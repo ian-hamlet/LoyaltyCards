@@ -1,4 +1,4 @@
-# Requirement: Backend Data Storage
+# Requirement: Peer-to-Peer Data Architecture
 
 ## ID
 REQ-015
@@ -7,27 +7,30 @@ REQ-015
 Draft
 
 ## Priority
-Medium
+Critical
 
 ## Category
 Technical
 
 ## Description
-The system shall evaluate and implement appropriate data storage architecture. Options include: (1) backend server with centralized database, (2) distributed peer-to-peer storage on customer devices, or (3) hybrid approach. If backend storage is used, transaction history shall be recorded for auditing and analytics.
+The system shall implement a peer-to-peer (P2P) data architecture where loyalty card data is stored locally on customer devices and stamp transactions occur through direct device-to-device communication (NFC, Bluetooth, or QR code exchange). An optional minimal cloud backup service may be provided for data recovery only, but shall not be required for core stamping operations.
 
 ## Rationale
-The discovery notes indicate preference for device-to-device interaction without backend storage if possible, to minimize infrastructure costs. However, backend storage provides benefits: transaction history, data recovery, fraud prevention, and future analytics. The architecture decision must balance cost, complexity, and functionality.
+P2P architecture eliminates backend infrastructure costs, maximizes privacy, enables offline operation, and provides the fastest possible stamping experience. By storing data on customer devices and using cryptographic signatures to prevent fraud, the system can operate without complex backend databases while maintaining security and data integrity. This aligns with the stated preference for device-to-device interaction and cost minimization goals.
 
 ## Acceptance Criteria
-- [ ] Architecture decision documented with rationale
-- [ ] Data storage solution supports required synchronization patterns
-- [ ] Supplier and customer data can sync reliably
-- [ ] If backend used: transaction history recorded (supplier ID, customer card ID, timestamp, action)
-- [ ] If backend used: API endpoints defined for mobile apps
-- [ ] If backend used: database schema designed and documented
-- [ ] If backend used: data backup and recovery procedures defined
-- [ ] If device-only: conflict resolution strategy defined
-- [ ] Solution supports scalability for future growth
+- [ ] Customer loyalty card data stored in local device database (SQLite or equivalent)
+- [ ] Supplier business configuration stored locally on supplier device
+- [ ] Stamp transactions occur via direct P2P communication (no backend required)
+- [ ] P2P communication supports: QR code exchange (MVP), NFC tap, or Bluetooth Low Energy
+- [ ] Cryptographic signatures used to authenticate stamp transactions and prevent fraud
+- [ ] Each stamp includes: digital signature, timestamp, supplier ID, previous stamp hash (chain)
+- [ ] Customer device validates all stamp signatures before accepting
+- [ ] Local transaction history maintained on both customer and supplier devices
+- [ ] Optional encrypted cloud backup for customer data recovery (iCloud, Google Drive, or minimal backend)
+- [ ] System operates fully offline (stamping, viewing, redemption)
+- [ ] Conflict resolution strategy defined for edge cases
+- [ ] Solution scales without backend infrastructure costs
 
 ## Dependencies
 - REQ-010 (Data Synchronization)
@@ -51,15 +54,34 @@ Generated from discovery document: 00-REQUIREMENTS_DISCOVERY.md - Sections 4, No
 Discovery mentions:
 - "Ideally if the applications can interact directly without backend storage that would be better"
 - "Almost stored on the customer's device"
-- "If data has to be stored on a backend server then the supplier and customer data should sync"
-- "If we are using a backend we can record the transaction history"
+- "If one could use the customer device for secure storage, the supplier device simply bumps/scans and securely increments the stamp counter"
 
-Options to evaluate:
-1. **No backend**: Peer-to-peer sync using Bluetooth, NFC, or direct WiFi. Challenges: sync reliability, data recovery.
-2. **Minimal backend**: Lightweight sync service, no app logic. Examples: Firebase, AWS AppSync.
-3. **Full backend**: Traditional client-server. Provides full features but higher cost and complexity.
+**P2P Architecture Decision:**
+After evaluation, P2P is viable and preferred for this use case:
 
-Recommendation: Start with minimal backend (Firebase/Supabase) for MVP reliability, evaluate P2P for future.
+**Phase 1 (MVP):** QR Code Exchange
+- Customer shows QR code with card ID + public key
+- Supplier scans, generates signed stamp token
+- Supplier shows QR code with stamp token
+- Customer scans and validates signature
+- Advantage: Universal compatibility, no specialized hardware
+
+**Phase 2:** NFC Enhancement (where supported)
+- Tap-to-stamp for devices with NFC
+- Faster UX, same cryptographic security
+- Fallback to QR for unsupported devices
+
+**Phase 3:** Optional Cloud Backup
+- Customer can enable encrypted backup to personal cloud storage
+- For device loss/replacement recovery only
+- No impact on day-to-day stamping operations
+
+**Security Model:**
+- Supplier has cryptographic key pair (private key secure on device)
+- Each stamp signed with supplier private key
+- Customer verifies with supplier public key (obtained at card issuance)
+- Hash chain prevents tampering with stamp history
+- Rate limiting on customer device prevents abuse
 
 ---
 **Created**: 2026-03-30  

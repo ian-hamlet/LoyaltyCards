@@ -16,7 +16,7 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 
 ## Requirements by Priority
 
-### Critical Priority (9 requirements)
+### Critical Priority (10 requirements)
 | ID | Title | Category | Status |
 |----|-------|----------|--------|
 | [REQ-001](REQ-001_Digital_Stamp_Card_System.md) | Digital Stamp Card System | Business | Draft |
@@ -25,8 +25,9 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 | [REQ-005](REQ-005_Minimal_Personal_Data_Collection.md) | Minimal Personal Data Collection | Non-Functional (Privacy) | Draft |
 | [REQ-006](REQ-006_Fast_Stamp_Process.md) | Fast Stamp Process | Non-Functional (Performance) | Draft |
 | [REQ-009](REQ-009_QR_Barcode_Scanning.md) | QR/Barcode Scanning | Functional | Draft |
-| [REQ-010](REQ-010_Data_Synchronization.md) | Data Synchronization | Technical | Draft |
+| [REQ-010](REQ-010_Data_Synchronization.md) | P2P Data Synchronization | Technical | Draft |
 | [REQ-012](REQ-012_Card_Redemption_Reset.md) | Card Redemption and Reset | Functional | Draft |
+| [REQ-015](REQ-015_Backend_Data_Storage.md) | Peer-to-Peer Data Architecture | Technical | Draft |
 | [REQ-017](REQ-017_Cost_Minimization.md) | Cost Minimization | Business | Draft |
 | [REQ-020](REQ-020_Security_Requirements.md) | Security Requirements | Non-Functional (Security) | Draft |
 
@@ -40,12 +41,11 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 | [REQ-013](REQ-013_GDPR_Compliance.md) | GDPR Compliance | Non-Functional (Legal) | Draft |
 | [REQ-014](REQ-014_Performance_Requirements.md) | Performance Requirements | Non-Functional (Performance) | Draft |
 
-### Medium Priority (3 requirements)
+### Medium Priority (2 requirements)
 | ID | Title | Category | Status |
 |----|-------|----------|--------|
-| [REQ-015](REQ-015_Backend_Data_Storage.md) | Backend Data Storage | Technical | Draft |
 | [REQ-016](REQ-016_Push_Notifications.md) | Push Notifications | Functional | Draft |
-| [REQ-018](REQ-018_Transaction_History.md) | Transaction History | Functional | Draft |
+| [REQ-018](REQ-018_Transaction_History.md) | Local Transaction History | Functional | Draft |
 
 ### Low Priority (1 requirement)
 | ID | Title | Category | Status |
@@ -74,8 +74,8 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 ### Technical Requirements (3)
 - [REQ-003](REQ-003_Mobile_Platform_Support.md) - Mobile Platform Support (Critical)
 - [REQ-010](REQ-010_Data_Synchronization.md) - Data Synchronization (Critical)
-- [REQ-015](REQ-015_Backend_Data_Storage.md) - Backend Data Storage (Medium)
-
+- [REQ-015](REQ-015_Backend_Data_Storage.md) - P2P Data Synchronization (Critical)
+- [REQ-015](REQ-015_Backend_Data_Storage.md) - Peer-to-Peer Data Architecture (Critical
 ### Non-Functional Requirements (6)
 - [REQ-005](REQ-005_Minimal_Personal_Data_Collection.md) - Minimal Personal Data Collection - Privacy (Critical)
 - [REQ-006](REQ-006_Fast_Stamp_Process.md) - Fast Stamp Process - Performance (Critical)
@@ -114,10 +114,11 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 4. REQ-005 - Minimal Personal Data Collection
 5. REQ-006 - Fast Stamp Process
 6. REQ-009 - QR/Barcode Scanning
-7. REQ-010 - Data Synchronization
+7. REQ-010 - P2P Data Synchronization
 8. REQ-012 - Card Redemption and Reset
-9. REQ-017 - Cost Minimization
-10. REQ-020 - Security Requirements
+9. REQ-015 - Peer-to-Peer Data Architecture
+10. REQ-017 - Cost Minimization
+11. REQ-020 - Security Requirements
 
 ### Should-Have for MVP (High Priority)
 1. REQ-004 - Zero Data Entry Card Issuance
@@ -127,9 +128,8 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 5. REQ-013 - GDPR Compliance
 6. REQ-014 - Performance Requirements
 
-### Could-Have for Later (Medium/Low Priority)
-1. REQ-015 - Backend Data Storage (TBD based on architecture)
-2. REQ-016 - Push Notifications
+### Could6 - Push Notifications
+2. REQ-018 - Local Transaction History (enhanced analytics)
 3. REQ-018 - Transaction History
 4. REQ-019 - Stamp Expiration
 
@@ -139,11 +139,12 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 
 Based on the requirements, the following architectural decisions must be made before design phase:
 
-1. **Data Storage Architecture** (REQ-015)
-   - Option A: Backend server with database (higher reliability, enables transaction history)
-   - Option B: Peer-to-peer device storage (lower cost, privacy-first)
-   - Option C: Hybrid approach (minimal backend for sync only)
-   - **Recommendation**: Start with minimal backend (Firebase/Supabase free tier)
+1. **Data Storage Architecture** (REQ-015) ✅ **DECIDED**
+   - **Decision**: Peer-to-peer (P2P) architecture with local device storage
+   - **Primary**: QR code exchange for universal compatibility
+   - **Enhanced**: NFC tap for supported devices
+   - **Backup**: Optional encrypted cloud backup (user's personal cloud storage)
+   - **Rationale**: Zero backend costs, maximum privacy, fastest performance, fully offline operation
 
 2. **Mobile Development Framework** (REQ-003)
    - Option A: Native (separate iOS/Android codebases)
@@ -152,11 +153,11 @@ Based on the requirements, the following architectural decisions must be made be
    - Option D: Progressive Web App (web-based, mobile-optimized)
    - **Recommendation**: React Native or Flutter for cross-platform efficiency
 
-3. **Synchronization Strategy** (REQ-010)
-   - Option A: Real-time (WebSocket/Server-Sent Events)
-   - Option B: Polling (periodic checks)
-   - Option C: Push-based (notifications trigger sync)
-   - **Recommendation**: Push-based with manual refresh option
+3. **Synchronization Strategy** (REQ-010) ✅ **DECIDED**
+   - **Decision**: Direct device-to-device (P2P) synchronization
+   - **Method**: QR code exchange with cryptographic signatures
+   - **Flow**: Supplier scans customer card → generates signed stamp token → customer scans to receive
+   - **Rationale**: Immediate sync, no network required, tamper-proof via cryptography
 
 4. **QR/Barcode Format** (REQ-009)
    - QR Code primary, human-readable fallback

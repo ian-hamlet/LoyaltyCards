@@ -1,0 +1,36 @@
+name: loyalty_cards_prototype
+description: LoyaltyCards P2P mobile prototype for testing supplier/customer interactions
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # QR Code Generation & Scanning
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^5.0.0
+  
+  # Utilities
+  crypto: ^3.0.3
+  uuid: ^4.3.0
+  intl: ^0.19.0
+  
+  # UI
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  # Add assets
+  assets:
+    - assets/images/

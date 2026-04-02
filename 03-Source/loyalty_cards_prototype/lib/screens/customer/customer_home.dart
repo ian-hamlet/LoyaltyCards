@@ -33,7 +33,7 @@ class _CustomerHomeState extends State<CustomerHome> {
   final List<LoyaltyCard> _cards = [
     LoyaltyCard(
       id: '1',
-      businessName: 'Joe\\'s Coffee Shop',
+      businessName: "Joe's Coffee Shop",
       stampsRequired: 7,
       stampsCollected: 4,
       brandColor: Colors.brown,

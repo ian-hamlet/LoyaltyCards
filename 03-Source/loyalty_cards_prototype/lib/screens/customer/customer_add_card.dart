@@ -1,3 +1,217 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'customer_home.dart';\n\nclass CustomerAddCard extends StatefulWidget {\n  const CustomerAddCard({super.key});\n\n  @override\n  State<CustomerAddCard> createState() => _CustomerAddCardState();\n}\n\nclass _CustomerAddCardState extends State<CustomerAddCard> {\n  MobileScannerController cameraController = MobileScannerController();\n  bool _isProcessing = false;\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(\n        title: const Text('Add Loyalty Card'),\n        actions: [\n          IconButton(\n            icon: ValueListenableBuilder(\n              valueListenable: cameraController.torchState,\n              builder: (context, state, child) {\n                switch (state) {\n                  case TorchState.off:\n                    return const Icon(Icons.flash_off, color: Colors.grey);\n                  case TorchState.on:\n                    return const Icon(Icons.flash_on, color: Colors.yellow);\n                }\n              },\n            ),\n            onPressed: () => cameraController.toggleTorch(),\n          ),\n        ],\n      ),\n      body: Column(\n        children: [\n          // Instructions\n          Container(\n            padding: const EdgeInsets.all(16),\n            color: Colors.blue[50],\n            child: Row(\n              children: [\n                const Icon(Icons.qr_code_scanner, color: Colors.blue),\n                const SizedBox(width: 12),\n                Expanded(\n                  child: Text(\n                    'Scan the QR code from the business to add their loyalty card',\n                    style: TextStyle(color: Colors.blue[900]),\n                  ),\n                ),\n              ],\n            ),\n          ),\n\n          // Scanner\n          Expanded(\n            child: MobileScanner(\n              controller: cameraController,\n              onDetect: (capture) {\n                if (_isProcessing) return;\n                \n                final List<Barcode> barcodes = capture.barcodes;\n                for (final barcode in barcodes) {\n                  if (barcode.rawValue != null) {\n                    _processQRCode(barcode.rawValue!);\n                    break;\n                  }\n                }\n              },\n            ),\n          ),\n\n          // Mock Data Button (for testing without camera)\n          Padding(\n            padding: const EdgeInsets.all(16),\n            child: OutlinedButton.icon(\n              onPressed: () {\n                // Simulate scanning a card\n                _processQRCode('LOYALTYCARD:ISSUE:test-card-123:Bakery Corner:5');\n              },\n              icon: const Icon(Icons.science),\n              label: const Text('Use Mock Data (Testing)'),\n            ),\n          ),\n        ],\n      ),\n    );\n  }\n\n  void _processQRCode(String qrData) {\n    setState(() {\n      _isProcessing = true;\n    });\n\n    // Parse QR data\n    // Expected format: LOYALTYCARD:ISSUE:cardId:businessName:stampsRequired\n    if (qrData.startsWith('LOYALTYCARD:ISSUE:')) {\n      final parts = qrData.split(':');\n      if (parts.length >= 5) {\n        final cardId = parts[2];\n        final businessName = parts[3];\n        final stampsRequired = int.tryParse(parts[4]) ?? 7;\n        \n        _showCardConfirmation(\n          context,\n          cardId,\n          businessName,\n          stampsRequired,\n        );\n      }\n    } else {\n      _showError('Invalid QR code. Please scan a supplier card issuance code.');\n    }\n  }\n\n  void _showCardConfirmation(\n    BuildContext context,\n    String cardId,\n    String businessName,\n    int stampsRequired,\n  ) {\n    showDialog(\n      context: context,\n      builder: (context) => AlertDialog(\n        title: const Text('Add Loyalty Card?'),\n        content: Column(\n          mainAxisSize: MainAxisSize.min,\n          crossAxisAlignment: CrossAxisAlignment.start,\n          children: [\n            ListTile(\n              contentPadding: EdgeInsets.zero,\n              leading: const CircleAvatar(\n                backgroundColor: Colors.blue,\n                child: Icon(Icons.store, color: Colors.white),\n              ),\n              title: Text(\n                businessName,\n                style: const TextStyle(fontWeight: FontWeight.bold),\n              ),\n              subtitle: Text('Buy $stampsRequired, Get ${stampsRequired + 1}th FREE'),\n            ),\n            const SizedBox(height: 16),\n            Container(\n              padding: const EdgeInsets.all(12),\n              decoration: BoxDecoration(\n                color: Colors.blue[50],\n                borderRadius: BorderRadius.circular(8),\n              ),\n              child: Row(\n                children: [\n                  const Icon(Icons.check_circle, color: Colors.blue),\n                  const SizedBox(width: 12),\n                  const Expanded(\n                    child: Text('Start collecting stamps now!'),\n                  ),\n                ],\n              ),\n            ),\n          ],\n        ),\n        actions: [\n          TextButton(\n            onPressed: () {\n              Navigator.pop(context);\n              setState(() {\n                _isProcessing = false;\n              });\n            },\n            child: const Text('Cancel'),\n          ),\n          FilledButton(\n            onPressed: () {\n              final newCard = LoyaltyCard(\n                id: cardId,\n                businessName: businessName,\n                stampsRequired: stampsRequired,\n                stampsCollected: 0,\n                brandColor: _generateColor(businessName),\n              );\n              \n              Navigator.pop(context);\n              Navigator.pop(context, newCard);\n              \n              ScaffoldMessenger.of(context).showSnackBar(\n                SnackBar(\n                  content: Text('$businessName card added!'),\n                  backgroundColor: Colors.green,\n                ),\n              );\n            },\n            child: const Text('Add Card'),\n          ),\n        ],\n      ),\n    );\n  }\n\n  Color _generateColor(String businessName) {\n    // Simple deterministic color generation based on business name\n    final colors = [\n      Colors.blue,\n      Colors.green,\n      Colors.orange,\n      Colors.purple,\n      Colors.red,\n      Colors.teal,\n      Colors.brown,\n      Colors.indigo,\n    ];\n    \n    final hash = businessName.hashCode;\n    return colors[hash.abs() % colors.length];\n  }\n\n  void _showError(String message) {\n    setState(() {\n      _isProcessing = false;\n    });\n    \n    ScaffoldMessenger.of(context).showSnackBar(\n      SnackBar(content: Text(message)),\n    );\n  }\n\n  @override\n  void dispose() {\n    cameraController.dispose();\n    super.dispose();\n  }\n}
+import 'customer_home.dart';
+
+class CustomerAddCard extends StatefulWidget {
+  const CustomerAddCard({super.key});
+
+  @override
+  State<CustomerAddCard> createState() => _CustomerAddCardState();
+}
+
+class _CustomerAddCardState extends State<CustomerAddCard> {
+  MobileScannerController cameraController = MobileScannerController();
+  bool _isProcessing = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Loyalty Card'),
+      ),
+      body: Column(
+        children: [
+          // Instructions
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.blue[50],
+            child: Row(
+              children: [
+                const Icon(Icons.qr_code_scanner, color: Colors.blue),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Scan the QR code from the business to add their loyalty card',
+                    style: TextStyle(color: Colors.blue[900]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Scanner
+          Expanded(
+            child: MobileScanner(
+              controller: cameraController,
+              onDetect: (capture) {
+                if (_isProcessing) return;
+                
+                final List<Barcode> barcodes = capture.barcodes;
+                for (final barcode in barcodes) {
+                  if (barcode.rawValue != null) {
+                    _processQRCode(barcode.rawValue!);
+                    break;
+                  }
+                }
+              },
+            ),
+          ),
+
+          // Mock Data Button (for testing without camera)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: OutlinedButton.icon(
+              onPressed: () {
+                // Simulate scanning a card
+                _processQRCode('LOYALTYCARD:ISSUE:test-card-123:Bakery Corner:5');
+              },
+              icon: const Icon(Icons.science),
+              label: const Text('Use Mock Data (Testing)'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _processQRCode(String qrData) {
+    setState(() {
+      _isProcessing = true;
+    });
+
+    // Parse QR data
+    // Expected format: LOYALTYCARD:ISSUE:cardId:businessName:stampsRequired
+    if (qrData.startsWith('LOYALTYCARD:ISSUE:')) {
+      final parts = qrData.split(':');
+      if (parts.length >= 5) {
+        final cardId = parts[2];
+        final businessName = parts[3];
+        final stampsRequired = int.tryParse(parts[4]) ?? 7;
+        
+        _showCardConfirmation(
+          context,
+          cardId,
+          businessName,
+          stampsRequired,
+        );
+      }
+    } else {
+      _showError('Invalid QR code. Please scan a supplier card issuance code.');
+    }
+  }
+
+  void _showCardConfirmation(
+    BuildContext context,
+    String cardId,
+    String businessName,
+    int stampsRequired,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Loyalty Card?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const CircleAvatar(
+                backgroundColor: Colors.blue,
+                child: Icon(Icons.store, color: Colors.white),
+              ),
+              title: Text(
+                businessName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text('Buy $stampsRequired, Get ${stampsRequired + 1}th FREE'),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.blue),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text('Start collecting stamps now!'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _isProcessing = false;
+              });
+            },
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final newCard = LoyaltyCard(
+                id: cardId,
+                businessName: businessName,
+                stampsRequired: stampsRequired,
+                stampsCollected: 0,
+                brandColor: _generateColor(businessName),
+              );
+              
+              Navigator.pop(context);
+              Navigator.pop(context, newCard);
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$businessName card added!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: const Text('Add Card'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _generateColor(String businessName) {
+    // Simple deterministic color generation based on business name
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.red,
+      Colors.teal,
+      Colors.brown,
+      Colors.indigo,
+    ];
+    
+    final hash = businessName.hashCode;
+    return colors[hash.abs() % colors.length];
+  }
+
+  void _showError(String message) {
+    setState(() {
+      _isProcessing = false;
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  void dispose() {
+    cameraController.dispose();
+    super.dispose();
+  }
+}

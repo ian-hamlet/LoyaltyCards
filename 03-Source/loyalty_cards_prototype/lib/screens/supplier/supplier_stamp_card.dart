@@ -17,22 +17,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stamp Card'),
-        actions: [
-          IconButton(
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController.torchState,
-              builder: (context, state, child) {
-                switch (state) {
-                  case TorchState.off:
-                    return const Icon(Icons.flash_off, color: Colors.grey);
-                  case TorchState.on:
-                    return const Icon(Icons.flash_on, color: Colors.yellow);
-                }
-              },
-            ),
-            onPressed: () => cameraController.toggleTorch(),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -46,7 +30,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Position customer\\'s QR code in the frame',
+                    'Position customer\'s QR code in the frame',
                     style: TextStyle(color: Colors.orange[900]),
                   ),
                 ),
@@ -102,7 +86,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         final cardId = parts[2];
         final currentStamps = int.tryParse(parts[3]) ?? 0;
         
-        Navigator.pop(context);
         _showStampConfirmation(context, cardId, currentStamps);
       }
     } else {
@@ -114,53 +97,52 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Stamp'),
+        title: const Text('Add Stamp?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Card ID: ${cardId.substring(0, 8).toUpperCase()}'),
-            const SizedBox(height: 8),
-            Text('Current Stamps: $currentStamps'),
+            const Icon(Icons.coffee, size: 64, color: Colors.orange),
+            const SizedBox(height: 16),
+            Text(
+              'Customer currently has $currentStamps stamps',
+              style: const TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 8),
             Text(
-              'New Stamps: ${currentStamps + 1}',
-              style: const TextStyle(
+              'Add one more stamp?',
+              style: TextStyle(
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                color: Colors.orange[800],
               ),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _isProcessing = false;
+              });
+            },
             child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              _generateStampToken(context, cardId, currentStamps + 1);
+              Navigator.pop(context, true); // Return success
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Stamp added successfully!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
             },
             child: const Text('Add Stamp'),
           ),
         ],
-      ),
-    );
-  }
-
-  void _generateStampToken(BuildContext context, String cardId, int newStampCount) {
-    // In real app, this would generate cryptographic signature
-    final stampToken = 'STAMP:$cardId:$newStampCount:${DateTime.now().millisecondsSinceEpoch}';
-    
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => _StampTokenScreen(
-          cardId: cardId,
-          newStampCount: newStampCount,
-          stampToken: stampToken,
-        ),
       ),
     );
   }
@@ -176,9 +158,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
           controller: controller,
           decoration: const InputDecoration(
             labelText: 'Card ID',
-            hintText: 'ABC123XY',
+            hintText: 'e.g., card-123',
           ),
-          textCapitalization: TextCapitalization.characters,
         ),
         actions: [
           TextButton(
@@ -188,9 +169,11 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              _processCardQR('LOYALTYCARD:SHOW:${controller.text}:3');
+              if (controller.text.isNotEmpty) {
+                _processCardQR('LOYALTYCARD:SHOW:${controller.text}:0');
+              }
             },
-            child: const Text('Submit'),
+            child: const Text('Process'),
           ),
         ],
       ),
@@ -211,86 +194,5 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   void dispose() {
     cameraController.dispose();
     super.dispose();
-  }
-}
-
-class _StampTokenScreen extends StatelessWidget {
-  final String cardId;
-  final int newStampCount;
-  final String stampToken;
-
-  const _StampTokenScreen({
-    required this.cardId,
-    required this.newStampCount,
-    required this.stampToken,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Stamp Added'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Icon(
-              Icons.check_circle,
-              size: 80,
-              color: Colors.green,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Stamp Added Successfully!',
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Card now has $newStampCount stamps',
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Customer: Scan this QR code',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    const SizedBox(height: 16),
-                    // In real app, display QR code with stampToken
-                    Container(
-                      width: 200,
-                      height: 200,
-                      color: Colors.grey[200],
-                      child: const Center(
-                        child: Text('[QR Code Here]'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst || route.settings.name == '/supplier_home');
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(12),
-                child: Text('Done'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

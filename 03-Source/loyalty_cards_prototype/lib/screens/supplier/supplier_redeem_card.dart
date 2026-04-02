@@ -17,22 +17,6 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Redeem Card'),
-        actions: [
-          IconButton(
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController.torchState,
-              builder: (context, state, child) {
-                switch (state) {
-                  case TorchState.off:
-                    return const Icon(Icons.flash_off, color: Colors.grey);
-                  case TorchState.on:
-                    return const Icon(Icons.flash_on, color: Colors.yellow);
-                }
-              },
-            ),
-            onPressed: () => cameraController.toggleTorch(),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -46,7 +30,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Scan customer\\'s completed card to redeem reward',
+                    'Scan customer\'s completed card to redeem reward',
                     style: TextStyle(color: Colors.purple[900]),
                   ),
                 ),
@@ -89,7 +73,6 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         final cardId = parts[2];
         final stamps = int.tryParse(parts[3]) ?? 0;
         
-        Navigator.pop(context);
         _showRedemptionConfirmation(context, cardId, stamps);
       }
     } else {
@@ -101,93 +84,65 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('🎉 Confirm Redemption'),
+        title: const Text('🎉 Redeem Reward'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Card ID: ${cardId.substring(0, 8).toUpperCase()}'),
+            const Icon(Icons.celebration, size: 80, color: Colors.purple),
+            const SizedBox(height: 16),
+            Text(
+              'Customer has completed their card!',
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
-            Text('Completed Stamps: $stamps'),
+            Text(
+              '$stamps stamps collected',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple[800],
+              ),
+            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.green[50],
+                color: Colors.purple[50],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.green),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Customer earns FREE item!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+              child: const Text(
+                'Card will be reset after redemption',
+                style: TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
               ),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton.icon(
             onPressed: () {
               Navigator.pop(context);
-              _completeRedemption(context, cardId);
+              setState(() {
+                _isProcessing = false;
+              });
             },
-            icon: const Icon(Icons.card_giftcard),
-            label: const Text('Redeem'),
+            child: const Text('Cancel'),
           ),
-        ],
-      ),
-    );
-  }
-
-  void _completeRedemption(BuildContext context, String cardId) {
-    // In real app, this would generate redemption token and reset card
-    final redemptionToken = 'REDEEM:$cardId:${DateTime.now().millisecondsSinceEpoch}';
-    
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('✅ Redemption Complete'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.celebration,
-              size: 80,
-              color: Colors.purple,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Card has been redeemed and reset!',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Customer can start collecting stamps again.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
           FilledButton(
             onPressed: () {
-              Navigator.popUntil(context, (route) => route.isFirst || route.settings.name == '/supplier_home');
+              Navigator.pop(context);
+              Navigator.pop(context, true); // Return success
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Card redeemed! Customer earned their reward 🎁'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 3),
+                ),
+              );
             },
-            child: const Text('Done'),
+            child: const Text('Redeem Now'),
           ),
         ],
       ),

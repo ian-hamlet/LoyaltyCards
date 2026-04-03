@@ -5,8 +5,9 @@ import 'package:shared/models/transaction.dart' as models;
 import 'package:uuid/uuid.dart';
 import '../../services/card_repository.dart';
 import '../../services/transaction_repository.dart';
+import '../../services/database_helper.dart';
 import 'customer_card_detail.dart';
-import 'customer_add_card.dart';
+import 'qr_scanner_screen.dart';
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -16,8 +17,8 @@ class CustomerHome extends StatefulWidget {
 }
 
 class _CustomerHomeState extends State<CustomerHome> {
-  final CardRepository _cardRepo = CardRepository();
-  final TransactionRepository _transactionRepo = TransactionRepository();
+  final CardRepository _cardRepo = CardRepository(DatabaseHelper());
+  final TransactionRepository _transactionRepo = TransactionRepository(DatabaseHelper());
   List<models.Card> _cards = [];
   bool _isLoading = true;
 
@@ -138,16 +139,25 @@ class _CustomerHomeState extends State<CustomerHome> {
               : _buildCardList(context),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          await Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const CustomerAddCard(),
+              builder: (context) => const QRScannerScreen(
+                mode: QRScanMode.addCard,
+              ),
             ),
           );
+          
+          if (result != null && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result)),
+            );
+          }
+          
           _loadCards(); // Reload after returning
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Add Card'),
+        icon: const Icon(Icons.qr_code_scanner),
+        label: const Text('Scan Card'),
       ),
     );
   }

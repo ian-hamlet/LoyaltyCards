@@ -1,11 +1,12 @@
 import 'package:sqflite/sqflite.dart';
-import 'package:shared/shared.dart' hide TransactionType;
 import 'package:shared/models/card.dart' as models;
 import 'database_helper.dart';
 
 /// Repository for managing loyalty cards in the database
 class CardRepository {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final DatabaseHelper _dbHelper;
+
+  CardRepository(this._dbHelper);
 
   /// Get all cards from database
   Future<List<models.Card>> getAllCards() async {

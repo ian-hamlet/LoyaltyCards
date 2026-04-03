@@ -1,0 +1,274 @@
+/// QR Token Models for P2P Communication
+/// 
+/// These models define the data structures exchanged between supplier
+/// and customer devices via QR codes.
+
+import 'dart:convert';
+
+/// Base class for all QR token types
+abstract class QRToken {
+  final String type;
+  final int timestamp;
+
+  QRToken({
+    required this.type,
+    required this.timestamp,
+  });
+
+  Map<String, dynamic> toJson();
+
+  String toQRString() {
+    return jsonEncode(toJson());
+  }
+
+  static QRToken? fromQRString(String qrData) {
+    try {
+      final json = jsonDecode(qrData) as Map<String, dynamic>;
+      final type = json['type'] as String?;
+
+      switch (type) {
+        case 'card_issue':
+          return CardIssueToken.fromJson(json);
+        case 'card_stamp_request':
+          return CardStampRequestToken.fromJson(json);
+        case 'stamp_token':
+          return StampToken.fromJson(json);
+        case 'redemption_request':
+          return RedemptionRequestToken.fromJson(json);
+        default:
+          return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
+/// Token for supplier to issue a new card to customer
+class CardIssueToken extends QRToken {
+  final String businessId;
+  final String businessName;
+  final String publicKey;
+  final int stampsRequired;
+  final String brandColor;
+  final String signature;
+
+  CardIssueToken({
+    required this.businessId,
+    required this.businessName,
+    required this.publicKey,
+    required this.stampsRequired,
+    required this.brandColor,
+    required this.signature,
+    required int timestamp,
+  }) : super(type: 'card_issue', timestamp: timestamp);
+
+  factory CardIssueToken.fromJson(Map<String, dynamic> json) {
+    return CardIssueToken(
+      businessId: json['businessId'] as String,
+      businessName: json['businessName'] as String,
+      publicKey: json['publicKey'] as String,
+      stampsRequired: json['stampsRequired'] as int,
+      brandColor: json['brandColor'] as String,
+      signature: json['signature'] as String,
+      timestamp: json['timestamp'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'businessId': businessId,
+      'businessName': businessName,
+      'publicKey': publicKey,
+      'stampsRequired': stampsRequired,
+      'brandColor': brandColor,
+      'timestamp': timestamp,
+      'signature': signature,
+    };
+  }
+
+  /// Data string used for signature verification
+  String getSignatureData() {
+    return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$timestamp';
+  }
+
+  /// Validate token structure
+  bool isValid() {
+    if (businessId.isEmpty || businessName.isEmpty || publicKey.isEmpty) {
+      return false;
+    }
+    if (stampsRequired < 5 || stampsRequired > 20) {
+      return false;
+    }
+    if (!brandColor.startsWith('#') || brandColor.length != 7) {
+      return false;
+    }
+    if (signature.isEmpty) {
+      return false;
+    }
+    return true;
+  }
+}
+
+/// Token for customer to request a stamp from supplier
+class CardStampRequestToken extends QRToken {
+  final String cardId;
+  final String businessId;
+  final int currentStamps;
+  final String publicKey;
+
+  CardStampRequestToken({
+    required this.cardId,
+    required this.businessId,
+    required this.currentStamps,
+    required this.publicKey,
+    required int timestamp,
+  }) : super(type: 'card_stamp_request', timestamp: timestamp);
+
+  factory CardStampRequestToken.fromJson(Map<String, dynamic> json) {
+    return CardStampRequestToken(
+      cardId: json['cardId'] as String,
+      businessId: json['businessId'] as String,
+      currentStamps: json['currentStamps'] as int,
+      publicKey: json['publicKey'] as String,
+      timestamp: json['timestamp'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'cardId': cardId,
+      'businessId': businessId,
+      'currentStamps': currentStamps,
+      'publicKey': publicKey,
+      'timestamp': timestamp,
+    };
+  }
+
+  /// Validate token structure
+  bool isValid() {
+    if (cardId.isEmpty || businessId.isEmpty || publicKey.isEmpty) {
+      return false;
+    }
+    if (currentStamps < 0) {
+      return false;
+    }
+    return true;
+  }
+}
+
+/// Token for supplier to issue a stamp to customer
+class StampToken extends QRToken {
+  final String id;
+  final String cardId;
+  final int stampNumber;
+  final String previousHash;
+  final String signature;
+
+  StampToken({
+    required this.id,
+    required this.cardId,
+    required this.stampNumber,
+    required this.previousHash,
+    required this.signature,
+    required int timestamp,
+  }) : super(type: 'stamp_token', timestamp: timestamp);
+
+  factory StampToken.fromJson(Map<String, dynamic> json) {
+    return StampToken(
+      id: json['id'] as String,
+      cardId: json['cardId'] as String,
+      stampNumber: json['stampNumber'] as int,
+      previousHash: json['previousHash'] as String? ?? '',
+      signature: json['signature'] as String,
+      timestamp: json['timestamp'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'id': id,
+      'cardId': cardId,
+      'stampNumber': stampNumber,
+      'timestamp': timestamp,
+      'previousHash': previousHash,
+      'signature': signature,
+    };
+  }
+
+  /// Data string used for signature verification
+  String getSignatureData() {
+    return '$cardId:$stampNumber:$timestamp:$previousHash';
+  }
+
+  /// Validate token structure
+  bool isValid() {
+    if (id.isEmpty || cardId.isEmpty || signature.isEmpty) {
+      return false;
+    }
+    if (stampNumber < 1) {
+      return false;
+    }
+    return true;
+  }
+}
+
+/// Token for customer to request redemption from supplier
+class RedemptionRequestToken extends QRToken {
+  final String cardId;
+  final String businessId;
+  final int stampsCollected;
+  final List<String> stampSignatures;
+
+  RedemptionRequestToken({
+    required this.cardId,
+    required this.businessId,
+    required this.stampsCollected,
+    required this.stampSignatures,
+    required int timestamp,
+  }) : super(type: 'redemption_request', timestamp: timestamp);
+
+  factory RedemptionRequestToken.fromJson(Map<String, dynamic> json) {
+    return RedemptionRequestToken(
+      cardId: json['cardId'] as String,
+      businessId: json['businessId'] as String,
+      stampsCollected: json['stampsCollected'] as int,
+      stampSignatures: (json['stampSignatures'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      timestamp: json['timestamp'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'cardId': cardId,
+      'businessId': businessId,
+      'stampsCollected': stampsCollected,
+      'stampSignatures': stampSignatures,
+      'timestamp': timestamp,
+    };
+  }
+
+  /// Validate token structure
+  bool isValid() {
+    if (cardId.isEmpty || businessId.isEmpty) {
+      return false;
+    }
+    if (stampsCollected < 1) {
+      return false;
+    }
+    if (stampSignatures.length != stampsCollected) {
+      return false;
+    }
+    return true;
+  }
+}

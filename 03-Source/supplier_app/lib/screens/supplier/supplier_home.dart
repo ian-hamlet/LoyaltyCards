@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
+import '../../services/supplier_database_helper.dart';
 import 'supplier_onboarding.dart';
 import 'supplier_issue_card.dart';
 import 'supplier_stamp_card.dart';
@@ -14,7 +15,7 @@ class SupplierHome extends StatefulWidget {
 }
 
 class _SupplierHomeState extends State<SupplierHome> {
-  final BusinessRepository _businessRepo = BusinessRepository();
+  final BusinessRepository _businessRepo = BusinessRepository(SupplierDatabaseHelper());
   Business? _business;
   bool _isLoading = true;
   int _issuedCards = 0;
@@ -169,10 +170,7 @@ class _SupplierHomeState extends State<SupplierHome> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => SupplierIssueCard(
-                        businessName: _business!.name,
-                        stampsRequired: _business!.stampsRequired,
-                      ),
+                      builder: (_) => const SupplierIssueCard(),
                     ),
                   );
                 },

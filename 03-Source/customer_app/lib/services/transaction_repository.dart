@@ -1,11 +1,13 @@
 import 'package:sqflite/sqflite.dart' hide Transaction;
-import 'package:shared/shared.dart';
 import 'package:shared/models/transaction.dart' as models;
+import 'package:shared/shared.dart' show TransactionType;
 import 'database_helper.dart';
 
 /// Repository for managing transactions in the database
 class TransactionRepository {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final DatabaseHelper _dbHelper;
+
+  TransactionRepository(this._dbHelper);
 
   /// Get all transactions
   Future<List<models.Transaction>> getAllTransactions() async {
@@ -15,7 +17,7 @@ class TransactionRepository {
       orderBy: 'timestamp DESC',
     );
 
-    return maps.map((map) => Transaction.fromJson(map)).toList();
+    return maps.map((map) => models.Transaction.fromJson(map)).toList();
   }
 
   /// Get transactions for a specific card
@@ -28,7 +30,7 @@ class TransactionRepository {
       orderBy: 'timestamp DESC',
     );
 
-    return maps.map((map) => Transaction.fromJson(map)).toList();
+    return maps.map((map) => models.Transaction.fromJson(map)).toList();
   }
 
   /// Get transactions by type
@@ -43,7 +45,7 @@ class TransactionRepository {
       orderBy: 'timestamp DESC',
     );
 
-    return maps.map((map) => Transaction.fromJson(map)).toList();
+    return maps.map((map) => models.Transaction.fromJson(map)).toList();
   }
 
   /// Get a specific transaction by ID
@@ -56,7 +58,7 @@ class TransactionRepository {
     );
 
     if (maps.isEmpty) return null;
-    return Transaction.fromJson(maps.first);
+    return models.Transaction.fromJson(maps.first);
   }
 
   /// Insert a new transaction
@@ -78,7 +80,7 @@ class TransactionRepository {
       limit: limit,
     );
 
-    return maps.map((map) => Transaction.fromJson(map)).toList();
+    return maps.map((map) => models.Transaction.fromJson(map)).toList();
   }
 
   /// Get transaction count

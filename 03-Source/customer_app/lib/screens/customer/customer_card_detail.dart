@@ -5,6 +5,9 @@ import 'package:shared/models/card.dart' as models;
 import 'dart:convert';
 import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
+import '../../services/database_helper.dart';
+import 'qr_display_screen.dart';
+import 'qr_scanner_screen.dart';
 
 class CustomerCardDetail extends StatefulWidget {
   final String cardId;
@@ -16,8 +19,8 @@ class CustomerCardDetail extends StatefulWidget {
 }
 
 class _CustomerCardDetailState extends State<CustomerCardDetail> {
-  final CardRepository _cardRepo = CardRepository();
-  final StampRepository _stampRepo = StampRepository();
+  final CardRepository _cardRepo = CardRepository(DatabaseHelper());
+  final StampRepository _stampRepo = StampRepository(DatabaseHelper());
   
   models.Card? _card;
   List<Stamp> _stamps = [];
@@ -201,13 +204,22 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             // Action Buttons
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Row(
+              child: Column(
                 children: [
                   if (_card!.isComplete)
-                    Expanded(
+                    SizedBox(
+                      width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          // Future: Navigate to redemption flow
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QRDisplayScreen(
+                                card: _card!,
+                                mode: QRDisplayMode.redemption,
+                              ),
+                            ),
+                          );
                         },
                         icon: const Icon(Icons.redeem),
                         label: const Text('Redeem Reward'),
@@ -218,19 +230,57 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         ),
                       ),
                     )
-                  else
-                    Expanded(
-                      child: OutlinedButton.icon(
+                  else ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
                         onPressed: () {
-                          // Future: Show stamp request
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QRDisplayScreen(
+                                card: _card!,
+                                mode: QRDisplayMode.stampRequest,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.qr_code),
+                        label: const Text('Show QR for Stamp'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(16),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const QRScannerScreen(
+                                mode: QRScanMode.receiveStamp,
+                              ),
+                            ),
+                          );
+                          
+                          if (result != null && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result)),
+                            );
+                            _loadCardData(); // Reload card data
+                          }
                         },
                         icon: const Icon(Icons.qr_code_scanner),
-                        label: const Text('Get Stamp'),
+                        label: const Text('Scan Stamp Token'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.all(16),
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
             ),

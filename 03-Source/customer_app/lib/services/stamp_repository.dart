@@ -4,7 +4,9 @@ import 'database_helper.dart';
 
 /// Repository for managing stamps in the database
 class StampRepository {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final DatabaseHelper _dbHelper;
+
+  StampRepository(this._dbHelper);
 
   /// Get all stamps for a specific card
   Future<List<Stamp>> getStampsByCard(String cardId) async {

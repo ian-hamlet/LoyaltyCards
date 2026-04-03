@@ -1,0 +1,48 @@
+name: supplier_app
+description: "LoyaltyCards Business App - Issue and manage loyalty cards"
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Shared package with core models and utilities
+  shared:
+    path: ../shared
+
+  # QR Code Generation & Scanning
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^5.0.0
+  
+  # Database
+  sqflite: ^2.3.0
+  path_provider: ^2.1.0
+  
+  # Cryptography
+  crypto: ^3.0.3
+  pointycastle: ^3.7.0
+  
+  # Utilities
+  uuid: ^4.3.0
+  intl: ^0.19.0
+  
+  # UI
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+

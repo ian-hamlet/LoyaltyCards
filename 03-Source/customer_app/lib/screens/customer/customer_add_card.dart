@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'customer_home.dart';
 
 class CustomerAddCard extends StatefulWidget {
   const CustomerAddCard({super.key});
@@ -157,21 +156,15 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
           ),
           FilledButton(
             onPressed: () {
-              final newCard = LoyaltyCard(
-                id: cardId,
-                businessName: businessName,
-                stampsRequired: stampsRequired,
-                stampsCollected: 0,
-                brandColor: _generateColor(businessName),
-              );
-              
+              // TODO: Implement actual card creation from QR data
+              // For now, just navigate back - actual implementation in Phase 3
               Navigator.pop(context);
-              Navigator.pop(context, newCard);
+              Navigator.pop(context);
               
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('$businessName card added!'),
-                  backgroundColor: Colors.green,
+                const SnackBar(
+                  content: Text('Card scanning will be implemented in Phase 3'),
+                  backgroundColor: Colors.blue,
                 ),
               );
             },

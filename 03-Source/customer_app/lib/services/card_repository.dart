@@ -1,0 +1,126 @@
+import 'package:sqflite/sqflite.dart';
+import 'package:shared/shared.dart' hide TransactionType;
+import 'package:shared/models/card.dart' as models;
+import 'database_helper.dart';
+
+/// Repository for managing loyalty cards in the database
+class CardRepository {
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+
+  /// Get all cards from database
+  Future<List<models.Card>> getAllCards() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cards',
+      orderBy: 'created_at DESC',
+    );
+
+    return maps.map((map) => models.Card.fromJson(map)).toList();
+  }
+
+  /// Get a specific card by ID
+  Future<models.Card?> getCardById(String id) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cards',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isEmpty) return null;
+    return models.Card.fromJson(maps.first);
+  }
+
+  /// Get all cards for a specific business
+  Future<List<models.Card>> getCardsByBusiness(String businessId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cards',
+      where: 'business_id = ?',
+      whereArgs: [businessId],
+      orderBy: 'created_at DESC',
+    );
+
+    return maps.map((map) => models.Card.fromJson(map)).toList();
+  }
+
+  /// Insert a new card
+  Future<void> insertCard(models.Card card) async {
+    final db = await _dbHelper.database;
+    await db.insert(
+      'cards',
+      card.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Update an existing card
+  Future<void> updateCard(models.Card card) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'cards',
+      card.toJson(),
+      where: 'id = ?',
+      whereArgs: [card.id],
+    );
+  }
+
+  /// Update stamp count for a card
+  Future<void> updateStampCount(String cardId, int newCount) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'cards',
+      {
+        'stamps_collected': newCount,
+        'updated_at': DateTime.now().millisecondsSinceEpoch,
+      },
+      where: 'id = ?',
+      whereArgs: [cardId],
+    );
+  }
+
+  /// Delete a card (and all related stamps/transactions via CASCADE)
+  Future<void> deleteCard(String id) async {
+    final db = await _dbHelper.database;
+    await db.delete(
+      'cards',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Check if a card exists
+  Future<bool> cardExists(String id) async {
+    final db = await _dbHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM cards WHERE id = ?', [id]),
+    );
+    return (count ?? 0) > 0;
+  }
+
+  /// Get count of all cards
+  Future<int> getCardCount() async {
+    final db = await _dbHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM cards'),
+    );
+    return count ?? 0;
+  }
+
+  /// Get count of completed cards
+  Future<int> getCompletedCardCount() async {
+    final db = await _dbHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery(
+        'SELECT COUNT(*) FROM cards WHERE stamps_collected >= stamps_required',
+      ),
+    );
+    return count ?? 0;
+  }
+
+  /// Delete all cards (for testing)
+  Future<void> deleteAllCards() async {
+    final db = await _dbHelper.database;
+    await db.delete('cards');
+  }
+}

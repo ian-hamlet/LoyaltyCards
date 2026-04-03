@@ -1,26 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared/shared.dart' hide Card;
+import 'package:shared/models/card.dart' as models;
+import 'package:shared/models/transaction.dart' as models;
+import 'package:uuid/uuid.dart';
+import '../../services/card_repository.dart';
+import '../../services/transaction_repository.dart';
 import 'customer_card_detail.dart';
 import 'customer_add_card.dart';
-
-// Mock data models (will be replaced with proper models later)
-class LoyaltyCard {
-  final String id;
-  final String businessName;
-  final int stampsRequired;
-  final int stampsCollected;
-  final Color brandColor;
-
-  LoyaltyCard({
-    required this.id,
-    required this.businessName,
-    required this.stampsRequired,
-    required this.stampsCollected,
-    required this.brandColor,
-  });
-
-  bool get isComplete => stampsCollected >= stampsRequired;
-  int get stampsRemaining => stampsRequired - stampsCollected;
-}
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -30,34 +16,99 @@ class CustomerHome extends StatefulWidget {
 }
 
 class _CustomerHomeState extends State<CustomerHome> {
-  final List<LoyaltyCard> _cards = [
-    LoyaltyCard(
-      id: '1',
-      businessName: "Joe's Coffee Shop",
-      stampsRequired: 7,
-      stampsCollected: 4,
-      brandColor: Colors.brown,
-    ),
-    LoyaltyCard(
-      id: '2',
-      businessName: 'Pizza Palace',
-      stampsRequired: 10,
-      stampsCollected: 10,
-      brandColor: Colors.red,
-    ),
-    LoyaltyCard(
-      id: '3',
-      businessName: 'Smoothie Bar',
-      stampsRequired: 5,
-      stampsCollected: 2,
-      brandColor: Colors.green,
-    ),
-  ];
+  final CardRepository _cardRepo = CardRepository();
+  final TransactionRepository _transactionRepo = TransactionRepository();
+  List<models.Card> _cards = [];
+  bool _isLoading = true;
 
-  void _addCard(LoyaltyCard card) {
-    setState(() {
-      _cards.add(card);
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadCards();
+  }
+
+  Future<void> _loadCards() async {
+    setState(() => _isLoading = true);
+    try {
+      final cards = await _cardRepo.getAllCards();
+      setState(() {
+        _cards = cards;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading cards: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _addTestCard() async {
+    final uuid = const Uuid();
+    final testCard = models.Card(
+      id: uuid.v4(),
+      businessId: uuid.v4(),
+      businessName: 'Test Coffee Shop',
+      businessPublicKey: 'test-public-key',
+      stampsRequired: 7,
+      stampsCollected: 3,
+      brandColor: '#8B4513',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    await _cardRepo.insertCard(testCard);
+    
+    // Add transaction
+    final transaction = models.Transaction(
+      id: uuid.v4(),
+      cardId: testCard.id,
+      type: TransactionType.pickup,
+      timestamp: DateTime.now(),
+      businessName: testCard.businessName,
+    );
+    await _transactionRepo.insertTransaction(transaction);
+
+    await _loadCards();
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Test card added!')),
+      );
+    }
+  }
+
+  Future<void> _deleteCard(models.Card card) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Card'),
+        content: Text('Delete "${card.businessName}" card?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _cardRepo.deleteCard(card.id);
+      await _loadCards();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${card.businessName} deleted')),
+        );
+      }
+    }
   }
 
   @override
@@ -66,28 +117,34 @@ class _CustomerHomeState extends State<CustomerHome> {
       appBar: AppBar(
         title: const Text('My Loyalty Cards'),
         actions: [
+          // Debug: Add test card button
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            onPressed: _addTestCard,
+            tooltip: 'Add Test Card',
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Settings
+              // Settings - future
             },
           ),
         ],
       ),
-      body: _cards.isEmpty
-          ? _buildEmptyState(context)
-          : _buildCardList(context),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _cards.isEmpty
+              ? _buildEmptyState(context)
+              : _buildCardList(context),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final newCard = await Navigator.push<LoyaltyCard>(
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const CustomerAddCard(),
             ),
           );
-          if (newCard != null) {
-            _addCard(newCard);
-          }
+          _loadCards(); // Reload after returning
         },
         icon: const Icon(Icons.add),
         label: const Text('Add Card'),
@@ -105,23 +162,29 @@ class _CustomerHomeState extends State<CustomerHome> {
             Icon(
               Icons.card_membership_outlined,
               size: 100,
-              color: Colors.grey[300],
+              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 24),
             Text(
-              'No Loyalty Cards Yet',
+              AppStrings.customerNoCards,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[600],
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Visit a participating business and scan their QR code to add your first loyalty card!',
+              AppStrings.customerNoCardsHint,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey[500],
                 fontSize: 16,
               ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _addTestCard,
+              icon: const Icon(Icons.science),
+              label: const Text('Add Test Card'),
             ),
           ],
         ),
@@ -130,29 +193,71 @@ class _CustomerHomeState extends State<CustomerHome> {
   }
 
   Widget _buildCardList(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _cards.length,
-      itemBuilder: (context, index) {
-        final card = _cards[index];
-        return _LoyaltyCardWidget(
-          card: card,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CustomerCardDetail(card: card),
+    return RefreshIndicator(
+      onRefresh: _loadCards,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _cards.length,
+        itemBuilder: (context, index) {
+          final card = _cards[index];
+          return Dismissible(
+            key: Key(card.id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(16),
               ),
-            );
-          },
-        );
-      },
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            confirmDismiss: (direction) async {
+              return await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Delete Card?'),
+                  content: Text('Delete "${card.businessName}"?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      child: const Text('Delete'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            onDismissed: (direction) async {
+              await _cardRepo.deleteCard(card.id);
+              await _loadCards();
+            },
+            child: _LoyaltyCardWidget(
+              card: card,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CustomerCardDetail(cardId: card.id),
+                  ),
+                );
+                _loadCards(); // Reload in case card was updated
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
 class _LoyaltyCardWidget extends StatelessWidget {
-  final LoyaltyCard card;
+  final models.Card card;
   final VoidCallback onTap;
 
   const _LoyaltyCardWidget({
@@ -162,6 +267,8 @@ class _LoyaltyCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brandColor = BrandColors.fromHex(card.brandColor);
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
@@ -172,8 +279,8 @@ class _LoyaltyCardWidget extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                card.brandColor.withOpacity(0.1),
-                card.brandColor.withOpacity(0.05),
+                brandColor.withValues(alpha: 0.1),
+                brandColor.withValues(alpha: 0.05),
               ],
             ),
             borderRadius: BorderRadius.circular(16),
@@ -185,7 +292,7 @@ class _LoyaltyCardWidget extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: card.brandColor,
+                    backgroundColor: brandColor,
                     child: const Icon(Icons.store, color: Colors.white),
                   ),
                   const SizedBox(width: 12),
@@ -202,8 +309,8 @@ class _LoyaltyCardWidget extends StatelessWidget {
                         ),
                         Text(
                           card.isComplete
-                              ? 'Ready to redeem!'
-                              : '${card.stampsRemaining} more to go',
+                              ? AppStrings.stampReadyToRedeem
+                              : '${card.stampsRequired - card.stampsCollected} more to go',
                           style: TextStyle(
                             fontSize: 14,
                             color: card.isComplete ? Colors.green : Colors.grey[600],
@@ -217,7 +324,7 @@ class _LoyaltyCardWidget extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.green,
+                        color: BrandColors.success,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
@@ -242,22 +349,23 @@ class _LoyaltyCardWidget extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: _StampCircle(
                       isCollected: isCollected,
-                      color: card.brandColor,
+                      color: brandColor,
                     ),
                   );
                 }),
               ),
               const SizedBox(height: 12),
               
-              // Counter
-              Text(
-                '${card.stampsCollected} / ${card.stampsRequired} stamps',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+              // Count
+              Center(
+                child: Text(
+                  '${card.stampsCollected} / ${card.stampsRequired} ${AppStrings.stampsCollected}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -279,18 +387,22 @@ class _StampCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 32,
-      height: 32,
+      width: 28,
+      height: 28,
       decoration: BoxDecoration(
-        color: isCollected ? color : Colors.grey[200],
         shape: BoxShape.circle,
+        color: isCollected ? color : Colors.transparent,
         border: Border.all(
-          color: isCollected ? color : Colors.grey[400]!,
+          color: isCollected ? color : Colors.grey[300]!,
           width: 2,
         ),
       ),
       child: isCollected
-          ? const Icon(Icons.check, color: Colors.white, size: 18)
+          ? const Icon(
+              Icons.check,
+              size: 16,
+              color: Colors.white,
+            )
           : null,
     );
   }

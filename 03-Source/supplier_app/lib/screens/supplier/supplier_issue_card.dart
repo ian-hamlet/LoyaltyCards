@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:shared/shared.dart';
+import 'package:shared/shared.dart' hide Card;
 import '../../services/qr_token_generator.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
@@ -14,7 +14,7 @@ class SupplierIssueCard extends StatefulWidget {
 }
 
 class _SupplierIssueCardState extends State<SupplierIssueCard> {
-  final BusinessRepository _businessRepo = BusinessRepository(SupplierDatabaseHelper());
+  final BusinessRepository _businessRepo = BusinessRepository();
   final QRTokenGenerator _tokenGenerator = QRTokenGenerator(KeyManager());
   
   Business? _business;
@@ -265,4 +265,3 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     );
   }
 }
-            const SizedBox(height: 24),

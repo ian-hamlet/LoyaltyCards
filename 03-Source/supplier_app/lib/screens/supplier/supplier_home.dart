@@ -15,7 +15,7 @@ class SupplierHome extends StatefulWidget {
 }
 
 class _SupplierHomeState extends State<SupplierHome> {
-  final BusinessRepository _businessRepo = BusinessRepository(SupplierDatabaseHelper());
+  final BusinessRepository _businessRepo = BusinessRepository();
   Business? _business;
   bool _isLoading = true;
   int _issuedCards = 0;

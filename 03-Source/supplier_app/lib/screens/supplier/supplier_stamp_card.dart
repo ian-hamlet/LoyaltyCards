@@ -16,7 +16,7 @@ class SupplierStampCard extends StatefulWidget {
 
 class _SupplierStampCardState extends State<SupplierStampCard> {
   final MobileScannerController _cameraController = MobileScannerController();
-  final BusinessRepository _businessRepo = BusinessRepository(SupplierDatabaseHelper());
+  final BusinessRepository _businessRepo = BusinessRepository();
   final QRTokenGenerator _tokenGenerator = QRTokenGenerator(KeyManager());
   
   Business? _business;

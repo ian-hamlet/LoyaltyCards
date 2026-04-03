@@ -34,14 +34,14 @@
 | Phase | Duration | Focus | Status |
 |-------|----------|-------|--------|
 | **0: Foundation** | 1 day | Project structure, shared library | ✅ Complete |
-| **1: Customer Data** | 2-3 days | SQLite, repositories, persistence | ⬜ Not Started |
-| **2: Supplier Crypto** | 3-4 days | Key generation, signing, security | ⬜ Not Started |
+| **1: Customer Data** | 2-3 days | SQLite, repositories, persistence | ✅ Complete |
+| **2: Supplier Crypto** | 3-4 days | Key generation, signing, security | ✅ Complete |
 | **3: Customer QR/P2P** | 2-3 days | QR scanning, P2P exchange | ⬜ Not Started |
 | **4: Supplier Ops** | 2-3 days | Card issuance, stamping, redemption | ⬜ Not Started |
 | **5: Multi-Device** | 1-2 days | Config cloning, device support | ⬜ Not Started |
 | **6: Polish** | 3-4 days | UI/UX, testing, deployment prep | ⬜ Not Started |
 
-**Current Phase:** ✅ Phase 0 Complete - Ready for Phase 1
+**Current Phase:** ✅ Phases 0-2 Complete - Ready for Phase 3
 
 ---
 

@@ -2,9 +2,9 @@
 
 ## Document Information
 - **Created**: 2026-03-30
-- **Last Updated**: 2026-03-30
+- **Last Updated**: 2026-04-03
 - **Status**: Draft - Ready for Review
-- **Total Requirements**: 20
+- **Total Requirements**: 21
 
 ---
 
@@ -16,7 +16,7 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 
 ## Requirements by Priority
 
-### Critical Priority (10 requirements)
+### Critical Priority (11 requirements)
 | ID | Title | Category | Status |
 |----|-------|----------|--------|
 | [REQ-001](REQ-001_Digital_Stamp_Card_System.md) | Digital Stamp Card System | Business | Draft |
@@ -30,6 +30,7 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 | [REQ-015](REQ-015_Backend_Data_Storage.md) | Peer-to-Peer Data Architecture | Technical | Draft |
 | [REQ-017](REQ-017_Cost_Minimization.md) | Cost Minimization | Business | Draft |
 | [REQ-020](REQ-020_Security_Requirements.md) | Security Requirements | Non-Functional (Security) | Draft |
+| [REQ-021](REQ-021_Multi_Device_Supplier_Support.md) | Multi-Device Supplier Support | Technical | Draft |
 
 ### High Priority (6 requirements)
 | ID | Title | Category | Status |
@@ -71,11 +72,11 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 - [REQ-018](REQ-018_Transaction_History.md) - Transaction History (Medium)
 - [REQ-019](REQ-019_Stamp_Expiration.md) - Stamp Expiration (Low)
 
-### Technical Requirements (3)
+### Technical Requirements (4)
 - [REQ-003](REQ-003_Mobile_Platform_Support.md) - Mobile Platform Support (Critical)
 - [REQ-010](REQ-010_Data_Synchronization.md) - Data Synchronization (Critical)
-- [REQ-015](REQ-015_Backend_Data_Storage.md) - P2P Data Synchronization (Critical)
-- [REQ-015](REQ-015_Backend_Data_Storage.md) - Peer-to-Peer Data Architecture (Critical
+- [REQ-015](REQ-015_Backend_Data_Storage.md) - Peer-to-Peer Data Architecture (Critical)
+- [REQ-021](REQ-021_Multi_Device_Supplier_Support.md) - Multi-Device Supplier Support (Critical)
 ### Non-Functional Requirements (6)
 - [REQ-005](REQ-005_Minimal_Personal_Data_Collection.md) - Minimal Personal Data Collection - Privacy (Critical)
 - [REQ-006](REQ-006_Fast_Stamp_Process.md) - Fast Stamp Process - Performance (Critical)
@@ -103,6 +104,9 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 ### 5. Data Synchronization
 **Requirements**: REQ-010, REQ-011, REQ-015
 
+### 6. Supplier Pairs Additional Device
+**Requirements**: REQ-021, REQ-020, REQ-009, REQ-010
+
 ---
 
 ## MVP Scope (Minimum Viable Product)
@@ -119,6 +123,7 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 9. REQ-015 - Peer-to-Peer Data Architecture
 10. REQ-017 - Cost Minimization
 11. REQ-020 - Security Requirements
+12. REQ-021 - Multi-Device Supplier Support
 
 ### Should-Have for MVP (High Priority)
 1. REQ-004 - Zero Data Entry Card Issuance
@@ -128,10 +133,10 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 5. REQ-013 - GDPR Compliance
 6. REQ-014 - Performance Requirements
 
-### Could6 - Push Notifications
-2. REQ-018 - Local Transaction History (enhanced analytics)
-3. REQ-018 - Transaction History
-4. REQ-019 - Stamp Expiration
+### Could-Have for Post-MVP (Lower Priority)
+1. REQ-016 - Push Notifications
+2. REQ-018 - Transaction History
+3. REQ-019 - Stamp Expiration
 
 ---
 
@@ -202,5 +207,5 @@ All requirements are traceable to the [Requirements Discovery](00-REQUIREMENTS_D
 ---
 
 **Document Owner**: Project Team  
-**Last Review**: 2026-03-30  
+**Last Review**: 2026-04-03  
 **Next Review**: TBD

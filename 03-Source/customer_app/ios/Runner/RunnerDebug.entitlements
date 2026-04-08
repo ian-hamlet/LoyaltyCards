@@ -4,7 +4,7 @@
 <dict>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)com.ianhamlet.loyaltycards.supplierApp</string>
+		<string>$(AppIdentifierPrefix)com.ianhamlet.loyaltycards.customerApp</string>
 	</array>
 </dict>
 </plist>

@@ -1,8 +1,17 @@
 # Phase 3 Physical Device Testing Guide
 
-**Document Version:** 1.0  
+**Document Version:** 1.1  
 **Created:** 2026-04-08  
+**Last Updated:** 2026-04-08  
 **Target:** First-time iOS app testing on physical devices
+
+**Latest Updates (v1.1):**
+- ✅ Added Settings & Reset test scenario (Test 1B)
+- ✅ Updated QR refresh button instructions (Test 2)
+- ✅ Fixed brand color validation bug (`##` → `#`)
+- ✅ Fixed `deleteKey` → `deleteKeys` method name
+- ✅ Added troubleshooting for "Invalid token structure" error
+- ✅ Updated test results checklist
 
 ---
 
@@ -311,11 +320,70 @@ Now the fun part! Testing P2P interactions.
 - ✅ Business name shows: "Test Coffee Shop"
 - ✅ "7 stamps required" displayed
 - ✅ Brand color visible
-- ✅ Public key displayed (long string)
+- ✅ Settings icon visible in AppBar (top right)
 
 **Troubleshooting:**
 - ❌ App crashes during onboarding → Check logs, may be secure storage issue
 - ❌ Stuck on "Generating keys" → Force quit and restart
+
+**Result:** ✅ PASS / ❌ FAIL  
+**Notes:**
+
+---
+
+### Test Scenario 1B: Settings and Business Reset
+
+**Goal:** Verify settings screen and reset functionality  
+**Device:** iPad (supplier app)  
+**Time:** 3 minutes
+
+**Steps:**
+
+1. **From Supplier Home screen, tap ⚙️ Settings** icon (top right)
+
+2. **Settings screen displays**
+
+3. **Verify Business Information section shows:**
+   - Business Name: "Test Coffee Shop"
+   - Brand Color: (with colored circle indicator)
+   - Stamps Required: 7 stamps
+   - Business ID: (long UUID string)
+
+4. **Scroll to "Danger Zone" section** (red heading)
+
+5. **Tap "Reset Business Configuration"**
+
+6. **Confirmation dialog appears:**
+   - Warning about data loss
+   - Lists what will be deleted (name, keys, history)
+   - "Cancel" and "Reset" buttons
+
+7. **Tap "Cancel"** (don't reset yet)
+   - Dialog closes
+   - Still on settings screen
+
+8. **Optional: Test actual reset:**
+   - Tap "Reset Business Configuration" again
+   - Tap "Reset" button in confirmation
+   - Loading indicator appears
+   - Returns to onboarding screen
+   - Enter new business name to test re-setup
+
+**Note:** If testing reset, you'll need to re-onboard before continuing other tests.
+
+**Verification:**
+- ✅ Settings screen accessible
+- ✅ All business info displayed correctly
+- ✅ Brand color hex format correct (#RRGGBB)
+- ✅ Reset confirmation warning appears
+- ✅ Can cancel reset
+- ✅ Reset works (if tested)
+- ✅ Re-onboarding works after reset (if tested)
+
+**Use Cases:**
+- Fixing typo in business name (as encountered in testing)
+- Starting over with fresh configuration
+- Testing multiple business setups
 
 **Result:** ✅ PASS / ❌ FAIL  
 **Notes:**
@@ -338,11 +406,20 @@ Now the fun part! Testing P2P interactions.
    - Should be large (at least 50% of screen)
    - Should have border/padding
    - Should not be blurry
+   - Should show "Cryptographically Signed" badge
 
 4. **Note the information displayed:**
    - Business name: "Test Coffee Shop"
    - Stamps required: 7
    - "Show this QR to customer" instruction
+   - "QR code valid for 5 minutes" warning
+   - Blue **"Generate New QR Code"** button visible
+
+5. **Test QR Refresh:**
+   - Tap the blue **"Generate New QR Code"** button
+   - QR code should regenerate (will look different)
+   - Alt: Use refresh icon in top-right AppBar
+   - Useful when QR expires or for testing
 
 **DO NOT SCAN YET** - This is just visual verification
 
@@ -350,12 +427,13 @@ Now the fun part! Testing P2P interactions.
 - ✅ QR code displays
 - ✅ QR code is clear and scannable size
 - ✅ Business info correct
-- ✅ Can see timestamp or expiry info
+- ✅ QR expiry notice visible (5 minutes)
+- ✅ Refresh button present and working
+- ✅ Brand color format correct (#RRGGBB, 7 characters)
 
-**Current Status (as of Phase 2 completion):**
-- ⚠️ This screen may not be fully implemented yet in Phase 3
-- If you see "Issue Card" screen but no QR → Phase 3 implementation needed
-- If screen doesn't exist → Phase 4 implementation needed
+**Known Fixed Issues:**
+- ✅ Brand color bug fixed (was `##673AB7`, now `#673AB7`)
+- ✅ Refresh button added (previously mentioned but not visible)
 
 **Result:** ✅ PASS / ⚠️ NOT IMPLEMENTED / ❌ FAIL  
 **Notes:**
@@ -455,16 +533,23 @@ Now the fun part! Testing P2P interactions.
 - ✅ Business name correct
 - ✅ Stamp count shows 0/7
 - ✅ Card detail opens correctly
+- ✅ Brand color matches supplier's choice
 
 **Troubleshooting:**
 - ❌ "Can't scan QR" → Make sure QR is clear, well-lit, fills 30-50% of camera view
+- ❌ "Invalid token structure" → **FIXED:** Was caused by brand color format bug (double `#`). Ensure supplier app has latest code with fix.
 - ❌ "Invalid QR code" → Token parsing may have issues, check logs
 - ❌ "Failed to add card" → Database error, check customer app logs
 - ❌ Nothing happens → QR parsing may not be implemented yet
 
+**Known Fixed Issues:**
+- ✅ **Brand color bug:** QR token was generating `##673AB7` instead of `#673AB7`, causing validation to fail with "Invalid token structure". Fixed in `qr_token_generator.dart`.
+- ✅ Token validation now checks for exactly 7 characters (`#RRGGBB` format)
+
 **Expected Implementation Status:**
 - Phase 3 should include QR token generation and parsing
-- If not working, this is Phase 3 development task
+- Token validation with signature verification
+- If not working, check that all recent fixes are applied
 
 **Result:** ✅ PASS / ⚠️ NOT IMPLEMENTED / ❌ FAIL  
 **Notes:**
@@ -674,6 +759,7 @@ After completing all scenarios, fill out this summary:
 | Test # | Scenario | Status | Time | Notes |
 |--------|----------|--------|------|-------|
 | 1 | Supplier Onboarding | ⬜ | ___ min | |
+| 1B | Settings & Reset | ⬜ | ___ min | |
 | 2 | Card Issuance QR | ⬜ | ___ min | |
 | 3 | Camera Permissions | ⬜ | ___ min | |
 | 4 | Card Pickup (P2P) | ⬜ | ___ min | |
@@ -690,7 +776,15 @@ After completing all scenarios, fill out this summary:
 - [ ] All P2P flows functional
 - [ ] QR scanning working on both apps
 - [ ] Signature verification working
+- [ ] Settings and reset functionality working
+- [ ] QR refresh working correctly
 - [ ] Ready for Phase 4 implementation
+
+**Recent Fixes Applied:**
+- ✅ Brand color bug fix (token validation)
+- ✅ Settings screen implementation
+- ✅ QR refresh button added
+- ✅ `deleteKeys()` method name corrected
 
 **Blockers Found:**
 1. _________________________________
@@ -775,6 +869,79 @@ open ios/Runner.xcworkspace
 4. **Clean screen:** Wipe both screens clean
 5. **Size:** QR may be too small, check QR generation code
 6. **Debug:** Add logging to QR scanner callback
+
+---
+
+#### Issue: "Invalid token structure" when scanning supplier QR
+
+**Cause:** Brand color format bug (fixed as of 2026-04-08)
+
+**Symptoms:**
+- Customer app shows "Invalid token structure" error
+- Happens immediately when scanning card issuance QR
+- QR code appears valid visually
+
+**Root Cause:**
+The QR token generator was adding an extra `#` prefix to the brand color:
+- **Stored in DB:** `#673AB7` (7 characters)
+- **In QR token:** `##673AB7` (8 characters) ❌
+- **Validation expects:** `#RRGGBB` (exactly 7 characters)
+
+**Solution:**
+1. **Verify fix is applied:**
+   ```bash
+   cd ~/development/LoyaltyCards/03-Source/supplier_app/lib/services
+   grep "brandColor: business.brandColor" qr_token_generator.dart
+   ```
+   Should show: `brandColor: business.brandColor,` (without extra `#`)
+
+2. **If fix not applied, update:**
+   - In `qr_token_generator.dart`, lines ~22 and ~44
+   - Change: `brandColor: '#${business.brandColor}',`
+   - To: `brandColor: business.brandColor,`
+
+3. **Rebuild supplier app:**
+   ```bash
+   flutter clean && flutter build ios
+   ```
+
+4. **Reset and re-test:**
+   - Use Settings → Reset Business Configuration
+   - Re-onboard with correct setup
+   - Generate new QR code
+   - Should now scan successfully
+
+**Status:** ✅ Fixed in latest code
+
+---
+
+#### Issue: Build fails with "deleteKey method not found"
+
+**Cause:** Method name typo in settings screen (fixed as of 2026-04-08)
+
+**Error Message:**
+```
+lib/screens/supplier/supplier_settings.dart:62:27: Error: The method 'deleteKey' 
+isn't defined for the type 'KeyManager'.
+```
+
+**Solution:**
+1. **Verify fix in settings file:**
+   ```bash
+   grep "deleteKeys" supplier_app/lib/screens/supplier/supplier_settings.dart
+   ```
+   Should show: `await _keyManager.deleteKeys(widget.business.id);`
+
+2. **If not fixed, update line ~62:**
+   - Change: `await _keyManager.deleteKey(widget.business.id);`
+   - To: `await _keyManager.deleteKeys(widget.business.id);` (plural)
+
+3. **Rebuild:**
+   ```bash
+   flutter clean && flutter build ios
+   ```
+
+**Status:** ✅ Fixed in latest code
 
 ---
 
@@ -1037,3 +1204,59 @@ ___________________________________
 **Good luck with your first iOS device testing! 🚀**
 
 **Remember:** First time is always the longest. Once set up, testing becomes quick and easy!
+
+---
+
+## 📊 Appendix: Testing Session History
+
+### Session 1: Initial P2P Testing (2026-04-08)
+
+**Tester:** Ian Hamlet  
+**Duration:** ~2 hours  
+**Devices:**
+- iPhone: Customer App
+- iPad Pro: Supplier App
+
+**Tests Completed:**
+- ✅ Xcode signing configuration (both apps)
+- ✅ Device pairing and developer mode setup
+- ✅ Supplier onboarding (Test 1)
+- ⚠️ Card issuance QR generation (Test 2) - Issues found
+- ⚠️ Card pickup flow (Test 4) - Blocked by QR validation bug
+
+**Issues Found & Fixed:**
+
+1. **"Invalid token structure" Error (Critical)**
+   - **Symptom:** Customer app rejected supplier QR code immediately
+   - **Root Cause:** Brand color format bug - extra `#` prefix (`##673AB7`)
+   - **Fix:** Removed duplicate prefix in `qr_token_generator.dart`
+   - **Status:** ✅ Fixed and verified
+
+2. **Missing Refresh Button**
+   - **Symptom:** QR expiry message mentioned refresh button, but not visible
+   - **Root Cause:** Button existed in AppBar but wasn't prominent
+   - **Fix:** Added large blue button below QR code
+   - **Status:** ✅ Fixed
+
+3. **No Settings/Reset Functionality**
+   - **Symptom:** Typo in business name, no way to change it
+   - **Root Cause:** Settings screen not implemented
+   - **Fix:** Created `supplier_settings.dart` with reset feature
+   - **Status:** ✅ Fixed
+
+4. **Build Failure: "deleteKey not found"**
+   - **Symptom:** Xcode build failed after adding settings screen
+   - **Root Cause:** Called `deleteKey()` instead of `deleteKeys()` (plural)
+   - **Fix:** Corrected method name
+   - **Status:** ✅ Fixed
+
+**Outcomes:**
+- All critical bugs fixed in same session
+- Test guide updated with new scenarios and troubleshooting
+- Ready for next testing session with full P2P flow
+
+**Next Testing:**
+- Complete Test 4 (Card Pickup) with fixes applied
+- Continue to Test 5-8 (Stamp flow and persistence)
+
+---

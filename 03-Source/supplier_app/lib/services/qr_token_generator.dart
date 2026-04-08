@@ -20,7 +20,7 @@ class QRTokenGenerator {
       businessName: business.name,
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
-      brandColor: '#${business.brandColor}',
+      brandColor: business.brandColor,
       signature: '', // Will be filled below
       timestamp: timestamp,
     );
@@ -40,7 +40,7 @@ class QRTokenGenerator {
       businessName: business.name,
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
-      brandColor: '#${business.brandColor}',
+      brandColor: business.brandColor,
       signature: signature,
       timestamp: timestamp,
     );

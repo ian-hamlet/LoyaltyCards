@@ -8,6 +8,17 @@ class StampRepository {
 
   StampRepository(this._dbHelper);
 
+  /// Get all stamps across all cards
+  Future<List<Stamp>> getAllStamps() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'stamps',
+      orderBy: 'timestamp DESC',
+    );
+
+    return maps.map((map) => Stamp.fromJson(map)).toList();
+  }
+
   /// Get all stamps for a specific card
   Future<List<Stamp>> getStampsByCard(String cardId) async {
     final db = await _dbHelper.database;

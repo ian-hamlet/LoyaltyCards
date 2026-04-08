@@ -6,6 +6,7 @@ import 'supplier_onboarding.dart';
 import 'supplier_issue_card.dart';
 import 'supplier_stamp_card.dart';
 import 'supplier_redeem_card.dart';
+import 'supplier_settings.dart';
 
 class SupplierHome extends StatefulWidget {
   const SupplierHome({super.key});
@@ -85,7 +86,12 @@ class _SupplierHomeState extends State<SupplierHome> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // TODO: Settings screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SupplierSettings(business: _business!),
+                ),
+              ).then((_) => _loadBusinessData());
             },
           ),
         ],
@@ -138,9 +144,9 @@ class _SupplierHomeState extends State<SupplierHome> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildStat('Cards Issued', _issuedCards),
+                        _buildStat('Stamps Issued', _issuedStamps),
                         Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Stamps', _issuedStamps),
+                        _buildStat('Cards (P2P)', _issuedCards),
                       ],
                     ),
                   ],

@@ -46,9 +46,9 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       await _keyManager.storePrivateKey(businessId, keyPair.privateKey as ECPrivateKey);
       await _keyManager.storePublicKey(businessId, keyPair.publicKey as ECPublicKey);
 
-      // Get public key for storage
-      final publicKey = await _keyManager.getPublicKey(businessId);
-      if (publicKey == null) {
+      // Get public key as encoded string for database storage
+      final publicKeyString = await _keyManager.getPublicKeyString(businessId);
+      if (publicKeyString == null) {
         throw Exception('Failed to retrieve generated public key');
       }
 
@@ -56,7 +56,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       final business = Business(
         id: businessId,
         name: _businessNameController.text.trim(),
-        publicKey: 'stored_in_keychain', // Placeholder, actual key in secure storage
+        publicKey: publicKeyString, // Actual encoded public key for QR codes
         privateKey: '', // Not stored in database
         stampsRequired: _stampsRequired,
         brandColor: _selectedColor,

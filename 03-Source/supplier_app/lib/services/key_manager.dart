@@ -81,6 +81,12 @@ class KeyManager {
     return _decodePublicKey(encoded);
   }
 
+  /// Retrieve public key as encoded string for sharing/transmission
+  Future<String?> getPublicKeyString(String businessId) async {
+    final encoded = await _storage.read(key: '$_publicKeyPrefix$businessId');
+    return encoded;
+  }
+
   /// Sign data with private key using ECDSA
   Future<String> signData(String data, ECPrivateKey privateKey) async {
     final signer = ECDSASigner(SHA256Digest());

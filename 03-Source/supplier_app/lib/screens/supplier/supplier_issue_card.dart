@@ -48,6 +48,11 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         business: business,
       );
 
+      // Note: We don't log card issuance here because in the P2P model,
+      // the supplier doesn't know when/if the customer actually picks up the card.
+      // Card statistics would need to be tracked differently (e.g., via a callback
+      // or by having customers acknowledge receipt, which isn't in the current design).
+
       setState(() {
         _business = business;
         _token = token;
@@ -245,7 +250,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        'QR code valid for 5 minutes. Tap refresh to generate new one.',
+                                        'QR code valid for 5 minutes',
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.orange.shade900,
@@ -253,6 +258,26 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                       ),
                                     ),
                                   ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // Refresh Button (prominent)
+                              ElevatedButton.icon(
+                                onPressed: _loadBusinessAndGenerateToken,
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Generate New QR Code'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF3498DB),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ],

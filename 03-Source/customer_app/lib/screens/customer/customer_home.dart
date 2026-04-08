@@ -7,6 +7,7 @@ import '../../services/card_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import 'customer_card_detail.dart';
+import 'customer_settings.dart';
 import 'qr_scanner_screen.dart';
 
 class CustomerHome extends StatefulWidget {
@@ -127,7 +128,12 @@ class _CustomerHomeState extends State<CustomerHome> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Settings - future
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CustomerSettings(),
+                ),
+              ).then((_) => _loadCards());
             },
           ),
         ],

@@ -113,6 +113,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         previousHash: previousHash,
       );
 
+      // Log stamp issuance for analytics
+      await _businessRepo.logStampIssued(
+        stampId: stampToken.id,
+        cardId: token.cardId,
+        stampNumber: stampToken.stampNumber,
+        businessId: _business!.id,
+      );
+
       if (mounted) {
         // Show stamp token QR for customer to scan
         _showStampTokenQR(stampToken, token.currentStamps);

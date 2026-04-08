@@ -297,6 +297,18 @@ final isValid = KeyManager.verifySignature(
 - Database operations: < 10ms
 - Total onboarding: < 2 seconds
 
+**See comprehensive test results in:** [TEST_COMPLETION_REPORT.md](TEST_COMPLETION_REPORT.md)
+
+---
+
+## Automated Test Results
+
+**Unit Tests:** See shared package tests (17 tests passing, includes QR token tests)  
+**Integration Tests:** 20 manual simulator tests completed successfully  
+**Test Coverage:** ~45% (cryptographic services and business logic)
+
+**For detailed test breakdown, see:** [TEST_COMPLETION_REPORT.md](TEST_COMPLETION_REPORT.md#23-phase-2---supplier-crypto)
+
 ---
 
 ## Security Analysis

@@ -107,6 +107,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Save card to database
     final cardRepository = CardRepository(DatabaseHelper());
     await cardRepository.insertCard(card);
+    
+    print('=== Processing Card Issuance ===');
+    print('Card ID: $cardId');
+    print('Initial stamps to process: $initialStampCount');
 
     // Process initial stamps if present
     if (initialStampCount > 0) {
@@ -114,6 +118,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       String previousHash = ''; // First stamp has empty previous hash
 
       for (var initialStamp in token.initialStamps) {
+        print('Processing initial stamp #${initialStamp.stampNumber}');
+        print('  Card ID for stamp: $cardId');
         // Verify stamp signature
         final signatureData = '$cardId:${initialStamp.stampNumber}:${initialStamp.timestamp}:$previousHash';
         final isValid = KeyManager.verifySignature(
@@ -143,10 +149,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         );
 
         await stampRepository.insertStamp(stamp);
+        print('  Initial stamp #${initialStamp.stampNumber} saved to DB');
         
         // Next stamp's previous hash is this stamp's signature
         previousHash = initialStamp.signature;
       }
+      
+      // Verify stamps were saved
+      final savedStamps = await stampRepository.getStampsByCard(cardId);
+      print('Verification: ${savedStamps.length} stamps found in DB for card $cardId');
+      for (var s in savedStamps) {
+        print('  Stamp #${s.stampNumber}: ${s.signature.substring(0, 20)}...');
+      }
+      print('=== End Card Issuance Processing ===');
     }
 
     if (mounted) {
@@ -306,7 +321,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   @override
   Widget build(BuildContext context) {
     final title = widget.mode == QRScanMode.addCard
-        ? 'Scan Card QR'
+        ? 'Scan your shop\'s card QR'
         : 'Scan Stamp QR';
 
     return Scaffold(

@@ -57,9 +57,18 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ),
         );
 
+        print('='.padRight(60, '='));
+        print('SUPPLIER APP: RESETTING BUSINESS - ${DateTime.now().toIso8601String()}');
+        print('Business: ${widget.business.name} (ID: ${widget.business.id})');
+        
         // Delete business and keys
+        print('Deleting business configuration...');
         await _businessRepo.deleteBusiness(widget.business.id);
+        print('Deleting cryptographic keys...');
         await _keyManager.deleteKeys(widget.business.id);
+        
+        print('BUSINESS RESET COMPLETE');
+        print('='.padRight(60, '='));
 
         if (mounted) {
           // Pop loading dialog
@@ -138,6 +147,25 @@ class _SupplierSettingsState extends State<SupplierSettings> {
               widget.business.id,
               style: const TextStyle(fontSize: 11),
             ),
+          ),
+
+          const Divider(height: 32),
+
+          // App Version Section
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'App Information',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Version'),
+            subtitle: Text(appVersion),
           ),
 
           const Divider(height: 32),

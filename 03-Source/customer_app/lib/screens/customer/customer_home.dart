@@ -117,7 +117,7 @@ class _CustomerHomeState extends State<CustomerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Loyalty Cards'),
+        title: Text('My Loyalty Cards $appVersion'),
         actions: [
           // Debug: Add test card button
           IconButton(
@@ -163,7 +163,7 @@ class _CustomerHomeState extends State<CustomerHome> {
           _loadCards(); // Reload after returning
         },
         icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Scan Card'),
+        label: const Text('Scan your shop\'s QR code'),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared/shared.dart' hide Card;
 import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
 import '../../services/transaction_repository.dart';
@@ -123,11 +124,18 @@ class _CustomerSettingsState extends State<CustomerSettings> {
   }
 
   Future<void> _deleteAllData() async {
+    print('='.padRight(60, '='));
+    print('CUSTOMER APP: DELETING ALL DATA - ${DateTime.now().toIso8601String()}');
+    print('This will delete all cards, stamps, and transactions');
     // Delete all cards (stamps and transactions will CASCADE delete)
     final cards = await _cardRepo.getAllCards();
+    print('Found ${cards.length} cards to delete');
     for (final card in cards) {
+      print('  Deleting card: ${card.id} (${card.businessName})');
       await _cardRepo.deleteCard(card.id);
     }
+    print('ALL DATA DELETED SUCCESSFULLY');
+    print('='.padRight(60, '='));
   }
 
   @override
@@ -246,7 +254,31 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                 ),
 
                 const SizedBox(height: 32),
+                // App Version Section
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'App Information',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ListTile(
+                        leading: const Icon(Icons.info_outline),
+                        title: const Text('Version'),
+                        subtitle: Text(appVersion),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
 
+                const Divider(height: 32),
                 // Tips Section
                 Container(
                   margin: const EdgeInsets.all(16),

@@ -9,3 +9,6 @@ export 'models/qr_tokens.dart';
 
 // Export constants
 export 'constants/constants.dart';
+
+// Export version
+export 'version.dart';

@@ -81,7 +81,7 @@ class _SupplierHomeState extends State<SupplierHome> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_business!.name),
+        title: Text('${_business!.name} $appVersion'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),

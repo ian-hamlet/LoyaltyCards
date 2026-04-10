@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:shared/shared.dart';
+import 'dart:convert';
 
 class SupplierRedeemCard extends StatefulWidget {
   const SupplierRedeemCard({super.key});
@@ -65,17 +67,41 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       _isProcessing = true;
     });
 
-    // Parse QR data
-    // Expected format: LOYALTYCARD:REDEEM:cardId:stamps
-    if (qrData.startsWith('LOYALTYCARD:REDEEM:')) {
-      final parts = qrData.split(':');
-      if (parts.length >= 4) {
-        final cardId = parts[2];
-        final stamps = int.tryParse(parts[3]) ?? 0;
+    print('=== Processing Redemption QR ===');
+    print('QR Data: ${qrData.substring(0, qrData.length > 100 ? 100 : qrData.length)}...');
+
+    try {
+      // Try parsing as JSON token first (new format)
+      final json = jsonDecode(qrData) as Map<String, dynamic>;
+      
+      if (json['type'] == 'redemption_request') {
+        final token = RedemptionRequestToken.fromJson(json);
+        print('Redemption token parsed successfully');
+        print('Card ID: ${token.cardId}');
+        print('Stamps collected: ${token.stampsCollected}');
+        print('Signatures to verify: ${token.stampSignatures.length}');
         
-        _showRedemptionConfirmation(context, cardId, stamps);
+        _showRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+        return;
+      } else {
+        _showError('Invalid redemption QR - wrong token type: ${json['type']}');
+        return;
       }
-    } else {
+    } catch (e) {
+      print('Failed to parse as JSON token: $e');
+      
+      // Fall back to legacy format: LOYALTYCARD:REDEEM:cardId:stamps
+      if (qrData.startsWith('LOYALTYCARD:REDEEM:')) {
+        final parts = qrData.split(':');
+        if (parts.length >= 4) {
+          final cardId = parts[2];
+          final stamps = int.tryParse(parts[3]) ?? 0;
+          print('Legacy redemption format detected');
+          _showRedemptionConfirmation(context, cardId, stamps);
+          return;
+        }
+      }
+      
       _showError('Invalid QR code for redemption');
     }
   }

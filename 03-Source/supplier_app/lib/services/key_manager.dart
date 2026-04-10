@@ -24,6 +24,7 @@ class KeyManager {
 
   /// Generate a new ECDSA key pair using secp256r1 (P-256) curve
   Future<AsymmetricKeyPair<PublicKey, PrivateKey>> generateKeyPair() async {
+    print('KeyManager: Generating ECDSA P-256 key pair...');
     final keyParams = ECKeyGeneratorParameters(ECCurve_secp256r1());
     final random = FortunaRandom();
     
@@ -35,11 +36,14 @@ class KeyManager {
     final generator = ECKeyGenerator()
       ..init(ParametersWithRandom(keyParams, random));
 
-    return generator.generateKeyPair();
+    final keyPair = generator.generateKeyPair();
+    print('KeyManager: Key pair generated (P-256 curve)');
+    return keyPair;
   }
 
   /// Store private key securely in device keychain/keystore
   Future<void> storePrivateKey(String businessId, ECPrivateKey privateKey) async {
+    print('KeyManager: Storing private key for business: $businessId');
     final keyBytes = _bigIntToBytes(privateKey.d!);
     final keyBase64 = base64Encode(keyBytes);
     
@@ -47,16 +51,19 @@ class KeyManager {
       key: '$_privateKeyPrefix$businessId',
       value: keyBase64,
     );
+    print('KeyManager: Private key stored securely in keychain');
   }
 
   /// Store public key (can be stored less securely as it's meant to be shared)
   Future<void> storePublicKey(String businessId, ECPublicKey publicKey) async {
+    print('KeyManager: Storing public key for business: $businessId');
     final encoded = _encodePublicKey(publicKey);
     
     await _storage.write(
       key: '$_publicKeyPrefix$businessId',
       value: encoded,
     );
+    print('KeyManager: Public key stored (${encoded.length} chars)');
   }
 
   /// Retrieve private key from secure storage
@@ -156,8 +163,10 @@ class KeyManager {
 
   /// Delete keys for a business
   Future<void> deleteKeys(String businessId) async {
+    print('KeyManager: Deleting cryptographic keys for business: $businessId');
     await _storage.delete(key: '$_privateKeyPrefix$businessId');
     await _storage.delete(key: '$_publicKeyPrefix$businessId');
+    print('KeyManager: Private and public keys deleted');
   }
 
   /// Encode public key to base64 string for storage/transmission

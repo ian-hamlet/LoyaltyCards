@@ -36,21 +36,34 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
     setState(() => _isCreating = true);
 
     try {
+      print('='.padRight(60, '='));
+      print('SUPPLIER APP: SETTING UP NEW BUSINESS - ${DateTime.now().toIso8601String()}');
+      
       // Generate business ID
       final businessId = _uuid.v4();
+      print('Generated business ID: $businessId');
+      print('Business name: ${_businessNameController.text.trim()}');
+      print('Stamps required: $_stampsRequired');
+      print('Brand color: $_selectedColor');
 
       // Generate key pair
+      print('Generating cryptographic key pair...');
       final keyPair = await _keyManager.generateKeyPair();
+      print('Key pair generated successfully');
 
       // Store keys securely (cast to EC types)
+      print('Storing private key in secure storage...');
       await _keyManager.storePrivateKey(businessId, keyPair.privateKey as ECPrivateKey);
+      print('Storing public key in secure storage...');
       await _keyManager.storePublicKey(businessId, keyPair.publicKey as ECPublicKey);
 
       // Get public key as encoded string for database storage
+      print('Retrieving public key for database storage...');
       final publicKeyString = await _keyManager.getPublicKeyString(businessId);
       if (publicKeyString == null) {
         throw Exception('Failed to retrieve generated public key');
       }
+      print('Public key encoded (length: ${publicKeyString.length} chars)');
 
       // Create business model (without private key in DB)
       final business = Business(
@@ -64,7 +77,11 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       );
 
       // Save to database
+      print('Saving business configuration to database...');
       await _businessRepo.insertBusiness(business);
+      
+      print('BUSINESS SETUP COMPLETE');
+      print('='.padRight(60, '='));
 
       if (mounted) {
         // Navigate to home screen
@@ -119,7 +136,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Set up your loyalty card program',
+                  'Set and configure your loyalty card program for your customers',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.grey[600],
                   ),

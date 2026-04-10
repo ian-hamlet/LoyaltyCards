@@ -56,12 +56,23 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   String _generateCardQR() {
     if (_card == null) return '';
     
+    // Get the last stamp's signature for hash chain validation
+    String lastStampHash = '';
+    if (_stamps.isNotEmpty) {
+      lastStampHash = _stamps.last.signature;
+      print('Card Detail QR: Including lastStampHash from stamp #${_stamps.last.stampNumber}');
+      print('Card Detail QR: Hash = "${lastStampHash.substring(0, 20)}..."');
+    } else {
+      print('Card Detail QR: No stamps, lastStampHash will be empty');
+    }
+    
     final qrData = {
       'type': 'card_stamp_request',
       'cardId': _card!.id,
       'businessId': _card!.businessId,
       'currentStamps': _card!.stampsCollected,
       'publicKey': _card!.businessPublicKey,
+      'lastStampHash': lastStampHash,  // NOW INCLUDED!
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
     
@@ -230,29 +241,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         ),
                       ),
                     )
-                  else ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QRDisplayScreen(
-                                card: _card!,
-                                mode: QRDisplayMode.stampRequest,
-                              ),
-                            ),
-                          ).then((_) => _loadCardData()); // Reload card data when returning
-                        },
-                        icon: const Icon(Icons.qr_code),
-                        label: const Text('Show QR for Stamp'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                  else
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
@@ -279,8 +268,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                           padding: const EdgeInsets.all(16),
                         ),
                       ),
-                    ),
-                  ],
+                    )
                 ],
               ),
             ),

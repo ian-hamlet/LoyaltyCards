@@ -100,18 +100,31 @@ class SupplierDatabaseHelper {
 
   /// Clear all data (for testing)
   Future<void> clearAllData() async {
+    print('='.padRight(60, '='));
+    print('DATABASE: Clearing all tables - ${DateTime.now().toIso8601String()}');
     final db = await database;
     await db.delete('business');
+    print('  Cleared business table');
     await db.delete('issued_cards');
+    print('  Cleared issued_cards table');
     await db.delete('stamp_history');
+    print('  Cleared stamp_history table');
     await db.delete('app_settings');
+    print('  Cleared app_settings table');
+    print('ALL TABLES CLEARED');
+    print('='.padRight(60, '='));
   }
 
   /// Delete database file (complete reset)
   Future<void> deleteDatabase() async {
+    print('='.padRight(60, '='));
+    print('DATABASE: DELETING DATABASE FILE - ${DateTime.now().toIso8601String()}');
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, 'loyalty_cards_supplier.db');
+    print('Database path: $path');
     await databaseFactory.deleteDatabase(path);
     _database = null;
+    print('DATABASE FILE DELETED');
+    print('='.padRight(60, '='));
   }
 }

@@ -12,6 +12,27 @@
 - ✅ Fixed `deleteKey` → `deleteKeys` method name
 - ✅ Added troubleshooting for "Invalid token structure" error
 - ✅ Updated test results checklist
+- ⚠️ Rate limit reduced to 1 second (see Known UX Issue below)
+
+---
+
+## ⚠️ Known UX Issue: Multiple Stamps
+
+**IMPORTANT:** During testing, you'll notice that adding multiple stamps (e.g., customer buys 4 coffees) requires **4 complete scan cycles** (customer shows card → supplier scans → supplier shows stamp → customer scans → repeat).
+
+This is **slower than physical cards** where a supplier can stamp 4 times instantly.
+
+**Current State:**
+- Rate limit: 1 second between stamps (minimal duplicate protection)
+- Allows rapid sequential stamping but still requires full scan cycle each time
+- 4 stamps ≈ 40-60 seconds vs. physical card ≈ 2 seconds
+
+**Future Solution:**
+- A "Quick Add" or "Multiple Stamps" feature is planned for Phase 5
+- See `KNOWN_ISSUES_AND_RISKS.md` for full analysis and proposed solutions
+
+**For Testing:**
+This is a **known limitation**, not a bug. Document your experience with multiple stamps in the test results.
 
 ---
 

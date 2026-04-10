@@ -105,4 +105,34 @@ class BusinessRepository {
     );
     return count ?? 0;
   }
+
+  /// Get count of unique active cards (cards that have been stamped at least once)
+  Future<int> getActiveCardCount() async {
+    final db = await _dbHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(DISTINCT card_id) FROM stamp_history'),
+    );
+    return count ?? 0;
+  }
+
+  /// Log card activity when supplier scans a stamp request
+  /// This tracks which cards are actively being used, even if stamp token
+  /// generation fails or customer doesn't scan it
+  Future<void> logCardActivity(String cardId, String businessId) async {
+    final db = await _dbHelper.database;
+    // Use timestamp as part of ID to allow multiple activities for same card
+    final activityId = '${cardId}_activity_${DateTime.now().millisecondsSinceEpoch}';
+    
+    await db.insert(
+      'stamp_history',
+      {
+        'id': activityId,
+        'card_id': cardId,
+        'stamp_number': 0, // 0 indicates activity log, not actual stamp
+        'issued_at': DateTime.now().millisecondsSinceEpoch,
+        'business_id': businessId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore, // Ignore if duplicate
+    );
+  }
 }

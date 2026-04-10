@@ -78,6 +78,12 @@ class TokenValidator {
 
     // Verify previous hash chain
     if (token.previousHash != expectedPreviousHash) {
+      // Debug: Log the mismatch details
+      print('Hash mismatch debug:');
+      print('  Token previousHash: "${token.previousHash}"');
+      print('  Expected previousHash: "$expectedPreviousHash"');
+      print('  Token stampNumber: ${token.stampNumber}');
+      
       return ValidationResult(
         isValid: false,
         error: 'Previous hash mismatch - stamp chain broken',

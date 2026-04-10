@@ -90,6 +90,9 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         return;
       }
 
+      // Log card activity (tracks unique cards using the system)
+      await _businessRepo.logCardActivity(token.cardId, _business!.id);
+
       // Check timestamp (must be < 1 minute old)
       final now = DateTime.now().millisecondsSinceEpoch;
       final age = now - token.timestamp;
@@ -102,28 +105,18 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       }
 
       // Generate stamp token
-      final previousHash = token.currentStamps > 0 
-          ? 'prev_hash_placeholder' // In real implementation, customer would provide this
-          : '';
+      final previousHash = token.lastStampHash; // Use customer's last stamp hash
 
-      final stampToken = await _tokenGenerator.generateStampToken(
-        businessId: _business!.id,
-        cardId: token.cardId,
-        stampNumber: token.currentStamps + 1,
-        previousHash: previousHash,
-      );
-
-      // Log stamp issuance for analytics
-      await _businessRepo.logStampIssued(
-        stampId: stampToken.id,
-        cardId: token.cardId,
-        stampNumber: stampToken.stampNumber,
-        businessId: _business!.id,
-      );
+      print('=== Supplier Processing Stamp Request ===');
+      print('Customer card ID: ${token.cardId}');
+      print('Customer current stamps: ${token.currentStamps}');
+      print('Customer last stamp hash: "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"');
+      print('Will generate stamp #${token.currentStamps + 1}');
+      print('=== End Supplier Processing ===');
 
       if (mounted) {
-        // Show stamp token QR for customer to scan
-        _showStampTokenQR(stampToken, token.currentStamps);
+        // Show stamp count selector, then generate and show stamp token QR
+        _showStampCountSelector(token, previousHash);
       }
     } catch (e) {
       setState(() {
@@ -133,7 +126,137 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     }
   }
 
-  void _showStampTokenQR(StampToken token, int currentStamps) {
+  void _showStampCountSelector(CardStampRequestToken token, String previousHash) {
+    int selectedCount = 1;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.local_cafe, color: Colors.brown[400], size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'How many stamps?',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Card currently has ${token.currentStamps} stamp${token.currentStamps != 1 ? 's' : ''}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: List.generate(7, (index) {
+                    final count = index + 1;
+                    final isSelected = selectedCount == count;
+                    return ChoiceChip(
+                      label: Text('$count'),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setDialogState(() {
+                            selectedCount = count;
+                          });
+                        }
+                      },
+                      selectedColor: Colors.blue[600],
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black87,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontSize: 16,
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isProcessing = false;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _generateAndShowStamp(
+                          token,
+                          previousHash,
+                          selectedCount,
+                        );
+                      },
+                      icon: const Icon(Icons.check),
+                      label: Text('Add $selectedCount'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[600],
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _generateAndShowStamp(
+    CardStampRequestToken token,
+    String previousHash,
+    int stampCount,
+  ) async {
+    try {
+      final additionalStampCount = stampCount - 1; // First stamp is main, rest are additional
+      
+      final stampToken = await _tokenGenerator.generateStampToken(
+        businessId: _business!.id,
+        cardId: token.cardId,
+        stampNumber: token.currentStamps + 1,
+        previousHash: previousHash,
+        additionalStampCount: additionalStampCount,
+      );
+
+      // NOTE: Stamps are logged when CUSTOMER successfully scans and validates,
+      // not when supplier generates the token. This prevents counting stamps
+      // that were generated but never received due to errors.
+
+      if (mounted) {
+        _showStampTokenQR(stampToken, token.currentStamps, stampCount);
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error generating stamp: $e';
+        _isProcessing = false;
+      });
+    }
+  }
+
+  void _showStampTokenQR(StampToken token, int currentStamps, int stampCount) {
+    final newStampCount = currentStamps + stampCount;
+    final stampText = stampCount > 1 ? '$stampCount Stamps' : 'Stamp ${token.stampNumber}';
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -152,7 +275,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
               const SizedBox(height: 16),
               
               Text(
-                'Stamp ${token.stampNumber} Added!',
+                '$stampText Added!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -161,7 +284,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
               const SizedBox(height: 8),
               
               Text(
-                'Progress: $currentStamps → ${token.stampNumber}',
+                'Progress: $currentStamps → $newStampCount',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],

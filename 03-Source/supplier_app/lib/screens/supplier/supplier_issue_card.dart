@@ -21,6 +21,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   CardIssueToken? _token;
   bool _isLoading = true;
   String? _errorMessage;
+  int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
 
   @override
   void initState() {
@@ -46,12 +47,16 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
 
       final token = await _tokenGenerator.generateCardIssueToken(
         business: business,
+        initialStampCount: _initialStampCount,
       );
 
-      // Note: We don't log card issuance here because in the P2P model,
-      // the supplier doesn't know when/if the customer actually picks up the card.
-      // Card statistics would need to be tracked differently (e.g., via a callback
-      // or by having customers acknowledge receipt, which isn't in the current design).
+      // Log card issuance (QR generated)
+      // Note: In P2P model, we don't know if customer actually picks up the card,
+      // but we track QR generation as a proxy metric
+      await _businessRepo.logIssuedCard(
+        token.businessId + '_' + DateTime.now().millisecondsSinceEpoch.toString(),
+        business.id,
+      );
 
       setState(() {
         _business = business;
@@ -121,28 +126,121 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             children: [
-                              const Icon(Icons.info_outline, color: Colors.blue, size: 32),
+                              Icon(Icons.info_outline, color: Colors.blue[700], size: 32),
                               const SizedBox(height: 12),
                               Text(
                                 'Customer Pickup Process',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
+                                      color: Colors.blue[900],
                                     ),
                               ),
                               const SizedBox(height: 12),
-                              const Text(
+                              Text(
                                 '1. Show this QR code to customer\n'
                                 '2. Customer opens LoyaltyCards app\n'
                                 '3. Customer taps "Scan Card" button\n'
                                 '4. Customer scans this QR code\n'
                                 '5. Card added to customer wallet!',
-                                style: TextStyle(height: 1.6),
+                                style: TextStyle(
+                                  height: 1.6,
+                                  color: Colors.blue[900],
+                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                      
+                                            const SizedBox(height: 24),
+
+                      // Initial Stamp Count Selector
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.bolt, color: Colors.amber[700], size: 24),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Quick Start Stamps',
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Issue card with stamps already applied (for large purchases)',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              
+                              // Stamp count selector buttons
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: List.generate(8, (index) {
+                                  final count = index;
+                                  final isSelected = _initialStampCount == count;
+                                  return ChoiceChip(
+                                    label: Text(count == 0 ? 'None' : '$count'),
+                                    selected: isSelected,
+                                    onSelected: (selected) {
+                                      if (selected && _initialStampCount != count) {
+                                        setState(() {
+                                          _initialStampCount = count;
+                                        });
+                                        _loadBusinessAndGenerateToken();
+                                      }
+                                    },
+                                    selectedColor: Colors.blue[600],
+                                    labelStyle: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.black87,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                  );
+                                }),
+                              ),
+                              
+                              if (_initialStampCount > 0) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[50],
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.blue[200]!),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.check_circle, color: Colors.blue[700], size: 20),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Card will start with $_initialStampCount stamp${_initialStampCount > 1 ? 's' : ''} already applied',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.blue[900],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 24),
 
                       // QR Code Display

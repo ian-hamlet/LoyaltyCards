@@ -44,6 +44,35 @@ abstract class QRToken {
   }
 }
 
+/// Initial stamp data included in card issuance
+class InitialStamp {
+  final int stampNumber;
+  final String signature;
+  final int timestamp;
+
+  InitialStamp({
+    required this.stampNumber,
+    required this.signature,
+    required this.timestamp,
+  });
+
+  factory InitialStamp.fromJson(Map<String, dynamic> json) {
+    return InitialStamp(
+      stampNumber: json['stampNumber'] as int,
+      signature: json['signature'] as String,
+      timestamp: json['timestamp'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'stampNumber': stampNumber,
+      'signature': signature,
+      'timestamp': timestamp,
+    };
+  }
+}
+
 /// Token for supplier to issue a new card to customer
 class CardIssueToken extends QRToken {
   final String businessId;
@@ -52,6 +81,8 @@ class CardIssueToken extends QRToken {
   final int stampsRequired;
   final String brandColor;
   final String signature;
+  final String? cardId; // Pre-generated card ID for signature consistency (optional for backward compatibility)
+  final List<InitialStamp> initialStamps; // Pre-applied stamps at issuance
 
   CardIssueToken({
     required this.businessId,
@@ -60,10 +91,13 @@ class CardIssueToken extends QRToken {
     required this.stampsRequired,
     required this.brandColor,
     required this.signature,
+    this.cardId,
     required int timestamp,
+    this.initialStamps = const [],
   }) : super(type: 'card_issue', timestamp: timestamp);
 
   factory CardIssueToken.fromJson(Map<String, dynamic> json) {
+    final initialStampsJson = json['initialStamps'] as List<dynamic>? ?? [];
     return CardIssueToken(
       businessId: json['businessId'] as String,
       businessName: json['businessName'] as String,
@@ -71,13 +105,17 @@ class CardIssueToken extends QRToken {
       stampsRequired: json['stampsRequired'] as int,
       brandColor: json['brandColor'] as String,
       signature: json['signature'] as String,
+      cardId: json['cardId'] as String?,
       timestamp: json['timestamp'] as int,
+      initialStamps: initialStampsJson
+          .map((s) => InitialStamp.fromJson(s as Map<String, dynamic>))
+          .toList(),
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
-    return {
+    final map = {
       'type': type,
       'businessId': businessId,
       'businessName': businessName,
@@ -86,11 +124,20 @@ class CardIssueToken extends QRToken {
       'brandColor': brandColor,
       'timestamp': timestamp,
       'signature': signature,
+      'initialStamps': initialStamps.map((s) => s.toJson()).toList(),
     };
+    if (cardId != null) {
+      map['cardId'] = cardId!;
+    }
+    return map;
   }
 
   /// Data string used for signature verification
   String getSignatureData() {
+    // Include cardId only if present (backward compatibility)
+    if (cardId != null) {
+      return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardId:$timestamp';
+    }
     return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$timestamp';
   }
 
@@ -108,6 +155,10 @@ class CardIssueToken extends QRToken {
     if (signature.isEmpty) {
       return false;
     }
+    // If there are initial stamps, cardId must be present
+    if (initialStamps.isNotEmpty && (cardId == null || cardId!.isEmpty)) {
+      return false;
+    }
     return true;
   }
 }
@@ -118,12 +169,14 @@ class CardStampRequestToken extends QRToken {
   final String businessId;
   final int currentStamps;
   final String publicKey;
+  final String lastStampHash; // Hash of previous stamp for chain validation
 
   CardStampRequestToken({
     required this.cardId,
     required this.businessId,
     required this.currentStamps,
     required this.publicKey,
+    required this.lastStampHash,
     required int timestamp,
   }) : super(type: 'card_stamp_request', timestamp: timestamp);
 
@@ -133,6 +186,7 @@ class CardStampRequestToken extends QRToken {
       businessId: json['businessId'] as String,
       currentStamps: json['currentStamps'] as int,
       publicKey: json['publicKey'] as String,
+      lastStampHash: json['lastStampHash'] as String? ?? '',
       timestamp: json['timestamp'] as int,
     );
   }
@@ -145,6 +199,7 @@ class CardStampRequestToken extends QRToken {
       'businessId': businessId,
       'currentStamps': currentStamps,
       'publicKey': publicKey,
+      'lastStampHash': lastStampHash,
       'timestamp': timestamp,
     };
   }
@@ -161,6 +216,35 @@ class CardStampRequestToken extends QRToken {
   }
 }
 
+/// Additional stamp in a multi-stamp operation
+class AdditionalStamp {
+  final int stampNumber;
+  final String signature;
+  final int timestamp;
+
+  AdditionalStamp({
+    required this.stampNumber,
+    required this.signature,
+    required this.timestamp,
+  });
+
+  factory AdditionalStamp.fromJson(Map<String, dynamic> json) {
+    return AdditionalStamp(
+      stampNumber: json['stampNumber'] as int,
+      signature: json['signature'] as String,
+      timestamp: json['timestamp'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'stampNumber': stampNumber,
+      'signature': signature,
+      'timestamp': timestamp,
+    };
+  }
+}
+
 /// Token for supplier to issue a stamp to customer
 class StampToken extends QRToken {
   final String id;
@@ -168,6 +252,7 @@ class StampToken extends QRToken {
   final int stampNumber;
   final String previousHash;
   final String signature;
+  final List<AdditionalStamp> additionalStamps; // For multi-stamp operations
 
   StampToken({
     required this.id,
@@ -176,9 +261,11 @@ class StampToken extends QRToken {
     required this.previousHash,
     required this.signature,
     required int timestamp,
+    this.additionalStamps = const [],
   }) : super(type: 'stamp_token', timestamp: timestamp);
 
   factory StampToken.fromJson(Map<String, dynamic> json) {
+    final additionalStampsJson = json['additionalStamps'] as List<dynamic>? ?? [];
     return StampToken(
       id: json['id'] as String,
       cardId: json['cardId'] as String,
@@ -186,6 +273,9 @@ class StampToken extends QRToken {
       previousHash: json['previousHash'] as String? ?? '',
       signature: json['signature'] as String,
       timestamp: json['timestamp'] as int,
+      additionalStamps: additionalStampsJson
+          .map((s) => AdditionalStamp.fromJson(s as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -199,6 +289,7 @@ class StampToken extends QRToken {
       'timestamp': timestamp,
       'previousHash': previousHash,
       'signature': signature,
+      'additionalStamps': additionalStamps.map((s) => s.toJson()).toList(),
     };
   }
 

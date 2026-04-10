@@ -219,7 +219,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                 mode: QRDisplayMode.redemption,
                               ),
                             ),
-                          );
+                          ).then((_) => _loadCardData()); // Reload card data when returning
                         },
                         icon: const Icon(Icons.redeem),
                         label: const Text('Redeem Reward'),
@@ -243,7 +243,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                 mode: QRDisplayMode.stampRequest,
                               ),
                             ),
-                          );
+                          ).then((_) => _loadCardData()); // Reload card data when returning
                         },
                         icon: const Icon(Icons.qr_code),
                         label: const Text('Show QR for Stamp'),

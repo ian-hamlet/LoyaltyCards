@@ -20,7 +20,7 @@ class _SupplierHomeState extends State<SupplierHome> {
   Business? _business;
   bool _isLoading = true;
   int _issuedCards = 0;
-  int _issuedStamps = 0;
+  int _activeCards = 0;
 
   @override
   void initState() {
@@ -45,12 +45,12 @@ class _SupplierHomeState extends State<SupplierHome> {
       }
 
       final cardCount = await _businessRepo.getIssuedCardCount();
-      final stampCount = await _businessRepo.getIssuedStampCount();
+      final activeCardCount = await _businessRepo.getActiveCardCount();
 
       setState(() {
         _business = business;
         _issuedCards = cardCount;
-        _issuedStamps = stampCount;
+        _activeCards = activeCardCount;
         _isLoading = false;
       });
     } catch (e) {
@@ -144,9 +144,9 @@ class _SupplierHomeState extends State<SupplierHome> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildStat('Stamps Issued', _issuedStamps),
+                        _buildStat('QRs Generated', _issuedCards),
                         Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Cards (P2P)', _issuedCards),
+                        _buildStat('Active Cards', _activeCards),
                       ],
                     ),
                   ],
@@ -178,7 +178,7 @@ class _SupplierHomeState extends State<SupplierHome> {
                     MaterialPageRoute(
                       builder: (_) => const SupplierIssueCard(),
                     ),
-                  );
+                  ).then((_) => _loadBusinessData());
                 },
               ),
 
@@ -196,7 +196,7 @@ class _SupplierHomeState extends State<SupplierHome> {
                     MaterialPageRoute(
                       builder: (_) => const SupplierStampCard(),
                     ),
-                  );
+                  ).then((_) => _loadBusinessData());
                 },
               ),
 
@@ -214,7 +214,7 @@ class _SupplierHomeState extends State<SupplierHome> {
                     MaterialPageRoute(
                       builder: (_) => const SupplierRedeemCard(),
                     ),
-                  );
+                  ).then((_) => _loadBusinessData());
                 },
               ),
 
@@ -249,6 +249,41 @@ class _SupplierHomeState extends State<SupplierHome> {
                         '3.',
                         'Redeem',
                         'When card is complete, scan to validate and redeem reward',
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.info_outline, color: Colors.blue[700], size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Statistics',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue[900],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'QRs Generated: Times you offered a card to customers\\n'
+                              'Active Cards: Unique customers who have used your loyalty program',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue[900],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

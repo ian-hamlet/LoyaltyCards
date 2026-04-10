@@ -7,6 +7,7 @@ import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
 import '../../services/rate_limiter.dart';
 import '../../services/database_helper.dart';
+import '../../services/key_manager.dart';
 
 /// Scanner screen for adding new cards or receiving stamps
 class QRScannerScreen extends StatefulWidget {
@@ -86,26 +87,74 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
-    // Create card from token
+    // Use card ID from token if present (for multi-stamp consistency)
+    // Otherwise generate new one (backward compatibility)
+    final cardId = token.cardId ?? '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+    final initialStampCount = token.initialStamps.length;
+    
     final card = models.Card(
-      id: '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}',
+      id: cardId,
       businessId: token.businessId,
       businessName: token.businessName,
       businessPublicKey: token.publicKey,
       stampsRequired: token.stampsRequired,
-      stampsCollected: 0,
+      stampsCollected: initialStampCount,
       brandColor: token.brandColor.replaceAll('#', ''),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
     // Save card to database
-    final repository = CardRepository(DatabaseHelper());
-    await repository.insertCard(card);
+    final cardRepository = CardRepository(DatabaseHelper());
+    await cardRepository.insertCard(card);
+
+    // Process initial stamps if present
+    if (initialStampCount > 0) {
+      final stampRepository = StampRepository(DatabaseHelper());
+      String previousHash = ''; // First stamp has empty previous hash
+
+      for (var initialStamp in token.initialStamps) {
+        // Verify stamp signature
+        final signatureData = '$cardId:${initialStamp.stampNumber}:${initialStamp.timestamp}:$previousHash';
+        final isValid = KeyManager.verifySignature(
+          signatureData,
+          initialStamp.signature,
+          token.publicKey,
+        );
+
+        if (!isValid) {
+          setState(() {
+            _errorMessage = 'Invalid stamp signature at stamp #${initialStamp.stampNumber}';
+            _isProcessing = false;
+          });
+          // Rollback: delete the card
+          await cardRepository.deleteCard(cardId);
+          return;
+        }
+
+        // Create and save stamp
+        final stamp = Stamp(
+          id: '${cardId}_stamp_${initialStamp.stampNumber}',
+          cardId: cardId,
+          stampNumber: initialStamp.stampNumber,
+          timestamp: DateTime.fromMillisecondsSinceEpoch(initialStamp.timestamp),
+          signature: initialStamp.signature,
+          previousHash: previousHash.isEmpty ? null : previousHash,
+        );
+
+        await stampRepository.insertStamp(stamp);
+        
+        // Next stamp's previous hash is this stamp's signature
+        previousHash = initialStamp.signature;
+      }
+    }
 
     if (mounted) {
       // Success! Return to home with success message
-      Navigator.pop(context, 'Card added: ${card.businessName}');
+      final stampText = initialStampCount > 0 
+          ? ' with $initialStampCount stamp${initialStampCount > 1 ? 's' : ''}' 
+          : '';
+      Navigator.pop(context, 'Card added: ${card.businessName}$stampText');
     }
   }
 
@@ -149,6 +198,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final stampRepo = StampRepository(DatabaseHelper());
     final stamps = await stampRepo.getStampsByCard(card.id);
     final expectedPrevHash = stamps.isNotEmpty ? stamps.last.signature : '';
+    
+    print('=== Validating Stamp Token ===');
+    print('Card ID: ${card.id}');
+    print('Stamps in DB: ${stamps.length}');
+    print('Expected next stamp: #${stamps.length + 1}');
+    print('Token stamp number: ${token.stampNumber}');
+    print('Expected previousHash: "${expectedPrevHash.isEmpty ? "(empty)" : expectedPrevHash.substring(0, 20) + "..."}"');
+    print('Token previousHash: "${token.previousHash.isEmpty ? "(empty)" : token.previousHash.substring(0, 20) + "..."}"');
+    print('=== End Validation ===');
 
     // Validate stamp token
     final validation = await TokenValidator.validateStampToken(
@@ -166,21 +224,82 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
 
     // Add stamp to card
+    print('=== Saving Main Stamp ===');
+    print('Stamp #${token.stampNumber}');
+    print('previousHash: "${token.previousHash.isEmpty ? "(empty -> will be null)" : token.previousHash.substring(0, 20) + "..."}"');
+    print('signature: "${token.signature.substring(0, 20)}..."');
+    
     final stamp = Stamp(
       id: token.id,
       cardId: token.cardId,
       stampNumber: token.stampNumber,
       timestamp: DateTime.fromMillisecondsSinceEpoch(token.timestamp),
       signature: token.signature,
-      previousHash: token.previousHash,
+      previousHash: token.previousHash.isEmpty ? null : token.previousHash,
     );
 
     await stampRepo.insertStamp(stamp);
-    await repository.updateStampCount(card.id, card.stampsCollected + 1);
+    print('Main stamp saved to DB');
+    
+    // Process additional stamps if present
+    int totalStampsAdded = 1;
+    if (token.additionalStamps.isNotEmpty) {
+      print('=== Processing ${token.additionalStamps.length} Additional Stamps ===');
+      String currentPreviousHash = token.signature; // First additional stamp uses main stamp's signature
+
+      for (var additionalStamp in token.additionalStamps) {
+        print('Additional Stamp #${additionalStamp.stampNumber}:');
+        print('  previousHash: "${currentPreviousHash.substring(0, 20)}..."');
+        print('  signature: "${additionalStamp.signature.substring(0, 20)}..."');
+        
+        // Verify stamp signature
+        final signatureData = '${token.cardId}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
+        final isValid = KeyManager.verifySignature(
+          signatureData,
+          additionalStamp.signature,
+          card.businessPublicKey,
+        );
+
+        if (!isValid) {
+          print('ERROR: Additional stamp signature verification FAILED');
+          setState(() {
+            _errorMessage = 'Invalid stamp signature at stamp #${additionalStamp.stampNumber}';
+            _isProcessing = false;
+          });
+          // Note: We've already added some stamps. In production, you might want
+          // to implement a transaction rollback here.
+          return;
+        }
+        print('  Signature verified OK');
+
+        // Create and save stamp
+        final additionalStampRecord = Stamp(
+          id: '${token.cardId}_stamp_${additionalStamp.stampNumber}',
+          cardId: token.cardId,
+          stampNumber: additionalStamp.stampNumber,
+          timestamp: DateTime.fromMillisecondsSinceEpoch(additionalStamp.timestamp),
+          signature: additionalStamp.signature,
+          previousHash: currentPreviousHash.isEmpty ? null : currentPreviousHash,
+        );
+
+        await stampRepo.insertStamp(additionalStampRecord);
+        totalStampsAdded++;
+        print('  Additional stamp saved to DB');
+        
+        // Next stamp's previous hash is this stamp's signature
+        currentPreviousHash = additionalStamp.signature;
+      }
+      print('=== All Additional Stamps Processed ===');
+    }
+    
+    await repository.updateStampCount(card.id, card.stampsCollected + totalStampsAdded);
 
     if (mounted) {
       // Success! Return with success message
-      Navigator.pop(context, 'Stamp added successfully!');
+      final stampText = totalStampsAdded > 1 
+          ? '$totalStampsAdded stamps added successfully!' 
+          : 'Stamp added successfully!';
+      Navigator.pop(context, stampText);
     }
   }
 

@@ -8,7 +8,12 @@ class RateLimiter {
   RateLimiter(this._dbHelper);
 
   /// Check if a card can receive a new stamp
-  /// Rate limit: 1 stamp per hour per business
+  /// Rate limit: 1 stamp per second per card
+  /// Minimal protection against accidental duplicate scans
+  /// 
+  /// TODO: Review UX - multiple purchases (e.g., 4 coffees) require 4 separate
+  /// scan cycles. Consider adding "Add Multiple Stamps" feature to match
+  /// physical card UX where supplier can stamp multiple times instantly.
   Future<RateLimitResult> canReceiveStamp({
     required String cardId,
     required String businessId,
@@ -34,17 +39,17 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastStamp = now - lastStampTime;
 
-    // Rate limit: 1 hour (3600000 milliseconds)
-    const rateLimitMs = 60 * 60 * 1000;
+    // Rate limit: 1 second (1000 milliseconds)
+    // Minimal delay to prevent accidental duplicate scans only
+    const rateLimitMs = 1000;
 
     if (timeSinceLastStamp < rateLimitMs) {
       final remainingMs = rateLimitMs - timeSinceLastStamp;
-      final remainingMinutes = (remainingMs / 60000).ceil();
 
       return RateLimitResult(
         canProceed: false,
         waitTimeMs: remainingMs,
-        message: 'Please wait $remainingMinutes more minute(s) before getting another stamp',
+        message: 'Please wait a moment before getting another stamp',
       );
     }
 

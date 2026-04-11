@@ -27,7 +27,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   final MobileScannerController _controller = MobileScannerController();
   bool _isProcessing = false;
   String? _errorMessage;
-  int _manualRotationOffset = 0; // 0, 1, 2, or 3 quarter turns
+  int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
   @override
   void dispose() {

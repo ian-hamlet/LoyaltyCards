@@ -122,177 +122,163 @@ Track your daily development progress here. Update after each work session.
 
 ---
 
+### Day 4 - [Date: 2026-04-09]
+**Phase:** Phase 3 & 4 - Multi-Stamp Implementation (Builds 1-5)  
+**Hours Worked:** 3.5  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+- [x] Extended Card Issuance to support 0-7 initial stamps
+- [x] Extended Stamp operations to support 1-7 stamps per scan
+- [x] Implemented hash chain linking (previousHash validation)
+- [x] Fixed hash chain validation failures
+- [x] Fixed card ID mismatch between supplier and customer
+- [x] Made cardId field optional for backward compatibility
+- [x] Fixed card detail QR missing lastStampHash
+- [x] Removed redundant "Show QR for Stamp" button
+- [x] Created shared version.dart for build tracking (Build 5)
+
+**Testing:**
+- ✅ Multi-stamp card issuance (0-7 initial stamps)
+- ✅ Multi-stamp operations (1-7 additional stamps)
+- ✅ Hash chain validation working correctly
+- ✅ Signature verification for all stamps
+- ⚠️ Xcode caching causing deployment issues (deferred to Day 5)
+
+**Blockers/Issues:**
+- **Critical:** Hash chain validation failing due to cardId mismatch
+  - **Root Cause:** Supplier generated temp cardId, customer generated different ID
+  - **Fix:** Added cardId to CardIssueToken, supplier generates once
+  - **Status:** ✅ Resolved in Build 5
+- **Moderate:** Card detail QR missing lastStampHash field
+  - **Fix:** Updated _generateCardQR() to include lastStampHash
+  - **Status:** ✅ Resolved in Build 5
+- **Ongoing:** Code changes not appearing on physical devices despite builds succeeding
+  - **Status:** Investigating Xcode caching
+
+**Notes:**
+- Successfully implemented multi-stamp architecture (main + additional stamps)
+- Hash chain now properly links all stamps (each stamp's signature = next stamp's previousHash)
+- Build versioning system created to track deployments
+- Physical device testing reveals Xcode caching more aggressive than expected
+
+---
+
+### Day 5 - [Date: 2026-04-10]
+**Phase:** Phase 3 & 4 - Deployment & Overflow Logic (Builds 6-8)  
+**Hours Worked:** 4  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+- [x] Resolved Xcode caching issues (flutter clean + pod install)
+- [x] Added visual deployment markers (version in AppBar, startup logs)
+- [x] Built 6: Fixed supplier redemption scanner to accept JSON tokens
+- [x] Build 7: Implemented auto-switching QR mode (stamp vs redemption)
+- [x] Build 8: Implemented overflow-to-new-card logic
+- [x] Build 8: Fixed XML typo and missing updatedAt parameter
+- [x] Simplified redemption flow (scan, verify, customer deletes)
+- [x] Added comprehensive debug logging with visual separators
+
+**Testing:**
+- ✅ Deployment verification: Version visible in UI
+- ✅ Startup logs confirm code deployment
+- ✅ Auto-switching QR mode: Incomplete card shows stamp request, complete card shows redemption
+- ✅ Overflow test: 9 stamps + 3 stamps = 10 (complete) + 2 (new card)
+- ✅ Hash chain preserved across overflow
+- ✅ Redemption flow working end-to-end
+
+**Blockers/Issues:**
+- **Critical (Resolved):** New code not deploying to devices
+  - **Root Cause:** Xcode aggressive caching + Flutter incremental builds
+  - **Fix:** flutter clean + pod install + Xcode Clean Build Folder (⇧⌘K)
+  - **Status:** ✅ Resolved - now using aggressive clean rebuilds
+- **Moderate (Resolved):** Build error missing updatedAt parameter
+  - **Root Cause:** Card model requires both createdAt and updatedAt
+  - **Fix:** Added updatedAt: now to new card creation
+  - **Status:** ✅ Resolved in Build 8
+
+**Notes:**
+- Overflow-to-new-card is significant enhancement beyond original plan
+- Detects when stamps exceed requirement, automatically splits into complete + new card
+- Transfers overflow stamps to new card with proper renumbering
+- Maintains hash chain integrity in both cards
+- Version tracking system working perfectly for deployment verification
+- Redemption flow simplified: supplier verifies, customer deletes (no complex token exchange)
+
+---
+
+### Day 6 - [Date: 2026-04-11]
+**Phase:** Phase 3 & 4 - UI Polish & Testing (Builds 9-11)  
+**Hours Worked:** 2.5  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+- [x] Build 9-10: Clarified supplier dashboard counters
+  - "QRs Generated" → "Cards Issued" (count of card issuances)
+  - "Active Cards" → "Cards Stamped" (count of unique cards stamped)
+- [x] Build 11: Added QR frame to redemption scanner
+- [x] Build 11: Added processing indicator and flashlight toggle
+- [x] Comprehensive end-to-end testing on physical devices
+- [x] Validated all multi-stamp scenarios
+- [x] Validated overflow-to-new-card logic
+- [x] Validated redemption flow
+
+**Testing:**
+- ✅ Test 1: Card issuance with 3 initial stamps
+- ✅ Test 2: Add 3 stamps (total 6/10)
+- ✅ Test 3: Add 3 stamps (total 9/10)
+- ✅ Test 4: Add 3 stamps (overflow: 10 complete + 2 new)
+- ✅ Test 5: Redemption of complete card
+- ✅ Test 6: Continue with new card (2 stamps)
+- ✅ Hash chain validation throughout all operations
+- ✅ Performance metrics: All operations < 100ms
+- ✅ All acceptance criteria met
+
+**Blockers/Issues:**
+- **Minor (Resolved):** "QRs Generated" label confusing
+  - **Fix:** Renamed to "Cards Issued" and "Cards Stamped" with clear semantics
+  - **Status:** ✅ Resolved in Build 10
+- **Minor (Resolved):** Redemption scanner missing visual QR frame
+  - **Fix:** Added Stack layout with scanning frame overlay
+  - **Status:** ✅ Resolved in Build 11
+
+**Notes:**
+- All core P2P functionality working on physical devices
+- Multi-stamp operations validated: 3+3+3+3 = 12 stamps on 10-stamp card
+- Overflow triggered correctly, cards split properly
+- Hash chain maintained through all operations
+- Redemption flow simple and effective
+- Version v0.1.0 (Build 11) is production-ready for single-device supplier
+- Phases 3 & 4 officially complete
+
+---
+
 ## Summary
 
 **Phases Completed:**
 - ✅ Phase 0: Project Foundation (2026-04-03)
 - ✅ Phase 1: Customer Data Layer (2026-04-03)
 - ✅ Phase 2: Supplier Crypto (2026-04-03)
+- ✅ **Phase 3: Customer P2P & QR Scanning (2026-04-09 to 2026-04-11)**
+- ✅ **Phase 4: Supplier QR Operations (2026-04-09 to 2026-04-11)**
 
 **Next Steps:**
-- Phase 3: Customer P2P & QR Scanning (requires physical devices)
-- Phase 4: Supplier QR Operations
-- Phase 5: Multi-Device Configuration
-- Phase 6: Polish & Deployment
+- Phase 5: Multi-Device Configuration (export/import business config)
+- Phase 6: Polish & Deployment (remove debug logs, app store prep)
 
-**Total Development Time So Far:** ~7 hours  
-**Estimated Remaining:** ~10-15 days (depends on physical device availability)
+**Total Development Time:** ~17 hours  
+- Phase 0-2: ~7 hours
+- Phase 3-4: ~10 hours (including debugging and deployment issues)
 
----
-
----
-
-### Day 3 - [Date: ____ ]
-**Phase:** Phase 1 - Customer App Data Layer (continued)  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
-
-**Tasks Completed:**
-- [ ] 1.5 - Update CustomerHome with database
-- [ ] 1.6 - Implement card detail screen
-- [ ] 1.7 - Add card deletion
-- [ ] 1.8 - Add empty state handling
-
-**Testing:**
-- [ ] Full Phase 1 testing checkpoint passed
-- [ ] Tested on iPhone
-- [ ] Tested on iPad
-
-**Blockers/Issues:**
-
-**Notes:**
+**Current Build:** v0.1.0 (Build 11)  
+**Status:** Production-ready for single-device supplier testing  
 
 ---
 
-### Day 4 - [Date: ____ ]
-**Phase:** Phase 2 - Supplier App Crypto  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
-
-**Tasks Completed:**
-- [ ] 2.1 - Research crypto libraries
-- [ ] 2.2 - Implement KeyManager
-- [ ] 2.3 - Build onboarding screen
-- [ ] 2.4 - Business config storage
-
-**Testing:**
-- [ ] Key generation works
-- [ ] Keys stored in keychain
-
-**Blockers/Issues:**
-
-**Notes:**
-
----
-
-### Day 5 - [Date: ____ ]
-**Phase:** Phase 2 - Supplier App Crypto (continued)  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
-
-**Tasks Completed:**
-- [ ] 2.5 - Create StampSigner service
-- [ ] 2.6 - Build supplier home dashboard
-- [ ] 2.7 - Settings screen
-- [ ] 2.8 - Signature verification tests
-
-**Testing:**
-- [ ] Full Phase 2 testing checkpoint passed
-- [ ] Tested on iPad
-
-**Blockers/Issues:**
-
-**Notes:**
-
----
-
-## Week 2
-
-### Day 6 - [Date: ____ ]
-**Phase:** Phase 3 - Customer QR & P2P  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
-
-**Tasks Completed:**
-- [ ] 3.1 - QR scanner screen
-- [ ] 3.2 - QR token parser
-- [ ] 3.3 - Card pickup flow
-- [ ] 3.4 - Show QR for stamp screen
-
-**Testing:**
-- [ ] QR scanner works
-- [ ] Card pickup successful
-
-**Blockers/Issues:**
-
-**Notes:**
-
----
+## Week 2 (Future)
 
 ### Day 7 - [Date: ____ ]
-**Phase:** Phase 3 - Customer QR & P2P (continued)  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
-
-**Tasks Completed:**
-- [ ] 3.5 - Stamp validation logic
-- [ ] 3.6 - Stamp receiving flow
-- [ ] 3.7 - Redemption QR display
-- [ ] 3.8 - Rate limiting
-
-**Testing:**
-- [ ] P2P Test Scenario 1: Card Pickup (iPhone ↔ iPad)
-- [ ] P2P Test Scenario 2: Add Stamp (iPhone ↔ iPad)
-
-**Blockers/Issues:**
-
-**Notes:**
-
----
-
-### Day 8 - [Date: ____ ]
-**Phase:** Phase 4 - Supplier Operations  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
-
-**Tasks Completed:**
-- [ ] 4.1 - Issue Card screen
-- [ ] 4.2 - Stamp Card scanner
-- [ ] 4.3 - Stamp token generation
-- [ ] 4.4 - Stamp confirmation screen
-
-**Testing:**
-- [ ] Issue card QR works
-- [ ] Stamp generation works
-
-**Blockers/Issues:**
-
-**Notes:**
-
----
-
-### Day 9 - [Date: ____ ]
-**Phase:** Phase 4 - Supplier Operations (continued)  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
-
-**Tasks Completed:**
-- [ ] 4.5 - Redeem Card scanner
-- [ ] 4.6 - Redemption validation
-- [ ] 4.7 - Redemption confirmation
-- [ ] 4.8 - Transaction logging
-
-**Testing:**
-- [ ] Full E2E: Complete stamp card journey (iPhone ↔ iPad)
-
-**Blockers/Issues:**
-
-**Notes:**
-
----
-
-### Day 10 - [Date: ____ ]
-**Phase:** Phase 5 - Multi-Device  
+**Phase:** Phase 5 - Multi-Device Configuration  
 **Hours Worked:** ___  
 **Status:** ⬜ / 🟦 / ✅
 

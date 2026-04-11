@@ -1,315 +1,320 @@
 # Known Issues and Risks
 
-**Document Version:** 1.1  
+# Known Issues and Risks
+
+**Document Version:** 2.0  
 **Created:** 2026-04-08  
-**Last Updated:** 2026-04-09
-
-**CRITICAL ISSUES FOUND IN TESTING (2026-04-09):**
-
-## ✅ Issue #5: Stamp Chain Validation Failing (FIXED)
-
-**Identified:** 2026-04-09 (Physical Device Testing Session 2)  
-**Status:** ✅ FIXED  
-**Priority:** WAS CRITICAL - NOW RESOLVED
-
-**Problem:**
-When adding a second stamp, customer app showed **"Previous hash mismatch - stamp chain broken"** error.
-
-**Root Cause:**
-- Supplier was generating stamp token with `previousHash: 'prev_hash_placeholder'`
-- Customer expected `previousHash` to match the previous stamp's signature
-- Hash chain validation failed on second and subsequent stamps
-
-**Fix Applied (2026-04-09):**
-
-1. **Updated `CardStampRequestToken`** model to include `lastStampHash` field
-2. **Customer app** now retrieves last stamp's signature and includes it in QR token
-3. **Supplier app** uses customer's provided hash instead of placeholder
-4. **Proper cryptographic chain** now maintained
-5. **Added QR refresh** - Customer must regenerate QR after each stamp (important!)
-
-**Code Changes:**
-- `shared/lib/models/qr_tokens.dart`: Added `lastStampHash` field
-- `customer_app/lib/services/qr_token_generator.dart`: Changed to async, fetches last stamp
-- `customer_app/lib/screens/customer/qr_display_screen.dart`: Made stateful, added refresh button
-- `supplier_app/lib/screens/supplier/supplier_stamp_card.dart`: Use `token.lastStampHash`
-- Added debug logging to track hash mismatches
-
-**Important Workflow:**
-1. Customer shows stamp request QR to supplier
-2. Supplier scans and generates stamp token
-3. Customer scans stamp token → stamp added ✓
-4. **Customer MUST tap refresh (⟳) before requesting next stamp**
-5. Customer shows fresh QR for next stamp
-
-**Why Refresh is Needed:**
-The stamp request QR contains the customer's current state (last stamp hash). After adding stamp #1, the QR still has stamp #0's hash. Customer must regenerate the QR so it contains stamp #1's hash for the next request.
-
-**Added UI Hints:**
-- Orange info box reminds customer to refresh QR
-- Refresh icon in AppBar (top right)
-- Debug logging shows hash values for troubleshooting
-
-**Testing:**
-- ✅ First stamp works (empty hash)
-- ✅ Second stamp works after QR refresh
-- ✅ Third+ stamps work with proper workflow
-- ⚠️ Fails if customer forgets to refresh QR (by design - shows old state)
-
-**Rebuild Required:** Both customer and supplier apps
+**Last Updated:** 2026-04-11  
+**Current Build:** v0.1.0 (Build 11)
 
 ---
 
-## ✅ Issue #6: Supplier Statistics Improved
+## 🎉 Issues Resolved (Build 1-11)
 
-**Identified:** 2026-04-09 (Physical Device Testing Session 2)  
-**Status:** ✅ IMPROVED WITH PRACTICAL METRICS  
-**Priority:** RESOLVED
+### ✅ Issue #5: Stamp Chain Validation Failing (FIXED in Build 5)
 
-**Original Problem:**
-Supplier app couldn't track if customers successfully received stamps due to P2P architecture.
+**Status:** ✅ FULLY RESOLVED  
+**Fix Date:** 2026-04-09
 
-**Solution Implemented (2026-04-09):**
+**Problem:** Hash chain validation failing due to cardId mismatch between supplier and customer.
 
-Instead of trying to track what we can't know, we track actionable metrics:
+**Solution:** 
+- Added `cardId` field to `CardIssueToken`
+- Supplier generates cardId once, customer uses from token
+- Made cardId nullable for backward compatibility
+- Card detail QR now includes `lastStampHash` field
 
-1. **"QRs Generated"** (formerly "Cards Issued")
-   - Increments each time supplier generates a card issuance QR
-   - Represents times supplier offered a card to customers
-   - Tracked in `issued_cards` table
-
-2. **"Active Cards"** (NEW METRIC)
-   - Counts unique card IDs that have requested stamps
-   - Logged when supplier scans a stamp request (even if token fails later)
-   - Represents number of unique customers using the loyalty program
-   - Uses `COUNT(DISTINCT card_id)` from `stamp_history`
-
-**What We Track:**
-- ✅ Supplier actions (QR generations, stamp requests scanned)
-- ✅ Unique active customers (distinct cards seen)
-- ✅ Honest labels that match what's actually measured
-
-**What We DON'T Track:**
-- ❌ If customer actually scanned the issuance QR
-- ❌ If customer successfully validated stamp token
-- ❌ If stamp was added to customer's wallet
-
-**Why This Works:**
-These metrics answer business questions:
-- "How many times did I offer cards?" → QRs Generated
-- "How many unique customers am I serving?" → Active Cards
-- "Am I growing my customer base?" → Active Cards trend
-
-**Code Changes:**
-- Added `getActiveCardCount()` method to `BusinessRepository`
-- Added `logCardActivity()` to track when cards request stamps
-- Updated home screen to show both metrics with explanatory text
-
-**P2P Limitation Acknowledged:**
-Perfect tracking requires server architecture. These metrics are "proxy indicators" that are useful and honest about what they measure.
+**Verified:** ✅ Multi-stamp operations working correctly through Build 11
 
 ---
 
-# Original Issues
+### ✅ Issue #6: Multi-Stamp UX Problem (SOLVED in Builds 1-4)
 
-**Document Version:** 1.0  
-**Created:** 2026-04-08  
-**Last Updated:** 2026-04-08
+**Status:** ✅ FULLY IMPLEMENTED  
+**Completion Date:** 2026-04-10
 
-This document tracks known issues, technical debt, and risks identified during development and testing.
+**Original Problem:** Required 4 separate scan cycles for 4 stamps (40-60 seconds).
+
+**Solution Implemented:**
+- **Multi-stamp card issuance:** 0-7 initial stamps on new card
+- **Multi-stamp operations:** 1-7 stamps per scan cycle
+- **Hash chain validation:** All stamps cryptographically linked
+- **Single scan cycle now handles:** Customer shows QR → Supplier scans → Supplier issues 1-7 stamps → Customer scans → Done
+
+**UX Improvement:**
+- Before: 4 coffees = 4 scan cycles = ~60 seconds
+- After: 4 coffees = 1 scan cycle with 4 stamps = ~10 seconds
+- **6x faster** than original implementation
+
+**Verified:** ✅ Tested with 3+3+3+3 stamps in Build 11
 
 ---
 
-## 🔴 Critical UX Issues
+### ✅ Issue #7: Overflow Handling (ENHANCED in Build 8)
 
-### Issue #1: Multiple Stamps UX Problem
+**Status:** ✅ IMPLEMENTED AS BONUS FEATURE  
+**Completion Date:** 2026-04-10
 
-**Identified:** 2026-04-08 (Physical Device Testing)  
-**Status:** NEEDS DESIGN REVIEW  
-**Priority:** HIGH
+**Scenario:** Customer has 9 stamps on 10-stamp card, supplier adds 3 stamps (total would be 12).
 
-**Problem:**
-The current digital stamping process is **slower and more cumbersome** than the physical card model it's replacing:
+**Solution:**
+- Auto-detect overflow when `stampsCollected + newStamps > stampsRequired`
+- Mark original card as complete (exactly 10 stamps)
+- Create new card automatically with overflow stamps (2 stamps)
+- Renumber overflow stamps (start from #1 on new card)
+- Maintain hash chain integrity in both cards
 
-- **Physical Card:** Supplier can stamp 4 times instantly for 4 coffees (2 seconds total)
-- **Digital Card:** Requires 4 separate scan cycles:
-  1. Customer shows card QR
-  2. Supplier scans
-  3. Supplier shows stamp token QR
-  4. Customer scans
-  5. Repeat 4 times = ~40-60 seconds total (with 1-second rate limit between each)
+**Verified:** ✅ Tested and confirmed in Build 8-11
+
+---
+
+### ✅ Issue #8: Supplier Statistics Clarity (FIXED in Build 10)
+
+**Status:** ✅ LABELS CLARIFIED  
+**Completion Date:** 2026-04-11
+
+**Problem:** "QRs Generated" and "Active Cards" labels unclear about P2P limitations.
+
+**Solution:**
+- Renamed "QRs Generated" → **"Cards Issued"** (count of card issuances)
+- Renamed "Active Cards" → **"Cards Stamped"** (count of unique cards stamped)
+- Added clear descriptions of what each metric means
+- Acknowledged P2P limitations in documentation
+
+**Verified:** ✅ Build 10-11 has clear labels
+
+---
+
+### ✅ Issue #9: Deployment Verification (SOLVED in Builds 3-7)
+
+**Status:** ✅ VERSION TRACKING IMPLEMENTED  
+**Completion Date:** 2026-04-10
+
+**Problem:** Xcode aggressive caching prevented code deployment verification.
+
+**Solution:**
+- Created `shared/lib/version.dart` single source of truth
+- Added version to startup logs
+- Added version to AppBar titles
+- Added version to Settings screens
+- Build number incremented with each deployment
+
+**Workflow:** `flutter clean + pod install + Xcode Clean Build Folder` for deployments
+
+**Verified:** ✅ Build 11 visible in logs and UI
+
+---
+
+## 🔴 Known Current Limitations (P2P Architecture)
+
+### Limitation #1: Supplier Unaware of Customer-Created Cards
+
+**Status:** ACCEPTED AS P2P TRADE-OFF  
+**Priority:** LOW (documented)
+
+**Issue:**
+When overflow creates a new card on customer device, supplier app doesn't know the card exists until customer brings it for stamping.
 
 **Impact:**
-- Poor user experience for bulk purchases
-- Slower than physical cards defeats the purpose
-- May discourage adoption by businesses
+- "Cards Issued" counter only reflects supplier-initiated card issuances
+- "Cards Stamped" counter is only accurate for cards with at least one stamp
+- Overflow cards invisible to supplier until first stamp request
 
-**Current Workaround:**
-- Rate limit reduced to 1 second (minimal protection against accidental duplicates)
-- Allows rapid sequential stamping but still requires 4 full scan cycles
+**Mitigation:**
+- Labels clearly state what they count
+- Documentation explains P2P limitations
+- Metrics are "proxy indicators" not absolute counts
 
-**Proposed Solutions for Future:**
+**Alternative:** Would require centralized server (out of scope for P2P model)
 
-1. **Option A: "Add Multiple Stamps" Feature**
-   - Supplier can specify quantity (e.g., "Add 4 stamps")
-   - Single QR token contains multiple stamps
-   - Requires crypto chain validation for batch stamps
-   - **Complexity:** Medium
-   - **Benefit:** Matches physical card UX
+---
 
-2. **Option B: Bulk Stamp Mode**
-   - Supplier enters "bulk mode" 
-   - Can scan card multiple times rapidly
-   - Generates single compound token at the end
-   - **Complexity:** Medium-High
-   - **Benefit:** Most flexible
+### Limitation #2: No Redemption Confirmation
 
-3. **Option C: Quick Add Button**
-   - After first stamp, show "Add Another?" button
-   - No QR scanning required for subsequent stamps
-   - Timestamp-based session (e.g., 30 seconds to add more)
-   - **Complexity:** Low
-   - **Benefit:** Simple, quick to implement
+**Status:** ACCEPTED AS SIMPLIFIED FLOW  
+**Priority:** LOW (by design)
 
-4. **Option D: Supplier-Side Counter**
-   - Supplier app has "+1" button instead of scanning each time
-   - Customer scans once at start, again at end
-   - Supplier generates batch token
-   - **Complexity:** Medium
-   - **Benefit:** Minimal customer interaction
+**Issue:**
+Simplified redemption flow: supplier verifies complete card, customer deletes card. No token exchange to prove redemption occurred.
 
-**Recommended Approach:**
-- **Short-term:** Keep 1-second rate limit, document limitation
-- **Phase 5:** Implement Option C (Quick Add Button) - easiest path
-- **Phase 6:** Consider Option A if needed for production
+**Impact:**
+- Supplier has no record that customer redeemed reward
+- Customer could screenshot QR and redeem multiple times (if they don't delete)
+- No cryptographic proof of redemption
 
-**Related Requirements:**
-- REQ-006: Fast Stamp Process (currently not meeting requirement for bulk purchases)
+**Mitigation:**
+- Trust-based model (like physical punch cards)
+- Supplier visually confirms card before giving reward
+- Customer expected to delete card after redemption
+- If abuse detected, supplier can refuse service
+
+**Alternative:** Token-based redemption with reset (complexity not justified for MVP)
+
+---
+
+### Limitation #3: Clock Drift Handling
+
+**Status:** NOT IMPLEMENTED (deferred)  
+**Priority:** LOW
+
+**Issue:**
+Timestamp validation relies on device clocks being reasonably accurate. No protection against:
+- Device clock set far in future/past
+- Timestamp replay attacks (old stamp tokens re-presented)
+
+**Current State:**
+- Rate limiting uses only elapsed time between operations
+- No timestamp range validation
+- No detection of chronologically impossible stamps
+
+**Risk Level:** LOW (signatures prevent forgery, timing abuse requires device manipulation)
+
+**Future Enhancement:** Add timestamp sanity checks (e.g., stamps no more than 1 hour in future)
 
 ---
 
 ## ⚠️ Technical Debt
 
-### Issue #2: Card Issuance Statistics Not Tracked
+### Debt #1: Debug Logging in Production Code
 
-**Identified:** 2026-04-08  
-**Status:** DOCUMENTED  
+**Status:** ACTIVE (intentional for MVP)  
+**Priority:** MEDIUM
+
+**Issue:**
+Extensive `print()` statements throughout code for debugging. Should be removed or gated behind `kDebugMode` flag for production.
+
+**Files Affected:**
+- `customer_app/lib/screens/customer/qr_scanner_screen.dart` (overflow logging)
+- `customer_app/lib/main.dart` (startup logging)
+- `customer_app/lib/screens/customer/customer_home.dart` (data deletion logging)
+- `supplier_app/lib/main.dart` (startup logging)
+- `supplier_app/lib/screens/supplier/supplier_home.dart` (business reset logging)
+
+**Remediation Plan:**
+- Phase 6: Wrap all debug prints in `if (kDebugMode)` checks
+- Or: Create logging service with configurable levels
+- Keep startup version logging (useful for support)
+
+---
+
+### Debt #2: No Automated Integration Tests
+
+**Status:** DEFERRED TO PHASE 6  
+**Priority:** MEDIUM
+
+**Issue:**
+All P2P testing is manual (physical devices). No automated tests for:
+- QR generation/scanning flows
+- Multi-stamp operations
+- Overflow handling
+- Hash chain validation
+
+**Current State:**
+- Shared package: 17/17 unit tests passing
+- Manual testing: Comprehensive but time-consuming
+- No regression test suite
+
+**Remediation Plan:**
+- Phase 6: Create integration test suite
+- Mock QR scanning for automated tests
+- Golden tests for QR code generation
+
+---
+
+### Debt #3: Rate Limiting Only on Customer Side
+
+**Status:** ACCEPTED FOR MVP  
 **Priority:** LOW
 
-**Problem:**
-In the P2P (Peer-to-Peer) model, the supplier app generates a card issuance QR code but has no way to know if/when the customer actually scans and picks up the card.
+**Issue:**
+Rate limiting (1 second between stamps) only enforced on customer app. Supplier app has no rate limit logic.
 
-**Impact:**
-- "Cards Issued" statistic on supplier home screen always shows 0
-- No way to track card pickup rate
-- Can't measure conversion (QR generated → card added)
+**Risk:**
+- Modified customer app could bypass rate limit
+- No server-side enforcement (P2P architecture)
 
-**Solution Options:**
-1. Accept limitation (P2P model trade-off)
-2. Add optional callback mechanism (customer app pings supplier)
-3. Change label to "Cards (P2P - not tracked)"
+**Mitigation:**
+- Low risk for honest mistakes
+- Would require intent to modify app
+- Physical interaction required (face-to-face stamping)
 
-**Current:** Using label "Cards (P2P)" to indicate tracking limitation
-
----
-
-## 🔍 Items for Future Risk Assessment
-
-### Rate Limiting Strategy
-
-**Current Implementation:**
-- 1 second between stamps (prevents accidental duplicates only)
-- No business-level rate limits
-- No daily/weekly caps
-
-**Potential Risks:**
-1. **Abuse:** Customer could rapidly collect stamps if they hack the timing
-2. **Business Fraud:** Collusion between customer and rogue employee
-3. **Gaming:** Single customer getting unlimited stamps
-
-**Mitigation Considerations:**
-- Add business-configurable daily stamp limits
-- Implement anomaly detection (e.g., 20 stamps in 5 minutes)
-- Add audit trail with timestamp clustering detection
-- Consider requiring supplier authentication for high-frequency stamping
-
-**Timeline:** Review in Phase 5 (Security & Optimization)
-
----
-
-### Cryptographic Chain Validation
-
-**Current Implementation:**
-- Basic signature verification working
-- Previous hash chain concept implemented but using placeholder
-- No verification of stamp sequence integrity beyond signature
-
-**Known Gaps:**
-1. Previous hash is placeholder ('prev_hash_placeholder')
-2. No detection of missing stamps in chain
-3. No prevention of stamp reordering
-
-**Risk Level:** Medium-Low (signatures prevent forgery, but chain integrity not enforced)
-
-**Timeline:** Address in Phase 4 (Supplier Operations completion)
-
----
-
-## 📝 Testing Session Findings
-
-### Session 1: Initial P2P Testing (2026-04-08)
-
-**Issues Found and Fixed:**
-- ✅ Brand color bug (`##` → `#`)
-- ✅ Public key placeholder instead of actual key
-- ✅ Missing settings/reset functionality
-- ✅ Statistics not updating after stamp issuance
-- ✅ Rate limit too restrictive (1 hour → 1 second)
-
-**Outstanding:**
-- 🔴 Multiple stamps UX problem (see Issue #1 above)
+**Future:** Add business-configurable stamping policies if abuse detected
 
 ---
 
 ## 🎯 Action Items
 
-**Immediate (Phase 3 completion):**
-- [x] Fix rate limit to 1 second
-- [x] Document multiple stamps UX issue
-- [ ] Complete Phase 3 testing with new rate limit
+### Immediate (Phase 5)
 
-**Phase 4:**
-- [ ] Implement proper previous hash chain (remove placeholder)
-- [ ] Add stamp sequence validation
+- [ ] Export/import business configuration for multi-device suppliers
+- [ ] Test configuration cloning on iPad + iPhone
+- [ ] Verify both devices can issue/stamp with same business ID
 
-**Phase 5:**
-- [ ] Design and implement "Quick Add" stamping feature (Option C)
-- [ ] Add rate limiting analytics/monitoring
-- [ ] Review security implications of 1-second rate limit
+### Phase 6 (Polish)
 
-**Phase 6:**
-- [ ] Consider bulk stamping features if UX testing shows need
-- [ ] Implement business-level stamping policies (if needed)
+- [ ] Wrap debug prints in `kDebugMode` checks
+- [ ] Create integration test suite
+- [ ] Add timestamp sanity checks
+- [ ] Performance profiling and optimization
+- [ ] Accessibility audit
+- [ ] App store preparation
 
----
+### Future Enhancements (Post-MVP)
 
-## 📊 Risk Register
-
-| Risk ID | Description | Likelihood | Impact | Mitigation | Owner |
-|---------|-------------|------------|--------|------------|-------|
-| RISK-001 | Multiple stamps UX slower than physical cards | HIGH | HIGH | Implement Quick Add feature (Phase 5) | Product |
-| RISK-002 | 1-second rate limit insufficient for abuse prevention | MEDIUM | MEDIUM | Monitor in beta, add analytics | Security |
-| RISK-003 | Stamp chain integrity not fully validated | MEDIUM | LOW | Implement proper hash chain (Phase 4) | Engineering |
-| RISK-004 | Card pickup rate unknown (P2P limitation) | LOW | LOW | Accept or add optional tracking | Product |
+- [ ] Duplicate stamp detection (prevent replay attacks)
+- [ ] Business analytics dashboard (trends over time)
+- [ ] Transaction history screen (customer app)
+- [ ] Stamp expiration feature (REQ-019)
+- [ ] Push notifications (REQ-016) - requires server architecture
 
 ---
 
-## 🔄 Review Schedule
+## 📊 Updated Risk Register
 
-- **Weekly:** Review new issues from testing
-- **Phase Completion:** Risk assessment before moving to next phase
-- **Pre-Production:** Full security audit and UX testing with real users
+| Risk ID | Description | Likelihood | Impact | Mitigation | Status |
+|---------|-------------|------------|--------|------------|--------|
+| RISK-001 | Multiple stamps UX too slow | HIGH | HIGH | Multi-stamp feature | ✅ RESOLVED |
+| RISK-002 | Hash chain validation failures | MEDIUM | HIGH | cardId in token | ✅ RESOLVED |
+| RISK-003 | Overflow handling missing | LOW | MEDIUM | Auto-split cards | ✅ RESOLVED |
+| RISK-004 | P2P statistics inaccurate | MEDIUM | LOW | Clear labels | ✅ MITIGATED |
+| RISK-005 | Clock drift abuse | LOW | MEDIUM | Document limitation | ⏭️ DEFERRED |
+| RISK-006 | Redemption replay attack | LOW | MEDIUM | Trust-based model | ⏭️ ACCEPTED |
+| RISK-007 | Debug logging in production | HIGH | LOW | Phase 6 cleanup | ⬜ PENDING |
 
 ---
 
-**Next Review:** End of Phase 3 (Physical Device Testing completion)
+## 📝 Testing Session Summary
+
+### Session 1: Initial P2P Testing (2026-04-08)
+- Identified brand color bug, public key issues
+- Found rate limit too restrictive
+- Multi-stamp UX problem identified
+
+### Session 2-3: Multi-Stamp Implementation (2026-04-09)
+- Hash chain validation failures discovered and fixed
+- Multi-stamp architecture implemented (Builds 1-4)
+- cardId mismatch resolved (Build 5)
+
+### Session 4-5: Deployment & Overflow (2026-04-10)
+- Xcode caching issues resolved
+- Version tracking system implemented
+- Auto-switching QR modes implemented
+- Overflow-to-new-card logic added (Build 8)
+
+### Session 6: Final Polish (2026-04-11)
+- Dashboard counter labels clarified (Builds 9-10)
+- Redemption scanner QR frame added (Build 11)
+- All acceptance criteria validated
+- **RESULT:** Phases 3 & 4 COMPLETE
+
+---
+
+## ✅ Current Status
+
+**Build Version:** v0.1.0 (Build 11)  
+**Phases Complete:** 0, 1, 2, 3, 4 (67% of project)  
+**Core P2P Functionality:** ✅ Working on physical devices  
+**Next Phase:** Phase 5 (Multi-Device Configuration)  
+
+**Production Readiness:** Ready for single-device supplier testing and feedback
+

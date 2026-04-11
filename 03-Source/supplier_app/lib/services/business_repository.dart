@@ -139,4 +139,33 @@ class BusinessRepository {
       conflictAlgorithm: ConflictAlgorithm.ignore, // Ignore if duplicate
     );
   }
+
+  /// Log a redemption when customer redeems a completed card
+  Future<void> logRedemption({
+    required String cardId,
+    required int stampsRedeemed,
+    required String businessId,
+  }) async {
+    final db = await _dbHelper.database;
+    await db.insert(
+      'redemptions',
+      {
+        'id': '${cardId}_redemption_${DateTime.now().millisecondsSinceEpoch}',
+        'card_id': cardId,
+        'stamps_redeemed': stampsRedeemed,
+        'redeemed_at': DateTime.now().millisecondsSinceEpoch,
+        'business_id': businessId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get count of redemptions
+  Future<int> getRedemptionCount() async {
+    final db = await _dbHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM redemptions'),
+    );
+    return count ?? 0;
+  }
 }

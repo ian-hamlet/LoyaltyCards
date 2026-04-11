@@ -119,12 +119,6 @@ class _CustomerHomeState extends State<CustomerHome> {
       appBar: AppBar(
         title: Text('My Loyalty Cards $appVersion'),
         actions: [
-          // Debug: Add test card button
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: _addTestCard,
-            tooltip: 'Add Test Card',
-          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
@@ -195,12 +189,6 @@ class _CustomerHomeState extends State<CustomerHome> {
                 color: Colors.grey[500],
                 fontSize: 16,
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _addTestCard,
-              icon: const Icon(Icons.science),
-              label: const Text('Add Test Card'),
             ),
           ],
         ),
@@ -324,19 +312,41 @@ class _LoyaltyCardWidget extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          card.isComplete
-                              ? AppStrings.stampReadyToRedeem
-                              : '${card.stampsRequired - card.stampsCollected} more to go',
+                          card.isRedeemed
+                              ? 'Reward claimed - you can delete this card'
+                              : card.isComplete
+                                  ? AppStrings.stampReadyToRedeem
+                                  : '${card.stampsRequired - card.stampsCollected} more to go',
                           style: TextStyle(
                             fontSize: 14,
-                            color: card.isComplete ? Colors.green : Colors.grey[600],
-                            fontWeight: card.isComplete ? FontWeight.w600 : FontWeight.normal,
+                            color: card.isRedeemed 
+                                ? Colors.grey[600]
+                                : card.isComplete 
+                                    ? Colors.green 
+                                    : Colors.grey[600],
+                            fontWeight: card.isComplete && !card.isRedeemed ? FontWeight.w600 : FontWeight.normal,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  if (card.isComplete)
+                  if (card.isRedeemed)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[700],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'REDEEMED',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  else if (card.isComplete)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(

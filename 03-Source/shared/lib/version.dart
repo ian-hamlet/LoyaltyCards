@@ -6,4 +6,4 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 
-const String appVersion = 'v0.1.0 (Build 11)';
+const String appVersion = 'v0.1.0 (Build 34)';

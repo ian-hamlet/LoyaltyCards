@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart';
@@ -6,6 +7,7 @@ import '../../services/qr_token_generator.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import '../../services/supplier_database_helper.dart';
+import '../../services/device_orientation_service.dart';
 
 class SupplierStampCard extends StatefulWidget {
   const SupplierStampCard({super.key});
@@ -15,13 +17,17 @@ class SupplierStampCard extends StatefulWidget {
 }
 
 class _SupplierStampCardState extends State<SupplierStampCard> {
-  final MobileScannerController _cameraController = MobileScannerController();
+  final MobileScannerController _cameraController = MobileScannerController(
+    facing: CameraFacing.back,
+    autoStart: true,
+  );
   final BusinessRepository _businessRepo = BusinessRepository();
   final QRTokenGenerator _tokenGenerator = QRTokenGenerator(KeyManager());
   
   Business? _business;
   bool _isProcessing = false;
   String? _errorMessage;
+  int _manualRotationOffset = 0; // 0, 1, 2, or 3 quarter turns
 
   @override
   void initState() {
@@ -351,10 +357,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
               
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
-                  setState(() {
-                    _isProcessing = false;
-                  });
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Return to home
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
@@ -432,22 +436,102 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 
               // Scanner
               Expanded(
-                child: MobileScanner(
-                  controller: _cameraController,
-                  onDetect: (capture) {
-                    if (_isProcessing) return;
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final mediaQuery = MediaQuery.of(context);
+                    final padding = mediaQuery.viewPadding;
+                    final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
+                    
+                    // Detect status bar position
+                    String statusBarPosition;
+                    if (padding.top > padding.left && padding.top > padding.right) {
+                      statusBarPosition = 'top (portrait)';
+                    } else if (padding.left > padding.right) {
+                      statusBarPosition = 'left (landscapeRight)';
+                    } else if (padding.right > padding.left) {
+                      statusBarPosition = 'right (landscapeLeft)';
+                    } else {
+                      statusBarPosition = 'unknown';
+                    }
+                    
+                    // Apply rotation: base + manual offset
+                    final baseQuarterTurns = isLandscape ? 3 : 0;
+                    final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
+                    
+                    print('=== Stamp Card Scanner Orientation ===');
+                    print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
+                    print('Status bar: $statusBarPosition');
+                    print('Padding - Top: ${padding.top}, Bottom: ${padding.bottom}, Left: ${padding.left}, Right: ${padding.right}');
+                    print('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
+                    print('Final quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+                    
+                    return RotatedBox(
+                      quarterTurns: quarterTurns,
+                      child: MobileScanner(
+                        controller: _cameraController,
+                        fit: BoxFit.contain,
+                        onDetect: (capture) {
+                          if (_isProcessing) return;
                     
                     final List<Barcode> barcodes = capture.barcodes;
                     if (barcodes.isNotEmpty) {
                       final code = barcodes.first.rawValue;
                       if (code != null) {
                         _handleQRCode(code);
+                        }
                       }
-                    }
+                    },
+                      ),
+                    );
                   },
                 ),
               ),
             ],
+          ),
+
+          // Manual rotation controls
+          Positioned(
+            top: 80,
+            right: 16,
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  heroTag: 'rotate90',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    setState(() {
+                      _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                    });
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
+                      Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: 'rotate180',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    setState(() {
+                      _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                    });
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.flip, size: 20, color: Colors.blue),
+                      Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
 
           // Scanning frame

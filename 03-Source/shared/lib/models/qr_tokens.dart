@@ -35,6 +35,8 @@ abstract class QRToken {
           return StampToken.fromJson(json);
         case 'redemption_request':
           return RedemptionRequestToken.fromJson(json);
+        case 'redemption_token':
+          return RedemptionToken.fromJson(json);
         default:
           return null;
       }
@@ -358,6 +360,60 @@ class RedemptionRequestToken extends QRToken {
       return false;
     }
     if (stampSignatures.length != stampsCollected) {
+      return false;
+    }
+    return true;
+  }
+}
+
+/// Token for supplier to confirm redemption to customer (prevents double redemption)
+class RedemptionToken extends QRToken {
+  final String cardId;
+  final String businessId;
+  final int stampsRedeemed;
+  final String signature; // Supplier signs: cardId:stampsRedeemed:timestamp
+
+  RedemptionToken({
+    required this.cardId,
+    required this.businessId,
+    required this.stampsRedeemed,
+    required this.signature,
+    required int timestamp,
+  }) : super(type: 'redemption_token', timestamp: timestamp);
+
+  factory RedemptionToken.fromJson(Map<String, dynamic> json) {
+    return RedemptionToken(
+      cardId: json['cardId'] as String,
+      businessId: json['businessId'] as String,
+      stampsRedeemed: json['stampsRedeemed'] as int,
+      signature: json['signature'] as String,
+      timestamp: json['timestamp'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'cardId': cardId,
+      'businessId': businessId,
+      'stampsRedeemed': stampsRedeemed,
+      'signature': signature,
+      'timestamp': timestamp,
+    };
+  }
+
+  /// Data string used for signature verification
+  String getSignatureData() {
+    return '$cardId:$stampsRedeemed:$timestamp';
+  }
+
+  /// Validate token structure
+  bool isValid() {
+    if (cardId.isEmpty || businessId.isEmpty || signature.isEmpty) {
+      return false;
+    }
+    if (stampsRedeemed < 1) {
       return false;
     }
     return true;

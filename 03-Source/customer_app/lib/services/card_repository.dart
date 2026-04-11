@@ -126,4 +126,18 @@ class CardRepository {
     await db.delete('cards');
     print('CardRepository: All cards deleted');
   }
+
+  /// Mark a card as redeemed (prevents double redemption)
+  Future<void> markCardAsRedeemed(String cardId) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'cards',
+      {
+        'is_redeemed': 1,
+        'updated_at': DateTime.now().millisecondsSinceEpoch,
+      },
+      where: 'id = ?',
+      whereArgs: [cardId],
+    );
+  }
 }

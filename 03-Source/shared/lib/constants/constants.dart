@@ -7,7 +7,7 @@ class AppConstants {
   // Application Info
   static const String appName = 'LoyaltyCards';
   static const String customerAppName = 'LoyaltyCards';
-  static const String supplierAppName = 'LoyaltyCards Business';
+  static const String supplierAppName = 'Configure Your Customer Loyalty Cards';
   
   // Version
   static const String version = '0.1.0';
@@ -18,7 +18,7 @@ class AppConstants {
   
   // Database
   static const String databaseName = 'loyalty_cards.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
   
   // QR Code Settings
   static const int qrCodeSize = 300;

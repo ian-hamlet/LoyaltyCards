@@ -51,7 +51,8 @@ class DatabaseHelper {
         stamps_collected INTEGER NOT NULL,
         brand_color TEXT NOT NULL,
         created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL
+        updated_at INTEGER NOT NULL,
+        is_redeemed INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -101,8 +102,16 @@ class DatabaseHelper {
 
   /// Handle database upgrades
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Future migrations will go here
-    // Example: if (oldVersion < 2) { await db.execute('ALTER TABLE ...'); }
+    print('Database upgrade from version $oldVersion to $newVersion');
+    
+    // Migration from v1 to v2: Add is_redeemed column
+    if (oldVersion < 2) {
+      print('Migration v1 → v2: Adding is_redeemed column to cards table');
+      await db.execute('''
+        ALTER TABLE cards ADD COLUMN is_redeemed INTEGER NOT NULL DEFAULT 0
+      ''');
+      print('Migration complete: is_redeemed column added');
+    }
   }
 
   /// Close database connection

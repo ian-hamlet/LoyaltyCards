@@ -26,8 +26,9 @@ class SupplierDatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Incremented for redemptions table
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
     );
   }
@@ -73,6 +74,18 @@ class SupplierDatabaseHelper {
       )
     ''');
 
+    // Redemptions tracking (for analytics)
+    await db.execute('''
+      CREATE TABLE redemptions (
+        id TEXT PRIMARY KEY,
+        card_id TEXT NOT NULL,
+        stamps_redeemed INTEGER NOT NULL,
+        redeemed_at INTEGER NOT NULL,
+        business_id TEXT NOT NULL,
+        FOREIGN KEY (business_id) REFERENCES business (id) ON DELETE CASCADE
+      )
+    ''');
+
     // App settings
     await db.execute('''
       CREATE TABLE app_settings (
@@ -89,6 +102,34 @@ class SupplierDatabaseHelper {
     await db.execute('''
       CREATE INDEX idx_stamp_history_business ON stamp_history (business_id)
     ''');
+
+    await db.execute('''
+      CREATE INDEX idx_redemptions_business ON redemptions (business_id)
+    ''');
+  }
+
+  /// Handle database upgrades
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    print('Database upgrade from version $oldVersion to $newVersion');
+    
+    // Migration from v1 to v2: Add redemptions table
+    if (oldVersion < 2) {
+      print('Migration v1 → v2: Adding redemptions table');
+      await db.execute('''
+        CREATE TABLE redemptions (
+          id TEXT PRIMARY KEY,
+          card_id TEXT NOT NULL,
+          stamps_redeemed INTEGER NOT NULL,
+          redeemed_at INTEGER NOT NULL,
+          business_id TEXT NOT NULL,
+          FOREIGN KEY (business_id) REFERENCES business (id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('''
+        CREATE INDEX idx_redemptions_business ON redemptions (business_id)
+      ''');
+      print('Migration complete: redemptions table added');
+    }
   }
 
   /// Close database connection
@@ -109,6 +150,8 @@ class SupplierDatabaseHelper {
     print('  Cleared issued_cards table');
     await db.delete('stamp_history');
     print('  Cleared stamp_history table');
+    await db.delete('redemptions');
+    print('  Cleared redemptions table');
     await db.delete('app_settings');
     print('  Cleared app_settings table');
     print('ALL TABLES CLEARED');

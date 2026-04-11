@@ -22,6 +22,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   bool _isLoading = true;
   String? _errorMessage;
   int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
+  bool _hasLoggedCardIssuance = false; // Track if we've logged this session
 
   @override
   void initState() {
@@ -50,13 +51,15 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         initialStampCount: _initialStampCount,
       );
 
-      // Log card issuance (QR generated)
-      // Note: In P2P model, we don't know if customer actually picks up the card,
-      // but we track QR generation as a proxy metric
-      await _businessRepo.logIssuedCard(
-        token.businessId + '_' + DateTime.now().millisecondsSinceEpoch.toString(),
-        business.id,
-      );
+      // Log card issuance only ONCE per screen session (not on each QR regeneration)
+      // This prevents counting multiple "issued cards" when user changes initial stamp count
+      if (!_hasLoggedCardIssuance && token.cardId != null) {
+        await _businessRepo.logIssuedCard(
+          token.cardId!,
+          business.id,
+        );
+        _hasLoggedCardIssuance = true;
+      }
 
       setState(() {
         _business = business;

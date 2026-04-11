@@ -56,6 +56,12 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   String _generateCardQR() {
     if (_card == null) return '';
     
+    // If card has been redeemed, don't generate any QR
+    if (_card!.isRedeemed) {
+      print('Card Detail QR: Card REDEEMED - no QR generation');
+      return 'REDEEMED'; // Special marker to show redeemed message instead of QR
+    }
+    
     // If card is complete, generate redemption QR instead
     if (_card!.isComplete) {
       print('Card Detail QR: Card is COMPLETE - generating REDEMPTION QR');
@@ -171,8 +177,32 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                     ),
                   ),
 
-                  // Completion Badge
-                  if (_card!.isComplete) ...[
+                  // Completion/Redemption Badge
+                  if (_card!.isRedeemed) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[700],
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'REDEEMED',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else if (_card!.isComplete) ...[
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -213,21 +243,54 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               ),
             ),
 
-            // QR Code
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey[300]!),
+            // QR Code or Redeemed Message
+            if (_card!.isRedeemed)
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.check_circle, size: 80, color: Colors.green[600]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Card Redeemed!',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[800],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This card has been redeemed and can be deleted.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: QrImageView(
+                  data: _generateCardQR(),
+                  version: QrVersions.auto,
+                  size: 250,
+                  backgroundColor: Colors.white,
+                ),
               ),
-              child: QrImageView(
-                data: _generateCardQR(),
-                version: QrVersions.auto,
-                size: 250,
-                backgroundColor: Colors.white,
-              ),
-            ),
 
             const SizedBox(height: 16),
 
@@ -236,7 +299,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  if (!_card!.isComplete)
+                  if (!_card!.isRedeemed)
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
@@ -258,7 +321,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                           }
                         },
                         icon: const Icon(Icons.qr_code_scanner),
-                        label: const Text('Scan Stamp Token'),
+                        label: Text(_card!.isComplete 
+                          ? 'Scan Redemption Token' 
+                          : 'Scan Stamp Token'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.all(16),
                         ),

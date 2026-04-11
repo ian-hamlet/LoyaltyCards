@@ -21,6 +21,7 @@ class _SupplierHomeState extends State<SupplierHome> {
   bool _isLoading = true;
   int _issuedCards = 0;
   int _activeCards = 0;
+  int _redemptions = 0;
 
   @override
   void initState() {
@@ -46,11 +47,13 @@ class _SupplierHomeState extends State<SupplierHome> {
 
       final cardCount = await _businessRepo.getIssuedCardCount();
       final activeCardCount = await _businessRepo.getActiveCardCount();
+      final redemptionCount = await _businessRepo.getRedemptionCount();
 
       setState(() {
         _business = business;
         _issuedCards = cardCount;
         _activeCards = activeCardCount;
+        _redemptions = redemptionCount;
         _isLoading = false;
       });
     } catch (e) {
@@ -144,9 +147,11 @@ class _SupplierHomeState extends State<SupplierHome> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildStat('Cards Issued', _issuedCards),
+                        _buildStat('Issued', _issuedCards),
                         Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Cards Stamped', _activeCards),
+                        _buildStat('Stamped', _activeCards),
+                        Container(width: 1, height: 40, color: Colors.white30),
+                        _buildStat('Redeemed', _redemptions),
                       ],
                     ),
                   ],
@@ -275,8 +280,9 @@ class _SupplierHomeState extends State<SupplierHome> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Cards Issued: Number of new cards you created for customers\\n'
-                              'Cards Stamped: Unique customer cards you have stamped directly',
+                              'Issued: Number of new cards you created for customers\\n'
+                              'Stamped: Unique customer cards you have stamped directly\\n'
+                              'Redeemed: Number of completed cards that have been redeemed',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue[900],

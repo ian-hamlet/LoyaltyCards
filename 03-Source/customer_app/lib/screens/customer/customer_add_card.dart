@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:shared/shared.dart';
+import 'dart:convert';
+import '../../services/card_repository.dart';
+import '../../services/database_helper.dart';
+import '../../services/device_orientation_service.dart';
 
 class CustomerAddCard extends StatefulWidget {
   const CustomerAddCard({super.key});
@@ -11,6 +16,7 @@ class CustomerAddCard extends StatefulWidget {
 class _CustomerAddCardState extends State<CustomerAddCard> {
   MobileScannerController cameraController = MobileScannerController();
   bool _isProcessing = false;
+  int _manualRotationOffset = 0; // 0, 1, 2, or 3 quarter turns
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +24,9 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
       appBar: AppBar(
         title: const Text('Add Loyalty Card'),
       ),
-      body: Column(
+      body: Stack(
+        children: [
+          Column(
         children: [
           // Instructions
           Container(
@@ -40,9 +48,41 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
 
           // Scanner
           Expanded(
-            child: MobileScanner(
-              controller: cameraController,
-              onDetect: (capture) {
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final mediaQuery = MediaQuery.of(context);
+                final padding = mediaQuery.viewPadding;
+                final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
+                
+                // Detect status bar position
+                String statusBarPosition;
+                if (padding.top > padding.left && padding.top > padding.right) {
+                  statusBarPosition = 'top (portrait)';
+                } else if (padding.left > padding.right) {
+                  statusBarPosition = 'left (landscapeRight)';
+                } else if (padding.right > padding.left) {
+                  statusBarPosition = 'right (landscapeLeft)';
+                } else {
+                  statusBarPosition = 'unknown';
+                }
+                
+                // Apply rotation: base + manual offset
+                final baseQuarterTurns = isLandscape ? 3 : 0;
+                final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
+                
+                print('=== Add Card Scanner Orientation ===');
+                print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
+                print('Status bar: $statusBarPosition');
+                print('Padding - Top: ${padding.top}, Bottom: ${padding.bottom}, Left: ${padding.left}, Right: ${padding.right}');
+                print('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
+                print('Final quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+                
+                return RotatedBox(
+                  quarterTurns: quarterTurns,
+                  child: MobileScanner(
+                    controller: cameraController,
+                    fit: BoxFit.contain,
+                    onDetect: (capture) {
                 if (_isProcessing) return;
                 
                 final List<Barcode> barcodes = capture.barcodes;
@@ -50,26 +90,62 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
                   if (barcode.rawValue != null) {
                     _processQRCode(barcode.rawValue!);
                     break;
+                    }
                   }
-                }
+                },
+                  ),
+                );
               },
-            ),
-          ),
-
-          // Mock Data Button (for testing without camera)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // Simulate scanning a card
-                _processQRCode('LOYALTYCARD:ISSUE:test-card-123:Bakery Corner:5');
-              },
-              icon: const Icon(Icons.science),
-              label: const Text('Use Mock Data (Testing)'),
             ),
           ),
         ],
       ),
+      
+      // Manual rotation controls
+      Positioned(
+        top: 80,
+        right: 16,
+        child: Column(
+          children: [
+            FloatingActionButton(
+              heroTag: 'rotate90',
+              mini: true,
+              backgroundColor: Colors.white.withOpacity(0.9),
+              onPressed: () {
+                setState(() {
+                  _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                });
+              },
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
+                  Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            FloatingActionButton(
+              heroTag: 'rotate180',
+              mini: true,
+              backgroundColor: Colors.white.withOpacity(0.9),
+              onPressed: () {
+                setState(() {
+                  _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                });
+              },
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.flip, size: 20, color: Colors.blue),
+                  Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
     );
   }
 

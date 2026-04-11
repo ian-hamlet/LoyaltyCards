@@ -9,6 +9,7 @@ class Card {
   final String brandColor; // Hex color string
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool isRedeemed; // Track if card has been redeemed (prevents double redemption)
 
   Card({
     required this.id,
@@ -20,6 +21,7 @@ class Card {
     required this.brandColor,
     required this.createdAt,
     required this.updatedAt,
+    this.isRedeemed = false,
   });
 
   /// Check if card is complete (all stamps collected)
@@ -40,6 +42,7 @@ class Card {
       'brand_color': brandColor,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
+      'is_redeemed': isRedeemed ? 1 : 0,
     };
   }
 
@@ -55,6 +58,7 @@ class Card {
       brandColor: json['brand_color'] as String,
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(json['updated_at'] as int),
+      isRedeemed: (json['is_redeemed'] as int?) == 1,
     );
   }
 
@@ -69,6 +73,7 @@ class Card {
     String? brandColor,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isRedeemed,
   }) {
     return Card(
       id: id ?? this.id,
@@ -78,6 +83,7 @@ class Card {
       stampsRequired: stampsRequired ?? this.stampsRequired,
       stampsCollected: stampsCollected ?? this.stampsCollected,
       brandColor: brandColor ?? this.brandColor,
+      isRedeemed: isRedeemed ?? this.isRedeemed,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

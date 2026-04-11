@@ -8,6 +8,7 @@ import '../../services/stamp_repository.dart';
 import '../../services/rate_limiter.dart';
 import '../../services/database_helper.dart';
 import '../../services/key_manager.dart';
+import '../../services/device_orientation_service.dart';
 
 /// Scanner screen for adding new cards or receiving stamps
 class QRScannerScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   final MobileScannerController _controller = MobileScannerController();
   bool _isProcessing = false;
   String? _errorMessage;
+  int _manualRotationOffset = 0; // 0, 1, 2, or 3 quarter turns
 
   @override
   void dispose() {
@@ -174,9 +176,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Future<void> _handleStampToken(QRToken token) async {
+    // Handle redemption tokens
+    if (token is RedemptionToken) {
+      await _handleRedemptionToken(token);
+      return;
+    }
+    
+    // Handle stamp tokens
     if (token is! StampToken) {
       setState(() {
-        _errorMessage = 'Wrong QR type. Please scan a stamp token QR.';
+        _errorMessage = 'Wrong QR type. Please scan a stamp or redemption token QR.';
         _isProcessing = false;
       });
       return;
@@ -398,6 +407,83 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
   }
 
+  Future<void> _handleRedemptionToken(RedemptionToken token) async {
+    print('=== Processing Redemption Token ===');
+    print('Card ID: ${token.cardId}');
+    print('Stamps redeemed: ${token.stampsRedeemed}');
+    print('Business ID: ${token.businessId}');
+
+    // Get the card to verify it matches
+    final repository = CardRepository(DatabaseHelper());
+    final card = await repository.getCardById(token.cardId);
+
+    if (card == null) {
+      setState(() {
+        _errorMessage = 'Card not found. Please add the card first.';
+        _isProcessing = false;
+      });
+      return;
+    }
+
+    // Verify card is from the same business
+    if (card.businessId != token.businessId) {
+      setState(() {
+        _errorMessage = 'Card business mismatch';
+        _isProcessing = false;
+      });
+      return;
+    }
+
+    // Verify card is complete
+    if (!card.isComplete) {
+      final remaining = card.stampsRequired - card.stampsCollected;
+      setState(() {
+        _errorMessage = 'This card isn\'t complete yet. You need $remaining more stamp${remaining > 1 ? 's' : ''} before you can redeem.';
+        _isProcessing = false;
+      });
+      return;
+    }
+
+    // Check if card was already redeemed
+    if (card.isRedeemed) {
+      setState(() {
+        _errorMessage = 'This card has already been redeemed!';
+        _isProcessing = false;
+      });
+      return;
+    }
+
+    // Verify the redemption token signature
+    final signatureData = token.getSignatureData();
+    final isValid = KeyManager.verifySignature(
+      signatureData,
+      token.signature,
+      card.businessPublicKey,
+    );
+
+    if (!isValid) {
+      print('ERROR: Redemption token signature verification FAILED');
+      setState(() {
+        _errorMessage = 'Invalid redemption token signature';
+        _isProcessing = false;
+      });
+      return;
+    }
+
+    print('Redemption token signature verified OK');
+
+    // Mark card as redeemed
+    await repository.markCardAsRedeemed(card.id);
+    print('Card marked as redeemed in database');
+
+    print('=== Redemption Complete ===');
+
+    if (mounted) {
+      Navigator.pop(context, 
+        '🎉 Redemption confirmed! Card has been redeemed. You can now delete it.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final title = widget.mode == QRScanMode.addCard
@@ -412,19 +498,81 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       body: Stack(
         children: [
           // Camera view
-          MobileScanner(
-            controller: _controller,
-            onDetect: (capture) {
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final mediaQuery = MediaQuery.of(context);
+              final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
+              
+              // Apply rotation based on simple landscape detection
+              // Landscape: -90°, Portrait: 0° (no rotation)
+              final quarterTurns = isLandscape ? 3 : 0;
+              
+              print('=== QR Scanner Orientation ===');
+              print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
+              print('Applying quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+              
+              return RotatedBox(
+                quarterTurns: quarterTurns,
+                child: MobileScanner(
+                  controller: _controller,
+                  fit: BoxFit.contain,
+                  onDetect: (capture) {
               final List<Barcode> barcodes = capture.barcodes;
               if (barcodes.isNotEmpty && !_isProcessing) {
                 final code = barcodes.first.rawValue;
                 if (code != null) {
                   _handleQRCode(code);
                 }
-              }
+                  }
+                },
+                ),
+              );
             },
           ),
-
+          // Manual rotation controls
+          Positioned(
+            top: 80,
+            right: 16,
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  heroTag: 'rotate90',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    setState(() {
+                      _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                    });
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
+                      Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: 'rotate180',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    setState(() {
+                      _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                    });
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.flip, size: 20, color: Colors.blue),
+                      Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           // Scanning frame
           Center(
             child: Container(

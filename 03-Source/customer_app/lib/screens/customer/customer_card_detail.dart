@@ -56,7 +56,26 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   String _generateCardQR() {
     if (_card == null) return '';
     
-    // Get the last stamp's signature for hash chain validation
+    // If card is complete, generate redemption QR instead
+    if (_card!.isComplete) {
+      print('Card Detail QR: Card is COMPLETE - generating REDEMPTION QR');
+      print('Card Detail QR: ${_stamps.length} stamps for redemption');
+      
+      final signatures = _stamps.map((s) => s.signature).toList();
+      
+      final qrData = {
+        'type': 'redemption_request',
+        'cardId': _card!.id,
+        'businessId': _card!.businessId,
+        'stampsCollected': _card!.stampsCollected,
+        'stampSignatures': signatures,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+      
+      return jsonEncode(qrData);
+    }
+    
+    // Otherwise, generate stamp request QR
     String lastStampHash = '';
     if (_stamps.isNotEmpty) {
       lastStampHash = _stamps.last.signature;
@@ -217,31 +236,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  if (_card!.isComplete)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QRDisplayScreen(
-                                card: _card!,
-                                mode: QRDisplayMode.redemption,
-                              ),
-                            ),
-                          ).then((_) => _loadCardData()); // Reload card data when returning
-                        },
-                        icon: const Icon(Icons.redeem),
-                        label: const Text('Redeem Reward'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: BrandColors.success,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.all(16),
-                        ),
-                      ),
-                    )
-                  else
+                  if (!_card!.isComplete)
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(

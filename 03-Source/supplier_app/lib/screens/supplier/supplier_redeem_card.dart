@@ -134,13 +134,29 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.purple[50],
+                color: Colors.green[50],
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green[300]!),
               ),
-              child: const Text(
-                'Card will be reset after redemption',
-                style: TextStyle(fontSize: 14),
-                textAlign: TextAlign.center,
+              child: Column(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.green, size: 32),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Valid completed card!',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Give reward and ask customer to delete the card from their app.',
+                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ],
@@ -162,13 +178,16 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
               
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Card redeemed! Customer earned their reward 🎁'),
+                  content: Text('✅ Reward given! Customer can now delete their completed card.'),
                   backgroundColor: Colors.green,
-                  duration: Duration(seconds: 3),
+                  duration: Duration(seconds: 4),
                 ),
               );
             },
-            child: const Text('Redeem Now'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green,
+            ),
+            child: const Text('Reward Given'),
           ),
         ],
       ),

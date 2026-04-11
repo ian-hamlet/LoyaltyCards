@@ -307,14 +307,94 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       print('=== All Additional Stamps Processed ===');
     }
     
-    await repository.updateStampCount(card.id, card.stampsCollected + totalStampsAdded);
-
-    if (mounted) {
-      // Success! Return with success message
-      final stampText = totalStampsAdded > 1 
-          ? '$totalStampsAdded stamps added successfully!' 
-          : 'Stamp added successfully!';
-      Navigator.pop(context, stampText);
+    // Check for overflow
+    final newTotalStamps = card.stampsCollected + totalStampsAdded;
+    if (newTotalStamps > card.stampsRequired) {
+      print('╔═══════════════════════════════════════════════════════════╗');
+      print('║ OVERFLOW DETECTED - AUTO-CREATING NEW CARD               ║');
+      print('╚═══════════════════════════════════════════════════════════╝');
+      print('Current stamps: ${card.stampsCollected}');
+      print('Adding: $totalStampsAdded');
+      print('Total would be: $newTotalStamps');
+      print('Required: ${card.stampsRequired}');
+      
+      final overflow = newTotalStamps - card.stampsRequired;
+      final stampsForCurrentCard = card.stampsRequired - card.stampsCollected;
+      
+      print('Stamps to complete current card: $stampsForCurrentCard');
+      print('Overflow stamps: $overflow');
+      
+      // Mark current card as complete
+      await repository.updateStampCount(card.id, card.stampsRequired);
+      print('Current card now complete with ${card.stampsRequired} stamps');
+      
+      // Create new card with overflow stamps
+      final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+      final now = DateTime.now();
+      final newCard = models.Card(
+        id: newCardId,
+        businessId: card.businessId,
+        businessName: card.businessName,
+        businessPublicKey: card.businessPublicKey,
+        brandColor: card.brandColor,
+        stampsRequired: card.stampsRequired,
+        stampsCollected: overflow,
+        createdAt: now,
+        updatedAt: now,
+      );
+      
+      await repository.insertCard(newCard);
+      print('Created new card: $newCardId with $overflow stamps');
+      
+      // Move overflow stamps to new card
+      // Get all stamps for the original card
+      final allStamps = await stampRepo.getStampsByCard(card.id);
+      print('Total stamps in original card: ${allStamps.length}');
+      
+      // Take the last 'overflow' stamps and move them to new card
+      final stampsToMove = allStamps.skip(allStamps.length - overflow).toList();
+      print('Moving ${stampsToMove.length} stamps to new card...');
+      
+      for (var i = 0; i < stampsToMove.length; i++) {
+        final oldStamp = stampsToMove[i];
+        final newStampNumber = i + 1;
+        
+        // Delete from old card
+        await stampRepo.deleteStamp(oldStamp.id);
+        
+        // Create on new card with renumbered stamp number
+        final newStamp = Stamp(
+          id: '${newCardId}_stamp_$newStampNumber',
+          cardId: newCardId,
+          stampNumber: newStampNumber,
+          timestamp: oldStamp.timestamp,
+          signature: oldStamp.signature,
+          previousHash: i == 0 ? null : stampsToMove[i - 1].signature,
+        );
+        
+        await stampRepo.insertStamp(newStamp);
+        print('  Moved stamp #${oldStamp.stampNumber} -> new card stamp #$newStampNumber');
+      }
+      
+      print('Card split complete!');
+      print('  Card 1 (COMPLETE): ${card.stampsRequired} stamps');
+      print('  Card 2 (NEW): $overflow stamps');
+      
+      if (mounted) {
+        Navigator.pop(context, 
+          'Card complete! 🎉 New card started with $overflow stamp${overflow > 1 ? 's' : ''}');
+      }
+    } else {
+      // No overflow - just update stamp count
+      await repository.updateStampCount(card.id, newTotalStamps);
+      print('Card updated: $newTotalStamps / ${card.stampsRequired} stamps');
+      
+      if (mounted) {
+        final stampText = totalStampsAdded > 1 
+            ? '$totalStampsAdded stamps added successfully!' 
+            : 'Stamp added successfully!';
+        Navigator.pop(context, stampText);
+      }
     }
   }
 

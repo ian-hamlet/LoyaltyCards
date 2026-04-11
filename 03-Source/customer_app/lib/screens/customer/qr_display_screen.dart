@@ -26,6 +26,8 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
   bool _isLoading = true;
   String? _error;
   int _refreshKey = 0;
+  bool _instructionsExpanded = false; // Track if instructions are expanded
+  int _qrGeneratedTime = 0; // Track when QR was generated
 
   @override
   void initState() {
@@ -62,6 +64,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
           print('QR Display: Token lastStampHash = "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"');
           setState(() {
             _qrData = token.toQRString();
+            _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
             _isLoading = false;
           });
           print('QR Display: QR data set, screen should update');
@@ -82,6 +85,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
           print('QR Display: Stamps = ${token.stampsCollected}');
           setState(() {
             _qrData = token.toQRString();
+            _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
             _isLoading = false;
           });
           print('QR Display: Redemption QR ready to scan');
@@ -189,7 +193,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                               ),
                         ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
 
                       // QR Code
                       Container(
@@ -213,126 +217,172 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 24),
-
-                      // Refresh reminder for stamp requests
-                      if (widget.mode == QRDisplayMode.stampRequest)
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info_outline, color: Colors.orange.shade700, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'After receiving a stamp, refresh this QR (tap ⟳ above) before requesting another',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.orange.shade900,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
                       const SizedBox(height: 16),
 
-                      // Instructions
+                      // Compact info badges
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.shade200),
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
                         ),
-                        child: Row(
+                        child: Column(
                           children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.blue.shade700,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                instruction,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.blue.shade900,
-                                ),
+                            if (widget.mode == QRDisplayMode.stampRequest)
+                              Row(
+                                children: [
+                                  Icon(Icons.info_outline, size: 14, color: Colors.orange[700]),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'Refresh QR (tap ⟳ above) after each stamp',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.orange[900],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
+                            if (widget.mode == QRDisplayMode.stampRequest)
+                              const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(Icons.timer_outlined, size: 14, color: Colors.orange[700]),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    widget.mode == QRDisplayMode.stampRequest
+                                        ? 'Valid 1 min (expires ${_getExpiryTime(1)})'
+                                        : 'Valid 2 min (expires ${_getExpiryTime(2)})',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.orange[900],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
-                      // Additional info for redemption
-                      if (widget.mode == QRDisplayMode.redemption) ...[
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.green.shade200),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                'After redemption, your card will be reset and ready to collect new stamps.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.green.shade900,
+                      // Expandable Instructions (more prominent)
+                      Card(
+                        elevation: 3,
+                        color: Colors.blue[50],
+                        child: Theme(
+                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                          child: ExpansionTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[700],
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.help_outline, color: Colors.white, size: 18),
+                            ),
+                            title: Text(
+                              widget.mode == QRDisplayMode.stampRequest
+                                  ? 'How to Get a Stamp'
+                                  : 'How to Redeem Your Reward',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[900],
+                                fontSize: 15,
+                              ),
+                            ),
+                            subtitle: Row(
+                              children: [
+                                Icon(
+                                  _instructionsExpanded ? Icons.expand_less : Icons.expand_more,
+                                  size: 16,
+                                  color: Colors.blue[700],
                                 ),
-                                textAlign: TextAlign.center,
+                                const SizedBox(width: 4),
+                                Text(
+                                  _instructionsExpanded ? 'Hide details' : 'Tap for instructions',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue[700],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            initiallyExpanded: false,
+                            onExpansionChanged: (expanded) {
+                              setState(() {
+                                _instructionsExpanded = expanded;
+                              });
+                            },
+                            backgroundColor: Colors.blue[50],
+                            collapsedBackgroundColor: Colors.blue[50],
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      instruction,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.blue[900],
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                    if (widget.mode == QRDisplayMode.redemption) ...[
+                                      const SizedBox(height: 12),
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.info_outline, color: Colors.green[700], size: 16),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                'After redemption, your card will be reset and ready to collect new stamps.',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.green[900],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 32),
-
-                      // QR expires warning
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.timer_outlined,
-                              size: 16,
-                              color: Colors.orange.shade700,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              widget.mode == QRDisplayMode.stampRequest
-                                  ? 'Valid for 1 minute'
-                                  : 'Valid for 2 minutes',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.orange.shade900,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
     );
+  }
+
+  String _getExpiryTime(int validityMinutes) {
+    if (_qrGeneratedTime == 0) return '--:--';
+    
+    final expiryTime = DateTime.fromMillisecondsSinceEpoch(_qrGeneratedTime)
+        .add(Duration(minutes: validityMinutes));
+    
+    final hour = expiryTime.hour.toString().padLeft(2, '0');
+    final minute = expiryTime.minute.toString().padLeft(2, '0');
+    
+    return '$hour:$minute';
   }
 }
 

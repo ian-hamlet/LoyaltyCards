@@ -82,6 +82,7 @@ class CardIssueToken extends QRToken {
   final String publicKey;
   final int stampsRequired;
   final String brandColor;
+  final int logoIndex; // Business icon index (0-99)
   final String signature;
   final String? cardId; // Pre-generated card ID for signature consistency (optional for backward compatibility)
   final List<InitialStamp> initialStamps; // Pre-applied stamps at issuance
@@ -92,6 +93,7 @@ class CardIssueToken extends QRToken {
     required this.publicKey,
     required this.stampsRequired,
     required this.brandColor,
+    this.logoIndex = 0,
     required this.signature,
     this.cardId,
     required int timestamp,
@@ -106,6 +108,7 @@ class CardIssueToken extends QRToken {
       publicKey: json['publicKey'] as String,
       stampsRequired: json['stampsRequired'] as int,
       brandColor: json['brandColor'] as String,
+      logoIndex: json['logoIndex'] as int? ?? 0,
       signature: json['signature'] as String,
       cardId: json['cardId'] as String?,
       timestamp: json['timestamp'] as int,
@@ -124,6 +127,7 @@ class CardIssueToken extends QRToken {
       'publicKey': publicKey,
       'stampsRequired': stampsRequired,
       'brandColor': brandColor,
+      'logoIndex': logoIndex,
       'timestamp': timestamp,
       'signature': signature,
       'initialStamps': initialStamps.map((s) => s.toJson()).toList(),

@@ -343,7 +343,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Valid for 2 minutes',
+                      'Valid for 2 min (expires ${_getExpiryTime(token)})',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.orange.shade900,
@@ -373,6 +373,16 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         ),
       ),
     );
+  }
+
+  String _getExpiryTime(StampToken token) {
+    final expiryTime = DateTime.fromMillisecondsSinceEpoch(token.timestamp)
+        .add(const Duration(minutes: 2));
+    
+    final hour = expiryTime.hour.toString().padLeft(2, '0');
+    final minute = expiryTime.minute.toString().padLeft(2, '0');
+    
+    return '$hour:$minute';
   }
 
   void _showError(String message) {

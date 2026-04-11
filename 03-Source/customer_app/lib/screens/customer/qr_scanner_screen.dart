@@ -102,6 +102,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       stampsRequired: token.stampsRequired,
       stampsCollected: initialStampCount,
       brandColor: token.brandColor.replaceAll('#', ''),
+      logoIndex: token.logoIndex,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -346,6 +347,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         businessName: card.businessName,
         businessPublicKey: card.businessPublicKey,
         brandColor: card.brandColor,
+        logoIndex: card.logoIndex,
         stampsRequired: card.stampsRequired,
         stampsCollected: overflow,
         createdAt: now,

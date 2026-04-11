@@ -50,6 +50,7 @@ class DatabaseHelper {
         stamps_required INTEGER NOT NULL,
         stamps_collected INTEGER NOT NULL,
         brand_color TEXT NOT NULL,
+        logo_index INTEGER NOT NULL DEFAULT 0,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         is_redeemed INTEGER NOT NULL DEFAULT 0
@@ -111,6 +112,15 @@ class DatabaseHelper {
         ALTER TABLE cards ADD COLUMN is_redeemed INTEGER NOT NULL DEFAULT 0
       ''');
       print('Migration complete: is_redeemed column added');
+    }
+    
+    // Migration from v2 to v3: Add logo_index column
+    if (oldVersion < 3) {
+      print('Migration v2 → v3: Adding logo_index column to cards table');
+      await db.execute('''
+        ALTER TABLE cards ADD COLUMN logo_index INTEGER NOT NULL DEFAULT 0
+      ''');
+      print('Migration complete: logo_index column added');
     }
   }
 

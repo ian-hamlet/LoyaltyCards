@@ -124,7 +124,7 @@ class _SupplierHomeState extends State<SupplierHome> {
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.storefront, size: 60, color: Colors.white),
+                    Icon(BusinessIcons.getIcon(_business!.logoIndex), size: 60, color: Colors.white),
                     const SizedBox(height: 16),
                     Text(
                       _business!.name,

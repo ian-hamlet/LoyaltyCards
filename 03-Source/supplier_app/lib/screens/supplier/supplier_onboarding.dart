@@ -22,6 +22,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
 
   int _stampsRequired = AppConstants.defaultStampsRequired;
   String _selectedColor = BrandColors.cardColorOptions.first;
+  int _selectedLogoIndex = 0;
   bool _isCreating = false;
 
   @override
@@ -45,6 +46,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       print('Business name: ${_businessNameController.text.trim()}');
       print('Stamps required: $_stampsRequired');
       print('Brand color: $_selectedColor');
+      print('Logo index: $_selectedLogoIndex');
 
       // Generate key pair
       print('Generating cryptographic key pair...');
@@ -73,6 +75,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
         privateKey: '', // Not stored in database
         stampsRequired: _stampsRequired,
         brandColor: _selectedColor,
+        logoIndex: _selectedLogoIndex,
         createdAt: DateTime.now(),
       );
 
@@ -277,6 +280,44 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   }).toList(),
                 ),
                 
+                const SizedBox(height: 24),
+                
+                // Business Logo/Icon
+                const Text(
+                  'Business Icon',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Choose an icon to represent your business',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _buildLogoOption(0, 'Store', Icons.storefront),
+                    _buildLogoOption(1, 'Coffee', Icons.local_cafe),
+                    _buildLogoOption(2, 'Restaurant', Icons.restaurant),
+                    _buildLogoOption(3, 'Pizza', Icons.local_pizza),
+                    _buildLogoOption(5, 'Bakery', Icons.bakery_dining),
+                    _buildLogoOption(6, 'Dessert', Icons.icecream),
+                    _buildLogoOption(8, 'Fast Food', Icons.fastfood),
+                    _buildLogoOption(10, 'Grocery', Icons.local_grocery_store),
+                    _buildLogoOption(11, 'Shopping', Icons.shopping_bag),
+                    _buildLogoOption(13, 'Spa', Icons.spa),
+                    _buildLogoOption(14, 'Gym', Icons.fitness_center),
+                    _buildLogoOption(19, 'Pets', Icons.pets),
+                  ],
+                ),
+                
                 const SizedBox(height: 32),
                 
                 // Preview
@@ -302,6 +343,12 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     ),
                     child: Column(
                       children: [
+                        Icon(
+                          BusinessIcons.getIcon(_selectedLogoIndex),
+                          size: 48,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 12),
                         Text(
                           _businessNameController.text,
                           style: const TextStyle(
@@ -383,6 +430,55 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLogoOption(int index, String label, IconData icon) {
+    final isSelected = _selectedLogoIndex == index;
+    final color = BrandColors.fromHex(_selectedColor);
+    
+    return GestureDetector(
+      onTap: () => setState(() => _selectedLogoIndex = index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: isSelected ? color : Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? color : Colors.grey[400]!,
+                width: isSelected ? 3 : 1,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Icon(
+              icon,
+              size: 32,
+              color: isSelected ? Colors.white : Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: isSelected ? color : Colors.grey[700],
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
       ),
     );
   }

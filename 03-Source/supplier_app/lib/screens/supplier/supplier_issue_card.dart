@@ -23,6 +23,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   String? _errorMessage;
   int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
   bool _hasLoggedCardIssuance = false; // Track if we've logged this session
+  bool _instructionsExpanded = false; // Track if instructions are expanded
 
   @override
   void initState() {
@@ -122,79 +123,37 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Instructions Card
+                      // Initial Stamp Count Selector (Compact)
                       Card(
-                        color: Colors.blue[50],
+                        elevation: 1,
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              Icon(Icons.info_outline, color: Colors.blue[700], size: 32),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Customer Pickup Process',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue[900],
-                                    ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                '1. Show this QR code to customer\n'
-                                '2. Customer opens LoyaltyCards app\n'
-                                '3. Customer taps "Scan Card" button\n'
-                                '4. Customer scans this QR code\n'
-                                '5. Card added to customer wallet!',
-                                style: TextStyle(
-                                  height: 1.6,
-                                  color: Colors.blue[900],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                                            const SizedBox(height: 24),
-
-                      // Initial Stamp Count Selector
-                      Card(
-                        elevation: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.bolt, color: Colors.amber[700], size: 24),
-                                  const SizedBox(width: 8),
+                                  Icon(Icons.bolt, color: Colors.amber[700], size: 20),
+                                  const SizedBox(width: 6),
                                   Text(
                                     'Quick Start Stamps',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                'Issue card with stamps already applied (for large purchases)',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(height: 16),
                               
-                              // Stamp count selector buttons
+                              // Stamp count selector buttons (compact)
                               Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
+                                spacing: 6,
+                                runSpacing: 6,
                                 children: List.generate(8, (index) {
                                   final count = index;
                                   final isSelected = _initialStampCount == count;
                                   return ChoiceChip(
-                                    label: Text(count == 0 ? 'None' : '$count'),
+                                    label: Text(count == 0 ? 'None' : '$count', style: const TextStyle(fontSize: 13)),
                                     selected: isSelected,
                                     onSelected: (selected) {
                                       if (selected && _initialStampCount != count) {
@@ -209,6 +168,8 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                       color: isSelected ? Colors.white : Colors.black87,
                                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                     ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                    visualDensity: VisualDensity.compact,
                                   );
                                 }),
                               ),
@@ -253,6 +214,13 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                           padding: const EdgeInsets.all(24),
                           child: Column(
                             children: [
+                              Icon(
+                                BusinessIcons.getIcon(_business!.logoIndex),
+                                size: 48,
+                                color: BrandColors.fromHex(_business!.brandColor),
+                              ),
+                              const SizedBox(height: 12),
+                              
                               Text(
                                 _business!.name,
                                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -290,73 +258,56 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                 ),
                               ),
                               
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 16),
                               
                               Text(
                                 'Scan to Pick Up Card',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
                               
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 12),
                               
+                              // Combined crypto + expiry info (compact)
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
+                                padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Colors.green.shade50,
+                                  color: Colors.grey[100],
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.green.shade200),
+                                  border: Border.all(color: Colors.grey[300]!),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                child: Column(
                                   children: [
-                                    Icon(
-                                      Icons.verified_user,
-                                      size: 16,
-                                      color: Colors.green.shade700,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Cryptographically Signed',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.green.shade900,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 16),
-                              
-                              // Expiry notice
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.timer_outlined,
-                                      size: 18,
-                                      color: Colors.orange.shade700,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        'QR code valid for 5 minutes',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.orange.shade900,
+                                    Row(
+                                      children: [
+                                        Icon(Icons.verified_user, size: 14, color: Colors.green[700]),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Cryptographically Signed',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.green[900],
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.timer_outlined, size: 14, color: Colors.orange[700]),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            'Valid for 5 min (expires ${_getExpiryTime()})',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.orange[900],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -364,21 +315,90 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
 
                               const SizedBox(height: 12),
 
-                              // Refresh Button (prominent)
-                              ElevatedButton.icon(
+                              // Refresh Button (more compact)
+                              OutlinedButton.icon(
                                 onPressed: _loadBusinessAndGenerateToken,
-                                icon: const Icon(Icons.refresh),
-                                label: const Text('Generate New QR Code'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF3498DB),
-                                  foregroundColor: Colors.white,
+                                icon: const Icon(Icons.refresh, size: 18),
+                                label: const Text('Refresh QR'),
+                                style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 12,
+                                    horizontal: 16,
+                                    vertical: 8,
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 12),
+                      
+                      // Expandable Instructions (more prominent)
+                      Card(
+                        elevation: 3,
+                        color: Colors.blue[50],
+                        child: Theme(
+                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                          child: ExpansionTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[700],
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.help_outline, color: Colors.white, size: 18),
+                            ),
+                            title: Text(
+                              'How to Give Card to Customer',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[900],
+                                fontSize: 15,
+                              ),
+                            ),
+                            subtitle: Row(
+                              children: [
+                                Icon(
+                                  _instructionsExpanded ? Icons.expand_less : Icons.expand_more,
+                                  size: 16,
+                                  color: Colors.blue[700],
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _instructionsExpanded ? 'Hide steps' : 'Show 5 easy steps',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue[700],
+                                    fontWeight: FontWeight.w500,
                                   ),
+                                ),
+                              ],
+                            ),
+                            initiallyExpanded: false,
+                            onExpansionChanged: (expanded) {
+                              setState(() {
+                                _instructionsExpanded = expanded;
+                              });
+                            },
+                            backgroundColor: Colors.blue[50],
+                            collapsedBackgroundColor: Colors.blue[50],
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInstructionStep('1', 'Show this QR code to customer'),
+                                    const SizedBox(height: 8),
+                                    _buildInstructionStep('2', 'Customer opens LoyaltyCards app'),
+                                    const SizedBox(height: 8),
+                                    _buildInstructionStep('3', 'Customer taps "Scan Card" button'),
+                                    const SizedBox(height: 8),
+                                    _buildInstructionStep('4', 'Customer scans this QR code'),
+                                    const SizedBox(height: 8),
+                                    _buildInstructionStep('5', 'Card added to customer wallet!', isLast: true),
+                                  ],
                                 ),
                               ),
                             ],
@@ -389,5 +409,57 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   ),
                 ),
     );
+  }
+  
+  Widget _buildInstructionStep(String number, String text, {bool isLast = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: isLast ? Colors.green : Colors.blue[700],
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blue[900],
+                height: 1.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  String _getExpiryTime() {
+    if (_token == null) return '--:--';
+    
+    final expiryTime = DateTime.fromMillisecondsSinceEpoch(_token!.timestamp)
+        .add(const Duration(minutes: 5));
+    
+    final hour = expiryTime.hour.toString().padLeft(2, '0');
+    final minute = expiryTime.minute.toString().padLeft(2, '0');
+    
+    return '$hour:$minute';
   }
 }

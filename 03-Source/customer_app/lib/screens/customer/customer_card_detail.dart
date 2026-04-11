@@ -132,7 +132,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             // Card Visual
             Container(
               margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [brandColor, brandColor.withValues(alpha: 0.7)],
@@ -150,29 +150,37 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               ),
               child: Column(
                 children: [
+                  // Business Logo/Icon
+                  Icon(
+                    BusinessIcons.getIcon(_card!.logoIndex),
+                    size: 48,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 12),
+                  
                   // Business Name
                   Text(
                     _card!.businessName,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 28,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   
                   // Stamp Grid
                   _buildStampGrid(brandColor),
                   
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   
                   // Progress Text
                   Text(
                     '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -233,12 +241,12 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
 
             // QR Code Section
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Text(
                 _card!.isComplete 
                     ? 'Show this QR code to redeem your reward'
                     : 'Show this QR code to collect stamps',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -278,7 +286,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               )
             else
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -287,12 +295,12 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                 child: QrImageView(
                   data: _generateCardQR(),
                   version: QrVersions.auto,
-                  size: 250,
+                  size: 220,
                   backgroundColor: Colors.white,
                 ),
               ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Action Buttons
             Padding(
@@ -382,10 +390,10 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               final isCollected = stampIndex < _card!.stampsCollected;
               
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Container(
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isCollected ? Colors.white : Colors.transparent,
@@ -395,13 +403,13 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                     ),
                   ),
                   child: isCollected
-                      ? Icon(Icons.check, color: brandColor, size: 24)
+                      ? Icon(Icons.check, color: brandColor, size: 20)
                       : Center(
                           child: Text(
                             '${stampIndex + 1}',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

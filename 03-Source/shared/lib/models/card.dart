@@ -7,6 +7,7 @@ class Card {
   final int stampsRequired;
   final int stampsCollected;
   final String brandColor; // Hex color string
+  final int logoIndex; // Business icon index (0-99)
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isRedeemed; // Track if card has been redeemed (prevents double redemption)
@@ -19,6 +20,7 @@ class Card {
     required this.stampsRequired,
     required this.stampsCollected,
     required this.brandColor,
+    this.logoIndex = 0,
     required this.createdAt,
     required this.updatedAt,
     this.isRedeemed = false,
@@ -40,6 +42,7 @@ class Card {
       'stamps_required': stampsRequired,
       'stamps_collected': stampsCollected,
       'brand_color': brandColor,
+      'logo_index': logoIndex,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
       'is_redeemed': isRedeemed ? 1 : 0,
@@ -56,6 +59,7 @@ class Card {
       stampsRequired: json['stamps_required'] as int,
       stampsCollected: json['stamps_collected'] as int,
       brandColor: json['brand_color'] as String,
+      logoIndex: json['logo_index'] as int? ?? 0,
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(json['updated_at'] as int),
       isRedeemed: (json['is_redeemed'] as int?) == 1,
@@ -71,6 +75,7 @@ class Card {
     int? stampsRequired,
     int? stampsCollected,
     String? brandColor,
+    int? logoIndex,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isRedeemed,
@@ -83,6 +88,7 @@ class Card {
       stampsRequired: stampsRequired ?? this.stampsRequired,
       stampsCollected: stampsCollected ?? this.stampsCollected,
       brandColor: brandColor ?? this.brandColor,
+      logoIndex: logoIndex ?? this.logoIndex,
       isRedeemed: isRedeemed ?? this.isRedeemed,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

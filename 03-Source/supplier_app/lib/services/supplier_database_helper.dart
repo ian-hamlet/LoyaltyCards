@@ -26,7 +26,7 @@ class SupplierDatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2, // Incremented for redemptions table
+      version: 3, // Incremented for logo_index column
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
@@ -48,6 +48,7 @@ class SupplierDatabaseHelper {
         public_key TEXT NOT NULL,
         stamps_required INTEGER NOT NULL,
         brand_color TEXT NOT NULL,
+        logo_index INTEGER NOT NULL DEFAULT 0,
         created_at INTEGER NOT NULL
       )
     ''');
@@ -129,6 +130,15 @@ class SupplierDatabaseHelper {
         CREATE INDEX idx_redemptions_business ON redemptions (business_id)
       ''');
       print('Migration complete: redemptions table added');
+    }
+    
+    // Migration from v2 to v3: Add logo_index column
+    if (oldVersion < 3) {
+      print('Migration v2 → v3: Adding logo_index column to business table');
+      await db.execute('''
+        ALTER TABLE business ADD COLUMN logo_index INTEGER NOT NULL DEFAULT 0
+      ''');
+      print('Migration complete: logo_index column added');
     }
   }
 

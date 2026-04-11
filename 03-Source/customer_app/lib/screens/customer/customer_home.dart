@@ -297,7 +297,7 @@ class _LoyaltyCardWidget extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     backgroundColor: brandColor,
-                    child: const Icon(Icons.store, color: Colors.white),
+                    child: Icon(BusinessIcons.getIcon(card.logoIndex), color: Colors.white),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

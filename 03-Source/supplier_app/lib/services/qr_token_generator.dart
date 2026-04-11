@@ -55,6 +55,7 @@ class QRTokenGenerator {
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
+      logoIndex: business.logoIndex,
       signature: '', // Will be filled below
       cardId: cardId,
       timestamp: timestamp,
@@ -77,6 +78,7 @@ class QRTokenGenerator {
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
+      logoIndex: business.logoIndex,
       signature: signature,
       cardId: cardId,
       timestamp: timestamp,

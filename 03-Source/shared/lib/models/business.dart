@@ -6,6 +6,7 @@ class Business {
   final String privateKey;
   final int stampsRequired;
   final String brandColor; // Hex color string
+  final int logoIndex; // Business icon/logo index (0-99)
   final DateTime createdAt;
 
   Business({
@@ -15,6 +16,7 @@ class Business {
     required this.privateKey,
     required this.stampsRequired,
     required this.brandColor,
+    this.logoIndex = 0,
     required this.createdAt,
   });
 
@@ -26,6 +28,7 @@ class Business {
       'public_key': publicKey,
       'stamps_required': stampsRequired,
       'brand_color': brandColor,
+      'logo_index': logoIndex,
       'created_at': createdAt.millisecondsSinceEpoch,
     };
     
@@ -45,6 +48,7 @@ class Business {
       privateKey: json['private_key'] as String? ?? '',
       stampsRequired: json['stamps_required'] as int,
       brandColor: json['brand_color'] as String,
+      logoIndex: json['logo_index'] as int? ?? 0,
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
     );
   }
@@ -57,6 +61,7 @@ class Business {
     String? privateKey,
     int? stampsRequired,
     String? brandColor,
+    int? logoIndex,
     DateTime? createdAt,
   }) {
     return Business(
@@ -66,6 +71,7 @@ class Business {
       privateKey: privateKey ?? this.privateKey,
       stampsRequired: stampsRequired ?? this.stampsRequired,
       brandColor: brandColor ?? this.brandColor,
+      logoIndex: logoIndex ?? this.logoIndex,
       createdAt: createdAt ?? this.createdAt,
     );
   }

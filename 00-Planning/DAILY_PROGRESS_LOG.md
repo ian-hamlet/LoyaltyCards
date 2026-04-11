@@ -270,33 +270,204 @@ Track your daily development progress here. Update after each work session.
 - Phase 0-2: ~7 hours
 - Phase 3-4: ~10 hours (including debugging and deployment issues)
 
-**Current Build:** v0.1.0 (Build 11)  
-**Status:** Production-ready for single-device supplier testing  
+**Current Build:** v0.1.0 (Build 40)  
+**Status:** Production-ready for iPad landscape pilot testing  
 
 ---
 
-## Week 2 (Future)
+## Week 2
 
-### Day 7 - [Date: ____ ]
-**Phase:** Phase 5 - Multi-Device Configuration  
-**Hours Worked:** ___  
-**Status:** ⬜ / 🟦 / ✅
+### Day 7 - [Date: 2026-04-11]
+**Phase:** Secure Redemption & UX Improvements (Builds 12-15)  
+**Hours Worked:** 2  
+**Status:** ✅ Complete
 
 **Tasks Completed:**
-- [ ] 5.1 - Configuration export screen
-- [ ] 5.2 - QR generation for config
-- [ ] 5.3 - Configuration import screen
-- [ ] 5.4 - Import validation
+- [x] Build 12: Implemented cryptographically signed redemption tokens
+- [x] Build 12: Added timestamp-based expiry (2 minutes for redemption)
+- [x] Build 13: Added redemption tracking to supplier analytics
+- [x] Build 14: Redemption UX improvements (success feedback)
+- [x] Build 15: Fixed double redemption logging bug
 
 **Testing:**
-- [ ] Config export works
-- [ ] Config import works
+- ✅ Redemption tokens properly signed with ECDSA
+- ✅ Timestamp validation working (2-minute expiry)
+- ✅ Supplier analytics tracking redemptions correctly
+- ✅ No duplicate redemption logs
 
 **Blockers/Issues:**
+- **Minor (Resolved):** Redemption logged twice
+  - **Fix:** Removed duplicate transaction logging
+  - **Status:** ✅ Resolved in Build 15
 
 **Notes:**
+- Redemption flow now secure with cryptographic signatures
+- Analytics dashboard shows total cards issued, stamped, and redeemed
+- All operations remain < 100ms
 
 ---
+
+### Day 8 - [Date: 2026-04-11]
+**Phase:** Camera Orientation Issues (Builds 16-34)  
+**Hours Worked:** 4  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+- [x] Builds 16-33: Investigated camera orientation in iPad landscape mode
+  - Tried RotatedBox with manual calculations
+  - Attempted iOS platform channels (failed - timing issues)
+  - Attempted Info.plist orientation locking
+- [x] Build 34: Implemented manual rotation controls
+  - Added 90° and 180° rotation buttons to all 4 scanner screens
+  - Added MediaQuery viewPadding detection for status bar logging
+  - Removed mock data from production code
+
+**Testing:**
+- ✅ Manual rotation buttons functional on all scanners
+- ✅ ViewPadding logging helps debug orientation issues
+- ⚠️ Camera orientation still platform-specific behavior
+
+**Blockers/Issues:**
+- **Moderate (Mitigated):** Camera orientation upside-down in iPad landscape
+  - **Root Cause:** mobile_scanner plugin iOS behavior
+  - **Workaround:** Manual rotation buttons (90° and 180°)
+  - **Status:** ✅ Working solution for pilot
+
+**Notes:**
+- Platform channels investigation documented but abandoned due to timing issues
+- Manual controls provide acceptable UX for pilot testing
+- User can correct any orientation mismatch on-the-fly
+
+---
+
+### Day 9 - [Date: 2026-04-11]
+**Phase:** Business Logo Selection (Build 35)  
+**Hours Worked:** 1.5  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+- [x] Build 35: Created BusinessIcons constant with 20 icons
+- [x] Build 35: Added logoIndex to Business, Card, CardIssueToken models
+- [x] Build 35: Database migration v2→v3 (added logo_index column)
+- [x] Build 35: Added logo selection in supplier onboarding (12 icons displayed)
+- [x] Build 35: Updated all card displays to show selected logos
+
+**Testing:**
+- ✅ Logo selection working in supplier onboarding
+- ✅ Logos transmitted via QR tokens
+- ✅ Logos displayed on customer cards
+- ✅ Database migration successful
+- ✅ Backward compatible (defaults to index 0)
+
+**Blockers/Issues:**
+- None
+
+**Notes:**
+- 20 icons available (Coffee, Restaurant, Pizza, Bakery, Grocery, Spa, Gym, etc.)
+- 12 most common business types shown in UI
+- Enhances card differentiation for users with multiple cards
+- All apps updated to display logos throughout
+
+---
+
+### Day 10 - [Date: 2026-04-11-12]
+**Phase:** Landscape Layout Optimization (Builds 36-38)  
+**Hours Worked:** 2.5  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+- [x] Build 36: Supplier issue card - Moved instructions below QR, made expandable
+- [x] Build 37: Supplier issue card - Compact layout improvements
+  - Compressed Quick Start Stamps (~40px saved)
+  - Combined crypto + expiry badges (~50px saved)
+  - Added actual expiry time: "Valid for 5 min (expires 14:35)"
+  - Made refresh button compact (~20px saved)
+  - Enhanced instructions with blue circular badge and "Show 5 easy steps"
+- [x] Build 38: Customer QR display - Applied same optimizations
+  - Added actual expiry time calculation
+  - Made instructions expandable with prominent styling
+  - Compacted info badges and spacing
+  - Combined redemption info into instructions accordion
+
+**Testing:**
+- ✅ QR codes fully visible in landscape without scrolling
+- ✅ Expiry times display correctly
+- ✅ Instructions expandable/collapsible
+- ✅ ~80-110px vertical space saved per screen
+
+**Blockers/Issues:**
+- **Minor (Resolved):** Build 38 syntax error (`..[` instead of `...[`)
+  - **Fix:** Corrected spread operator syntax
+  - **Status:** ✅ Resolved immediately
+
+**Notes:**
+- Consistent UX across supplier and customer apps
+- Actual expiry times more user-friendly than generic durations
+- ExpansionTile provides clean accordion UI
+- Landscape QR scanning now optimal for iPad use
+
+---
+
+### Day 11 - [Date: 2026-04-12]
+**Phase:** Final Polish (Builds 39-40)  
+**Hours Worked:** 1  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+- [x] Build 39: Added actual expiry time to supplier stamp screen
+  - "Valid for 2 min (expires 14:35)" instead of "Valid for 2 minutes"
+- [x] Build 40: Reduced customer card stamp visual size
+  - Card padding: 24px → 20px
+  - Logo size: 56px → 48px
+  - Business name: 28px → 24px
+  - Stamp circles: 40x40px → 36x36px
+  - QR code: 250px → 220px
+  - Total ~80-100px vertical space saved
+
+**Testing:**
+- ✅ Expiry times consistent across all screens
+- ✅ Scan button now visible without scrolling
+- ✅ Card visual remains attractive and clear
+
+**Blockers/Issues:**
+- None
+
+**Notes:**
+- All QR screens now show actual expiry times
+- Customer card detail screen optimized for smaller screens
+- All core functionality complete and tested
+- Ready for pilot deployment on iPads
+
+---
+
+## Summary
+
+**Phases Completed:**
+- ✅ Phase 0: Project Foundation (2026-04-03)
+- ✅ Phase 1: Customer Data Layer (2026-04-03)
+- ✅ Phase 2: Supplier Crypto (2026-04-03)
+- ✅ Phase 3: Customer P2P & QR Scanning (2026-04-09 to 2026-04-11)
+- ✅ Phase 4: Supplier QR Operations (2026-04-09 to 2026-04-11)
+
+**Additional Features Completed:**
+- ✅ Secure redemption with cryptographic signatures
+- ✅ Manual camera rotation controls for iPad landscape
+- ✅ Business logo selection (20 icons)
+- ✅ Landscape-optimized QR layouts (both apps)
+- ✅ Actual expiry time displays throughout
+- ✅ Compact card visuals for better screen fit
+
+**Next Steps:**
+- **Immediate:** Pilot testing on iPads in landscape mode
+- **Phase 5:** Multi-Device Configuration (export/import business config)
+- **Phase 6:** Polish & Deployment (remove debug logs, app store prep)
+
+**Total Development Time:** ~30 hours  
+- Phase 0-4: ~17 hours
+- Additional features & polish: ~13 hours
+
+**Current Build:** v0.1.0 (Build 40)  
+**Status:** Production-ready for iPad landscape pilot testing
 
 ### Day 11 - [Date: ____ ]
 **Phase:** Phase 5 - Multi-Device (continued)  

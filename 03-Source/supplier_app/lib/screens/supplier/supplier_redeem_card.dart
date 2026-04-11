@@ -19,42 +19,86 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Redeem Card'),
+        backgroundColor: BrandColors.success,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Instructions
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.purple[50],
-            child: Row(
-              children: [
-                const Icon(Icons.card_giftcard, color: Colors.purple),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Scan customer\'s completed card to redeem reward',
-                    style: TextStyle(color: Colors.purple[900]),
-                  ),
+          Column(
+            children: [
+              // Instructions
+              Container(
+                padding: const EdgeInsets.all(16),
+                color: Colors.green[50],
+                child: Row(
+                  children: [
+                    const Icon(Icons.card_giftcard, color: Colors.green),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Scan customer\'s completed card to redeem reward',
+                        style: TextStyle(
+                          color: Colors.green[900],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+
+              // Scanner
+              Expanded(
+                child: MobileScanner(
+                  controller: cameraController,
+                  onDetect: (capture) {
+                    if (_isProcessing) return;
+                    
+                    final List<Barcode> barcodes = capture.barcodes;
+                    for (final barcode in barcodes) {
+                      if (barcode.rawValue != null) {
+                        _processCardQR(barcode.rawValue!);
+                        break;
+                      }
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          // Scanning frame
+          Center(
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.white,
+                  width: 3,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
 
-          // Scanner
-          Expanded(
-            child: MobileScanner(
-              controller: cameraController,
-              onDetect: (capture) {
-                if (_isProcessing) return;
-                
-                final List<Barcode> barcodes = capture.barcodes;
-                for (final barcode in barcodes) {
-                  if (barcode.rawValue != null) {
-                    _processCardQR(barcode.rawValue!);
-                    break;
-                  }
-                }
-              },
+          // Processing indicator
+          if (_isProcessing)
+            Container(
+              color: Colors.black.withOpacity(0.7),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ),
+
+          // Flashlight toggle
+          Positioned(
+            top: 16,
+            right: 16,
+            child: IconButton(
+              icon: const Icon(Icons.flash_on, color: Colors.white, size: 32),
+              onPressed: () => cameraController.toggleTorch(),
             ),
           ),
         ],

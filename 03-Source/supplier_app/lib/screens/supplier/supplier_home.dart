@@ -144,9 +144,9 @@ class _SupplierHomeState extends State<SupplierHome> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildStat('QRs Generated', _issuedCards),
+                        _buildStat('Cards Issued', _issuedCards),
                         Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Active Cards', _activeCards),
+                        _buildStat('Cards Stamped', _activeCards),
                       ],
                     ),
                   ],
@@ -275,8 +275,8 @@ class _SupplierHomeState extends State<SupplierHome> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'QRs Generated: Times you offered a card to customers\\n'
-                              'Active Cards: Unique customers who have used your loyalty program',
+                              'Cards Issued: Number of new cards you created for customers\\n'
+                              'Cards Stamped: Unique customer cards you have stamped directly',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue[900],

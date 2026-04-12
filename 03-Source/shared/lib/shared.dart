@@ -11,5 +11,13 @@ export 'models/qr_tokens.dart';
 export 'constants/constants.dart';
 export 'constants/business_icons.dart';
 
+// Export utilities
+export 'utils/haptics.dart';
+
+// Export widgets
+export 'widgets/feedback.dart';
+export 'widgets/loading_overlay.dart';
+export 'widgets/skeleton_loader.dart';
+
 // Export version
 export 'version.dart';

@@ -61,11 +61,17 @@ class _CustomerSettingsState extends State<CustomerSettings> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () {
+              Haptics.light();
+              Navigator.pop(context, false);
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () {
+              Haptics.error();
+              Navigator.pop(context, true);
+            },
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
@@ -94,12 +100,7 @@ class _CustomerSettingsState extends State<CustomerSettings> {
           Navigator.pop(context);
 
           // Show success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('All data deleted successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          AppFeedback.success(context, 'All data deleted successfully');
 
           // Refresh stats
           await _loadStats();
@@ -112,12 +113,7 @@ class _CustomerSettingsState extends State<CustomerSettings> {
           // Pop loading dialog
           Navigator.pop(context);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error deleting data: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          AppFeedback.error(context, 'Error deleting data: $e');
         }
       }
     }
@@ -250,7 +246,10 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                     'Remove all cards, stamps, and transaction history',
                     style: TextStyle(fontSize: 12),
                   ),
-                  onTap: _confirmAndDeleteAllData,
+                  onTap: () {
+              Haptics.medium();
+              _confirmAndDeleteAllData();
+            },
                 ),
 
                 const SizedBox(height: 32),

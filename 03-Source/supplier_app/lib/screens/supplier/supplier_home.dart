@@ -60,9 +60,7 @@ class _SupplierHomeState extends State<SupplierHome> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading business: $e')),
-        );
+        AppFeedback.error(context, 'Error loading business: $e');
       }
     }
   }

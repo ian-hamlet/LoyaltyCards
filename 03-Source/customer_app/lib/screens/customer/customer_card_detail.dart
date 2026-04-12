@@ -46,9 +46,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading card: $e')),
-        );
+        AppFeedback.error(context, 'Error loading card: $e');
       }
     }
   }
@@ -322,9 +320,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                           );
                           
                           if (result != null && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(result)),
-                            );
+                            AppFeedback.info(context, result);
                             _loadCardData(); // Reload card data
                           }
                         },

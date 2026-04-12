@@ -139,90 +139,79 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       context: context,
       barrierDismissible: false,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.local_cafe, color: Colors.brown[400], size: 48),
-                const SizedBox(height: 16),
-                Text(
-                  'How many stamps?',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+        builder: (context, setDialogState) => AlertDialog(
+          icon: Icon(Icons.local_cafe, color: Colors.brown[400], size: 48),
+          title: Text(
+            'How many stamps?',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Card currently has ${token.currentStamps} stamp${token.currentStamps != 1 ? 's' : ''}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: List.generate(7, (index) {
-                    final count = index + 1;
-                    final isSelected = selectedCount == count;
-                    return ChoiceChip(
-                      label: Text('$count'),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        if (selected) {
-                          setDialogState(() {
-                            selectedCount = count;
-                          });
-                        }
-                      },
-                      selectedColor: Colors.blue[600],
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        fontSize: 16,
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _isProcessing = false;
-                        });
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        await _generateAndShowStamp(
-                          token,
-                          previousHash,
-                          selectedCount,
-                        );
-                      },
-                      icon: const Icon(Icons.check),
-                      label: Text('Add $selectedCount'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[600],
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Card currently has ${token.currentStamps} stamp${token.currentStamps != 1 ? 's' : ''}',
+                style: TextStyle(
+                  fontSize: AppTypography.bodyLarge,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: List.generate(7, (index) {
+                  final count = index + 1;
+                  final isSelected = selectedCount == count;
+                  return ChoiceChip(
+                    label: Text('$count'),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        Haptics.selection();
+                        setDialogState(() {
+                          selectedCount = count;
+                        });
+                      }
+                    },
+                    selectedColor: Colors.blue[600],
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black87,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 16,
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Haptics.light();
+                setState(() {
+                  _isProcessing = false;
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton.icon(
+              onPressed: () async {
+                Haptics.medium();
+                Navigator.pop(context);
+                await _generateAndShowStamp(
+                  token,
+                  previousHash,
+                  selectedCount,
+                );
+              },
+              icon: const Icon(Icons.check),
+              label: Text('Add $selectedCount'),
+            ),
+          ],
         ),
       ),
     );

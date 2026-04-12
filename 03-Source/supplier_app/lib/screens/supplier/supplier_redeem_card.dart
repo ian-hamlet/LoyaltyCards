@@ -321,9 +321,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       _isProcessing = false;
     });
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    AppFeedback.error(context, message);
   }
 
   @override

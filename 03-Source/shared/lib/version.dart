@@ -6,12 +6,11 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
-/// Build 45 Changes:
-/// - UX Fix: Sticky bottom button on supplier onboarding (no hidden buttons)
-/// - Added "How It Works" screens for both supplier and customer apps
-/// - Added help icon (?) in AppBar to access How It Works
-/// - Removed verbose help text from onboarding
-/// - Added haptics to all supplier onboarding interactions
-/// - Updated error handling with AppFeedback
+/// Build 46 Changes:
+/// - UX Polish: Fixed dialog buttons to use actions parameter (always visible)
+/// - Added haptics to all dialog confirmations and destructive actions
+/// - Replaced all SnackBars with AppFeedback for consistency
+/// - Applied AppTypography and AppSpacing to dialogs
+/// - Improved dialog accessibility and modern UX patterns
 
-const String appVersion = 'v0.1.0 (Build 45)';
+const String appVersion = 'v0.1.0 (Build 46)';

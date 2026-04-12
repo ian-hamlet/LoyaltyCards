@@ -223,6 +223,7 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
         actions: [
           TextButton(
             onPressed: () {
+              Haptics.light();
               Navigator.pop(context);
               setState(() {
                 _isProcessing = false;
@@ -232,17 +233,13 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
           ),
           FilledButton(
             onPressed: () {
+              Haptics.medium();
               // TODO: Implement actual card creation from QR data
               // For now, just navigate back - actual implementation in Phase 3
               Navigator.pop(context);
               Navigator.pop(context);
               
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Card scanning will be implemented in Phase 3'),
-                  backgroundColor: Colors.blue,
-                ),
-              );
+              AppFeedback.info(context, 'Card scanning will be implemented in Phase 3');
             },
             child: const Text('Add Card'),
           ),
@@ -273,9 +270,7 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
       _isProcessing = false;
     });
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    AppFeedback.error(context, message);
   }
 
   @override

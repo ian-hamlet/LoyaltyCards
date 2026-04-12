@@ -21,12 +21,21 @@ class _CustomerHomeState extends State<CustomerHome> {
   final CardRepository _cardRepo = CardRepository(DatabaseHelper());
   final TransactionRepository _transactionRepo = TransactionRepository(DatabaseHelper());
   List<models.Card> _cards = [];
+  List<models.Card> _filteredCards = [];
   bool _isLoading = true;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadCards();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCards() async {
@@ -35,16 +44,32 @@ class _CustomerHomeState extends State<CustomerHome> {
       final cards = await _cardRepo.getAllCards();
       setState(() {
         _cards = cards;
+        _filterCards();
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading cards: $e')),
-        );
+        AppFeedback.error(context, 'Error loading cards: $e');
       }
     }
+  }
+
+  void _filterCards() {
+    if (_searchQuery.isEmpty) {
+      _filteredCards = _cards;
+    } else {
+      _filteredCards = _cards.where((card) {
+        return card.businessName.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+      _filterCards();
+    });
   }
 
   Future<void> _addTestCard() async {
@@ -76,9 +101,7 @@ class _CustomerHomeState extends State<CustomerHome> {
     await _loadCards();
     
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Test card added!')),
-      );
+      AppFeedback.success(context, 'Test card added!');
     }
   }
 
@@ -103,12 +126,11 @@ class _CustomerHomeState extends State<CustomerHome> {
     );
 
     if (confirmed == true) {
+      Haptics.medium();
       await _cardRepo.deleteCard(card.id);
       await _loadCards();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${card.businessName} deleted')),
-        );
+        AppFeedback.success(context, '${card.businessName} deleted');
       }
     }
   }
@@ -122,6 +144,7 @@ class _CustomerHomeState extends State<CustomerHome> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
+              Haptics.light();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -132,13 +155,59 @@ class _CustomerHomeState extends State<CustomerHome> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _cards.isEmpty
-              ? _buildEmptyState(context)
-              : _buildCardList(context),
+      body: Column(
+        children: [
+          // Search bar
+          if (_cards.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search cards...',
+                  hintStyle: const TextStyle(fontSize: AppTypography.bodyLarge),
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            Haptics.light();
+                            _searchController.clear();
+                            _onSearchChanged('');
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                ),
+                onChanged: _onSearchChanged,
+              ),
+            ),
+          
+          // Content
+          Expanded(
+            child: _isLoading
+                ? ListView.builder(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    itemCount: 3,
+                    itemBuilder: (context, index) => const SkeletonCard(),
+                  )
+                : _filteredCards.isEmpty
+                    ? _buildEmptyState(context)
+                    : _buildCardList(context),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
+          Haptics.medium();
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
@@ -149,9 +218,7 @@ class _CustomerHomeState extends State<CustomerHome> {
           );
           
           if (result != null && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(result)),
-            );
+            AppFeedback.success(context, result);
           }
           
           _loadCards(); // Reload after returning
@@ -163,31 +230,40 @@ class _CustomerHomeState extends State<CustomerHome> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final isEmpty = _cards.isEmpty;
+    final message = isEmpty 
+        ? AppStrings.customerNoCards 
+        : 'No matching cards';
+    final hint = isEmpty
+        ? AppStrings.customerNoCardsHint
+        : 'Try a different search term';
+    
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.card_membership_outlined,
+              isEmpty ? Icons.card_membership_outlined : Icons.search_off,
               size: 100,
               color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
             Text(
-              AppStrings.customerNoCards,
+              message,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Colors.grey[600],
+                fontSize: AppTypography.displaySmall,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
-              AppStrings.customerNoCardsHint,
+              hint,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey[500],
-                fontSize: 16,
+                fontSize: AppTypography.titleMedium,
               ),
             ),
           ],
@@ -200,10 +276,10 @@ class _CustomerHomeState extends State<CustomerHome> {
     return RefreshIndicator(
       onRefresh: _loadCards,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _cards.length,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        itemCount: _filteredCards.length,
         itemBuilder: (context, index) {
-          final card = _cards[index];
+          final card = _filteredCards[index];
           return Dismissible(
             key: Key(card.id),
             direction: DismissDirection.endToStart,
@@ -238,12 +314,17 @@ class _CustomerHomeState extends State<CustomerHome> {
               );
             },
             onDismissed: (direction) async {
+              Haptics.medium();
               await _cardRepo.deleteCard(card.id);
               await _loadCards();
+              if (mounted) {
+                AppFeedback.success(context, '${card.businessName} deleted');
+              }
             },
             child: _LoyaltyCardWidget(
               card: card,
               onTap: () async {
+                Haptics.selection();
                 await Navigator.push(
                   context,
                   MaterialPageRoute(

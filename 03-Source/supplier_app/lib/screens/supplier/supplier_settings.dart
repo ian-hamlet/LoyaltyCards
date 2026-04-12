@@ -103,6 +103,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
       appBar: AppBar(
         title: const Text('Settings'),
         backgroundColor: const Color(0xFF2C3E50),
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         children: [

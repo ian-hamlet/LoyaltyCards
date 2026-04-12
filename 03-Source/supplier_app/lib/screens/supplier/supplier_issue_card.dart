@@ -23,7 +23,6 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   String? _errorMessage;
   int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
   bool _hasLoggedCardIssuance = false; // Track if we've logged this session
-  bool _instructionsExpanded = false; // Track if instructions are expanded
 
   @override
   void initState() {
@@ -81,6 +80,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       appBar: AppBar(
         title: const Text('Issue New Card'),
         backgroundColor: const Color(0xFF2C3E50),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -205,21 +205,21 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
                       // QR Code Display
                       Card(
                         elevation: 4,
                         child: Padding(
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(20),
                           child: Column(
                             children: [
                               Icon(
                                 BusinessIcons.getIcon(_business!.logoIndex),
-                                size: 48,
+                                size: 40,
                                 color: BrandColors.fromHex(_business!.brandColor),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 8),
                               
                               Text(
                                 _business!.name,
@@ -229,20 +229,9 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                 textAlign: TextAlign.center,
                               ),
                               
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 16),
                               
-                              Text(
-                                'Collect ${_business!.stampsRequired} stamps for a reward',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              
-                              const SizedBox(height: 24),
-                              
-                              // QR Code
+                              // QR Code (slightly smaller for landscape fit)
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
@@ -253,12 +242,12 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                 child: QrImageView(
                                   data: _token!.toQRString(),
                                   version: QrVersions.auto,
-                                  size: 280.0,
+                                  size: QRCodeSize.calculate(context),
                                   backgroundColor: Colors.white,
                                 ),
                               ),
                               
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               
                               Text(
                                 'Scan to Pick Up Card',
@@ -267,137 +256,57 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                     ),
                               ),
                               
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
                               
-                              // Combined crypto + expiry info (compact)
+                              // Expiry info with integrated refresh button
                               Container(
-                                padding: const EdgeInsets.all(10),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+                                  color: _business!.mode == OperationMode.simple
+                                      ? Colors.blue[50]
+                                      : Colors.orange[50],
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey[300]!),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.verified_user, size: 14, color: Colors.green[700]),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Cryptographically Signed',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.green[900],
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.timer_outlined, size: 14, color: Colors.orange[700]),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            'Valid for 5 min (expires ${_getExpiryTime()})',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.orange[900],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Refresh Button (more compact)
-                              OutlinedButton.icon(
-                                onPressed: _loadBusinessAndGenerateToken,
-                                icon: const Icon(Icons.refresh, size: 18),
-                                label: const Text('Refresh QR'),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
+                                  border: Border.all(
+                                    color: _business!.mode == OperationMode.simple
+                                        ? Colors.blue[300]!
+                                        : Colors.orange[300]!,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
-                      // Expandable Instructions (more prominent)
-                      Card(
-                        elevation: 3,
-                        color: Colors.blue[50],
-                        child: Theme(
-                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                          child: ExpansionTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue[700],
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.help_outline, color: Colors.white, size: 18),
-                            ),
-                            title: Text(
-                              'How to Give Card to Customer',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[900],
-                                fontSize: 15,
-                              ),
-                            ),
-                            subtitle: Row(
-                              children: [
-                                Icon(
-                                  _instructionsExpanded ? Icons.expand_less : Icons.expand_more,
-                                  size: 16,
-                                  color: Colors.blue[700],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _instructionsExpanded ? 'Hide steps' : 'Show 5 easy steps',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue[700],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            initiallyExpanded: false,
-                            onExpansionChanged: (expanded) {
-                              setState(() {
-                                _instructionsExpanded = expanded;
-                              });
-                            },
-                            backgroundColor: Colors.blue[50],
-                            collapsedBackgroundColor: Colors.blue[50],
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    _buildInstructionStep('1', 'Show this QR code to customer'),
-                                    const SizedBox(height: 8),
-                                    _buildInstructionStep('2', 'Customer opens LoyaltyCards app'),
-                                    const SizedBox(height: 8),
-                                    _buildInstructionStep('3', 'Customer taps "Scan Card" button'),
-                                    const SizedBox(height: 8),
-                                    _buildInstructionStep('4', 'Customer scans this QR code'),
-                                    const SizedBox(height: 8),
-                                    _buildInstructionStep('5', 'Card added to customer wallet!', isLast: true),
+                                    Icon(
+                                      _business!.mode == OperationMode.simple
+                                          ? Icons.all_inclusive
+                                          : Icons.timer_outlined,
+                                      size: 16,
+                                      color: _business!.mode == OperationMode.simple
+                                          ? Colors.blue[700]
+                                          : Colors.orange[700],
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _business!.mode == OperationMode.simple
+                                          ? 'Reusable QR (no expiry)'
+                                          : 'Valid 5 min (expires ${_getExpiryTime()})',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: _business!.mode == OperationMode.simple
+                                            ? Colors.blue[900]
+                                            : Colors.orange[900],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    if (_business!.mode == OperationMode.secure) ...[
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        onPressed: _loadBusinessAndGenerateToken,
+                                        icon: Icon(Icons.refresh, size: 18, color: Colors.orange[700]),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        tooltip: 'Refresh QR Code',
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -410,47 +319,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                 ),
     );
   }
-  
-  Widget _buildInstructionStep(String number, String text, {bool isLast = false}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: isLast ? Colors.green : Colors.blue[700],
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.blue[900],
-                height: 1.4,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-  
+
   String _getExpiryTime() {
     if (_token == null) return '--:--';
     

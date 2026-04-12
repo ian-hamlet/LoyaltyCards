@@ -237,105 +237,208 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               ),
             ),
 
-            // QR Code Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: Text(
-                _card!.isComplete 
-                    ? 'Show this QR code to redeem your reward'
-                    : 'Show this QR code to collect stamps',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
-            ),
-
-            // QR Code or Redeemed Message
-            if (_card!.isRedeemed)
-              Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.check_circle, size: 80, color: Colors.green[600]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Card Redeemed!',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[800],
+            // Simple Mode vs Secure Mode UI
+            if (_card!.mode == OperationMode.simple) ...[
+              // SIMPLE MODE: No customer QR, just scan supplier
+              if (!_card!.isRedeemed) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.all_inclusive,
+                        size: 64,
+                        color: Colors.blue[400],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'This card has been redeemed and can be deleted.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
+                      const SizedBox(height: 16),
+                      Text(
+                        _card!.isComplete 
+                            ? 'Ready to redeem your reward'
+                            : 'Simple Mode - Scan to collect stamps',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: QrImageView(
-                  data: _generateCardQR(),
-                  version: QrVersions.auto,
-                  size: 220,
-                  backgroundColor: Colors.white,
-                ),
-              ),
-
-            const SizedBox(height: 12),
-
-            // Action Buttons
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  if (!_card!.isRedeemed)
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const QRScannerScreen(
-                                mode: QRScanMode.receiveStamp,
+                      const SizedBox(height: 8),
+                      Text(
+                        _card!.isComplete
+                            ? 'Scan the supplier\'s redemption QR code'
+                            : 'Scan the supplier\'s stamp QR code to add stamps',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const QRScannerScreen(
+                                  mode: QRScanMode.receiveStamp,
+                                ),
                               ),
-                            ),
-                          );
-                          
-                          if (result != null && mounted) {
-                            AppFeedback.info(context, result);
-                            _loadCardData(); // Reload card data
-                          }
-                        },
-                        icon: const Icon(Icons.qr_code_scanner),
-                        label: Text(_card!.isComplete 
-                          ? 'Scan Redemption Token' 
-                          : 'Scan Stamp Token'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.all(16),
+                            );
+                            
+                            if (result != null && mounted) {
+                              AppFeedback.info(context, result);
+                              _loadCardData();
+                            }
+                          },
+                          icon: const Icon(Icons.qr_code_scanner),
+                          label: Text(_card!.isComplete 
+                            ? 'Scan to Redeem' 
+                            : 'Scan to Add Stamp'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.all(16),
+                          ),
                         ),
                       ),
-                    )
-                ],
+                    ],
+                  ),
+                ),
+              ] else ...[
+                // Redeemed state for simple mode
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.check_circle, size: 80, color: Colors.green[600]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Card Redeemed!',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'This card has been redeemed and can be deleted.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ] else ...[
+              // SECURE MODE: Show customer QR code
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                child: Text(
+                  _card!.isComplete 
+                      ? 'Show this QR code to redeem your reward'
+                      : 'Show this QR code to collect stamps',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
+
+              // QR Code or Redeemed Message
+              if (_card!.isRedeemed)
+                Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.check_circle, size: 80, color: Colors.green[600]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Card Redeemed!',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'This card has been redeemed and can be deleted.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: QrImageView(
+                    data: _generateCardQR(),
+                    version: QrVersions.auto,
+                    size: QRCodeSize.calculate(context),
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+
+              const SizedBox(height: 12),
+
+              // Action Buttons (Secure Mode)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    if (!_card!.isRedeemed)
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const QRScannerScreen(
+                                  mode: QRScanMode.receiveStamp,
+                                ),
+                              ),
+                            );
+                            
+                            if (result != null && mounted) {
+                              AppFeedback.info(context, result);
+                              _loadCardData(); // Reload card data
+                            }
+                          },
+                          icon: const Icon(Icons.qr_code_scanner),
+                          label: Text(_card!.isComplete 
+                            ? 'Scan Redemption Token' 
+                            : 'Scan Stamp Token'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.all(16),
+                          ),
+                        ),
+                      )
+                  ],
+                ),
+              ),
+            ],
 
             // Stamps History
             if (_stamps.isNotEmpty) ...[

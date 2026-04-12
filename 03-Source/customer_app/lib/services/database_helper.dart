@@ -51,6 +51,7 @@ class DatabaseHelper {
         stamps_collected INTEGER NOT NULL,
         brand_color TEXT NOT NULL,
         logo_index INTEGER NOT NULL DEFAULT 0,
+        mode TEXT NOT NULL DEFAULT 'secure',
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         is_redeemed INTEGER NOT NULL DEFAULT 0
@@ -121,6 +122,15 @@ class DatabaseHelper {
         ALTER TABLE cards ADD COLUMN logo_index INTEGER NOT NULL DEFAULT 0
       ''');
       print('Migration complete: logo_index column added');
+    }
+    
+    // Migration from v3 to v4: Add mode column
+    if (oldVersion < 4) {
+      print('Migration v3 → v4: Adding mode column to cards table');
+      await db.execute('''
+        ALTER TABLE cards ADD COLUMN mode TEXT NOT NULL DEFAULT 'secure'
+      ''');
+      print('Migration complete: mode column added (default: secure)');
     }
   }
 

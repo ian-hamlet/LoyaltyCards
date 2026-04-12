@@ -193,7 +193,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm,
@@ -397,12 +397,29 @@ class _LoyaltyCardWidget extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          card.businessName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                card.businessName,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            // Mode indicator icon
+                            Icon(
+                              card.mode == OperationMode.simple 
+                                  ? Icons.all_inclusive 
+                                  : Icons.security_outlined,
+                              size: 14,
+                              color: card.mode == OperationMode.simple 
+                                  ? Colors.blue[600] 
+                                  : Colors.orange[700],
+                            ),
+                          ],
                         ),
                         Text(
                           card.isRedeemed

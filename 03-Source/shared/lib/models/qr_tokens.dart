@@ -4,6 +4,7 @@
 /// and customer devices via QR codes.
 
 import 'dart:convert';
+import 'operation_mode.dart';
 
 /// Base class for all QR token types
 abstract class QRToken {
@@ -83,6 +84,7 @@ class CardIssueToken extends QRToken {
   final int stampsRequired;
   final String brandColor;
   final int logoIndex; // Business icon index (0-99)
+  final OperationMode mode; // Operation mode for this card
   final String signature;
   final String? cardId; // Pre-generated card ID for signature consistency (optional for backward compatibility)
   final List<InitialStamp> initialStamps; // Pre-applied stamps at issuance
@@ -94,6 +96,7 @@ class CardIssueToken extends QRToken {
     required this.stampsRequired,
     required this.brandColor,
     this.logoIndex = 0,
+    this.mode = OperationMode.secure,
     required this.signature,
     this.cardId,
     required int timestamp,
@@ -109,6 +112,7 @@ class CardIssueToken extends QRToken {
       stampsRequired: json['stampsRequired'] as int,
       brandColor: json['brandColor'] as String,
       logoIndex: json['logoIndex'] as int? ?? 0,
+      mode: OperationModeExtension.fromString(json['mode'] as String? ?? 'secure'),
       signature: json['signature'] as String,
       cardId: json['cardId'] as String?,
       timestamp: json['timestamp'] as int,
@@ -128,6 +132,7 @@ class CardIssueToken extends QRToken {
       'stampsRequired': stampsRequired,
       'brandColor': brandColor,
       'logoIndex': logoIndex,
+      'mode': mode.toStorageString(),
       'timestamp': timestamp,
       'signature': signature,
       'initialStamps': initialStamps.map((s) => s.toJson()).toList(),

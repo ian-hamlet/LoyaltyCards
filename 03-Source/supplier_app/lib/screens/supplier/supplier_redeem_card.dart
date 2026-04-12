@@ -29,6 +29,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       appBar: AppBar(
         title: const Text('Redeem Card'),
         backgroundColor: BrandColors.success,
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [
@@ -397,46 +398,11 @@ class _RedemptionTokenScreen extends StatelessWidget {
                 child: QrImageView(
                   data: token.toQRString(),
                   version: QrVersions.auto,
-                  size: 280,
+                  size: QRCodeSize.calculate(context),
                   backgroundColor: Colors.white,
                 ),
               ),
               const SizedBox(height: 32),
-
-              // Instructions for customer
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green[300]!),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.qr_code_scanner, color: Colors.green[700], size: 36),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Customer: Scan this QR code',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[900],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'This confirms the redemption and prevents the card from being used again.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
 
               // Done button
               FilledButton(

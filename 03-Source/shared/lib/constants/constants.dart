@@ -18,7 +18,7 @@ class AppConstants {
   
   // Database
   static const String databaseName = 'loyalty_cards.db';
-  static const int databaseVersion = 3;
+  static const int databaseVersion = 4;
   
   // QR Code Settings
   static const int qrCodeSize = 300;

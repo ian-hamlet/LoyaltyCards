@@ -1,3 +1,4 @@
+import 'package:shared/shared.dart';
 import 'database_helper.dart';
 
 /// Service to enforce rate limiting on stamp operations
@@ -8,8 +9,9 @@ class RateLimiter {
   RateLimiter(this._dbHelper);
 
   /// Check if a card can receive a new stamp
-  /// Rate limit: 1 stamp per second per card
-  /// Minimal protection against accidental duplicate scans
+  /// 
+  /// Simple mode: 1 stamp per hour per business (trust-based, prevent abuse)
+  /// Secure mode: 1 stamp per second (prevent accidental duplicate scans)
   /// 
   /// TODO: Review UX - multiple purchases (e.g., 4 coffees) require 4 separate
   /// scan cycles. Consider adding "Add Multiple Stamps" feature to match
@@ -17,6 +19,7 @@ class RateLimiter {
   Future<RateLimitResult> canReceiveStamp({
     required String cardId,
     required String businessId,
+    required OperationMode mode,
   }) async {
     final db = await _dbHelper.database;
 
@@ -39,17 +42,23 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastStamp = now - lastStampTime;
 
-    // Rate limit: 1 second (1000 milliseconds)
-    // Minimal delay to prevent accidental duplicate scans only
-    const rateLimitMs = 1000;
+    // Rate limit based on operation mode
+    final rateLimitMs = mode == OperationMode.simple
+        ? 60 * 60 * 1000  // Simple mode: 1 hour (prevents abuse of static QRs)
+        : 1000;            // Secure mode: 1 second (prevents duplicate scans)
 
     if (timeSinceLastStamp < rateLimitMs) {
       final remainingMs = rateLimitMs - timeSinceLastStamp;
+      final remainingMinutes = (remainingMs / (60 * 1000)).ceil();
+      
+      final message = mode == OperationMode.simple
+          ? 'You can get another stamp from this business in $remainingMinutes minute${remainingMinutes > 1 ? 's' : ''}'
+          : 'Please wait a moment before getting another stamp';
 
       return RateLimitResult(
         canProceed: false,
         waitTimeMs: remainingMs,
-        message: 'Please wait a moment before getting another stamp',
+        message: message,
       );
     }
 

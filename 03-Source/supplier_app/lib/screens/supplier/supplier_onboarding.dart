@@ -5,6 +5,7 @@ import 'package:pointycastle/ecc/api.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import 'supplier_home.dart';
+import 'how_it_works.dart';
 
 class SupplierOnboarding extends StatefulWidget {
   const SupplierOnboarding({super.key});
@@ -32,8 +33,12 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   }
 
   Future<void> _createBusiness() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      Haptics.error();
+      return;
+    }
 
+    Haptics.medium();
     setState(() => _isCreating = true);
 
     try {
@@ -87,6 +92,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       print('='.padRight(60, '='));
 
       if (mounted) {
+        Haptics.success();
         // Navigate to home screen
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const SupplierHome()),
@@ -95,12 +101,8 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
     } catch (e) {
       setState(() => _isCreating = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error setting up business: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Haptics.error();
+        AppFeedback.error(context, 'Error setting up business: $e');
       }
     }
   }
@@ -108,15 +110,30 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Business Setup'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'How It Works',
+            onPressed: () {
+              Haptics.light();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const HowItWorks()),
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.md),
                 
                 // Logo/Icon
                 Icon(
@@ -125,7 +142,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
                 
                 // Title
                 Text(
@@ -136,17 +153,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   textAlign: TextAlign.center,
                 ),
                 
-                const SizedBox(height: 8),
-                
-                Text(
-                  'Set and configure your loyalty card program for your customers',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: 48),
+                const SizedBox(height: AppSpacing.xl),
                 
                 // Business Name
                 TextFormField(
@@ -251,7 +258,10 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   children: BrandColors.cardColorOptions.map((color) {
                     final isSelected = color == _selectedColor;
                     return GestureDetector(
-                      onTap: () => setState(() => _selectedColor = color),
+                      onTap: () {
+                        Haptics.selection();
+                        setState(() => _selectedColor = color);
+                      },
                       child: Container(
                         width: 50,
                         height: 50,
@@ -390,44 +400,46 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
                 ],
                 
-                // Create Button
-                FilledButton(
-                  onPressed: _isCreating ? null : _createBusiness,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                    backgroundColor: BrandColors.fromHex(_selectedColor),
-                  ),
-                  child: _isCreating
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Create Business Profile',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Info text
-                Text(
-                  'Your cryptographic keys will be generated and stored securely on this device.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                const SizedBox(height: AppSpacing.lg),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: FilledButton(
+            onPressed: _isCreating ? null : _createBusiness,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              backgroundColor: BrandColors.fromHex(_selectedColor),
+            ),
+            child: _isCreating
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'Creating...',
+                        style: TextStyle(fontSize: AppTypography.bodyLarge),
+                      ),
+                    ],
+                  )
+                : Text(
+                    'Create Business Profile',
+                    style: TextStyle(fontSize: AppTypography.bodyLarge),
+                  ),
           ),
         ),
       ),
@@ -439,7 +451,10 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
     final color = BrandColors.fromHex(_selectedColor);
     
     return GestureDetector(
-      onTap: () => setState(() => _selectedLogoIndex = index),
+      onTap: () {
+        Haptics.selection();
+        setState(() => _selectedLogoIndex = index);
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

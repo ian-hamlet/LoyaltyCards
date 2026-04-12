@@ -9,6 +9,7 @@ import '../../services/database_helper.dart';
 import 'customer_card_detail.dart';
 import 'customer_settings.dart';
 import 'qr_scanner_screen.dart';
+import 'how_it_works.dart';
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -141,6 +142,17 @@ class _CustomerHomeState extends State<CustomerHome> {
       appBar: AppBar(
         title: Text('My Loyalty Cards $appVersion'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'How It Works',
+            onPressed: () {
+              Haptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HowItWorks()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {

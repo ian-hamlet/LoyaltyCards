@@ -7,6 +7,7 @@ import 'supplier_issue_card.dart';
 import 'supplier_stamp_card.dart';
 import 'supplier_redeem_card.dart';
 import 'supplier_settings.dart';
+import 'how_it_works.dart';
 
 class SupplierHome extends StatefulWidget {
   const SupplierHome({super.key});
@@ -87,8 +88,20 @@ class _SupplierHomeState extends State<SupplierHome> {
         title: Text('${_business!.name} $appVersion'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'How It Works',
+            onPressed: () {
+              Haptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HowItWorks()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
+              Haptics.light();
               Navigator.push(
                 context,
                 MaterialPageRoute(

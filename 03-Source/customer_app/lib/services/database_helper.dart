@@ -54,7 +54,8 @@ class DatabaseHelper {
         mode TEXT NOT NULL DEFAULT 'secure',
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
-        is_redeemed INTEGER NOT NULL DEFAULT 0
+        is_redeemed INTEGER NOT NULL DEFAULT 0,
+        redeemed_at INTEGER
       )
     ''');
 

@@ -6,6 +6,29 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 63 Changes:
+/// - **REDEMPTION TIMESTAMP**: Store and display when cards were redeemed
+/// - Added redeemed_at column to database (records timestamp at redemption)
+/// - Redemption success dialog shows time and date in customer app
+/// - Redeemed cards in wallet display redemption timestamp
+/// - Improved text readability: green color scheme instead of grey
+/// 
+/// Build 62 Changes:
+/// - **CUSTOMER SELF-REDEMPTION**: Simple mode customers now redeem their own cards
+/// - Customer presses "Redeem Reward" button after receiving reward from supplier
+/// - Card marked as redeemed with timestamp on customer's device
+/// - Supplier just verifies card visually - no button press needed
+/// - Success dialog shows redemption time and date to customer
+/// - Supplier instructions updated: customer triggers redemption
+/// 
+/// Build 61 Changes:
+/// - **SIMPLE MODE REDEMPTION**: Manual confirmation for simple mode suppliers
+/// - No QR scanning needed - honor-based system
+/// - Supplier confirms they verified completed card and gave reward
+/// - Records redemption with timestamp for supplier confidence
+/// - Shows redemption time and date in confirmation dialog
+/// - Secure mode redemption unchanged (still uses camera scanner)
+/// 
 /// Build 60 Changes:
 /// - Removed step-by-step instructions from supplier simple mode stamp screen
 /// - Cleaner UI - instructions should be in help documentation, not main screen
@@ -80,4 +103,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 60)';
+const String appVersion = 'v0.1.0 (Build 63)';

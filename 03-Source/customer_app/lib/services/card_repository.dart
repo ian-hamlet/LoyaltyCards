@@ -130,11 +130,13 @@ class CardRepository {
   /// Mark a card as redeemed (prevents double redemption)
   Future<void> markCardAsRedeemed(String cardId) async {
     final db = await _dbHelper.database;
+    final now = DateTime.now().millisecondsSinceEpoch;
     await db.update(
       'cards',
       {
         'is_redeemed': 1,
-        'updated_at': DateTime.now().millisecondsSinceEpoch,
+        'redeemed_at': now,
+        'updated_at': now,
       },
       where: 'id = ?',
       whereArgs: [cardId],

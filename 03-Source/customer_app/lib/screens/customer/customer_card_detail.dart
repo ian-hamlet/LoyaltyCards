@@ -264,7 +264,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                       const SizedBox(height: 8),
                       Text(
                         _card!.isComplete
-                            ? 'Scan the supplier\'s redemption QR code'
+                            ? 'Show this card to the supplier to verify, then redeem below'
                             : 'Scan the supplier\'s stamp QR code to add stamps',
                         style: TextStyle(
                           fontSize: 15,
@@ -273,33 +273,45 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const QRScannerScreen(
-                                  mode: QRScanMode.receiveStamp,
+                      if (_card!.isComplete)
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _showRedemptionConfirmation,
+                            icon: const Icon(Icons.card_giftcard),
+                            label: const Text('Redeem Reward'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.green[600],
+                              padding: const EdgeInsets.all(16),
+                            ),
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const QRScannerScreen(
+                                    mode: QRScanMode.receiveStamp,
+                                  ),
                                 ),
-                              ),
-                            );
-                            
-                            if (result != null && mounted) {
-                              AppFeedback.info(context, result);
-                              _loadCardData();
-                            }
-                          },
-                          icon: const Icon(Icons.qr_code_scanner),
-                          label: Text(_card!.isComplete 
-                            ? 'Scan to Redeem' 
-                            : 'Scan to Add Stamp'),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.all(16),
+                              );
+                              
+                              if (result != null && mounted) {
+                                AppFeedback.info(context, result);
+                                _loadCardData();
+                              }
+                            },
+                            icon: const Icon(Icons.qr_code_scanner),
+                            label: const Text('Scan to Add Stamp'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.all(16),
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -309,9 +321,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Colors.green[50],
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey[300]!),
+                    border: Border.all(color: Colors.green[200]!, width: 2),
                   ),
                   child: Column(
                     children: [
@@ -326,11 +338,50 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         ),
                       ),
                       const SizedBox(height: 8),
+                      if (_card!.redeemedAt != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.access_time, size: 16, color: Colors.green[700]),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${_card!.redeemedAt!.hour}:${_card!.redeemedAt!.minute.toString().padLeft(2, '0')}',
+                                    style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.calendar_today, size: 16, color: Colors.green[700]),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${_card!.redeemedAt!.day}/${_card!.redeemedAt!.month}/${_card!.redeemedAt!.year}',
+                                    style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       Text(
                         'This card has been redeemed and can be deleted.',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -545,5 +596,162 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _showRedemptionConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(Icons.card_giftcard, color: Colors.green[600], size: 48),
+        title: const Text(
+          'Redeem Reward?',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Have you received your reward from the supplier?',
+              style: TextStyle(fontSize: 15),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'This will mark your card as redeemed with the current date and time',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not Yet'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.check_circle),
+            label: const Text('Yes, Redeem'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green[600],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _processRedemption();
+    }
+  }
+
+  Future<void> _processRedemption() async {
+    try {
+      final now = DateTime.now();
+      
+      // Mark card as redeemed
+      await _cardRepo.markCardAsRedeemed(_card!.id);
+      
+      print('=== Simple Mode Redemption ===');
+      print('Card ID: ${_card!.id}');
+      print('Business: ${_card!.businessName}');
+      print('Stamps: ${_card!.stampsCollected}');
+      print('Redeemed at: ${now.toIso8601String()}');
+      
+      // Reload card data
+      await _loadCardData();
+      
+      if (mounted) {
+        // Show success message
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            icon: const Icon(Icons.celebration, color: Colors.green, size: 64),
+            title: const Text('Reward Redeemed!'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _card!.businessName,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${_card!.stampsCollected} stamps redeemed',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green[200]!),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.access_time, size: 18, color: Colors.green[700]),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${now.hour}:${now.minute.toString().padLeft(2, '0')}',
+                            style: TextStyle(fontSize: 15, color: Colors.green[900], fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_today, size: 18, color: Colors.green[700]),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${now.day}/${now.month}/${now.year}',
+                            style: TextStyle(fontSize: 15, color: Colors.green[900], fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'You can now delete this card',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700], fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Done'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        AppFeedback.error(context, 'Error redeeming card: $e');
+      }
+    }
   }
 }

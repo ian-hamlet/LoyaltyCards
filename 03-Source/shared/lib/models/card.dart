@@ -14,6 +14,7 @@ class Card {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isRedeemed; // Track if card has been redeemed (prevents double redemption)
+  final DateTime? redeemedAt; // Timestamp when card was redeemed (null if not redeemed)
 
   Card({
     required this.id,
@@ -28,6 +29,7 @@ class Card {
     required this.createdAt,
     required this.updatedAt,
     this.isRedeemed = false,
+    this.redeemedAt,
   });
 
   /// Check if card is complete (all stamps collected)
@@ -50,6 +52,7 @@ class Card {
       'mode': mode.toStorageString(),
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
+      'redeemed_at': redeemedAt?.millisecondsSinceEpoch,
       'is_redeemed': isRedeemed ? 1 : 0,
     };
   }
@@ -68,6 +71,9 @@ class Card {
       mode: OperationModeExtension.fromString(json['mode'] as String? ?? 'secure'),
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(json['updated_at'] as int),
+      redeemedAt: json['redeemed_at'] != null 
+          ? DateTime.fromMillisecondsSinceEpoch(json['redeemed_at'] as int)
+          : null,
       isRedeemed: (json['is_redeemed'] as int?) == 1,
     );
   }
@@ -83,6 +89,7 @@ class Card {
     String? brandColor,
     int? logoIndex,
     OperationMode? mode,
+    DateTime? redeemedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isRedeemed,
@@ -98,6 +105,7 @@ class Card {
       logoIndex: logoIndex ?? this.logoIndex,
       mode: mode ?? this.mode,
       isRedeemed: isRedeemed ?? this.isRedeemed,
+      redeemedAt: redeemedAt ?? this.redeemedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

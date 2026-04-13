@@ -1,3 +1,5 @@
+import 'operation_mode.dart';
+
 /// Represents a business/supplier configuration
 class Business {
   final String id;
@@ -7,6 +9,7 @@ class Business {
   final int stampsRequired;
   final String brandColor; // Hex color string
   final int logoIndex; // Business icon/logo index (0-99)
+  final OperationMode mode; // Operation mode (simple or secure)
   final DateTime createdAt;
 
   Business({
@@ -17,6 +20,7 @@ class Business {
     required this.stampsRequired,
     required this.brandColor,
     this.logoIndex = 0,
+    this.mode = OperationMode.secure, // Default to secure for backward compatibility
     required this.createdAt,
   });
 
@@ -29,6 +33,7 @@ class Business {
       'stamps_required': stampsRequired,
       'brand_color': brandColor,
       'logo_index': logoIndex,
+      'mode': mode.toStorageString(),
       'created_at': createdAt.millisecondsSinceEpoch,
     };
     
@@ -49,6 +54,7 @@ class Business {
       stampsRequired: json['stamps_required'] as int,
       brandColor: json['brand_color'] as String,
       logoIndex: json['logo_index'] as int? ?? 0,
+      mode: OperationModeExtension.fromString(json['mode'] as String? ?? 'secure'),
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
     );
   }
@@ -62,6 +68,7 @@ class Business {
     int? stampsRequired,
     String? brandColor,
     int? logoIndex,
+    OperationMode? mode,
     DateTime? createdAt,
   }) {
     return Business(
@@ -72,6 +79,7 @@ class Business {
       stampsRequired: stampsRequired ?? this.stampsRequired,
       brandColor: brandColor ?? this.brandColor,
       logoIndex: logoIndex ?? this.logoIndex,
+      mode: mode ?? this.mode,
       createdAt: createdAt ?? this.createdAt,
     );
   }

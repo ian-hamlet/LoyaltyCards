@@ -1,3 +1,4 @@
+import 'package:shared/shared.dart';
 import 'database_helper.dart';
 
 /// Service to enforce rate limiting on stamp operations
@@ -8,15 +9,15 @@ class RateLimiter {
   RateLimiter(this._dbHelper);
 
   /// Check if a card can receive a new stamp
-  /// Rate limit: 1 stamp per second per card
-  /// Minimal protection against accidental duplicate scans
   /// 
-  /// TODO: Review UX - multiple purchases (e.g., 4 coffees) require 4 separate
-  /// scan cycles. Consider adding "Add Multiple Stamps" feature to match
-  /// physical card UX where supplier can stamp multiple times instantly.
+  /// Both modes: 1 stamp per second (prevents accidental duplicate scans)
+  /// 
+  /// Note: For multiple purchases (e.g., 2 coffees), customer can scan
+  /// repeatedly with 1-second delays between each stamp.
   Future<RateLimitResult> canReceiveStamp({
     required String cardId,
     required String businessId,
+    required OperationMode mode,
   }) async {
     final db = await _dbHelper.database;
 
@@ -39,13 +40,12 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastStamp = now - lastStampTime;
 
-    // Rate limit: 1 second (1000 milliseconds)
-    // Minimal delay to prevent accidental duplicate scans only
+    // Rate limit: 1 second for both modes (prevents accidental duplicate scans)
     const rateLimitMs = 1000;
 
     if (timeSinceLastStamp < rateLimitMs) {
       final remainingMs = rateLimitMs - timeSinceLastStamp;
-
+      
       return RateLimitResult(
         canProceed: false,
         waitTimeMs: remainingMs,

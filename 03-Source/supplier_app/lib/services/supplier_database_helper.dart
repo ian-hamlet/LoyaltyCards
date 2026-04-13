@@ -26,7 +26,7 @@ class SupplierDatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3, // Incremented for logo_index column
+      version: 4, // Incremented for mode column
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
@@ -49,6 +49,7 @@ class SupplierDatabaseHelper {
         stamps_required INTEGER NOT NULL,
         brand_color TEXT NOT NULL,
         logo_index INTEGER NOT NULL DEFAULT 0,
+        mode TEXT NOT NULL DEFAULT 'secure',
         created_at INTEGER NOT NULL
       )
     ''');
@@ -139,6 +140,15 @@ class SupplierDatabaseHelper {
         ALTER TABLE business ADD COLUMN logo_index INTEGER NOT NULL DEFAULT 0
       ''');
       print('Migration complete: logo_index column added');
+    }
+    
+    // Migration from v3 to v4: Add mode column
+    if (oldVersion < 4) {
+      print('Migration v3 → v4: Adding mode column to business table');
+      await db.execute('''
+        ALTER TABLE business ADD COLUMN mode TEXT NOT NULL DEFAULT 'secure'
+      ''');
+      print('Migration complete: mode column added (default: secure)');
     }
   }
 

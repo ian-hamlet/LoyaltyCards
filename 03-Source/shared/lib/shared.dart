@@ -6,6 +6,7 @@ export 'models/stamp.dart';
 export 'models/business.dart';
 export 'models/transaction.dart';
 export 'models/qr_tokens.dart';
+export 'models/operation_mode.dart';
 
 // Export constants
 export 'constants/constants.dart';
@@ -13,6 +14,7 @@ export 'constants/business_icons.dart';
 
 // Export utilities
 export 'utils/haptics.dart';
+export 'utils/qr_code_size.dart';
 
 // Export widgets
 export 'widgets/feedback.dart';

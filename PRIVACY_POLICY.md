@@ -199,7 +199,7 @@ Since we collect no personal data and all data stays on your device:
 
 If you have questions about this Privacy Policy or LoyaltyCards:
 
-- **Email:** [Your email address]
+- **Email:** ian.hamlet@dotConnected.com
 - **GitHub:** https://github.com/ian-hamlet/LoyaltyCards
 
 Please note: Since we collect no data, we cannot help you recover lost data or access data from your device.

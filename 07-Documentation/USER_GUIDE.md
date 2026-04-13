@@ -2,7 +2,7 @@
 
 **Quick Start Guide for Businesses & Customers**
 
-Version 0.1.0 (Build 78)  
+Version 0.1.0 (Build 83)  
 Last Updated: April 13, 2026
 
 ---
@@ -295,8 +295,8 @@ Last Updated: April 13, 2026
    - View Business ID
 
 2. **Backup & Recovery**
-   - **Create Recovery Backup** ← DO THIS NOW
-   - Clone to Another Device (coming soon)
+   - **Create Recovery Backup** ← CRITICAL - Do immediately
+   - **Clone to Another Device** ← Set up multiple devices
 
 3. **App Information**
    - View app version
@@ -358,6 +358,89 @@ Last Updated: April 13, 2026
 
 ---
 
+### Setting Up Additional Devices (Clone)
+
+**Use Case:** You want the same business available on multiple devices (e.g., front desk + back office, or multiple checkout stations).
+
+**How It Works:**
+1. **Device A** (already configured): Settings → Clone to Another Device
+2. Clone QR code appears with **5-minute countdown timer**
+3. **Device B** (new/unconfigured): Open app → Tap "Clone from Another Device"
+4. Scan QR code from Device A
+5. Device B now has identical business configuration
+
+**Result:**
+- Both devices have same business identity
+- Both can issue loyalty cards
+- Both can add stamps
+- Both can redeem cards
+- Customer cards work on both devices
+- Completely independent operation
+
+**Important Notes:**
+- ⏱️ Clone QR expires in **5 minutes** for security
+- 🔐 Contains your private cryptographic keys
+- ⚠️ Only use on devices you personally control
+- 🔄 Can regenerate new clone QR anytime
+- 📱 Can clone to unlimited devices
+- 🔑 All devices share same Business ID
+
+**Security:**
+- Clone QR is time-limited (5 minutes)
+- Prevents unauthorized cloning
+- If QR expires, just generate a new one
+- Never share clone QR publicly
+- Store devices securely
+
+**When to Use Clone vs Recovery:**
+
+| Scenario | Use This |
+|----------|----------|
+| Lost/stolen device | **Recovery Backup** (restore) |
+| Setting up second checkout | **Clone QR** (5-min) |
+| New device same business | **Clone QR** (5-min) |
+| Backup for safety | **Recovery Backup** (print/save) |
+| Testing new device | **Clone QR** (5-min) |
+
+**Step-by-Step Clone Process:**
+
+**On Device A (Source):**
+1. Open Supplier app
+2. Tap Settings (⚙️)
+3. Tap "Clone to Another Device"
+4. QR code appears with countdown
+5. Keep screen active while scanning
+
+**On Device B (Target):**
+1. Open Supplier app (should show onboarding)
+2. Tap "Clone from Another Device" (green button)
+3. Point camera at Device A's QR code
+4. Wait for import to complete (5-10 seconds)
+5. App navigates to home screen
+6. Device B ready to use!
+
+**Common Scenarios:**
+
+**Scenario: Multiple Checkout Stations**
+- Clone business to iPad at each station
+- All stations issue/redeem independently
+- Customer cards work at any station
+- Statistics combine across all devices
+
+**Scenario: Manager + Staff Device**
+- Manager has primary device (with backup)
+- Clone to staff device for daily use
+- Both can perform all operations
+- No "master" device - all equal
+
+**Scenario: Temporary Pop-Up Location**
+- Clone to temporary device
+- Use for event/market
+- Return device or wipe after event
+- Original device unaffected
+
+---
+
 ### Troubleshooting (Business)
 
 **"Customer says stamp didn't work"**
@@ -391,6 +474,19 @@ Last Updated: April 13, 2026
 - Check QR code not damaged
 - Contact support if persistent issue
 
+**"Clone QR expired before I could scan"**
+- Generate new clone QR (Settings → Clone to Another Device)
+- 5-minute timer resets with each new QR
+- Have both devices ready before generating
+- If interrupted, just regenerate
+
+**"Clone import failed"**
+- Check QR hasn't expired (5-minute limit)
+- Ensure good lighting for scan
+- Try using QR frame and rotation controls
+- Verify source device still configured
+- Check target device has no existing business
+
 ---
 
 ## 🎓 Tips & Best Practices
@@ -412,17 +508,25 @@ Last Updated: April 13, 2026
 
 ✅ **DO:**
 - **Create backup immediately** (before issuing any cards)
+- **Use multiple backup methods** (Print + Photos recommended)
 - Test with personal device first
 - Print clear, large QR codes (3-4 inches)
 - Position QR codes at eye level
 - Train staff on redemption process (secure mode)
 - Update app regularly
+- Clone to multiple devices if needed (front/back office)
+- Keep clone QR secure during 5-minute window
+- Test recovery process once to ensure backup works
 
 ❌ **DON'T:**
 - Skip the backup step
+- Rely on single backup method only
 - Change mode without planning
 - Delete QR codes (simple mode)
 - Share backup QR code publicly
+- Share clone QR with unauthorized people
+- Leave clone QR displayed after setup complete
+- Post backup/clone QR on social media
 
 ---
 

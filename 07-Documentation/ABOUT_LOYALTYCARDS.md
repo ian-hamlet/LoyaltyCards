@@ -2,7 +2,7 @@
 
 **A Privacy-First Digital Loyalty Card System**
 
-Version 0.1.0 (Build 78)  
+Version 0.1.0 (Build 83)  
 Last Updated: April 13, 2026
 
 ---
@@ -407,10 +407,105 @@ Customer Phone ←--QR Codes--→ Supplier Device
    - View active cards
    - Transaction history
 
-5. **Disaster Recovery**
-   - Backup business configuration
-   - Restore to new device
-   - Customer cards remain valid
+5. **Disaster Recovery & Multi-Device**
+   - Backup business configuration (4 methods)
+   - Restore to new device from backup QR
+   - Clone to additional devices (5-minute expiry)
+   - Customer cards remain valid across all devices
+   - Multiple devices can issue/redeem for same business
+
+---
+
+## 💾 Backup & Recovery
+
+### Business Configuration Protection
+
+**CRITICAL:** Your business configuration contains cryptographic keys that validate all customer cards. Losing your device without a backup means **all customer cards become invalid**.
+
+### Four Backup Methods
+
+**1. 🖨️ Print Backup (HIGHLY RECOMMENDED)**
+- Generates PDF with backup QR code
+- Print and store in safe location
+- No internet required to restore
+- Cannot be hacked or lost to cloud breach
+- Best practice: Print 2 copies, store separately
+
+**2. 📸 Save to Photos**
+- Saves QR image to iOS Photos app
+- Automatically backs up to iCloud Photos (if enabled)
+- Easy to find and access
+- Syncs across your Apple devices
+- Requires iOS photo library permission
+
+**3. 📧 Email to Yourself**
+- Opens email with QR attachment
+- Send to your own email address
+- Access from any device with email
+- Searchable: "LoyaltyCards Backup"
+- Works with any email provider
+
+**4. 📁 Save to Files**
+- Saves to Files app / iCloud Drive
+- Store in password manager (1Password, etc.)
+- Organize with other business documents
+- Cloud-synced if using iCloud Drive
+- Can share with trusted backup location
+
+### Recovery Backup vs Clone QR
+
+**Recovery Backup (No Expiry):**
+- For disaster recovery (lost/stolen/broken device)
+- Never expires - valid forever
+- Restores complete business configuration
+- Use when: Device lost, needs replacement
+
+**Clone QR (5-Minute Expiry):**
+- For setting up additional devices
+- Expires in 5 minutes for security
+- Allows multiple devices for same business
+- Use when: Front desk + back office needs access
+- All devices share same business identity
+
+### Multi-Device Support
+
+**Setting Up Second Device:**
+1. Device A (already configured): Settings → Clone to Another Device
+2. Clone QR appears with countdown (5 minutes)
+3. Device B (new): Open app → Clone from Another Device
+4. Scan QR from Device A
+5. Device B now has identical configuration
+
+**Result:**
+- Both devices can issue loyalty cards
+- Both devices can add stamps
+- Both devices can redeem cards
+- Customer cards valid on both devices
+- Same business ID and cryptographic keys
+- Changes on one device don't affect the other
+
+**Security:**
+- Clone QR expires in 5 minutes
+- Contains private cryptographic keys
+- Only use on devices you control
+- Regenerate new QR if setup takes longer
+
+### Best Practices
+
+✅ **DO THIS:**
+- Create backup immediately after setup
+- Use at least 2 backup methods
+- Print and store physical copy
+- Test restore process once
+- Create new backup after any major changes
+- Keep backup QR codes secure and private
+
+❌ **DON'T DO THIS:**
+- Skip backup creation
+- Share backup QR publicly
+- Store only digital backup
+- Email backup to untrusted addresses
+- Post backup QR on social media
 
 ---
 
@@ -422,8 +517,7 @@ Customer Phone ←--QR Codes--→ Supplier Device
 - Push notifications (opt-in)
 - Customer spending insights (anonymous)
 - Business analytics dashboard
-- Clone business to multiple devices
-- Encrypted cloud backup
+- Encrypted cloud backup (optional)
 
 **Not Planned (Privacy Reasons):**
 - Customer accounts or profiles
@@ -478,7 +572,7 @@ A: Yes! There's no data to steal - everything stays on your device. No cloud ser
 A: Customer cards are lost (like physical cards). No personal data is exposed. Simple reinstall the app and start fresh.
 
 **Q: What if supplier loses their device?**  
-A: With backup: Restore to new device, all customer cards remain valid. Without backup: Must re-issue cards to customers.
+A: With backup QR code: Scan the backup on new device, all customer cards remain valid, business fully restored in seconds. Without backup: All customer cards become invalid, must restart business from scratch.
 
 **Q: Can I switch between modes?**  
 A: Currently not supported. Choose mode during setup. Contact support to discuss migration.

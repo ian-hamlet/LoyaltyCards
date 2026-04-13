@@ -1,48 +1,105 @@
 # Next Actions
 
-**Document Version:** 1.0  
+**Document Version:** 2.0  
 **Created:** 2026-04-11  
-**Current Build:** v0.1.0 (Build 11)  
-**Current Phase:** Phases 3 & 4 Complete, Ready for Phase 5
+**Updated:** 2026-04-13  
+**Current Build:** v0.1.0 (Build 75)  
+**Current Phase:** Dual-Mode System Complete, Ready for Device Testing
 
 ---
 
 ## 📋 Executive Summary
 
-**Current Status:** 67% Complete (Phases 0-4 done)
+**Current Status:** 85% Complete (Phases 0-6 done)
 
-You have successfully completed 4 of 6 phases:
+You have successfully completed 6 development phases:
 - ✅ Phase 0: Project Foundation
 - ✅ Phase 1: Customer Data Layer
 - ✅ Phase 2: Supplier Cryptography
 - ✅ Phase 3: Customer P2P & QR Scanning
 - ✅ Phase 4: Supplier QR Operations
+- ✅ Phase 5: UX Polish & Refinement (Builds 43-46)
+- ✅ Phase 6: Dual-Mode System Implementation (Builds 62-75)
 
 **What's Working:**
-- Card issuance with 0-7 initial stamps
-- Stamp operations with 1-7 stamps per scan
-- Hash chain cryptographic validation
-- Auto-overflow to new card when stamps exceed requirement
-- Simplified redemption flow
-- All core P2P functionality tested on physical devices (iPhone + iPad)
+- Complete dual-mode system (Simple & Secure)
+- Simple Mode: Trust-based, reusable QR codes, perfect for coffee shops
+- Secure Mode: Time-limited crypto validation for high-value scenarios
+- Auto-create new card after redemption (both modes)
+- Stamp history with card creation entry
+- Redemption timestamp tracking
+- Unified non-modal QR displays
+- Customer instruction banners throughout
+- All core P2P functionality tested on physical devices
 
-**Build 11 Achievement:**
-- Multi-stamp implementation complete
-- Deployment verification working
-- UI polished and clear
-- Performance excellent (all operations < 100ms)
-- Production-ready for single-device supplier testing
+**Build 75 Achievement:**
+- Dual-mode architecture complete
+- 27 files changed (+2,416 additions, -815 deletions)
+- Feature branch merged to develop
+- Both apps building successfully (Customer: 18.1MB, Supplier: 18.7MB)
+- Production-ready for comprehensive device testing
 
 ---
 
-## 🎯 Next Phase: Phase 5 - Multi-Device Configuration
+## 🎯 Next Phase: Phase 7 - Comprehensive Device Testing
+
+**Duration Estimate:** 2-3 days  
+**Priority:** HIGH (validate dual-mode system on physical devices)
+
+### Objectives
+
+Comprehensive testing of both Simple and Secure operation modes on physical iOS devices to validate real-world functionality.
+
+### Testing Scenarios
+
+**Simple Mode Testing (Coffee Shop Scenario):**
+1. Create simple mode business on supplier iPad
+2. Issue card to customer iPhone (0 stamps)
+3. Customer scans reusable stamp QR 5 times
+4. Verify: Card has 5 stamps, history shows all 5 entries
+5. Add 5 more stamps (total 10)
+6. Customer self-redeems card
+7. Verify: New card auto-created with 0 stamps
+
+**Secure Mode Testing (High-Value Scenario):**
+1. Create secure mode business on supplier iPad
+2. Issue card with 2 initial stamps
+3. Add 4 stamps (using time-limited QR codes)
+4. Verify: Hash chain validates correctly
+5. Add 6 stamps (total 12, overflow to new card)
+6. Verify: 10 stamps on complete card, 2 on new card
+7. Redeem complete card (scan redemption QR)
+8. Continue with new card
+
+**Cross-Mode Testing:**
+- Multiple businesses in wallet (mix of simple and secure)
+- Switch between modes throughout day
+- Rate limiting working correctly (1 second cooldown)
+- Statistics tracking (secure mode only)
+- Offline functionality (both modes)
+
+**Acceptance Criteria:**
+- [ ] Simple mode: All features working without crypto validation
+- [ ] Secure mode: All features working with crypto validation
+- [ ] Auto-create card after redemption (both modes)
+- [ ] Stamp history accurate (both modes)
+- [ ] Redemption timestamps recorded
+- [ ] Navigation smooth throughout apps
+- [ ] No crashes or freezes
+- [ ] Performance acceptable (< 200ms operations)
+
+---
+
+## 🚀 Following Phase: Phase 8 - Multi-Device Configuration (Optional)
 
 **Duration Estimate:** 1-2 days  
-**Priority:** HIGH (required for multi-register businesses)
+**Priority:** MEDIUM (useful for multi-register businesses)
 
 ### Objectives
 
 Enable a single business to operate from multiple devices (e.g., coffee shop with iPad at register + iPhone on mobile cart).
+
+**Note:** Simple mode businesses may not need this feature as QR codes are static and can be shared. Most valuable for secure mode where private keys need distribution.
 
 ### Tasks
 

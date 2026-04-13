@@ -1,15 +1,15 @@
 # LoyaltyCards - Current Status
 
-**Document Version:** 2.0  
-**Updated:** 2026-04-12  
-**Current Build:** v0.1.0 (Build 46)  
-**Status:** UX Polish Complete, Ready for Device Testing
+**Document Version:** 3.0  
+**Updated:** 2026-04-13  
+**Current Build:** v0.1.0 (Build 75)  
+**Status:** Dual-Mode System Complete, Feature Branch Merged to Develop
 
 ---
 
 ## 📊 Project Completion Status
 
-**Overall Progress:** ~75% Complete (Ready for Pilot Testing)
+**Overall Progress:** ~85% Complete (Dual-Mode Implementation Complete)
 
 ### Completed Phases ✅
 - ✅ **Phase 0:** Project Foundation (Apr 3, 2026)
@@ -20,7 +20,8 @@
 - ✅ **Phase 5:** UX Polish & Refinement (Apr 11-12, 2026) - **NEW**
 
 ### Current Phase 🎯
-- 🔄 **Phase 6:** Device Testing & Validation (In Progress)
+- ✅ **Phase 6:** Dual-Mode System Implementation (Complete)
+- 🔄 **Phase 7:** Comprehensive Device Testing (Ready to Start)
 
 ### Remaining Phases
 - ⏳ **Phase 7:** Multi-Device Configuration (Optional for pilot)
@@ -97,6 +98,47 @@
 - Replaced ALL remaining SnackBars with AppFeedback
 - Applied AppTypography and AppSpacing to dialogs
 - Changed ElevatedButton to FilledButton for modern design
+
+### Builds 62-75: Dual-Mode System (Apr 13, 2026)
+**Duration:** 6 hours  
+**Impact:** Major feature - Complete dual-mode implementation
+
+**Dual-Mode Architecture (Simple & Secure):**
+- Created OperationMode enum (Simple/Secure)
+- Simple Mode: Trust-based, reusable QR codes, no cryptographic validation
+- Secure Mode: Time-limited QR codes with cryptographic validation
+- Mode selection in supplier onboarding
+- Mode-specific UI behaviors throughout both apps
+
+**Customer App Improvements:**
+- Auto-create new card after redemption (both modes)
+- Fixed simple mode stamp history (unique stamp IDs per scan)
+- Card creation entry in stamp history with initial stamp count
+- Redemption timestamp display on redeemed cards
+- Improved text colors for better readability (green scheme)
+- Database migration v4→v5 for redeemed_at column
+- Fixed simple mode card lookup (businessId-based)
+- Removed 60-minute rate limit (changed to 1 second)
+
+**Supplier App Improvements:**
+- Unified non-modal stamp QR display (consistent UX across modes)
+- Customer instruction banners on stamp/redemption screens
+- Simple mode: Removed verbose instructional text
+- Fixed navigation (Done/Back buttons return to home)
+- Text corrections: "Adding N Stamps!" (reflects in-progress state)
+- Green check icon and instruction banner in simple mode
+- Statistics hidden in simple mode (counters not tracked)
+- Fixed keyboard overlap on supplier setup
+
+**Bug Fixes:**
+- Database exception fix (no redeemed_at column)
+- Fixed spread operator syntax errors
+- Fixed button styling (removed black border)
+
+**Feature Branch:**
+- Merged feature/build-47-dual-mode → develop
+- 27 files changed (+2,416 additions, -815 deletions)
+- 6 commits merged successfully
 
 **Files Modified:** 8 files across both apps
 

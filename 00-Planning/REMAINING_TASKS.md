@@ -2,81 +2,126 @@
 
 **Document:** Focused Task List  
 **Created:** April 12, 2026  
-**Current Build:** v0.1.0 (Build 46)  
-**Status:** Ready for Device Testing
+**Updated:** April 13, 2026  
+**Current Build:** v0.1.0 (Build 75)  
+**Status:** Dual-Mode Complete - Ready for Device Testing
 
 ---
 
 ## 🎯 Critical Path to Pilot (Estimated: 5-7 days)
 
-### Phase 6: Device Testing & Validation
+### Phase 7: Dual-Mode Device Testing & Validation
 **Duration:** 2-3 days  
 **Priority:** 🔥 CRITICAL  
 **Status:** Ready to Start
 
+**Note:** Build 75 includes complete dual-mode implementation. Both Simple Mode (trust-based) and Secure Mode (crypto-validated) need comprehensive testing.
+
 #### Day 1: Initial Device Testing
 - [ ] **Morning: Deploy & Setup**
-  - [ ] Build and deploy Build 46 to iPhone (customer app)
-  - [ ] Build and deploy Build 46 to iPad (supplier app)
-  - [ ] Create test business on iPad: "Test Coffee Shop" (10 stamps required)
+  - [ ] Build and deploy Build 75 to iPhone (customer app)
+  - [ ] Build and deploy Build 75 to iPad (supplier app)
+  - [ ] Create test businesses on iPad:
+    - [ ] "Simple Coffee Shop" (Simple Mode, 10 stamps)
+    - [ ] "Secure Boutique" (Secure Mode, 10 stamps)
   
-- [ ] **Afternoon: Core Flow Testing (30 min per scenario)**
-  - [ ] **Scenario 1: Basic Flow**
+- [ ] **Afternoon: Simple Mode Testing (Trust-Based)**
+  - [ ] **Scenario 1: Basic Simple Flow**
     - [ ] Issue card with 0 stamps
-    - [ ] Add 1 stamp
-    - [ ] Add 3 stamps
-    - [ ] Add 5 stamps
-    - [ ] Redeem at exactly 10 stamps
-    - [ ] Verify new card auto-created
+    - [ ] Customer scans reusable stamp QR 5 times
+    - [ ] Verify: 5 stamps added, rate limiting working (1 sec cooldown)
+    - [ ] Add 5 more stamps (total 10)
+    - [ ] Customer self-redeems (scans redemption QR)
+    - [ ] Verify: New card auto-created with 0 stamps
   
-  - [ ] **Scenario 2: Pre-loaded Cards**
+  - [ ] **Scenario 2: Simple Pre-loaded Cards**
     - [ ] Issue card with 3 initial stamps
-    - [ ] Add 7 stamps (reaches 10)
-    - [ ] Redeem
+    - [ ] Customer scans reusable stamp QR 7 times
+    - [ ] Verify: Card reaches 10 stamps
+    - [ ] Self-redeem
+    - [ ] Verify: New card created
   
-  - [ ] **Scenario 3: Overflow**
+- [ ] **Evening: Secure Mode Testing (Crypto-Validated)**
+  - [ ] **Scenario 3: Basic Secure Flow**
+    - [ ] Issue card with 2 initial stamps
+    - [ ] Supplier generates time-limited stamp QR (Add Stamp button)
+    - [ ] Customer scans QR (adds 4 stamps)
+    - [ ] Verify: Hash chain validates, 6 total stamps
+    - [ ] Issue 6 more stamps (total 12, overflow)
+    - [ ] Verify: 10 stamps on complete card, 2 on new card
+    - [ ] Supplier redeems complete card (scans customer QR)
+    - [ ] Verify: New card continues with 2 stamps
+  
+  - [ ] **Scenario 4: Secure Overflow**
     - [ ] Card at 8/10 stamps
     - [ ] Add 5 stamps
     - [ ] Verify: 10 go to original, 3 overflow to new card
     - [ ] Redeem original card
-    - [ ] Verify new card has 3 stamps
+    - [ ] Verify: New card has 3 stamps, hash chain valid
 
-#### Day 2: Edge Cases & Error Scenarios
-- [ ] **Edge Case Testing**
-  - [ ] Card with exactly stampsRequired stamps (no overflow)
-  - [ ] Card one away from complete, add 1 stamp
-  - [ ] Multiple cards from same business
-  - [ ] 5+ different business cards in wallet
-  - [ ] Search functionality with many cards
-  - [ ] Delete card with stamps
+#### Day 2: Cross-Mode & Edge Case Testing
+- [ ] **Cross-Mode Testing**
+  - [ ] Multiple businesses in wallet (mix of simple and secure)
+  - [ ] Switch between simple and secure cards
+  - [ ] Verify: Simple cards don't show statistics
+  - [ ] Verify: Secure cards show validation stats
+  - [ ] Test search with 5+ cards (different modes)
+  - [ ] Delete simple mode card
+  - [ ] Delete secure mode card
   
-- [ ] **Error Scenarios**
-  - [ ] Expired QR code (wait 2 minutes, refresh)
+- [ ] **Simple Mode Edge Cases**
+  - [ ] Card with exactly stampsRequired stamps (self-redeem)
+  - [ ] Rapid scanning (rate limiting working)
+  - [ ] Scan same QR code immediately (should block for 1 second)
+  - [ ] App backgrounded during simple stamp scan
+  
+- [ ] **Secure Mode Edge Cases**
+  - [ ] Expired QR code (wait 2 minutes, try to scan)
   - [ ] Invalid QR code (scan random QR)
-  - [ ] App backgrounded during scan
+  - [ ] Hash chain validation failure detection
+  - [ ] Multiple stamp operations in sequence
+  - [ ] Card one away from complete, add 1 stamp
+  
+- [ ] **Error Scenarios (Both Modes)**
+  - [ ] Invalid QR code format
   - [ ] Camera in different orientations
   - [ ] Low light conditions
   - [ ] QR code at extreme angles
+  - [ ] Multiple cards from same business
 
-#### Day 3: UX & Performance Validation
-- [ ] **UX Testing**
+#### Day 3: UX, Performance & Dual-Mode Validation
+- [ ] **Dual-Mode UX Testing**
+  - [ ] Simple mode: Verify reusable QR workflow is intuitive
+  - [ ] Simple mode: Redemption QR clearly labeled
+  - [ ] Secure mode: Time-limited QR refresh working
+  - [ ] Secure mode: Statistics display useful
+  - [ ] Both modes: Stamp history accurate
+  - [ ] Both modes: Auto-create after redemption working
+  - [ ] Navigation between modes smooth
+  
+- [ ] **General UX Testing**
   - [ ] All haptic feedback feels appropriate
   - [ ] All AppFeedback messages are clear
   - [ ] "How It Works" screens are helpful
   - [ ] Dialog buttons always visible
   - [ ] Search is responsive
   - [ ] Skeleton loaders display correctly
+  - [ ] Instruction banners visible and helpful
   
 - [ ] **Performance Testing**
   - [ ] 1-hour continuous use (no crashes)
-  - [ ] 20+ card operations (smooth performance)
+  - [ ] 20+ card operations across both modes
   - [ ] Battery drain assessment
   - [ ] Camera responsiveness
   - [ ] App launch time
+  - [ ] Simple mode: No noticeable validation delay
+  - [ ] Secure mode: Crypto validation < 100ms
   
-- [ ] **Final Checklist**
-  - [ ] No crashes encountered
+- [ ] **Final Dual-Mode Checklist**
+  - [ ] No crashes encountered (either mode)
   - [ ] No confusing UI elements
+  - [ ] Simple mode workflow is fast and frictionless
+  - [ ] Secure mode workflow is clear and validated
   - [ ] All features work as expected
   - [ ] Ready for TestFlight upload
 

@@ -4,6 +4,7 @@ import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
 import 'supplier_onboarding.dart';
 import 'recovery_backup_screen.dart';
+import 'clone_device_screen.dart';
 
 class SupplierSettings extends StatefulWidget {
   final Business business;
@@ -208,12 +209,20 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             leading: const Icon(Icons.device_hub, color: Colors.green),
             title: const Text('Clone to Another Device'),
             subtitle: const Text(
-              'Set up this business on additional devices (Coming Soon)',
+              'Set up this business on additional devices',
               style: TextStyle(fontSize: 12),
             ),
-            enabled: false,
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Implement clone QR screen
+              Haptics.medium();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CloneDeviceScreen(
+                    business: widget.business,
+                  ),
+                ),
+              );
             },
           ),
           const Divider(height: 32),

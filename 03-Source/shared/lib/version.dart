@@ -6,6 +6,20 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 82 Changes:
+/// - **CLONE DEVICE COMPLETE**: Implemented "Clone to Another Device" feature
+/// - Added CloneDeviceScreen to display clone QR code for multi-device setup
+/// - Shows QR code with 24-hour expiry countdown timer
+/// - Auto-updates countdown every second with hours:minutes:seconds
+/// - Color-coded warning (orange → red when < 1 hour remaining)
+/// - Displays step-by-step instructions for cloning process
+/// - Security notice about private key sharing
+/// - Regenerate button to create new QR with fresh timer
+/// - Enabled "Clone to Another Device" in Settings menu
+/// - Clone QR fetches private key from KeyManager (like recovery backup)
+/// - Scanning side already complete: ImportBusinessScreen has frame + rotation controls (Build 81)
+/// - Full multi-device workflow: Device A displays QR → Device B scans → Both have same business
+/// 
 /// Build 81 Changes:
 /// - **UI ENHANCEMENT**: Added QR scanning frame and orientation controls to import screen
 /// - Added white border scanning frame (250x250) to ImportBusinessScreen
@@ -252,4 +266,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 81)';
+const String appVersion = 'v0.1.0 (Build 82)';

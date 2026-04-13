@@ -46,13 +46,13 @@ class SupplierConfigBackup {
     final backup = SupplierConfigBackup(
       type: 'clone',
       version: 1,
-      businessId: business.businessId,
+      businessId: business.id,
       businessName: business.name,
       privateKey: business.privateKey ?? '',
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
-      operationMode: business.operationMode,
+      operationMode: business.mode,
       timestamp: now,
       expiresAt: expires,
       signature: '', // Will be calculated below
@@ -84,13 +84,13 @@ class SupplierConfigBackup {
     final backup = SupplierConfigBackup(
       type: 'recovery',
       version: 1,
-      businessId: business.businessId,
-      businessName: business.businessName,
+      businessId: business.id,
+      businessName: business.name,
       privateKey: business.privateKey ?? '',
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
-      operationMode: business.operationMode,
+      operationMode: business.mode,
       timestamp: now,
       expiresAt: null, // Never expires
       signature: '', // Will be calculated below
@@ -199,13 +199,14 @@ class SupplierConfigBackup {
   /// Convert backup to Business object for import
   Business toBusiness() {
     return Business(
-      businessId: businessId,
+      id: businessId,
       name: businessName,
       publicKey: publicKey,
       privateKey: privateKey,
       stampsRequired: stampsRequired,
       brandColor: brandColor,
-      operationMode: operationMode,
+      mode: operationMode,
+      createdAt: timestamp,
     );
   }
 }

@@ -6,6 +6,14 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 81 Changes:
+/// - **UI ENHANCEMENT**: Added QR scanning frame and orientation controls to import screen
+/// - Added white border scanning frame (250x250) to ImportBusinessScreen
+/// - Added manual rotation controls (90° and 180° buttons) for QR orientation
+/// - Added RotatedBox with automatic landscape detection
+/// - Import screen now matches UI pattern of other QR scanning screens
+/// - Improved user experience when scanning backup QR codes
+/// 
 /// Build 80 Changes:
 /// - **IMPORT FIX**: Fixed "FormatException: Could not parse BigInt" during backup restoration
 /// - Added KeyManager.getPrivateKeyString() to retrieve private key for backup creation
@@ -244,4 +252,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 80)';
+const String appVersion = 'v0.1.0 (Build 81)';

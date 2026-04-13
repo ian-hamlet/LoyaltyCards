@@ -24,6 +24,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
   
   bool _isProcessing = false;
   String? _errorMessage;
+  int _manualRotationOffset = 0; // 0-3 for 0°, 90°, 180°, 270°
 
   @override
   void dispose() {
@@ -141,19 +142,98 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
       ),
       body: Stack(
         children: [
-          // QR Scanner
+          // QR Scanner with orientation handling
           if (!_isProcessing)
-            MobileScanner(
-              controller: _scannerController,
-              onDetect: (capture) {
-                final List<Barcode> barcodes = capture.barcodes;
-                for (final barcode in barcodes) {
-                  if (barcode.rawValue != null) {
-                    _handleQRCode(barcode.rawValue!);
-                    break;
-                  }
-                }
-              },
+            ClipRect(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isLandscape = constraints.maxWidth > constraints.maxHeight;
+                  final padding = MediaQuery.of(context).padding;
+                  
+                  // Apply rotation: base + manual offset
+                  final baseQuarterTurns = isLandscape ? 3 : 0;
+                  final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
+                  
+                  return RotatedBox(
+                    quarterTurns: quarterTurns,
+                    child: MobileScanner(
+                      controller: _scannerController,
+                      fit: BoxFit.contain,
+                      onDetect: (capture) {
+                        final List<Barcode> barcodes = capture.barcodes;
+                        for (final barcode in barcodes) {
+                          if (barcode.rawValue != null) {
+                            _handleQRCode(barcode.rawValue!);
+                            break;
+                          }
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+
+          // Manual rotation controls
+          if (!_isProcessing)
+            Positioned(
+              top: 80,
+              right: 16,
+              child: Column(
+                children: [
+                  FloatingActionButton(
+                    heroTag: 'rotate90_import',
+                    mini: true,
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    onPressed: () {
+                      setState(() {
+                        _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                      });
+                    },
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
+                        Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FloatingActionButton(
+                    heroTag: 'rotate180_import',
+                    mini: true,
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    onPressed: () {
+                      setState(() {
+                        _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                      });
+                    },
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.flip, size: 20, color: Colors.blue),
+                        Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          // Scanning frame
+          if (!_isProcessing)
+            Center(
+              child: Container(
+                width: 250,
+                height: 250,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 3,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
 
           // Processing overlay

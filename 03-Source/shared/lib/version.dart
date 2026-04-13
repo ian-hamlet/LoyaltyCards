@@ -6,6 +6,18 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 79 Changes:
+/// - **IMPORT/RECOVERY COMPLETE**: Full backup restore functionality implemented
+/// - Added ImportBusinessScreen with QR scanner for recovery/cloning
+/// - Added "Recover from Backup" button to supplier onboarding
+/// - Added "Clone from Another Device" button to supplier onboarding
+/// - Signature validation during import
+/// - Expiry check for clone QR codes (24h limit)
+/// - Prevents import if business already exists on device
+/// - Restores exact Business ID and cryptographic keys
+/// - Complete backup → restore cycle now working
+/// - All customer cards remain valid after recovery
+/// 
 /// Build 78 Changes:
 /// - **CRASH FIX**: Added iOS permissions for photo library access (NSPhotoLibraryAddUsageDescription)
 /// - **PDF FIX**: Removed emoji characters from PDF that caused rendering issues
@@ -224,4 +236,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 78)';
+const String appVersion = 'v0.1.0 (Build 79)';

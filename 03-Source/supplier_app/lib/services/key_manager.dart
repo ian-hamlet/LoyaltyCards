@@ -161,6 +161,20 @@ class KeyManager {
     return privateKey != null && publicKey != null;
   }
 
+  /// Decode private key from base64 string (for backup restore)
+  ECPrivateKey decodePrivateKey(String keyBase64) {
+    final keyBytes = base64Decode(keyBase64);
+    final d = BigInt.parse(keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
+    
+    final params = ECCurve_secp256r1();
+    return ECPrivateKey(d, params);
+  }
+
+  /// Decode public key from encoded string (for backup restore)
+  ECPublicKey? decodePublicKey(String encoded) {
+    return _decodePublicKey(encoded);
+  }
+
   /// Delete keys for a business
   Future<void> deleteKeys(String businessId) async {
     print('KeyManager: Deleting cryptographic keys for business: $businessId');

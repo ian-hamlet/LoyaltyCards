@@ -1,0 +1,334 @@
+import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:shared/shared.dart' hide Card;
+import '../../services/business_repository.dart';
+import '../../services/key_manager.dart';
+import 'supplier_home.dart';
+import 'package:pointycastle/ecc/api.dart';
+
+/// Screen for importing/recovering business configuration from QR code
+/// Supports both:
+/// - Recovery backup (no expiry) - for disaster recovery
+/// - Clone QR (24h expiry) - for setting up additional devices
+class ImportBusinessScreen extends StatefulWidget {
+  const ImportBusinessScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ImportBusinessScreen> createState() => _ImportBusinessScreenState();
+}
+
+class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
+  final MobileScannerController _scannerController = MobileScannerController();
+  final BusinessRepository _businessRepo = BusinessRepository();
+  final KeyManager _keyManager = KeyManager();
+  
+  bool _isProcessing = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _scannerController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleQRCode(String qrData) async {
+    if (_isProcessing) return;
+
+    setState(() {
+      _isProcessing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      print('='.padRight(60, '='));
+      print('IMPORT BUSINESS: Processing QR code - ${DateTime.now().toIso8601String()}');
+
+      // Step 1: Parse QR data
+      print('Step 1: Parsing QR data...');
+      final SupplierConfigBackup backup = SupplierConfigBackup.fromQRString(qrData);
+      print('Parsed backup type: ${backup.type}');
+      print('Business: ${backup.businessName}');
+      print('Version: ${backup.version}');
+
+      // Step 2: Verify signature
+      print('Step 2: Verifying signature...');
+      final isValid = await backup.verifySignature();
+      if (!isValid) {
+        throw Exception('Invalid signature - backup may be tampered with');
+      }
+      print('Signature verified ✓');
+
+      // Step 3: Check expiry (for clone type)
+      if (backup.type == 'clone') {
+        print('Step 3: Checking clone QR expiry...');
+        if (backup.isExpired) {
+          throw Exception('Clone QR code has expired. Please generate a new one.');
+        }
+        print('Clone QR still valid ✓');
+      } else {
+        print('Step 3: Recovery backup (no expiry) ✓');
+      }
+
+      // Step 4: Check if business already exists
+      print('Step 4: Checking for existing business...');
+      final existingBusiness = await _businessRepo.getBusiness();
+      if (existingBusiness != null) {
+        throw Exception(
+          'Business already configured on this device.\n'
+          'Please reset existing business in Settings first.'
+        );
+      }
+      print('No existing business found ✓');
+
+      // Step 5: Convert backup to Business
+      print('Step 5: Converting backup to Business model...');
+      final business = backup.toBusiness();
+      print('Business ID: ${business.id}');
+
+      // Step 6: Store private key
+      print('Step 6: Storing private key securely...');
+      final privateKey = _keyManager.decodePrivateKey(backup.privateKey);
+      await _keyManager.storePrivateKey(business.id, privateKey as ECPrivateKey);
+      print('Private key stored ✓');
+
+      // Step 7: Store public key
+      print('Step 7: Storing public key securely...');
+      final publicKey = _keyManager.decodePublicKey(backup.publicKey);
+      await _keyManager.storePublicKey(business.id, publicKey as ECPublicKey);
+      print('Public key stored ✓');
+
+      // Step 8: Save business to database
+      print('Step 8: Saving business to database...');
+      await _businessRepo.insertBusiness(business);
+      print('Business saved to database ✓');
+
+      print('IMPORT COMPLETE - Business restored successfully');
+      print('='.padRight(60, '='));
+
+      // Success!
+      if (mounted) {
+        Haptics.success();
+        AppFeedback.success(context, 'Business restored: ${business.name}');
+        
+        // Navigate to home
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const SupplierHome()),
+        );
+      }
+    } catch (e) {
+      print('IMPORT FAILED: $e');
+      print('='.padRight(60, '='));
+      
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      });
+
+      if (mounted) {
+        Haptics.error();
+        AppFeedback.error(context, 'Import failed: $_errorMessage');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Import Business'),
+        backgroundColor: const Color(0xFF2C3E50),
+        foregroundColor: Colors.white,
+      ),
+      body: Stack(
+        children: [
+          // QR Scanner
+          if (!_isProcessing)
+            MobileScanner(
+              controller: _scannerController,
+              onDetect: (capture) {
+                final List<Barcode> barcodes = capture.barcodes;
+                for (final barcode in barcodes) {
+                  if (barcode.rawValue != null) {
+                    _handleQRCode(barcode.rawValue!);
+                    break;
+                  }
+                }
+              },
+            ),
+
+          // Processing overlay
+          if (_isProcessing)
+            Container(
+              color: Colors.black87,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 24),
+                    Text(
+                      'Restoring business...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Validating signature and storing keys',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          // Instructions overlay (when not processing)
+          if (!_isProcessing)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black87,
+                      Colors.black54,
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Scan Recovery QR',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Scan your backup QR code to restore your business configuration',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade900.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Works with both recovery backups and clone QR codes',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          // Error message (if any)
+          if (_errorMessage != null && !_isProcessing)
+            Positioned(
+              bottom: 100,
+              left: 16,
+              right: 16,
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade900.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red, width: 2),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.white, size: 28),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Import Failed',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            _errorMessage!,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          // Cancel button
+          if (!_isProcessing)
+            Positioned(
+              bottom: 24,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: TextButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.arrow_back, color: Colors.white),
+                  label: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.black54,
+                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

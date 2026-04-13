@@ -6,6 +6,15 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 84 Changes:
+/// - **CUSTOM APP ICONS**: Added professional branded icons for both apps
+/// - Customer app: Warm-toned (coral/orange) stamp card icon with grid of stamp dots
+/// - Supplier app: Professional blue-toned business icon with QR/badge design
+/// - Icons generated for all required iOS sizes (iPhone, iPad, Apple Watch, Mac)
+/// - Replaces default Flutter placeholder icons (11KB → 627KB master icon per app)
+/// - Icons designed for visibility at small sizes (60x60px on home screen)
+/// - Distinct color schemes help users differentiate apps on device
+/// 
 /// Build 83 Changes:
 /// - **CLONE EXPIRY REDUCED**: Changed clone QR expiry from 24 hours to 5 minutes
 /// - More secure: Shorter window for QR to be compromised
@@ -276,4 +285,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 83)';
+const String appVersion = 'v0.1.0 (Build 84)';

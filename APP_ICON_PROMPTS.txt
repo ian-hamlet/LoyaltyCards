@@ -1,0 +1,79 @@
+================================================================================
+CUSTOMER APP ICON PROMPT - Copy and paste this into DALL-E
+================================================================================
+
+Create a modern iOS app icon for a digital loyalty stamp card application. 
+The icon should be 1024x1024 pixels, designed for iOS with NO transparency 
+(solid background). Do NOT add rounded corners - iOS handles that automatically.
+
+DESIGN CONCEPT:
+- Central element: A stylized stamp card or wallet with visible stamp dots/circles
+- Color scheme: Warm, consumer-friendly colors (coral/orange/pink gradient background)
+- Style: Flat design, modern, minimalist, professional
+- Must work at small sizes (60x60px on phone screens)
+
+VISUAL ELEMENTS:
+- 3-5 circular stamp dots arranged in a card grid pattern
+- Subtle gradient background (warm tones)
+- Clean, simple iconography
+- Optional: Small QR code pattern in corner or background texture
+
+AVOID:
+- Text or letters
+- Complex details that disappear at small sizes
+- Generic wallet/card stock imagery
+- Too many colors (max 3-4)
+
+STYLE REFERENCE: Modern fintech/consumer app aesthetic, similar to Apple 
+Wallet but focused on loyalty stamps. Think: friendly, trustworthy, simple.
+
+
+================================================================================
+SUPPLIER APP ICON PROMPT - Copy and paste this into DALL-E
+================================================================================
+
+Create a modern iOS app icon for a business/supplier loyalty stamp card 
+management application. The icon should be 1024x1024 pixels, designed for 
+iOS with NO transparency (solid background). Do NOT add rounded corners - 
+iOS handles that automatically.
+
+DESIGN CONCEPT:
+- Central element: QR code or business-focused stamp/badge symbol
+- Color scheme: Professional business colors (blue/teal/navy gradient background)
+- Style: Flat design, modern, minimalist, authoritative
+- Must work at small sizes (60x60px on phone screens)
+
+VISUAL ELEMENTS:
+- Stylized QR code pattern OR business badge/seal
+- Professional gradient background (cool tones: blue/teal)
+- Clean geometric shapes
+- Distinct from consumer app but clearly related
+
+AVOID:
+- Text or letters
+- Complex details that disappear at small sizes
+- Generic business icons
+- Too many colors (max 3-4)
+
+STYLE REFERENCE: Modern business/enterprise app aesthetic. Think: Square 
+Point of Sale, Shopify, or professional business tools. Should look related 
+to the customer app but more business-oriented.
+
+
+================================================================================
+INSTRUCTIONS
+================================================================================
+
+1. Open ChatGPT Plus (https://chat.openai.com) or Bing Image Creator (https://www.bing.com/create)
+2. Copy the CUSTOMER APP ICON PROMPT above and paste it
+3. Generate 2-3 variations
+4. Pick your favorite and download as PNG
+5. Repeat with SUPPLIER APP ICON PROMPT
+6. Verify both are 1024x1024 pixels
+
+TIPS:
+- If too complex, ask DALL-E: "make it simpler"
+- If colors don't match vision, ask: "use more coral/orange tones" or "use navy blue gradient"
+- Generate multiple options and compare at small sizes
+
+After you have both icons saved, let me know and I'll help you add them to the project!

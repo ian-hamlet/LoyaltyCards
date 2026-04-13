@@ -127,9 +127,72 @@
 
 ---
 
-### Phase 8: TestFlight Preparation
+### Phase 8: Supplier Backup & Recovery Implementation
+**Duration:** 1-2 days  
+**Priority:** 🔥 CRITICAL (before TestFlight)  
+**Status:** Pending
+
+**Requirement Reference:** [REQ-021: Multi-Device Supplier Support](Requirements/REQ-021_Multi_Device_Supplier_Support.md)
+
+**Rationale:** Device loss/theft without backup would invalidate all customer cards. This feature is essential business continuity protection and should be implemented before pilot deployment.
+
+#### Backup & Recovery Features
+- [ ] **Supplier Backup Generation**
+  - [ ] Add "Backup Business Configuration" to supplier settings
+  - [ ] Generate non-expiring recovery backup QR code
+  - [ ] Include in QR: Business ID, private key, public key, all config
+  - [ ] Format: JSON signed with business private key
+  - [ ] Display clear warning: "Anyone with this can impersonate your business"
+  
+- [ ] **Backup Export Options**
+  - [ ] Save QR as image to Photos
+  - [ ] Generate PDF with QR + business details
+  - [ ] Share via Files app (for password managers)
+  - [ ] Optional: Copy backup JSON to clipboard
+  - [ ] Add "Print" option (iOS print dialog)
+  
+- [ ] **Recovery During Onboarding**
+  - [ ] Add "Recover Existing Business" button to supplier setup
+  - [ ] Scan recovery backup QR
+  - [ ] Validate backup format and signature
+  - [ ] Restore exact Business ID and cryptographic keys
+  - [ ] Show success: "Business restored: [Business Name]"
+  - [ ] Confirm all settings restored correctly
+  
+- [ ] **First-Time Setup Backup Prompt**
+  - [ ] After completing initial supplier onboarding
+  - [ ] Show dialog: "Save Recovery Backup"
+  - [ ] Explain importance: "If you lose this device..."
+  - [ ] Offer immediate backup or remind later
+  - [ ] Track if backup created (local flag)
+  
+- [ ] **Testing Checklist**
+  - [ ] Create business on Device A
+  - [ ] Generate and save backup QR
+  - [ ] Wipe/reinstall app on Device A (or use Device B)
+  - [ ] Recover business from backup QR
+  - [ ] Verify: Same Business ID, same keys
+  - [ ] Verify: Customer cards from before recovery still validate
+  - [ ] Test: Issue new card after recovery - should work
+  - [ ] Test: Add stamp after recovery - should validate
+  
+- [ ] **UX & Documentation**
+  - [ ] Add "Backup & Recovery" to supplier help/onboarding
+  - [ ] In-app tip: "Backup your business configuration"
+  - [ ] Warning labels on backup screens
+  - [ ] Test print workflow on iOS device
+  
+- [ ] **Security Hardening**
+  - [ ] Backup QR marked as type: "supplier_recovery_backup"
+  - [ ] Customer app rejects recovery backup QR (validation check)
+  - [ ] Backup includes version for future compatibility
+  - [ ] Optional (Phase 2): Password-protect backup
+
+---
+
+### Phase 9: TestFlight Preparation
 **Duration:** 2-3 days  
-**Priority:** 🔥 CRITICAL (after device testing)  
+**Priority:** 🔥 CRITICAL (after backup implementation)  
 **Status:** Pending
 
 #### Day 4: Apple Developer Setup

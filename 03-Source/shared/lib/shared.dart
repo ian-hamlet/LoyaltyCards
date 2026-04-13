@@ -7,6 +7,7 @@ export 'models/business.dart';
 export 'models/transaction.dart';
 export 'models/qr_tokens.dart';
 export 'models/operation_mode.dart';
+export 'models/supplier_config_backup.dart';
 
 // Export constants
 export 'constants/constants.dart';

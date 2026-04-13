@@ -6,6 +6,14 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 76 Changes:
+/// - **SUPPLIER BACKUP & RECOVERY**: Implementing REQ-021 disaster recovery features
+/// - Added SupplierConfigBackup model for configuration export/import
+/// - Implemented four storage methods: Print PDF, Photos, Email, Files
+/// - Cross-platform compatible (iOS & Android)
+/// - Recovery backup QR codes (non-expiring) vs clone QR codes (24h expiry)
+/// - Encryption support for backup data
+/// 
 /// Build 75 Changes:
 /// - **SIMPLE MODE STAMP UI UPDATE**: Added green check icon and customer instruction
 /// - Changed business icon to green check circle (matches secure mode)
@@ -201,4 +209,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 75)';
+const String appVersion = 'v0.1.0 (Build 76)';

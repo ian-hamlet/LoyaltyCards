@@ -37,11 +37,11 @@ class SupplierConfigBackup {
     required this.signature,
   });
 
-  /// Creates a clone QR code that expires in 24 hours
+  /// Creates a clone QR code that expires in 5 minutes
   /// Used for setting up additional devices while original still works
   static Future<SupplierConfigBackup> createCloneQR(Business business) async {
     final now = DateTime.now();
-    final expires = now.add(Duration(hours: 24));
+    final expires = now.add(Duration(minutes: 5));
 
     final backup = SupplierConfigBackup(
       type: 'clone',

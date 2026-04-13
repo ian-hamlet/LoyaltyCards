@@ -210,12 +210,12 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: _remainingTime!.inHours < 1
+                            color: _remainingTime!.inMinutes < 2
                                 ? Colors.red.shade50
                                 : Colors.orange.shade50,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _remainingTime!.inHours < 1
+                              color: _remainingTime!.inMinutes < 2
                                   ? Colors.red.shade200
                                   : Colors.orange.shade200,
                             ),
@@ -225,7 +225,7 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                             children: [
                               Icon(
                                 Icons.timer_outlined,
-                                color: _remainingTime!.inHours < 1
+                                color: _remainingTime!.inMinutes < 2
                                     ? Colors.red.shade700
                                     : Colors.orange.shade700,
                               ),
@@ -238,18 +238,18 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: _remainingTime!.inHours < 1
+                                      color: _remainingTime!.inMinutes < 2
                                           ? Colors.red.shade900
                                           : Colors.orange.shade900,
                                     ),
                                   ),
                                   Text(
-                                    _remainingTime!.inHours < 1
+                                    _remainingTime!.inMinutes < 2
                                         ? 'Expiring soon!'
-                                        : 'Valid for 24 hours',
+                                        : 'Valid for 5 minutes',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: _remainingTime!.inHours < 1
+                                      color: _remainingTime!.inMinutes < 2
                                           ? Colors.red.shade700
                                           : Colors.orange.shade700,
                                     ),
@@ -387,7 +387,10 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+            ),
           ),
         ),
       ],

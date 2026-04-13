@@ -6,6 +6,16 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 83 Changes:
+/// - **CLONE EXPIRY REDUCED**: Changed clone QR expiry from 24 hours to 5 minutes
+/// - More secure: Shorter window for QR to be compromised
+/// - More practical: Device cloning should happen immediately, not hours later
+/// - Updated expiry warning threshold: Orange when > 2 min, red when < 2 min
+/// - Updated countdown text: "Valid for 5 minutes" instead of 24 hours
+/// - **TEXT COLOR FIX**: Added Colors.black87 to step instructions for readability
+/// - Consistent with other screens (recovery_backup_screen pattern)
+/// - Fixed illegible text on blue background
+/// 
 /// Build 82 Changes:
 /// - **CLONE DEVICE COMPLETE**: Implemented "Clone to Another Device" feature
 /// - Added CloneDeviceScreen to display clone QR code for multi-device setup
@@ -266,4 +276,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 82)';
+const String appVersion = 'v0.1.0 (Build 83)';

@@ -6,6 +6,62 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 70 Changes:
+/// - **REDEMPTION INSTRUCTION**: Added clear instruction on redemption token screen
+/// - "Now ask customer to scan this redemption code to complete the transaction"
+/// - Green highlighted banner with QR scanner icon for better visibility
+/// - **FIXED KEYBOARD OVERLAP**: Supplier setup button no longer hidden by iPad keyboard
+/// - Bottom navigation bar now stays above keyboard suggestions/spell hints
+/// - Added shadow and proper spacing for better visual clarity
+/// 
+/// NOTE: Stamp QR Display Design
+/// - Secure mode currently uses modal dialog to show stamp QR
+/// - Simple mode shows QR directly on screen (non-modal)
+/// - RECOMMENDATION: Non-modal is better practice for QR codes because:
+///   * Supplier can keep QR visible while customer scans
+///   * No risk of accidental dismissal
+///   * Simpler UX with fewer state transitions
+/// - Consider unifying both modes to use non-modal display in future update
+/// 
+/// Build 69 Changes:
+/// - **CARD CREATION IN STAMP HISTORY**: Shows when card was created and initial stamps (if any)
+/// - Stamp history now always displays with "Card Created" entry at top
+/// - Shows card creation date/time and number of initial stamps added
+/// - Blue card icon distinguishes creation from regular stamps
+/// - **FIXED TEXT COLOR**: "New card automatically added" text now uses blue[900] for better contrast
+/// - Changed from default color to Colors.blue[900] on blue[50] background (improved readability)
+/// 
+/// Build 68 Changes:
+/// - **FIXED SIMPLE MODE STAMP HISTORY**: Stamps now save correctly with unique IDs
+/// - In simple mode, each scan generates a unique stamp record (not replaced)
+/// - Stamp ID uses card + stamp number: `{cardId}_stamp_{number}` 
+/// - Stamp number increments properly: 1, 2, 3, etc.
+/// - Timestamp uses scan time (not token time since QR is reusable)
+/// - Previous hash chains correctly from last stamp signature
+/// - Stamp history now shows all stamps, not just the first one
+/// 
+/// Build 67 Changes:
+/// - **AUTO-CREATE CARD ON REDEMPTION**: New card automatically added after redemption
+/// - Both simple and secure modes now create a fresh card after reward is redeemed
+/// - Matches overflow behavior where new cards are created automatically
+/// - Success message updated to mention new card creation
+/// - **IMPROVED STAMP HISTORY LOADING**: Added await to ensure stamps reload before showing feedback
+/// - Added debug logging to card data loading for troubleshooting
+/// 
+/// Build 66 Changes:
+/// - **SECURE MODE REDEMPTION TIMESTAMP**: Added date/time display to secure mode redeemed cards
+/// - Secure mode now shows redemption timestamp like simple mode (consistent UX)
+/// - Changed background from grey to green for redeemed cards in secure mode
+/// - **SIMPLIFIED CONFIRMATION**: Removed confusing orange info box from simple mode redemption confirmation
+/// - Removed "This will mark your card as redeemed..." text box (redundant, hard to read)
+/// - Confirmation dialog now cleaner with just the main question
+/// 
+/// Build 65 Changes:
+/// - **DATABASE MIGRATION**: Fixed "no redeemed_at column" exception
+/// - Added database migration from v4 to v5 to add redeemed_at column
+/// - Existing app installations will automatically upgrade their database
+/// - Database version incremented to 5
+/// 
 /// Build 64 Changes:
 /// - **SIMPLIFIED SUPPLIER UI**: Removed instructional text from simple mode screens
 /// - Stamp screen: Removed "Customer scans this QR to add a stamp" info card
@@ -109,4 +165,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 64)';
+const String appVersion = 'v0.1.0 (Build 70)';

@@ -287,18 +287,36 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Add stamp to card
     print('=== Saving Main Stamp ===');
-    print('Stamp #${token.stampNumber}');
+    
+    // In simple mode, generate unique stamp details since QR is reusable
+    final nextStampNumber = stamps.length + 1;
+    final stampId = card.mode == OperationMode.simple 
+        ? '${card.id}_stamp_$nextStampNumber'
+        : token.id;
+    final stampNumber = card.mode == OperationMode.simple
+        ? nextStampNumber
+        : token.stampNumber;
+    final stampTimestamp = card.mode == OperationMode.simple
+        ? DateTime.now()
+        : DateTime.fromMillisecondsSinceEpoch(token.timestamp);
+    final stampPreviousHash = card.mode == OperationMode.simple
+        ? expectedPrevHash
+        : token.previousHash;
+    
+    print('Stamp #$stampNumber');
     print('Card ID: ${card.id}');
-    print('previousHash: "${token.previousHash.isEmpty ? "(empty -> will be null)" : token.previousHash.substring(0, 20) + "..."}"');
+    print('Stamp ID: $stampId');
+    print('Mode: ${card.mode.displayName}');
+    print('previousHash: "${stampPreviousHash.isEmpty ? "(empty -> will be null)" : stampPreviousHash.substring(0, 20) + "..."}"');
     print('signature: "${token.signature.substring(0, 20)}..."');
     
     final stamp = Stamp(
-      id: token.id,
+      id: stampId,
       cardId: card.id,  // Use the actual card ID we found, not token.cardId
-      stampNumber: token.stampNumber,
-      timestamp: DateTime.fromMillisecondsSinceEpoch(token.timestamp),
+      stampNumber: stampNumber,
+      timestamp: stampTimestamp,
       signature: token.signature,
-      previousHash: token.previousHash.isEmpty ? null : token.previousHash,
+      previousHash: stampPreviousHash.isEmpty ? null : stampPreviousHash,
     );
 
     await stampRepo.insertStamp(stamp);
@@ -520,12 +538,32 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Mark card as redeemed
     await repository.markCardAsRedeemed(card.id);
     print('Card marked as redeemed in database');
+    
+    // Auto-create new card for continued loyalty
+    final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+    final now = DateTime.now();
+    final newCard = models.Card(
+      id: newCardId,
+      businessId: card.businessId,
+      businessName: card.businessName,
+      businessPublicKey: card.businessPublicKey,
+      brandColor: card.brandColor,
+      logoIndex: card.logoIndex,
+      mode: card.mode,
+      stampsRequired: card.stampsRequired,
+      stampsCollected: 0,
+      createdAt: now,
+      updatedAt: now,
+    );
+    
+    await repository.insertCard(newCard);
+    print('New card auto-created: $newCardId');
 
     print('=== Redemption Complete ===');
 
     if (mounted) {
       Navigator.pop(context, 
-        '🎉 Redemption confirmed! Card has been redeemed. You can now delete it.');
+        '🎉 Redemption confirmed! New card added to your wallet.');
     }
   }
 

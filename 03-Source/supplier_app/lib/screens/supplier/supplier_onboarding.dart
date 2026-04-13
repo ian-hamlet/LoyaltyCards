@@ -457,10 +457,28 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: FilledButton(
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.md,
+              right: AppSpacing.md,
+              top: AppSpacing.md,
+              bottom: MediaQuery.of(context).viewInsets.bottom > 0 
+                  ? AppSpacing.md 
+                  : AppSpacing.md,
+            ),
+            child: FilledButton(
             onPressed: _isCreating ? null : _createBusiness,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.all(AppSpacing.md),
@@ -489,6 +507,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     'Create Business Profile',
                     style: TextStyle(fontSize: AppTypography.bodyLarge),
                   ),
+            ),
           ),
         ),
       ),

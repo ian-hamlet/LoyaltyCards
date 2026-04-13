@@ -664,6 +664,34 @@ class _RedemptionTokenScreen extends StatelessWidget {
                   color: Colors.grey[600],
                 ),
               ),
+              const SizedBox(height: 16),
+              
+              // Customer instruction
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.qr_code_scanner, color: Colors.green[700], size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Now ask customer to scan this redemption code to complete the transaction',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.green[900],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 32),
 
               // QR Code

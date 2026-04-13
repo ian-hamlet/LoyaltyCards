@@ -133,6 +133,15 @@ class DatabaseHelper {
       ''');
       print('Migration complete: mode column added (default: secure)');
     }
+    
+    // Migration from v4 to v5: Add redeemed_at column
+    if (oldVersion < 5) {
+      print('Migration v4 → v5: Adding redeemed_at column to cards table');
+      await db.execute('''
+        ALTER TABLE cards ADD COLUMN redeemed_at INTEGER
+      ''');
+      print('Migration complete: redeemed_at column added');
+    }
   }
 
   /// Close database connection

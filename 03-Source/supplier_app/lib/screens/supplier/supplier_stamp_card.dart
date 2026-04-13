@@ -469,46 +469,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Info Card
-                    Card(
-                      elevation: 1,
-                      color: Colors.blue[50],
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: Colors.blue[700], size: 24),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Simple Mode - Reusable QR',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue[900],
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Customer scans this QR to add a stamp',
-                                    style: TextStyle(
-                                      color: Colors.blue[800],
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
                     // QR Code Display
                     Card(
                       elevation: 4,

@@ -6,6 +6,12 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 64 Changes:
+/// - **SIMPLIFIED SUPPLIER UI**: Removed instructional text from simple mode screens
+/// - Stamp screen: Removed "Customer scans this QR to add a stamp" info card
+/// - Redeem screen: Removed step-by-step instructions and info box
+/// - Supplier screens now show QR codes and icons only - cleaner interface
+/// 
 /// Build 63 Changes:
 /// - **REDEMPTION TIMESTAMP**: Store and display when cards were redeemed
 /// - Added redeemed_at column to database (records timestamp at redemption)
@@ -103,4 +109,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 63)';
+const String appVersion = 'v0.1.0 (Build 64)';

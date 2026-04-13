@@ -131,47 +131,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                             ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildStep('1. Customer shows you their completed card'),
-                            const SizedBox(height: 8),
-                            _buildStep('2. Verify all stamps are filled'),
-                            const SizedBox(height: 8),
-                            _buildStep('3. Provide the reward to the customer'),
-                            const SizedBox(height: 8),
-                            _buildStep('4. Customer taps "Redeem Reward" on their device'),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue[200]!),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: Colors.blue[700], size: 24),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Text(
-                                'Customer marks their own card as redeemed with a timestamp. No action needed from you.',
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+
                     ],
                   ),
                 ),

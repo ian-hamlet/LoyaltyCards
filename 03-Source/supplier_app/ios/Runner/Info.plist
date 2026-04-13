@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Supplier App</string>
+	<string>LoyaltyCards Business</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -67,7 +67,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>We need camera access to scan QR codes for loyalty cards</string>
+	<string>Scan QR codes to issue and redeem loyalty cards</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save backup QR codes to your photo library for safekeeping</string>
 	<key>NSPhotoLibraryUsageDescription</key>

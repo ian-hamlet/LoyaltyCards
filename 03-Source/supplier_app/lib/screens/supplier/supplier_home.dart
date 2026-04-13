@@ -154,17 +154,20 @@ class _SupplierHomeState extends State<SupplierHome> {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStat('Issued', _issuedCards),
-                        Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Stamped', _activeCards),
-                        Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Redeemed', _redemptions),
-                      ],
-                    ),
+                    // Hide statistics in simple mode (counters not tracked)
+                    if (_business!.mode == OperationMode.secure) ...[
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildStat('Issued', _issuedCards),
+                          Container(width: 1, height: 40, color: Colors.white30),
+                          _buildStat('Stamped', _activeCards),
+                          Container(width: 1, height: 40, color: Colors.white30),
+                          _buildStat('Redeemed', _redemptions),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

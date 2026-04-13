@@ -6,6 +6,42 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 75 Changes:
+/// - **SIMPLE MODE STAMP UI UPDATE**: Added green check icon and customer instruction
+/// - Changed business icon to green check circle (matches secure mode)
+/// - Added blue instruction box: "Now ask customer to scan this code and get their stamp"
+/// - Consistent visual design between simple and secure modes
+/// - Single stamp wording (simple mode is always one stamp at a time)
+/// 
+/// Build 74 Changes:
+/// - **STAMP TEXT CORRECTION**: Changed "N Stamps Added!" to "Adding N Stamps!"
+/// - Reflects in-progress state - customer hasn't scanned yet
+/// - AppBar title: "Stamp Added" → "Adding Stamps"
+/// - Main text: "$stampCount Stamps Added!" → "Adding $stampCount Stamps!"
+/// 
+/// Build 73 Changes:
+/// - **REVERTED BUTTON STYLING**: Removed black border from Create Business Profile button
+/// - Reverted bottomNavigationBar changes from Build 70 (removed Container wrapper with shadow)
+/// - Button now looks clean again without decorative border
+/// 
+/// Build 72 Changes:
+/// - **STAMP QR INSTRUCTION**: Added customer instruction on secure mode stamp screen
+/// - "Now ask customer to scan this code and get their X stamp(s)"
+/// - Blue highlighted banner with QR scanner icon for visibility
+/// - **FIXED NAVIGATION**: Done and back buttons now return directly to home screen
+/// - Both buttons pop twice (close QR screen + close camera scanner)
+/// - No more stuck on camera screen with spinning circle
+/// 
+/// Build 71 Changes:
+/// - **HIDE STATISTICS IN SIMPLE MODE**: Counters (Issued/Stamped/Redeemed) hidden for simple suppliers
+/// - In simple mode, transactions aren't tracked server-side, so counters are inaccurate
+/// - Statistics section only shown in secure mode where logging occurs
+/// - **UNIFIED STAMP QR DISPLAY**: Secure mode now uses non-modal screen (consistent with simple mode)
+/// - Changed from modal dialog popup to full screen navigation
+/// - Supplier can keep QR visible without accidental dismissal
+/// - Better UX: consistent behavior across both operation modes
+/// - Simpler state management (no dialog lifecycle)
+/// 
 /// Build 70 Changes:
 /// - **REDEMPTION INSTRUCTION**: Added clear instruction on redemption token screen
 /// - "Now ask customer to scan this redemption code to complete the transaction"
@@ -165,4 +201,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 70)';
+const String appVersion = 'v0.1.0 (Build 75)';

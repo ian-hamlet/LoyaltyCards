@@ -262,113 +262,15 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     final newStampCount = currentStamps + stampCount;
     final stampText = stampCount > 1 ? '$stampCount Stamps' : 'Stamp ${token.stampNumber}';
     
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 64,
-              ),
-              
-              const SizedBox(height: 16),
-              
-              Text(
-                '$stampText Added!',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              
-              const SizedBox(height: 8),
-              
-              Text(
-                'Progress: $currentStamps → $newStampCount',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Stamp Token QR
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: QrImageView(
-                  data: token.toQRString(),
-                  version: QrVersions.auto,
-                  size: QRCodeSize.calculate(context),
-                  backgroundColor: Colors.white,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _business!.mode == OperationMode.simple
-                      ? Colors.blue.shade50
-                      : Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _business!.mode == OperationMode.simple
-                          ? Icons.all_inclusive
-                          : Icons.timer_outlined,
-                      size: 16,
-                      color: _business!.mode == OperationMode.simple
-                          ? Colors.blue.shade700
-                          : Colors.orange.shade700,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _business!.mode == OperationMode.simple
-                          ? 'Reusable QR (no expiry)'
-                          : 'Valid for 2 min (expires ${_getExpiryTime(token)})',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _business!.mode == OperationMode.simple
-                            ? Colors.blue.shade900
-                            : Colors.orange.shade900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Return to home
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                ),
-                child: const Text('Done'),
-              ),
-            ],
-          ),
+    // Navigate to non-modal QR display screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _StampTokenScreen(
+          token: token,
+          currentStamps: currentStamps,
+          stampCount: stampCount,
+          business: _business!,
         ),
       ),
     );
@@ -476,12 +378,13 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                         padding: const EdgeInsets.all(20),
                         child: Column(
                           children: [
-                            Icon(
-                              BusinessIcons.getIcon(_business!.logoIndex),
-                              size: 40,
-                              color: BrandColors.fromHex(_business!.brandColor),
+                            // Success/Ready icon
+                            const Icon(
+                              Icons.check_circle,
+                              size: 60,
+                              color: Colors.green,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 16),
                             
                             Text(
                               _business!.name,
@@ -528,6 +431,35 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Customer instruction
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.blue[200]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.qr_code_scanner, color: Colors.blue[700], size: 24),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Now ask customer to scan this code and get their stamp',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.blue[900],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     
@@ -768,6 +700,185 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Screen to display stamp token QR code (non-modal)
+class _StampTokenScreen extends StatelessWidget {
+  final StampToken token;
+  final int currentStamps;
+  final int stampCount;
+  final Business business;
+
+  const _StampTokenScreen({
+    required this.token,
+    required this.currentStamps,
+    required this.stampCount,
+    required this.business,
+  });
+
+  String _getExpiryTime() {
+    final expiryTime = DateTime.fromMillisecondsSinceEpoch(token.timestamp)
+        .add(const Duration(minutes: 2));
+    final hour = expiryTime.hour.toString().padLeft(2, '0');
+    final minute = expiryTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final newStampCount = currentStamps + stampCount;
+    final stampText = stampCount > 1 ? '$stampCount Stamps' : '${stampCount} Stamp';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Adding Stamps'),
+        backgroundColor: const Color(0xFF2C3E50),
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Pop twice: close QR screen and camera scanner to return to home
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Success icon
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 80,
+              ),
+              
+              const SizedBox(height: 24),
+              
+              Text(
+                'Adding $stampText!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              
+              const SizedBox(height: 8),
+              
+              Text(
+                'Progress: $currentStamps → $newStampCount',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey[600],
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Customer instruction
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.qr_code_scanner, color: Colors.blue[700], size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Now ask customer to scan this code and get their ${stampCount > 1 ? "$stampCount stamps" : "stamp"}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.blue[900],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // QR Code
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: QrImageView(
+                  data: token.toQRString(),
+                  version: QrVersions.auto,
+                  size: QRCodeSize.calculate(context),
+                  backgroundColor: Colors.white,
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Expiry info
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.timer_outlined,
+                      size: 16,
+                      color: Colors.orange.shade700,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Valid for 2 min (expires ${_getExpiryTime()})',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade900,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Done button
+              FilledButton(
+                onPressed: () {
+                  // Pop twice: close QR screen and camera scanner to return to home
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                ),
+                child: const Text('Done', style: TextStyle(fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

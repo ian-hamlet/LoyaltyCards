@@ -6,6 +6,21 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 78 Changes:
+/// - **CRASH FIX**: Added iOS permissions for photo library access (NSPhotoLibraryAddUsageDescription)
+/// - **PDF FIX**: Removed emoji characters from PDF that caused rendering issues
+/// - **IPAD FIX**: Added sharePositionOrigin for Email and Files share sheet on iPad
+/// - Fixed unicode characters (⚠️) in PDF generation - replaced with text
+/// - Fixed "sharePositionOrigin must be set" crash on iPad
+/// - Fixed thread safety warning from printing plugin
+/// - Navigation to backup screen from Settings now working
+/// 
+/// Build 77 Changes:
+/// - **NAVIGATION**: Added backup screen access via Settings
+/// - Added "Backup & Recovery" section to supplier settings
+/// - Created comprehensive testing guide (BACKUP_TESTING_GUIDE.md)
+/// - Placeholder for Clone QR feature (coming soon)
+/// 
 /// Build 76 Changes:
 /// - **SUPPLIER BACKUP & RECOVERY**: Implementing REQ-021 disaster recovery features
 /// - Added SupplierConfigBackup model for configuration export/import
@@ -209,4 +224,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 76)';
+const String appVersion = 'v0.1.0 (Build 78)';

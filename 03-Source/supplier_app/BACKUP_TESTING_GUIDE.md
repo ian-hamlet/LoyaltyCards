@@ -1,8 +1,39 @@
 # Supplier Backup & Recovery Testing Guide
 
-**Build:** 76  
+**Build:** 78  
 **Feature:** REQ-021 Supplier Configuration Backup/Recovery  
 **Date:** April 13, 2026
+
+---
+
+## 🔐 iOS Permissions Required
+
+The backup feature requires specific iOS permissions for certain storage methods:
+
+### 1. **Save to Photos** - Permission Required ✋
+- **Permission:** `NSPhotoLibraryAddUsageDescription`
+- **Access Level:** "Add Photos Only" (write-only, no read access needed)
+- **When Prompt Appears:** First time user taps "Save to Photos"
+- **User Choice:** Allow or Don't Allow
+- **If Denied:** Feature won't work - user must enable in Settings → Privacy → Photos
+
+### 2. **Email to Myself** - No Permission Required ✅
+- Uses system share sheet
+- Built-in email access via share functionality
+- No prompts, works immediately
+
+### 3. **Save to Files** - No Permission Required ✅
+- Saves to app's document directory (no permission needed)
+- Opens share sheet for user to choose location
+- User can save to Files app, iCloud Drive, etc.
+- No prompts, works immediately
+
+### 4. **Print Backup** - No Permission Required ✅
+- Opens system print dialog
+- No permissions needed
+- Works immediately
+
+**Note:** If user denies photo library access, they still have 3 other backup methods available.
 
 ---
 
@@ -44,19 +75,30 @@ _Note: Integration with onboarding flow is planned but not yet implemented._
 
 ---
 
-### Test 2: Save to Photos
+### Test 2: Save to Photos (Permission Required)
 
-**Steps:**
+**First Time Use - Permission Prompt:**
 1. On backup screen, tap **"Save to Photos"**
-2. Grant photo access if prompted
-3. Check Photos app
+2. iOS shows permission dialog:
+   - "LoyaltyCards would like to add photos to your library"
+   - Options: "Don't Allow" or "Allow"
+3. Tap **"Allow"**
+
+**Subsequent Uses:**
+1. Tap **"Save to Photos"**
+2. No prompt (permission already granted)
 
 **Expected Results:**
-- ✅ Success message appears
+- ✅ Permission prompt appears first time only
+- ✅ Success message appears after granting permission
 - ✅ Button shows green checkmark
 - ✅ Completion tracker updates (1/4)
 - ✅ Image saved to Photos with name: `LoyaltyCards-Recovery-[BusinessName]-2026-04-13.png`
 - ✅ QR code visible in saved image
+
+**If Permission Denied:**
+- ⚠️ Error message: "Failed to save to Photos"
+- User must enable in: Settings → Privacy & Security → Photos → LoyaltyCards → Add Photos Only
 
 **To Verify:**
 ```bash

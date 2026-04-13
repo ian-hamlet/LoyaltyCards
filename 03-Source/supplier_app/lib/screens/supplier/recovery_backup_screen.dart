@@ -9,6 +9,30 @@ import 'package:intl/intl.dart';
 
 /// Screen for creating and exporting supplier configuration backups
 /// Offers four storage methods: Print, Photos, Email, Files
+/// 
+/// **PERMISSIONS REQUIRED:**
+/// 
+/// 1. **Save to Photos:**
+///    - iOS Permission: NSPhotoLibraryAddUsageDescription (defined in Info.plist)
+///    - Level: "Add Photos Only" (write access, no read access needed)
+///    - Prompt: Appears first time user taps "Save to Photos"
+///    - User can allow or deny; denied means feature won't work
+/// 
+/// 2. **Email to Myself:**
+///    - No system permissions required
+///    - Uses system share sheet which has built-in email access
+///    - Works immediately without prompts
+/// 
+/// 3. **Save to Files:**
+///    - No system permissions required on iOS (app's own documents directory)
+///    - Opens share sheet to let user choose save location
+///    - User can select Files app, iCloud Drive, etc.
+/// 
+/// 4. **Print Backup:**
+///    - No permissions required
+///    - Opens system print dialog
+///    - User can print or save as PDF
+/// Offers four storage methods: Print, Photos, Email, Files
 class RecoveryBackupScreen extends StatefulWidget {
   final Business business;
   final bool isFirstTime; // True if called during initial setup
@@ -98,9 +122,19 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     if (_backup == null || _qrImageBytes == null) return;
 
     try {
+      // Get screen size for iPad share position
+      final size = MediaQuery.of(context).size;
+      final sharePosition = Rect.fromLTWH(
+        size.width / 2,
+        size.height / 2,
+        10,
+        10,
+      );
+
       final success = await BackupStorageService.shareViaEmail(
         _backup!,
         _qrImageBytes!,
+        sharePositionOrigin: sharePosition,
       );
 
       if (success) {
@@ -118,9 +152,19 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     if (_backup == null || _qrImageBytes == null) return;
 
     try {
+      // Get screen size for iPad share position
+      final size = MediaQuery.of(context).size;
+      final sharePosition = Rect.fromLTWH(
+        size.width / 2,
+        size.height / 2,
+        10,
+        10,
+      );
+
       final success = await BackupStorageService.saveToFiles(
         _backup!,
         _qrImageBytes!,
+        sharePositionOrigin: sharePosition,
       );
 
       if (success) {
@@ -432,12 +476,19 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
           title,
           style: TextStyle(
             fontWeight: isPrimary ? FontWeight.bold : FontWeight.normal,
+            color: Colors.black87, // Consistent readable dark text
           ),
         ),
-        subtitle: Text(subtitle),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.grey[700], // Darker, more readable gray
+            fontSize: 13,
+          ),
+        ),
         trailing: completed
             ? Icon(Icons.check_circle, color: Colors.green)
-            : Icon(Icons.chevron_right),
+            : Icon(Icons.chevron_right, color: Colors.grey[600]),
         onTap: onTap,
       ),
     );

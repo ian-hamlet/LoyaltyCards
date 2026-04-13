@@ -65,8 +65,9 @@ class BackupStorageService {
   /// Opens system share sheet with pre-filled email option
   static Future<bool> shareViaEmail(
     SupplierConfigBackup backup,
-    Uint8List qrImageBytes,
-  ) async {
+    Uint8List qrImageBytes, {
+    Rect? sharePositionOrigin,
+  }) async {
     try {
       // Save QR image to temporary file
       final tempDir = await getTemporaryDirectory();
@@ -80,7 +81,7 @@ class BackupStorageService {
       final body = '''
 This is your LoyaltyCards business recovery backup.
 
-⚠️ KEEP THIS EMAIL SECURE - Do not forward to anyone.
+WARNING: KEEP THIS EMAIL SECURE - Do not forward to anyone.
 
 Business: ${backup.businessName}
 Created: ${DateFormat('MMMM d, yyyy').format(backup.timestamp)}
@@ -99,6 +100,7 @@ The QR code image is attached to this email.
         [XFile(filePath)],
         subject: subject,
         text: body,
+        sharePositionOrigin: sharePositionOrigin,
       );
 
       return true;
@@ -112,8 +114,9 @@ The QR code image is attached to this email.
   /// iOS: Saves to Files app, Android: Saves to Downloads
   static Future<bool> saveToFiles(
     SupplierConfigBackup backup,
-    Uint8List qrImageBytes,
-  ) async {
+    Uint8List qrImageBytes, {
+    Rect? sharePositionOrigin,
+  }) async {
     try {
       final fileName = _generateFileName(backup, 'png');
       
@@ -143,6 +146,7 @@ The QR code image is attached to this email.
           [XFile(filePath)],
           subject: 'LoyaltyCards Backup - ${backup.businessName}',
           text: 'Save this backup to a secure location',
+          sharePositionOrigin: sharePositionOrigin,
         );
       }
 
@@ -265,7 +269,7 @@ The QR code image is attached to this email.
                   child: pw.Column(
                     children: [
                       pw.Text(
-                        '⚠️  KEEP THIS SECURE',
+                        'WARNING: KEEP THIS SECURE',
                         style: pw.TextStyle(
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
@@ -301,11 +305,11 @@ The QR code image is attached to this email.
                         ),
                       ),
                       pw.SizedBox(height: 5),
-                      pw.Text('• Store in a locked safe or drawer',
+                      pw.Text('- Store in a locked safe or drawer',
                           style: const pw.TextStyle(fontSize: 11)),
-                      pw.Text('• Keep in a safety deposit box',
+                      pw.Text('- Keep in a safety deposit box',
                           style: const pw.TextStyle(fontSize: 11)),
-                      pw.Text('• Do not leave in plain sight',
+                      pw.Text('- Do not leave in plain sight',
                           style: const pw.TextStyle(fontSize: 11)),
                       pw.SizedBox(height: 10),
                       pw.Text(

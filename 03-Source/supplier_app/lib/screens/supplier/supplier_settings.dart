@@ -32,11 +32,17 @@ class _SupplierSettingsState extends State<SupplierSettings> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () {
+              Haptics.light();
+              Navigator.pop(context, false);
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () {
+              Haptics.error();
+              Navigator.pop(context, true);
+            },
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
@@ -85,12 +91,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           // Pop loading dialog
           Navigator.pop(context);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error resetting business: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          AppFeedback.error(context, 'Error resetting business: $e');
         }
       }
     }
@@ -102,6 +103,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
       appBar: AppBar(
         title: const Text('Settings'),
         backgroundColor: const Color(0xFF2C3E50),
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         children: [
@@ -192,7 +194,10 @@ class _SupplierSettingsState extends State<SupplierSettings> {
               'Delete business and start over with new name',
               style: TextStyle(fontSize: 12),
             ),
-            onTap: _confirmAndResetBusiness,
+            onTap: () {
+              Haptics.medium();
+              _confirmAndResetBusiness();
+            },
           ),
 
           const SizedBox(height: 32),

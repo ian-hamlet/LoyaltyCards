@@ -469,6 +469,76 @@ Track your daily development progress here. Update after each work session.
 **Current Build:** v0.1.0 (Build 40)  
 **Status:** Production-ready for iPad landscape pilot testing
 
+---
+
+### Day 12 - [Date: 2026-04-13]
+**Phase:** Dual-Mode System Implementation (Builds 62-75)  
+**Hours Worked:** 6  
+**Status:** ✅ Complete
+
+**Tasks Completed:**
+
+**Dual-Mode Architecture:**
+- [x] Build 62-63: Created OperationMode enum (Simple/Secure)
+- [x] Build 62-63: Added mode selection to supplier onboarding
+- [x] Build 62-63: Implemented mode-specific behaviors throughout apps
+- [x] Build 62-63: Simple mode: trust-based, reusable QR codes
+- [x] Build 62-63: Secure mode: time-limited QR codes with crypto validation
+
+**Customer App Improvements:**
+- [x] Build 62-63: Auto-create new card after redemption (both modes)
+- [x] Build 65: Database migration v4→v5 (added redeemed_at column)
+- [x] Build 66: Redemption timestamp display on cards
+- [x] Build 67: Fixed simple mode stamp history (unique IDs per scan)
+- [x] Build 68: Fixed database exception (no redeemed_at column)
+- [x] Build 69: Card creation entry in stamp history
+
+**Supplier App Improvements:**
+- [x] Build 70: Customer instruction banners on stamp/redemption screens
+- [x] Build 71: Unified non-modal stamp QR display (both modes)
+- [x] Build 71: Hidden statistics in simple mode
+- [x] Build 72: Fixed navigation (Done/Back return to home)
+- [x] Build 73: Reverted button styling (removed black border)
+- [x] Build 74: Text corrections: "Adding N Stamps!" 
+- [x] Build 75: Green check icon and instruction in simple mode
+
+**Bug Fixes:**
+- [x] Build 64: Fixed simple mode card lookup (businessId-based)
+- [x] Build 64: Removed 60-minute rate limit (changed to 1 second)
+- [x] Build 66: Improved text colors for better readability
+- [x] Build 70: Fixed keyboard overlap on supplier setup
+
+**Feature Branch:**
+- [x] Merged feature/build-47-dual-mode → develop
+- [x] 27 files changed (+2,416 additions, -815 deletions)
+- [x] 6 commits merged successfully
+
+**Testing:**
+- ✅ Simple mode: Trust-based flow working end-to-end
+- ✅ Secure mode: Cryptographic validation working
+- ✅ Auto-create card after redemption (both modes)
+- ✅ Stamp history shows all stamps correctly
+- ✅ Database migration successful
+- ✅ Navigation fixed throughout supplier app
+- ✅ Both apps build successfully (18.1MB customer, 18.7MB supplier)
+
+**Blockers/Issues:**
+- **Critical (Resolved):** Database exception - no redeemed_at column
+  - **Fix:** Added migration v4→v5 in DatabaseHelper
+  - **Status:** ✅ Resolved in Build 65
+- **Moderate (Resolved):** Simple mode stamp history only showing 1 entry
+  - **Root Cause:** Reusable QR had same stamp ID, database replaced records
+  - **Fix:** Generate unique stamp IDs in simple mode based on card + number
+  - **Status:** ✅ Resolved in Build 68
+
+**Notes:**
+- Dual-mode system is major feature addition
+- Simple mode perfect for coffee shops and low-stakes use cases
+- Secure mode provides cryptographic guarantees for high-value scenarios
+- Both modes share 90% of codebase, differ only in validation logic
+- Feature branch successfully merged to develop
+- Ready for comprehensive device testing with both modes
+
 ### Day 11 - [Date: ____ ]
 **Phase:** Phase 5 - Multi-Device (continued)  
 **Hours Worked:** ___  

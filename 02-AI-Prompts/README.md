@@ -1,6 +1,10 @@
 # AI Prompts Directory
 
-This directory contains all AI prompts and chat logs used throughout the development process.
+This directory contains all AI prompts, development standards, and chat logs used throughout the development process.
+
+## ⚠️ READ FIRST
+
+**[DEVELOPMENT_STANDARDS.md](DEVELOPMENT_STANDARDS.md)** - MANDATORY reading for all developers and AI assistants. Contains critical conventions including the version numbering requirement.
 
 ## Structure
 

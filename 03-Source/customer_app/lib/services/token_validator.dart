@@ -5,6 +5,9 @@ import '../services/key_manager.dart';
 class TokenValidator {
   /// Validate a Card Issue Token
   /// Checks token structure and signature validity
+  /// 
+  /// For simple mode: Skips timestamp validation (tokens are reusable)
+  /// For secure mode: Enforces 5-minute expiry
   static Future<ValidationResult> validateCardIssueToken(
     CardIssueToken token,
   ) async {
@@ -16,7 +19,35 @@ class TokenValidator {
       );
     }
 
-    // Check timestamp (reject tokens older than 5 minutes)
+    // Simple mode: Skip timestamp check (tokens are reusable/static)
+    if (token.mode == OperationMode.simple) {
+      print('Simple mode: Skipping timestamp validation (reusable token)');
+      // Still verify signature for simple mode
+      try {
+        final signatureData = token.getSignatureData();
+        final isSignatureValid = KeyManager.verifySignature(
+          signatureData,
+          token.signature,
+          token.publicKey,
+        );
+
+        if (!isSignatureValid) {
+          return ValidationResult(
+            isValid: false,
+            error: 'Invalid signature',
+          );
+        }
+
+        return ValidationResult(isValid: true);
+      } catch (e) {
+        return ValidationResult(
+          isValid: false,
+          error: 'Signature verification failed: $e',
+        );
+      }
+    }
+
+    // Secure mode: Check timestamp (reject tokens older than 5 minutes)
     final now = DateTime.now().millisecondsSinceEpoch;
     final age = now - token.timestamp;
     if (age > 5 * 60 * 1000) {
@@ -53,10 +84,14 @@ class TokenValidator {
 
   /// Validate a Stamp Token
   /// Checks token structure, signature, and previous hash chain
+  /// 
+  /// For simple mode: Skips timestamp validation (tokens are reusable)
+  /// For secure mode: Enforces 2-minute expiry
   static Future<ValidationResult> validateStampToken({
     required StampToken token,
     required String businessPublicKey,
     required String expectedPreviousHash,
+    required OperationMode mode,
   }) async {
     // Check basic structure
     if (!token.isValid()) {
@@ -66,14 +101,19 @@ class TokenValidator {
       );
     }
 
-    // Check timestamp (reject stamps older than 2 minutes)
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final age = now - token.timestamp;
-    if (age > 2 * 60 * 1000) {
-      return ValidationResult(
-        isValid: false,
-        error: 'Stamp expired (older than 2 minutes)',
-      );
+    // Simple mode: Skip timestamp check (tokens are reusable/static)
+    // Secure mode: Check timestamp (reject stamps older than 2 minutes)
+    if (mode == OperationMode.secure) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final age = now - token.timestamp;
+      if (age > 2 * 60 * 1000) {
+        return ValidationResult(
+          isValid: false,
+          error: 'Stamp expired (older than 2 minutes)',
+        );
+      }
+    } else {
+      print('Simple mode: Skipping timestamp validation (reusable token)');
     }
 
     // Verify previous hash chain

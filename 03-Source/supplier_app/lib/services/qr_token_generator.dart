@@ -56,6 +56,7 @@ class QRTokenGenerator {
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
       logoIndex: business.logoIndex,
+      mode: business.mode,
       signature: '', // Will be filled below
       cardId: cardId,
       timestamp: timestamp,
@@ -79,6 +80,7 @@ class QRTokenGenerator {
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
       logoIndex: business.logoIndex,
+      mode: business.mode,
       signature: signature,
       cardId: cardId,
       timestamp: timestamp,
@@ -139,6 +141,7 @@ class QRTokenGenerator {
     return StampToken(
       id: stampId,
       cardId: cardId,
+      businessId: businessId,
       stampNumber: stampNumber,
       previousHash: previousHash,
       signature: signature,

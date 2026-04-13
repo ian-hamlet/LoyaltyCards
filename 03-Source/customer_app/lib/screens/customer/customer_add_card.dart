@@ -27,125 +27,126 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
       body: Stack(
         children: [
           Column(
-        children: [
-          // Instructions
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.blue[50],
-            child: Row(
+            children: [
+              // Instructions
+              Container(
+                padding: const EdgeInsets.all(16),
+                color: Colors.blue[50],
+                child: Row(
+                  children: [
+                    const Icon(Icons.qr_code_scanner, color: Colors.blue),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Scan the QR code from the business to add their loyalty card',
+                        style: TextStyle(color: Colors.blue[900]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Scanner
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final mediaQuery = MediaQuery.of(context);
+                    final padding = mediaQuery.viewPadding;
+                    final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
+                    
+                    // Detect status bar position
+                    String statusBarPosition;
+                    if (padding.top > padding.left && padding.top > padding.right) {
+                      statusBarPosition = 'top (portrait)';
+                    } else if (padding.left > padding.right) {
+                      statusBarPosition = 'left (landscapeRight)';
+                    } else if (padding.right > padding.left) {
+                      statusBarPosition = 'right (landscapeLeft)';
+                    } else {
+                      statusBarPosition = 'unknown';
+                    }
+                    
+                    // Apply rotation: base + manual offset
+                    final baseQuarterTurns = isLandscape ? 3 : 0;
+                    final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
+                    
+                    print('=== Add Card Scanner Orientation ===');
+                    print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
+                    print('Status bar: $statusBarPosition');
+                    print('Padding - Top: ${padding.top}, Bottom: ${padding.bottom}, Left: ${padding.left}, Right: ${padding.right}');
+                    print('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
+                    print('Final quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+                    
+                    return RotatedBox(
+                      quarterTurns: quarterTurns,
+                      child: MobileScanner(
+                        controller: cameraController,
+                        fit: BoxFit.contain,
+                        onDetect: (capture) {
+                          if (_isProcessing) return;
+                          
+                          final List<Barcode> barcodes = capture.barcodes;
+                          for (final barcode in barcodes) {
+                            if (barcode.rawValue != null) {
+                              _processQRCode(barcode.rawValue!);
+                              break;
+                            }
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+      
+          // Manual rotation controls
+          Positioned(
+            top: 80,
+            right: 16,
+            child: Column(
               children: [
-                const Icon(Icons.qr_code_scanner, color: Colors.blue),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Scan the QR code from the business to add their loyalty card',
-                    style: TextStyle(color: Colors.blue[900]),
+                FloatingActionButton(
+                  heroTag: 'rotate90',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    setState(() {
+                      _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                    });
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
+                      Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: 'rotate180',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    setState(() {
+                      _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                    });
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.flip, size: 20, color: Colors.blue),
+                      Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-
-          // Scanner
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final mediaQuery = MediaQuery.of(context);
-                final padding = mediaQuery.viewPadding;
-                final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
-                
-                // Detect status bar position
-                String statusBarPosition;
-                if (padding.top > padding.left && padding.top > padding.right) {
-                  statusBarPosition = 'top (portrait)';
-                } else if (padding.left > padding.right) {
-                  statusBarPosition = 'left (landscapeRight)';
-                } else if (padding.right > padding.left) {
-                  statusBarPosition = 'right (landscapeLeft)';
-                } else {
-                  statusBarPosition = 'unknown';
-                }
-                
-                // Apply rotation: base + manual offset
-                final baseQuarterTurns = isLandscape ? 3 : 0;
-                final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
-                
-                print('=== Add Card Scanner Orientation ===');
-                print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
-                print('Status bar: $statusBarPosition');
-                print('Padding - Top: ${padding.top}, Bottom: ${padding.bottom}, Left: ${padding.left}, Right: ${padding.right}');
-                print('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
-                print('Final quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
-                
-                return RotatedBox(
-                  quarterTurns: quarterTurns,
-                  child: MobileScanner(
-                    controller: cameraController,
-                    fit: BoxFit.contain,
-                    onDetect: (capture) {
-                if (_isProcessing) return;
-                
-                final List<Barcode> barcodes = capture.barcodes;
-                for (final barcode in barcodes) {
-                  if (barcode.rawValue != null) {
-                    _processQRCode(barcode.rawValue!);
-                    break;
-                    }
-                  }
-                },
-                  ),
-                );
-              },
-            ),
-          ),
         ],
       ),
-      
-      // Manual rotation controls
-      Positioned(
-        top: 80,
-        right: 16,
-        child: Column(
-          children: [
-            FloatingActionButton(
-              heroTag: 'rotate90',
-              mini: true,
-              backgroundColor: Colors.white.withOpacity(0.9),
-              onPressed: () {
-                setState(() {
-                  _manualRotationOffset = (_manualRotationOffset + 1) % 4;
-                });
-              },
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
-                  Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            FloatingActionButton(
-              heroTag: 'rotate180',
-              mini: true,
-              backgroundColor: Colors.white.withOpacity(0.9),
-              onPressed: () {
-                setState(() {
-                  _manualRotationOffset = (_manualRotationOffset + 2) % 4;
-                });
-              },
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.flip, size: 20, color: Colors.blue),
-                  Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
     );
   }
 
@@ -223,6 +224,7 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
         actions: [
           TextButton(
             onPressed: () {
+              Haptics.light();
               Navigator.pop(context);
               setState(() {
                 _isProcessing = false;
@@ -232,17 +234,13 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
           ),
           FilledButton(
             onPressed: () {
+              Haptics.medium();
               // TODO: Implement actual card creation from QR data
               // For now, just navigate back - actual implementation in Phase 3
               Navigator.pop(context);
               Navigator.pop(context);
               
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Card scanning will be implemented in Phase 3'),
-                  backgroundColor: Colors.blue,
-                ),
-              );
+              AppFeedback.info(context, 'Card scanning will be implemented in Phase 3');
             },
             child: const Text('Add Card'),
           ),
@@ -273,9 +271,7 @@ class _CustomerAddCardState extends State<CustomerAddCard> {
       _isProcessing = false;
     });
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    AppFeedback.error(context, message);
   }
 
   @override

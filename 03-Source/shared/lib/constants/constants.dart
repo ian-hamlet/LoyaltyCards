@@ -18,7 +18,7 @@ class AppConstants {
   
   // Database
   static const String databaseName = 'loyalty_cards.db';
-  static const int databaseVersion = 3;
+  static const int databaseVersion = 5;
   
   // QR Code Settings
   static const int qrCodeSize = 300;
@@ -32,6 +32,43 @@ class AppConstants {
   // Timing
   static const Duration animationDuration = Duration(milliseconds: 300);
   static const Duration qrScanSuccessDelay = Duration(milliseconds: 500);
+}
+
+/// Typography scale for consistent text sizing
+class AppTypography {
+  AppTypography._();
+
+  // Display
+  static const double displayLarge = 28.0;   // Card titles
+  static const double displayMedium = 24.0;  // Section headers
+  static const double displaySmall = 20.0;   // Subsection headers
+  
+  // Title
+  static const double titleLarge = 18.0;     // AppBar titles
+  static const double titleMedium = 16.0;    // Card titles
+  static const double titleSmall = 15.0;     // List item titles
+  
+  // Body
+  static const double bodyLarge = 14.0;      // Primary content
+  static const double bodyMedium = 13.0;     // Secondary content
+  static const double bodySmall = 12.0;      // Tertiary content
+  
+  // Label
+  static const double labelLarge = 13.0;     // Important labels
+  static const double labelMedium = 12.0;    // Standard labels
+  static const double labelSmall = 11.0;     // Minor labels
+}
+
+/// Spacing scale for consistent layout
+class AppSpacing {
+  AppSpacing._();
+
+  static const double xs = 4.0;    // Minimal spacing
+  static const double sm = 8.0;    // Small spacing
+  static const double md = 16.0;   // Medium spacing (DEFAULT)
+  static const double lg = 24.0;   // Large spacing
+  static const double xl = 32.0;   // Extra large spacing
+  static const double xxl = 48.0;  // Huge spacing
 }
 
 /// Brand color palette
@@ -58,6 +95,13 @@ class BrandColors {
   static const Color textPrimary = Color(0xFF212121);
   static const Color textSecondary = Color(0xFF757575);
   static const Color textHint = Color(0xFF9E9E9E);
+  
+  // Container Colors (light variants for backgrounds)
+  static const Color primaryContainer = Color(0xFFEDE7F6);   // Light purple
+  static const Color successContainer = Color(0xFFE8F5E9);   // Light green
+  static const Color errorContainer = Color(0xFFFFEBEE);     // Light red
+  static const Color warningContainer = Color(0xFFFFF3E0);   // Light orange
+  static const Color infoContainer = Color(0xFFE3F2FD);      // Light blue
   
   // Predefined card colors for businesses
   static const List<String> cardColorOptions = [

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:shared/shared.dart';
+import 'package:shared/shared.dart' hide Card;
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
 import '../../services/business_repository.dart';
@@ -20,15 +20,134 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     facing: CameraFacing.back,
     autoStart: true,
   );
+  final BusinessRepository _businessRepo = BusinessRepository();
+  
+  Business? _business;
   bool _isProcessing = false;
+  bool _isLoading = true;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
   @override
+  void initState() {
+    super.initState();
+    _loadBusiness();
+  }
+
+  Future<void> _loadBusiness() async {
+    try {
+      final business = await _businessRepo.getBusiness();
+      setState(() {
+        _business = business;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading || _business == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Redeem Card'),
+          backgroundColor: BrandColors.success,
+          foregroundColor: Colors.white,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Simple mode: Manual redemption confirmation
+    if (_business!.mode == OperationMode.simple) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Redeem Card'),
+          backgroundColor: BrandColors.success,
+          foregroundColor: Colors.white,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Info Card
+              Card(
+                elevation: 1,
+                color: Colors.green[50],
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.green[700], size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Simple Mode - Manual Redemption',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green[900],
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Honor-based system - verify customer has completed card',
+                              style: TextStyle(
+                                color: Colors.green[800],
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Instructions
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.card_giftcard,
+                        size: 80,
+                        color: Colors.green[600],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Redeem Customer Reward',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Secure mode: Camera scanner (existing implementation)
     return Scaffold(
       appBar: AppBar(
         title: const Text('Redeem Card'),
         backgroundColor: BrandColors.success,
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [
@@ -195,6 +314,173 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     );
   }
 
+  Widget _buildStep(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.check_circle, color: Colors.green[700], size: 18),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showRedemptionConfirmation() async {
+    if (_business == null) return;
+
+    // For simple mode, show manual confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(Icons.card_giftcard, color: Colors.green[600], size: 48),
+        title: const Text(
+          'Confirm Redemption',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Have you:',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            ),
+            const SizedBox(height: 12),
+            _buildCheckItem('✓ Verified customer\'s completed card'),
+            const SizedBox(height: 8),
+            _buildCheckItem('✓ Provided the reward to the customer'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'This will record the redemption with current timestamp',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.check_circle),
+            label: const Text('Confirm Redemption'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green[600],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _processManualRedemption();
+    }
+  }
+
+  Widget _buildCheckItem(String text) {
+    return Row(
+      children: [
+        Icon(Icons.check_circle, color: Colors.green[600], size: 18),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _processManualRedemption() async {
+    setState(() => _isProcessing = true);
+
+    try {
+      // Log the redemption with timestamp
+      final now = DateTime.now();
+      final cardId = 'simple_redemption_${now.millisecondsSinceEpoch}';
+      
+      await _businessRepo.logRedemption(
+        cardId: cardId,
+        stampsRedeemed: _business!.stampsRequired,
+        businessId: _business!.id,
+      );
+
+      print('=== Simple Mode Redemption Logged ===');
+      print('Business: ${_business!.name}');
+      print('Stamps: ${_business!.stampsRequired}');
+      print('Timestamp: ${now.toIso8601String()}');
+
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        
+        // Show success message
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            icon: const Icon(Icons.celebration, color: Colors.green, size: 64),
+            title: const Text('Redemption Recorded!'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Redeemed: ${_business!.stampsRequired} stamps',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Time: ${now.hour}:${now.minute.toString().padLeft(2, '0')}',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Date: ${now.day}/${now.month}/${now.year}',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Return to home
+                },
+                child: const Text('Done'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        _showError('Error recording redemption: $e');
+      }
+    }
+  }
+
   void _processCardQR(String qrData) {
     setState(() {
       _isProcessing = true;
@@ -214,7 +500,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         print('Stamps collected: ${token.stampsCollected}');
         print('Signatures to verify: ${token.stampSignatures.length}');
         
-        _showRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+        _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
         return;
       } else if (json['type'] == 'card_stamp_request') {
         // Customer is showing a stamp request QR, not a redemption QR
@@ -237,7 +523,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           final cardId = parts[2];
           final stamps = int.tryParse(parts[3]) ?? 0;
           print('Legacy redemption format detected');
-          _showRedemptionConfirmation(context, cardId, stamps);
+          _showSecureModeRedemptionConfirmation(context, cardId, stamps);
           return;
         }
       }
@@ -246,7 +532,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     }
   }
 
-  void _showRedemptionConfirmation(BuildContext context, String cardId, int stamps) async {
+  void _showSecureModeRedemptionConfirmation(BuildContext context, String cardId, int stamps) async {
     // Get business info to sign the redemption token
     final businessRepo = BusinessRepository();
     final business = await businessRepo.getBusiness();
@@ -321,9 +607,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       _isProcessing = false;
     });
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    AppFeedback.error(context, message);
   }
 
   @override
@@ -380,6 +664,34 @@ class _RedemptionTokenScreen extends StatelessWidget {
                   color: Colors.grey[600],
                 ),
               ),
+              const SizedBox(height: 16),
+              
+              // Customer instruction
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.qr_code_scanner, color: Colors.green[700], size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Now ask customer to scan this redemption code to complete the transaction',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.green[900],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 32),
 
               // QR Code
@@ -399,46 +711,11 @@ class _RedemptionTokenScreen extends StatelessWidget {
                 child: QrImageView(
                   data: token.toQRString(),
                   version: QrVersions.auto,
-                  size: 280,
+                  size: QRCodeSize.calculate(context),
                   backgroundColor: Colors.white,
                 ),
               ),
               const SizedBox(height: 32),
-
-              // Instructions for customer
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green[300]!),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.qr_code_scanner, color: Colors.green[700], size: 36),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Customer: Scan this QR code',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[900],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'This confirms the redemption and prevents the card from being used again.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
 
               // Done button
               FilledButton(

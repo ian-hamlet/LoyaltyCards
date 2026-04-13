@@ -7,6 +7,7 @@ import 'supplier_issue_card.dart';
 import 'supplier_stamp_card.dart';
 import 'supplier_redeem_card.dart';
 import 'supplier_settings.dart';
+import 'how_it_works.dart';
 
 class SupplierHome extends StatefulWidget {
   const SupplierHome({super.key});
@@ -59,9 +60,7 @@ class _SupplierHomeState extends State<SupplierHome> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading business: $e')),
-        );
+        AppFeedback.error(context, 'Error loading business: $e');
       }
     }
   }
@@ -87,8 +86,20 @@ class _SupplierHomeState extends State<SupplierHome> {
         title: Text('${_business!.name} $appVersion'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'How It Works',
+            onPressed: () {
+              Haptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HowItWorks()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
+              Haptics.light();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -143,17 +154,20 @@ class _SupplierHomeState extends State<SupplierHome> {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStat('Issued', _issuedCards),
-                        Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Stamped', _activeCards),
-                        Container(width: 1, height: 40, color: Colors.white30),
-                        _buildStat('Redeemed', _redemptions),
-                      ],
-                    ),
+                    // Hide statistics in simple mode (counters not tracked)
+                    if (_business!.mode == OperationMode.secure) ...[
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildStat('Issued', _issuedCards),
+                          Container(width: 1, height: 40, color: Colors.white30),
+                          _buildStat('Stamped', _activeCards),
+                          Container(width: 1, height: 40, color: Colors.white30),
+                          _buildStat('Redeemed', _redemptions),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

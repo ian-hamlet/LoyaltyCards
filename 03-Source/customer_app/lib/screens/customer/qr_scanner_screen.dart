@@ -89,6 +89,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
+    // Note: In simple mode, signature validation is skipped (trust-based)
+    // In secure mode, full cryptographic validation is performed
+    print('Card operation mode: ${token.mode.displayName}');
+
     // Use card ID from token if present (for multi-stamp consistency)
     // Otherwise generate new one (backward compatibility)
     final cardId = token.cardId ?? '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}';
@@ -103,6 +107,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       stampsCollected: initialStampCount,
       brandColor: token.brandColor.replaceAll('#', ''),
       logoIndex: token.logoIndex,
+      mode: token.mode, // Store the operation mode from token
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -123,22 +128,27 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       for (var initialStamp in token.initialStamps) {
         print('Processing initial stamp #${initialStamp.stampNumber}');
         print('  Card ID for stamp: $cardId');
-        // Verify stamp signature
-        final signatureData = '$cardId:${initialStamp.stampNumber}:${initialStamp.timestamp}:$previousHash';
-        final isValid = KeyManager.verifySignature(
-          signatureData,
-          initialStamp.signature,
-          token.publicKey,
-        );
+        
+        // Verify stamp signature (skip in simple mode)
+        if (token.mode == OperationMode.secure) {
+          final signatureData = '$cardId:${initialStamp.stampNumber}:${initialStamp.timestamp}:$previousHash';
+          final isValid = KeyManager.verifySignature(
+            signatureData,
+            initialStamp.signature,
+            token.publicKey,
+          );
 
-        if (!isValid) {
-          setState(() {
-            _errorMessage = 'Invalid stamp signature at stamp #${initialStamp.stampNumber}';
-            _isProcessing = false;
-          });
-          // Rollback: delete the card
-          await cardRepository.deleteCard(cardId);
-          return;
+          if (!isValid) {
+            setState(() {
+              _errorMessage = 'Invalid stamp signature at stamp #${initialStamp.stampNumber}';
+              _isProcessing = false;
+            });
+            // Rollback: delete the card
+            await cardRepository.deleteCard(cardId);
+            return;
+          }
+        } else {
+          print('  Simple mode: Skipping signature validation');
         }
 
         // Create and save stamp
@@ -194,7 +204,26 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Get the card this stamp is for
     final repository = CardRepository(DatabaseHelper());
-    final card = await repository.getCardById(token.cardId);
+    models.Card? card;
+    
+    // For simple mode stamps, look up by businessId since cardId is generic
+    if (token.cardId == 'simple-mode-stamp' && token.businessId.isNotEmpty) {
+      print('=== Simple Mode Stamp Detected ===');
+      print('Looking up card by businessId: ${token.businessId}');
+      final allCards = await repository.getAllCards();
+      try {
+        card = allCards.firstWhere(
+          (c) => c.businessId == token.businessId,
+        );
+        print('Found card with ID: ${card.id}');
+      } catch (e) {
+        print('No card found for businessId: ${token.businessId}');
+        card = null;
+      }
+    } else {
+      // Secure mode: look up by exact cardId
+      card = await repository.getCardById(token.cardId);
+    }
 
     if (card == null) {
       setState(() {
@@ -209,6 +238,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final rateLimit = await rateLimiter.canReceiveStamp(
       cardId: card.id,
       businessId: card.businessId,
+      mode: card.mode,
     );
 
     if (!rateLimit.canProceed) {
@@ -226,6 +256,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     
     print('=== Validating Stamp Token ===');
     print('Card ID: ${card.id}');
+    print('Card mode: ${card.mode.displayName}');
     print('Stamps in DB: ${stamps.length}');
     print('Expected next stamp: #${stamps.length + 1}');
     print('Token stamp number: ${token.stampNumber}');
@@ -233,34 +264,59 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     print('Token previousHash: "${token.previousHash.isEmpty ? "(empty)" : token.previousHash.substring(0, 20) + "..."}"');
     print('=== End Validation ===');
 
-    // Validate stamp token
-    final validation = await TokenValidator.validateStampToken(
-      token: token,
-      businessPublicKey: card.businessPublicKey,
-      expectedPreviousHash: expectedPrevHash,
-    );
+    // Validate stamp token (skip crypto validation for simple mode)
+    if (card.mode == OperationMode.secure) {
+      final validation = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: card.businessPublicKey,
+        expectedPreviousHash: expectedPrevHash,
+        mode: card.mode,
+      );
 
-    if (!validation.isValid) {
-      setState(() {
-        _errorMessage = validation.error ?? 'Invalid stamp';
-        _isProcessing = false;
-      });
-      return;
+      if (!validation.isValid) {
+        setState(() {
+          _errorMessage = validation.error ?? 'Invalid stamp';
+          _isProcessing = false;
+        });
+        return;
+      }
+    } else {
+      // Simple mode: Trust-based, no cryptographic validation
+      print('Simple mode: Skipping cryptographic validation');
     }
 
     // Add stamp to card
     print('=== Saving Main Stamp ===');
-    print('Stamp #${token.stampNumber}');
-    print('previousHash: "${token.previousHash.isEmpty ? "(empty -> will be null)" : token.previousHash.substring(0, 20) + "..."}"');
+    
+    // In simple mode, generate unique stamp details since QR is reusable
+    final nextStampNumber = stamps.length + 1;
+    final stampId = card.mode == OperationMode.simple 
+        ? '${card.id}_stamp_$nextStampNumber'
+        : token.id;
+    final stampNumber = card.mode == OperationMode.simple
+        ? nextStampNumber
+        : token.stampNumber;
+    final stampTimestamp = card.mode == OperationMode.simple
+        ? DateTime.now()
+        : DateTime.fromMillisecondsSinceEpoch(token.timestamp);
+    final stampPreviousHash = card.mode == OperationMode.simple
+        ? expectedPrevHash
+        : token.previousHash;
+    
+    print('Stamp #$stampNumber');
+    print('Card ID: ${card.id}');
+    print('Stamp ID: $stampId');
+    print('Mode: ${card.mode.displayName}');
+    print('previousHash: "${stampPreviousHash.isEmpty ? "(empty -> will be null)" : stampPreviousHash.substring(0, 20) + "..."}"');
     print('signature: "${token.signature.substring(0, 20)}..."');
     
     final stamp = Stamp(
-      id: token.id,
-      cardId: token.cardId,
-      stampNumber: token.stampNumber,
-      timestamp: DateTime.fromMillisecondsSinceEpoch(token.timestamp),
+      id: stampId,
+      cardId: card.id,  // Use the actual card ID we found, not token.cardId
+      stampNumber: stampNumber,
+      timestamp: stampTimestamp,
       signature: token.signature,
-      previousHash: token.previousHash.isEmpty ? null : token.previousHash,
+      previousHash: stampPreviousHash.isEmpty ? null : stampPreviousHash,
     );
 
     await stampRepo.insertStamp(stamp);
@@ -277,30 +333,34 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         print('  previousHash: "${currentPreviousHash.substring(0, 20)}..."');
         print('  signature: "${additionalStamp.signature.substring(0, 20)}..."');
         
-        // Verify stamp signature
-        final signatureData = '${token.cardId}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
-        final isValid = KeyManager.verifySignature(
-          signatureData,
-          additionalStamp.signature,
-          card.businessPublicKey,
-        );
+        // Verify stamp signature (skip in simple mode)
+        if (card.mode == OperationMode.secure) {
+          final signatureData = '${card.id}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
+          final isValid = KeyManager.verifySignature(
+            signatureData,
+            additionalStamp.signature,
+            card.businessPublicKey,
+          );
 
-        if (!isValid) {
-          print('ERROR: Additional stamp signature verification FAILED');
-          setState(() {
-            _errorMessage = 'Invalid stamp signature at stamp #${additionalStamp.stampNumber}';
-            _isProcessing = false;
-          });
-          // Note: We've already added some stamps. In production, you might want
-          // to implement a transaction rollback here.
-          return;
+          if (!isValid) {
+            print('ERROR: Additional stamp signature verification FAILED');
+            setState(() {
+              _errorMessage = 'Invalid stamp signature at stamp #${additionalStamp.stampNumber}';
+              _isProcessing = false;
+            });
+            // Note: We've already added some stamps. In production, you might want
+            // to implement a transaction rollback here.
+            return;
+          }
+          print('  Signature verified OK');
+        } else {
+          print('  Simple mode: Skipping signature validation');
         }
-        print('  Signature verified OK');
 
         // Create and save stamp
         final additionalStampRecord = Stamp(
-          id: '${token.cardId}_stamp_${additionalStamp.stampNumber}',
-          cardId: token.cardId,
+          id: '${card.id}_stamp_${additionalStamp.stampNumber}',
+          cardId: card.id,
           stampNumber: additionalStamp.stampNumber,
           timestamp: DateTime.fromMillisecondsSinceEpoch(additionalStamp.timestamp),
           signature: additionalStamp.signature,
@@ -348,6 +408,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         businessPublicKey: card.businessPublicKey,
         brandColor: card.brandColor,
         logoIndex: card.logoIndex,
+        mode: card.mode, // Preserve the operation mode
         stampsRequired: card.stampsRequired,
         stampsCollected: overflow,
         createdAt: now,
@@ -477,12 +538,32 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Mark card as redeemed
     await repository.markCardAsRedeemed(card.id);
     print('Card marked as redeemed in database');
+    
+    // Auto-create new card for continued loyalty
+    final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+    final now = DateTime.now();
+    final newCard = models.Card(
+      id: newCardId,
+      businessId: card.businessId,
+      businessName: card.businessName,
+      businessPublicKey: card.businessPublicKey,
+      brandColor: card.brandColor,
+      logoIndex: card.logoIndex,
+      mode: card.mode,
+      stampsRequired: card.stampsRequired,
+      stampsCollected: 0,
+      createdAt: now,
+      updatedAt: now,
+    );
+    
+    await repository.insertCard(newCard);
+    print('New card auto-created: $newCardId');
 
     print('=== Redemption Complete ===');
 
     if (mounted) {
       Navigator.pop(context, 
-        '🎉 Redemption confirmed! Card has been redeemed. You can now delete it.');
+        '🎉 Redemption confirmed! New card added to your wallet.');
     }
   }
 

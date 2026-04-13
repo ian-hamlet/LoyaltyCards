@@ -5,6 +5,7 @@ import 'package:pointycastle/ecc/api.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import 'supplier_home.dart';
+import 'how_it_works.dart';
 
 class SupplierOnboarding extends StatefulWidget {
   const SupplierOnboarding({super.key});
@@ -23,6 +24,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   int _stampsRequired = AppConstants.defaultStampsRequired;
   String _selectedColor = BrandColors.cardColorOptions.first;
   int _selectedLogoIndex = 0;
+  OperationMode _selectedMode = OperationMode.secure; // Default to secure
   bool _isCreating = false;
 
   @override
@@ -32,8 +34,12 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   }
 
   Future<void> _createBusiness() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      Haptics.error();
+      return;
+    }
 
+    Haptics.medium();
     setState(() => _isCreating = true);
 
     try {
@@ -47,6 +53,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       print('Stamps required: $_stampsRequired');
       print('Brand color: $_selectedColor');
       print('Logo index: $_selectedLogoIndex');
+      print('Operation mode: ${_selectedMode.displayName}');
 
       // Generate key pair
       print('Generating cryptographic key pair...');
@@ -76,6 +83,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
         stampsRequired: _stampsRequired,
         brandColor: _selectedColor,
         logoIndex: _selectedLogoIndex,
+        mode: _selectedMode,
         createdAt: DateTime.now(),
       );
 
@@ -87,6 +95,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       print('='.padRight(60, '='));
 
       if (mounted) {
+        Haptics.success();
         // Navigate to home screen
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const SupplierHome()),
@@ -95,12 +104,8 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
     } catch (e) {
       setState(() => _isCreating = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error setting up business: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Haptics.error();
+        AppFeedback.error(context, 'Error setting up business: $e');
       }
     }
   }
@@ -108,15 +113,30 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Business Setup'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'How It Works',
+            onPressed: () {
+              Haptics.light();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const HowItWorks()),
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.md),
                 
                 // Logo/Icon
                 Icon(
@@ -125,7 +145,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
                 
                 // Title
                 Text(
@@ -136,17 +156,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   textAlign: TextAlign.center,
                 ),
                 
-                const SizedBox(height: 8),
-                
-                Text(
-                  'Set and configure your loyalty card program for your customers',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: 48),
+                const SizedBox(height: AppSpacing.xl),
                 
                 // Business Name
                 TextFormField(
@@ -173,65 +183,119 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 const SizedBox(height: 24),
                 
                 // Stamps Required
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Stamps Required',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'How many stamps to earn a reward?',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                              onPressed: _stampsRequired > 3
-                                  ? () => setState(() => _stampsRequired--)
-                                  : null,
-                              icon: const Icon(Icons.remove_circle),
-                            ),
-                            Text(
-                              '$_stampsRequired stamps',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: _stampsRequired < 20
-                                  ? () => setState(() => _stampsRequired++)
-                                  : null,
-                              icon: const Icon(Icons.add_circle),
-                            ),
-                          ],
-                        ),
-                        Slider(
-                          value: _stampsRequired.toDouble(),
-                          min: 3,
-                          max: 20,
-                          divisions: 17,
-                          label: '$_stampsRequired',
-                          onChanged: (value) {
-                            setState(() => _stampsRequired = value.toInt());
-                          },
-                        ),
-                      ],
+                Row(
+                  children: [
+                    const Text(
+                      'Stamps Required',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: 'How many stamps customers need to earn a reward (3-20)',
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 18,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: _stampsRequired > 3
+                          ? () {
+                              Haptics.light();
+                              setState(() => _stampsRequired--);
+                            }
+                          : null,
+                      icon: const Icon(Icons.remove_circle),
+                    ),
+                    Text(
+                      '$_stampsRequired stamps',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _stampsRequired < 20
+                          ? () {
+                              Haptics.light();
+                              setState(() => _stampsRequired++);
+                            }
+                          : null,
+                      icon: const Icon(Icons.add_circle),
+                    ),
+                  ],
+                ),
+                Slider(
+                  value: _stampsRequired.toDouble(),
+                  min: 3,
+                  max: 20,
+                  divisions: 17,
+                  label: '$_stampsRequired',
+                  onChanged: (value) {
+                    setState(() => _stampsRequired = value.toInt());
+                  },
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Operation Mode Selection
+                Row(
+                  children: [
+                    const Text(
+                      'Operation Mode',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: 'Simple: Fast, trust-based (coffee shops)\nSecure: Crypto validation (high-value)',
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 18,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                RadioListTile<OperationMode>(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(OperationMode.simple.displayName),
+                  subtitle: Text(
+                    OperationMode.simple.description,
+                    style: const TextStyle(fontSize: 13),
                   ),
+                  value: OperationMode.simple,
+                  groupValue: _selectedMode,
+                  onChanged: (value) {
+                    Haptics.selection();
+                    setState(() => _selectedMode = value!);
+                  },
+                ),
+                RadioListTile<OperationMode>(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(OperationMode.secure.displayName),
+                  subtitle: Text(
+                    OperationMode.secure.description,
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  value: OperationMode.secure,
+                  groupValue: _selectedMode,
+                  onChanged: (value) {
+                    Haptics.selection();
+                    setState(() => _selectedMode = value!);
+                  },
                 ),
                 
                 const SizedBox(height: 24),
@@ -251,7 +315,10 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   children: BrandColors.cardColorOptions.map((color) {
                     final isSelected = color == _selectedColor;
                     return GestureDetector(
-                      onTap: () => setState(() => _selectedColor = color),
+                      onTap: () {
+                        Haptics.selection();
+                        setState(() => _selectedColor = color);
+                      },
                       child: Container(
                         width: 50,
                         height: 50,
@@ -288,14 +355,6 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Choose an icon to represent your business',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -390,44 +449,46 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
                 ],
                 
-                // Create Button
-                FilledButton(
-                  onPressed: _isCreating ? null : _createBusiness,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                    backgroundColor: BrandColors.fromHex(_selectedColor),
-                  ),
-                  child: _isCreating
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Create Business Profile',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Info text
-                Text(
-                  'Your cryptographic keys will be generated and stored securely on this device.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                const SizedBox(height: AppSpacing.lg),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: FilledButton(
+            onPressed: _isCreating ? null : _createBusiness,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              backgroundColor: BrandColors.fromHex(_selectedColor),
+            ),
+            child: _isCreating
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'Creating...',
+                        style: TextStyle(fontSize: AppTypography.bodyLarge),
+                      ),
+                    ],
+                  )
+                : Text(
+                    'Create Business Profile',
+                    style: TextStyle(fontSize: AppTypography.bodyLarge),
+                  ),
           ),
         ),
       ),
@@ -439,7 +500,10 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
     final color = BrandColors.fromHex(_selectedColor);
     
     return GestureDetector(
-      onTap: () => setState(() => _selectedLogoIndex = index),
+      onTap: () {
+        Haptics.selection();
+        setState(() => _selectedLogoIndex = index);
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

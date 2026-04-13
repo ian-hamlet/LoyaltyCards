@@ -212,7 +212,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                         child: QrImageView(
                           data: _qrData!,
                           version: QrVersions.auto,
-                          size: 280,
+                          size: QRCodeSize.calculate(context),
                           backgroundColor: Colors.white,
                         ),
                       ),
@@ -265,106 +265,6 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                               ],
                             ),
                           ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Expandable Instructions (more prominent)
-                      Card(
-                        elevation: 3,
-                        color: Colors.blue[50],
-                        child: Theme(
-                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                          child: ExpansionTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue[700],
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.help_outline, color: Colors.white, size: 18),
-                            ),
-                            title: Text(
-                              widget.mode == QRDisplayMode.stampRequest
-                                  ? 'How to Get a Stamp'
-                                  : 'How to Redeem Your Reward',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[900],
-                                fontSize: 15,
-                              ),
-                            ),
-                            subtitle: Row(
-                              children: [
-                                Icon(
-                                  _instructionsExpanded ? Icons.expand_less : Icons.expand_more,
-                                  size: 16,
-                                  color: Colors.blue[700],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _instructionsExpanded ? 'Hide details' : 'Tap for instructions',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue[700],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            initiallyExpanded: false,
-                            onExpansionChanged: (expanded) {
-                              setState(() {
-                                _instructionsExpanded = expanded;
-                              });
-                            },
-                            backgroundColor: Colors.blue[50],
-                            collapsedBackgroundColor: Colors.blue[50],
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      instruction,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.blue[900],
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                    if (widget.mode == QRDisplayMode.redemption) ...[
-                                      const SizedBox(height: 12),
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green[100],
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.info_outline, color: Colors.green[700], size: 16),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                'After redemption, your card will be reset and ready to collect new stamps.',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.green[900],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ],

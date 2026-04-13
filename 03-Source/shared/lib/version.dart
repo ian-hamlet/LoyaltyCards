@@ -6,6 +6,81 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 83 Changes:
+/// - **CLONE EXPIRY REDUCED**: Changed clone QR expiry from 24 hours to 5 minutes
+/// - More secure: Shorter window for QR to be compromised
+/// - More practical: Device cloning should happen immediately, not hours later
+/// - Updated expiry warning threshold: Orange when > 2 min, red when < 2 min
+/// - Updated countdown text: "Valid for 5 minutes" instead of 24 hours
+/// - **TEXT COLOR FIX**: Added Colors.black87 to step instructions for readability
+/// - Consistent with other screens (recovery_backup_screen pattern)
+/// - Fixed illegible text on blue background
+/// 
+/// Build 82 Changes:
+/// - **CLONE DEVICE COMPLETE**: Implemented "Clone to Another Device" feature
+/// - Added CloneDeviceScreen to display clone QR code for multi-device setup
+/// - Shows QR code with 24-hour expiry countdown timer
+/// - Auto-updates countdown every second with hours:minutes:seconds
+/// - Color-coded warning (orange → red when < 1 hour remaining)
+/// - Displays step-by-step instructions for cloning process
+/// - Security notice about private key sharing
+/// - Regenerate button to create new QR with fresh timer
+/// - Enabled "Clone to Another Device" in Settings menu
+/// - Clone QR fetches private key from KeyManager (like recovery backup)
+/// - Scanning side already complete: ImportBusinessScreen has frame + rotation controls (Build 81)
+/// - Full multi-device workflow: Device A displays QR → Device B scans → Both have same business
+/// 
+/// Build 81 Changes:
+/// - **UI ENHANCEMENT**: Added QR scanning frame and orientation controls to import screen
+/// - Added white border scanning frame (250x250) to ImportBusinessScreen
+/// - Added manual rotation controls (90° and 180° buttons) for QR orientation
+/// - Added RotatedBox with automatic landscape detection
+/// - Import screen now matches UI pattern of other QR scanning screens
+/// - Improved user experience when scanning backup QR codes
+/// 
+/// Build 80 Changes:
+/// - **IMPORT FIX**: Fixed "FormatException: Could not parse BigInt" during backup restoration
+/// - Added KeyManager.getPrivateKeyString() to retrieve private key for backup creation
+/// - Modified RecoveryBackupScreen to fetch private key from KeyManager before creating backup
+/// - Private key now properly included in backup QR code
+/// - Import/recovery now successfully restores business configuration
+/// - Full backup → restore cycle verified working
+/// 
+/// Build 79 Changes:
+/// - **IMPORT/RECOVERY COMPLETE**: Full backup restore functionality implemented
+/// - Added ImportBusinessScreen with QR scanner for recovery/cloning
+/// - Added "Recover from Backup" button to supplier onboarding
+/// - Added "Clone from Another Device" button to supplier onboarding
+/// - Signature validation during import
+/// - Expiry check for clone QR codes (24h limit)
+/// - Prevents import if business already exists on device
+/// - Restores exact Business ID and cryptographic keys
+/// - Complete backup → restore cycle now working
+/// - All customer cards remain valid after recovery
+/// 
+/// Build 78 Changes:
+/// - **CRASH FIX**: Added iOS permissions for photo library access (NSPhotoLibraryAddUsageDescription)
+/// - **PDF FIX**: Removed emoji characters from PDF that caused rendering issues
+/// - **IPAD FIX**: Added sharePositionOrigin for Email and Files share sheet on iPad
+/// - Fixed unicode characters (⚠️) in PDF generation - replaced with text
+/// - Fixed "sharePositionOrigin must be set" crash on iPad
+/// - Fixed thread safety warning from printing plugin
+/// - Navigation to backup screen from Settings now working
+/// 
+/// Build 77 Changes:
+/// - **NAVIGATION**: Added backup screen access via Settings
+/// - Added "Backup & Recovery" section to supplier settings
+/// - Created comprehensive testing guide (BACKUP_TESTING_GUIDE.md)
+/// - Placeholder for Clone QR feature (coming soon)
+/// 
+/// Build 76 Changes:
+/// - **SUPPLIER BACKUP & RECOVERY**: Implementing REQ-021 disaster recovery features
+/// - Added SupplierConfigBackup model for configuration export/import
+/// - Implemented four storage methods: Print PDF, Photos, Email, Files
+/// - Cross-platform compatible (iOS & Android)
+/// - Recovery backup QR codes (non-expiring) vs clone QR codes (24h expiry)
+/// - Encryption support for backup data
+/// 
 /// Build 75 Changes:
 /// - **SIMPLE MODE STAMP UI UPDATE**: Added green check icon and customer instruction
 /// - Changed business icon to green check circle (matches secure mode)
@@ -201,4 +276,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 75)';
+const String appVersion = 'v0.1.0 (Build 83)';

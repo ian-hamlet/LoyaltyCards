@@ -94,6 +94,12 @@ class KeyManager {
     return encoded;
   }
 
+  /// Retrieve private key as base64 string (for backup creation)
+  Future<String?> getPrivateKeyString(String businessId) async {
+    final keyBase64 = await _storage.read(key: '$_privateKeyPrefix$businessId');
+    return keyBase64;
+  }
+
   /// Sign data with private key using ECDSA
   Future<String> signData(String data, ECPrivateKey privateKey) async {
     final signer = ECDSASigner(SHA256Digest());
@@ -159,6 +165,20 @@ class KeyManager {
     final privateKey = await _storage.read(key: '$_privateKeyPrefix$businessId');
     final publicKey = await _storage.read(key: '$_publicKeyPrefix$businessId');
     return privateKey != null && publicKey != null;
+  }
+
+  /// Decode private key from base64 string (for backup restore)
+  ECPrivateKey decodePrivateKey(String keyBase64) {
+    final keyBytes = base64Decode(keyBase64);
+    final d = BigInt.parse(keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
+    
+    final params = ECCurve_secp256r1();
+    return ECPrivateKey(d, params);
+  }
+
+  /// Decode public key from encoded string (for backup restore)
+  ECPublicKey? decodePublicKey(String encoded) {
+    return _decodePublicKey(encoded);
   }
 
   /// Delete keys for a business

@@ -6,6 +6,7 @@ import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import 'supplier_home.dart';
 import 'how_it_works.dart';
+import 'import_business_screen.dart';
 
 class SupplierOnboarding extends StatefulWidget {
   const SupplierOnboarding({super.key});
@@ -452,6 +453,106 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 ],
                 
                 const SizedBox(height: AppSpacing.lg),
+                
+                // Divider with "OR"
+                Row(
+                  children: [
+                    Expanded(child: Divider(thickness: 1, color: Colors.grey[400])),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(thickness: 1, color: Colors.grey[400])),
+                  ],
+                ),
+                
+                const SizedBox(height: AppSpacing.lg),
+                
+                // Import options
+                Text(
+                  'Already Have a Business?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.md),
+                
+                // Recover Existing Business button
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Haptics.medium();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ImportBusinessScreen(),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.restore, size: 24),
+                  label: Text('Recover from Backup'),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.all(16),
+                    side: BorderSide(color: Colors.blue, width: 2),
+                    foregroundColor: Colors.blue,
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+                
+                Text(
+                  'Restore your business if you lost your device',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.lg),
+                
+                // Clone from Another Device button
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Haptics.medium();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ImportBusinessScreen(),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.device_hub, size: 24),
+                  label: Text('Clone from Another Device'),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.all(16),
+                    side: BorderSide(color: Colors.green, width: 2),
+                    foregroundColor: Colors.green,
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+                
+                Text(
+                  'Set up this device as an additional location',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.xl),
               ],
             ),
           ),

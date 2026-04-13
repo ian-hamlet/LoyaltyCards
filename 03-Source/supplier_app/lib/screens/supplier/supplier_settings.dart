@@ -3,6 +3,8 @@ import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
 import 'supplier_onboarding.dart';
+import 'recovery_backup_screen.dart';
+import 'clone_device_screen.dart';
 
 class SupplierSettings extends StatefulWidget {
   final Business business;
@@ -169,7 +171,60 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             title: const Text('Version'),
             subtitle: Text(appVersion),
           ),
+          const Divider(height: 32),
 
+          // Backup & Recovery Section
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Backup & Recovery',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.backup, color: Colors.blue),
+            title: const Text('Create Recovery Backup'),
+            subtitle: const Text(
+              'Save your business configuration to prevent data loss',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Haptics.medium();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecoveryBackupScreen(
+                    business: widget.business,
+                    isFirstTime: false,
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.device_hub, color: Colors.green),
+            title: const Text('Clone to Another Device'),
+            subtitle: const Text(
+              'Set up this business on additional devices',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Haptics.medium();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CloneDeviceScreen(
+                    business: widget.business,
+                  ),
+                ),
+              );
+            },
+          ),
           const Divider(height: 32),
 
           // Danger Zone

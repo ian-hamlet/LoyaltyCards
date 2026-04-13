@@ -6,6 +6,14 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 80 Changes:
+/// - **IMPORT FIX**: Fixed "FormatException: Could not parse BigInt" during backup restoration
+/// - Added KeyManager.getPrivateKeyString() to retrieve private key for backup creation
+/// - Modified RecoveryBackupScreen to fetch private key from KeyManager before creating backup
+/// - Private key now properly included in backup QR code
+/// - Import/recovery now successfully restores business configuration
+/// - Full backup → restore cycle verified working
+/// 
 /// Build 79 Changes:
 /// - **IMPORT/RECOVERY COMPLETE**: Full backup restore functionality implemented
 /// - Added ImportBusinessScreen with QR scanner for recovery/cloning
@@ -236,4 +244,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 79)';
+const String appVersion = 'v0.1.0 (Build 80)';

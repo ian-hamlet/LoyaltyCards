@@ -5,6 +5,7 @@ import 'package:shared/models/supplier_config_backup.dart';
 import 'package:shared/widgets/feedback.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/backup_storage_service.dart';
+import '../../services/key_manager.dart';
 import 'package:intl/intl.dart';
 
 /// Screen for creating and exporting supplier configuration backups
@@ -52,6 +53,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   Uint8List? _qrImageBytes;
   bool _isGenerating = false;
   final Set<String> _completedMethods = {};
+  final KeyManager _keyManager = KeyManager();
 
   @override
   void initState() {
@@ -63,8 +65,19 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     setState(() => _isGenerating = true);
 
     try {
+      // Fetch private key from secure storage for backup inclusion
+      final privateKeyString = await _keyManager.getPrivateKeyString(widget.business.id);
+      if (privateKeyString == null) {
+        throw Exception('Private key not found in secure storage');
+      }
+
+      // Create business object with privateKey populated for backup
+      final businessWithKeys = widget.business.copyWith(
+        privateKey: privateKeyString,
+      );
+
       final backup =
-          await SupplierConfigBackup.createRecoveryBackup(widget.business);
+          await SupplierConfigBackup.createRecoveryBackup(businessWithKeys);
       final qrBytes = await BackupStorageService.generateQRImageBytes(backup);
 
       setState(() {

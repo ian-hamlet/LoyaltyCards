@@ -94,6 +94,12 @@ class KeyManager {
     return encoded;
   }
 
+  /// Retrieve private key as base64 string (for backup creation)
+  Future<String?> getPrivateKeyString(String businessId) async {
+    final keyBase64 = await _storage.read(key: '$_privateKeyPrefix$businessId');
+    return keyBase64;
+  }
+
   /// Sign data with private key using ECDSA
   Future<String> signData(String data, ECPrivateKey privateKey) async {
     final signer = ECDSASigner(SHA256Digest());

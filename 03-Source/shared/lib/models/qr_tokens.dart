@@ -260,6 +260,7 @@ class AdditionalStamp {
 class StampToken extends QRToken {
   final String id;
   final String cardId;
+  final String businessId; // Added for simple mode card lookup
   final int stampNumber;
   final String previousHash;
   final String signature;
@@ -268,6 +269,7 @@ class StampToken extends QRToken {
   StampToken({
     required this.id,
     required this.cardId,
+    required this.businessId,
     required this.stampNumber,
     required this.previousHash,
     required this.signature,
@@ -280,6 +282,7 @@ class StampToken extends QRToken {
     return StampToken(
       id: json['id'] as String,
       cardId: json['cardId'] as String,
+      businessId: json['businessId'] as String? ?? '', // Backward compatibility
       stampNumber: json['stampNumber'] as int,
       previousHash: json['previousHash'] as String? ?? '',
       signature: json['signature'] as String,
@@ -296,6 +299,7 @@ class StampToken extends QRToken {
       'type': type,
       'id': id,
       'cardId': cardId,
+      'businessId': businessId,
       'stampNumber': stampNumber,
       'timestamp': timestamp,
       'previousHash': previousHash,

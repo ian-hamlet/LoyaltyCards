@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:shared/shared.dart';
+import 'package:shared/shared.dart' hide Card;
 import '../../services/qr_token_generator.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
@@ -25,6 +25,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   final QRTokenGenerator _tokenGenerator = QRTokenGenerator(KeyManager());
   
   Business? _business;
+  StampToken? _stampToken; // For simple mode QR display
   bool _isProcessing = false;
   String? _errorMessage;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
@@ -47,7 +48,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         // Small delay to ensure widget is built
         await Future.delayed(const Duration(milliseconds: 100));
         if (mounted) {
-          _generateSimpleModeStampQR();
+          await _generateSimpleModeStampQR();
         }
       }
     } catch (e) {
@@ -418,7 +419,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       );
 
       if (mounted) {
-        _showSimpleModeStampQR(stampToken);
+        setState(() {
+          _stampToken = stampToken;
+          _isProcessing = false;
+        });
       }
     } catch (e) {
       setState(() {
@@ -426,120 +430,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         _isProcessing = false;
       });
     }
-  }
-
-  void _showSimpleModeStampQR(StampToken token) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.qr_code_2,
-                color: Colors.blue,
-                size: 64,
-              ),
-              
-              const SizedBox(height: 16),
-              
-              Text(
-                'Stamp QR Ready',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              
-              const SizedBox(height: 8),
-              
-              Text(
-                'Customer scans this to add a stamp',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Stamp Token QR
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: QrImageView(
-                  data: token.toQRString(),
-                  version: QrVersions.auto,
-                  size: QRCodeSize.calculate(context),
-                  backgroundColor: Colors.white,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.all_inclusive,
-                      size: 16,
-                      color: Colors.blue.shade700,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Reusable QR (no expiry)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue.shade900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context); // Close dialog
-                      Navigator.pop(context); // Return to home
-                    },
-                    icon: const Icon(Icons.arrow_back),
-                    label: const Text('Back'),
-                  ),
-                  FilledButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context); // Close current dialog
-                      setState(() {
-                        _isProcessing = false;
-                      });
-                      _generateSimpleModeStampQR(); // Generate new QR
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Regenerate'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -557,108 +447,163 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       );
     }
 
-    // Simple mode: Show button to generate stamp QR
+    // Simple mode: Show stamp QR directly
     if (_business!.mode == OperationMode.simple) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Stamp Card'),
           backgroundColor: const Color(0xFF2C3E50),
           foregroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _generateSimpleModeStampQR,
+              tooltip: 'Regenerate QR',
+            ),
+          ],
         ),
-        body: Stack(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
+        body: _stampToken == null
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(
-                      Icons.qr_code_2,
-                      size: 120,
-                      color: Colors.blue[400],
-                    ),
-                    const SizedBox(height: 32),
-                    Text(
-                      'Simple Mode',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Generate a stamp QR code for your customers to scan',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                    FilledButton.icon(
-                      onPressed: _isProcessing ? null : _generateSimpleModeStampQR,
-                      icon: const Icon(Icons.add_circle_outline, size: 28),
-                      label: const Text(
-                        'Generate Stamp QR',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
+                    // Info Card
+                    Card(
+                      elevation: 1,
+                      color: Colors.blue[50],
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.blue[700], size: 24),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Simple Mode - Reusable QR',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue[900],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Customer scans this QR to add a stamp',
+                                    style: TextStyle(
+                                      color: Colors.blue[800],
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Error message
-            if (_errorMessage != null)
-              Positioned(
-                bottom: 100,
-                left: 16,
-                right: 16,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade900.withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.white,
+                    
+                    const SizedBox(height: 16),
+                    
+                    // QR Code Display
+                    Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            Icon(
+                              BusinessIcons.getIcon(_business!.logoIndex),
+                              size: 40,
+                              color: BrandColors.fromHex(_business!.brandColor),
+                            ),
+                            const SizedBox(height: 8),
+                            
+                            Text(
+                              _business!.name,
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                            
+                            const SizedBox(height: 8),
+                            
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.all_inclusive, size: 16, color: Colors.blue[700]),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Reusable Stamp QR',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.blue[900],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            
+                            // QR Code
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: QrImageView(
+                                data: _stampToken!.toQRString(),
+                                version: QrVersions.auto,
+                                size: QRCodeSize.calculate(context),
+                                backgroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
+                    ),
+                    
+                    // Error message
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.red.shade700,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(
+                                  color: Colors.red.shade900,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
               ),
-            
-            // Processing indicator
-            if (_isProcessing)
-              Container(
-                color: Colors.black.withOpacity(0.7),
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-              ),
-          ],
-        ),
       );
     }
 

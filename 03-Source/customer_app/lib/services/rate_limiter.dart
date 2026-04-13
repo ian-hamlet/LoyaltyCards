@@ -10,12 +10,10 @@ class RateLimiter {
 
   /// Check if a card can receive a new stamp
   /// 
-  /// Simple mode: 1 stamp per hour per business (trust-based, prevent abuse)
-  /// Secure mode: 1 stamp per second (prevent accidental duplicate scans)
+  /// Both modes: 1 stamp per second (prevents accidental duplicate scans)
   /// 
-  /// TODO: Review UX - multiple purchases (e.g., 4 coffees) require 4 separate
-  /// scan cycles. Consider adding "Add Multiple Stamps" feature to match
-  /// physical card UX where supplier can stamp multiple times instantly.
+  /// Note: For multiple purchases (e.g., 2 coffees), customer can scan
+  /// repeatedly with 1-second delays between each stamp.
   Future<RateLimitResult> canReceiveStamp({
     required String cardId,
     required String businessId,
@@ -42,23 +40,16 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastStamp = now - lastStampTime;
 
-    // Rate limit based on operation mode
-    final rateLimitMs = mode == OperationMode.simple
-        ? 60 * 60 * 1000  // Simple mode: 1 hour (prevents abuse of static QRs)
-        : 1000;            // Secure mode: 1 second (prevents duplicate scans)
+    // Rate limit: 1 second for both modes (prevents accidental duplicate scans)
+    const rateLimitMs = 1000;
 
     if (timeSinceLastStamp < rateLimitMs) {
       final remainingMs = rateLimitMs - timeSinceLastStamp;
-      final remainingMinutes = (remainingMs / (60 * 1000)).ceil();
       
-      final message = mode == OperationMode.simple
-          ? 'You can get another stamp from this business in $remainingMinutes minute${remainingMinutes > 1 ? 's' : ''}'
-          : 'Please wait a moment before getting another stamp';
-
       return RateLimitResult(
         canProceed: false,
         waitTimeMs: remainingMs,
-        message: message,
+        message: 'Please wait a moment before getting another stamp',
       );
     }
 

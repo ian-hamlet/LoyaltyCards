@@ -204,7 +204,26 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Get the card this stamp is for
     final repository = CardRepository(DatabaseHelper());
-    final card = await repository.getCardById(token.cardId);
+    models.Card? card;
+    
+    // For simple mode stamps, look up by businessId since cardId is generic
+    if (token.cardId == 'simple-mode-stamp' && token.businessId.isNotEmpty) {
+      print('=== Simple Mode Stamp Detected ===');
+      print('Looking up card by businessId: ${token.businessId}');
+      final allCards = await repository.getAllCards();
+      try {
+        card = allCards.firstWhere(
+          (c) => c.businessId == token.businessId,
+        );
+        print('Found card with ID: ${card.id}');
+      } catch (e) {
+        print('No card found for businessId: ${token.businessId}');
+        card = null;
+      }
+    } else {
+      // Secure mode: look up by exact cardId
+      card = await repository.getCardById(token.cardId);
+    }
 
     if (card == null) {
       setState(() {
@@ -269,12 +288,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Add stamp to card
     print('=== Saving Main Stamp ===');
     print('Stamp #${token.stampNumber}');
+    print('Card ID: ${card.id}');
     print('previousHash: "${token.previousHash.isEmpty ? "(empty -> will be null)" : token.previousHash.substring(0, 20) + "..."}"');
     print('signature: "${token.signature.substring(0, 20)}..."');
     
     final stamp = Stamp(
       id: token.id,
-      cardId: token.cardId,
+      cardId: card.id,  // Use the actual card ID we found, not token.cardId
       stampNumber: token.stampNumber,
       timestamp: DateTime.fromMillisecondsSinceEpoch(token.timestamp),
       signature: token.signature,
@@ -297,7 +317,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         
         // Verify stamp signature (skip in simple mode)
         if (card.mode == OperationMode.secure) {
-          final signatureData = '${token.cardId}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
+          final signatureData = '${card.id}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
           final isValid = KeyManager.verifySignature(
             signatureData,
             additionalStamp.signature,
@@ -321,8 +341,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
         // Create and save stamp
         final additionalStampRecord = Stamp(
-          id: '${token.cardId}_stamp_${additionalStamp.stampNumber}',
-          cardId: token.cardId,
+          id: '${card.id}_stamp_${additionalStamp.stampNumber}',
+          cardId: card.id,
           stampNumber: additionalStamp.stampNumber,
           timestamp: DateTime.fromMillisecondsSinceEpoch(additionalStamp.timestamp),
           signature: additionalStamp.signature,

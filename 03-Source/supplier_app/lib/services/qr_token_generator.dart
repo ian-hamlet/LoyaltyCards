@@ -141,6 +141,7 @@ class QRTokenGenerator {
     return StampToken(
       id: stampId,
       cardId: cardId,
+      businessId: businessId,
       stampNumber: stampNumber,
       previousHash: previousHash,
       signature: signature,

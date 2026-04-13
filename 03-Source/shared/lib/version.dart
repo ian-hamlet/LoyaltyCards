@@ -6,6 +6,39 @@
 /// Format: v{major}.{minor}.{patch} (Build {build})
 /// Example: v1.0.0 (Build 1)
 ///
+/// Build 60 Changes:
+/// - Removed step-by-step instructions from supplier simple mode stamp screen
+/// - Cleaner UI - instructions should be in help documentation, not main screen
+/// 
+/// Build 59 Changes:
+/// - Fixed iOS build: Installed CocoaPods (required for iOS plugins)
+/// - Ran pod install to setup Flutter module dependencies
+/// - Build now succeeds on iOS (was "no such module flutter" error)
+/// 
+/// Build 58 Changes:
+/// - Fixed import ambiguity: Added 'hide Card' to shared import in supplier_stamp_card.dart
+/// - Build now succeeds (was conflicting with Flutter's Card widget)
+/// 
+/// Build 57 Changes:
+/// - **CRITICAL UX FIX**: Simple mode supplier stamp screen now consistent
+/// - Displays QR directly in screen body (like Issue Card screen)
+/// - Back button now works properly (no modal dialog blocking it)
+/// - Added Regenerate button in AppBar (consistent with Issue Card)
+/// - Same color scheme across all supplier screens
+/// - Removed confusing modal dialog with "Back" button
+/// 
+/// Build 56 Changes:
+/// - Removed 60-minute rate limit in simple mode (now 1 second like secure mode)
+/// - Allows multiple stamps to be added quickly (e.g., 2 coffees)
+/// - Customer can scan simple mode QR repeatedly with 1-second delays
+/// - 1-second delay prevents accidental duplicate scans only
+/// 
+/// Build 55 Changes:
+/// - **CRITICAL FIX**: Added businessId to StampToken model for simple mode
+/// - Simple mode stamps now work: Customer app looks up card by businessId, not cardId
+/// - Fixed "Card not found please add the card first" error in simple mode
+/// - StampToken now includes businessId field for proper card lookup
+/// 
 /// Build 54 Changes:
 /// - **CRITICAL FIX**: Customer simple mode now works correctly
 /// - Simple mode cards: Show camera scanner button (no customer QR shown)
@@ -47,4 +80,4 @@
 /// - Refresh button only shown for secure mode (simple mode QRs are permanent)
 /// - Customer can scan same simple mode QR multiple times (rate limited per customer)
 
-const String appVersion = 'v0.1.0 (Build 54)';
+const String appVersion = 'v0.1.0 (Build 60)';

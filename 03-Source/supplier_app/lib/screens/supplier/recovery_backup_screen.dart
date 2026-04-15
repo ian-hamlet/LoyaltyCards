@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared/models/business.dart';
 import 'package:shared/models/supplier_config_backup.dart';
 import 'package:shared/widgets/feedback.dart';
+import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/backup_storage_service.dart';
 import '../../services/key_manager.dart';
@@ -131,8 +132,8 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
         AppLogger.warning('printBackup returned false - no dialog shown', 'Backup');
         AppFeedback.error(context, 'Failed to open print dialog');
       }
-    } catch (e) {
-      AppLogger.error('Exception in _printBackup: $e', 'Backup');
+    } catch (e, stackTrace) {
+      AppLogger.error('Exception in _printBackup: $e', tag: 'Backup');\n      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       AppFeedback.error(context, 'Print error: $e');
     }
   }

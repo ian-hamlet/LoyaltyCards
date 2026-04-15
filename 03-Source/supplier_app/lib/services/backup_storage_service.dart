@@ -15,7 +15,20 @@ import 'package:shared/models/supplier_config_backup.dart';
 import 'package:shared/shared.dart';
 
 /// Service for managing supplier configuration backup storage
-/// Supports four methods: Print, Photos, Email, and Files
+/// 
+/// Supports four backup methods:
+/// 1. Save to Photos - Saves QR code image to device photo library
+/// 2. Print Backup - Generates PDF and opens system print dialog
+/// 3. Share via Email - Creates temp file and opens email share sheet
+/// 4. Save to Files - Opens system file picker to save QR image
+/// 
+/// ERROR HANDLING PATTERN:
+/// All methods return Future<bool>:
+/// - Returns true on success
+/// - Returns false on failure (logged via AppLogger.error)
+/// - Failures are graceful - user can try alternative backup method
+/// - Common failures: Permission denied, disk full, user cancelled
+/// 
 /// Cross-platform compatible (iOS & Android)
 class BackupStorageService {
   /// 1. Save backup QR code to device photo gallery

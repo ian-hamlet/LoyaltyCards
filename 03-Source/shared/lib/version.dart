@@ -47,5 +47,15 @@
 /// - Default: hide redeemed cards for cleaner wallet view
 /// - Preference persisted using SharedPreferences
 /// - Filter works alongside search functionality
+/// 
+/// Build 13 Changes:
+/// - Standardize error handling patterns across codebase (CR-014)
+/// - Added error_handling.dart utility with safeExecute helpers
+/// - Documented error handling conventions for each pattern:
+///   * Future<bool> for optional/graceful operations (backup, etc)
+///   * Future<void> + exceptions for critical operations (database)
+///   * bool for synchronous validation (QR parsing, signatures)
+/// - Added comprehensive documentation to key service files
+/// - No breaking changes - documentation and utilities only
 
-const String appVersion = '0.2.0+12';
+const String appVersion = '0.2.0+13';

@@ -229,12 +229,30 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             ],
           ),
 
-          // Manual rotation controls
+          // Camera controls
           Positioned(
             top: 80,
             right: 16,
             child: Column(
               children: [
+                // Camera flip (front/back switch)
+                FloatingActionButton(
+                  heroTag: 'flip_camera_redeem',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    cameraController.switchCamera();
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.flip_camera_ios, size: 20, color: Colors.green),
+                      Text('Flip', style: TextStyle(fontSize: 10, color: Colors.green)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Rotate 90°
                 FloatingActionButton(
                   heroTag: 'rotate90',
                   mini: true,
@@ -253,6 +271,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // Rotate 180°
                 FloatingActionButton(
                   heroTag: 'rotate180',
                   mini: true,

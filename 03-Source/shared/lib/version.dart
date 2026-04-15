@@ -19,11 +19,13 @@
 /// - Custom branded app icons
 /// - Offline-capable with local storage
 /// 
-/// Build 8 Changes:
-/// - Complete print() → AppLogger migration (NEW-001)
-/// - Add missing AppLogger.database() method (NEW-002)
-/// - Standardize logging strategy across all screens (NEW-003)
-/// - Document AppLogger.qr() method (NEW-004)
-/// - Finish CR-002: Remove all remaining debug print statements
+/// Build 9 Changes:
+/// - Fix customer QR scanner rotation buttons (TEST-004)
+/// - Add camera flip button to all QR scanners
+/// - Fix rotation calculation to use _manualRotationOffset variable
+/// - Add flip camera (front/back switch) functionality
+/// - Apply fixes to customer_app/qr_scanner_screen.dart
+/// - Apply fixes to supplier_app/import_business_screen.dart
+/// - Add camera controls to supplier_stamp_card.dart and supplier_redeem_card.dart
 
-const String appVersion = '0.2.0+8';
+const String appVersion = '0.2.0+9';

@@ -169,21 +169,42 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
               ),
             ),
 
-          // Manual rotation controls
+          // Camera controls
           if (!_isProcessing)
             Positioned(
               top: 80,
               right: 16,
               child: Column(
                 children: [
+                  // Camera flip (front/back switch)
+                  FloatingActionButton(
+                    heroTag: 'flip_camera_import',
+                    mini: true,
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    onPressed: () {
+                      AppLogger.debug('🔵 Flip camera button tapped', 'Camera');
+                      _scannerController.switchCamera();
+                    },
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.flip_camera_ios, size: 20, color: Colors.blue),
+                        Text('Flip', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Rotate 90°
                   FloatingActionButton(
                     heroTag: 'rotate90_import',
                     mini: true,
                     backgroundColor: Colors.white.withOpacity(0.9),
                     onPressed: () {
+                      AppLogger.debug('🔄 Rotate 90° button tapped - current offset: $_manualRotationOffset', 'Camera');
                       setState(() {
                         _manualRotationOffset = (_manualRotationOffset + 1) % 4;
                       });
+                      AppLogger.debug('🔄 New rotation offset: $_manualRotationOffset (${_manualRotationOffset * 90}°)', 'Camera');
                     },
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -194,14 +215,17 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  // Rotate 180°
                   FloatingActionButton(
                     heroTag: 'rotate180_import',
                     mini: true,
                     backgroundColor: Colors.white.withOpacity(0.9),
                     onPressed: () {
+                      AppLogger.debug('🔁 Rotate 180° button tapped - current offset: $_manualRotationOffset', 'Camera');
                       setState(() {
                         _manualRotationOffset = (_manualRotationOffset + 2) % 4;
                       });
+                      AppLogger.debug('🔁 New rotation offset: $_manualRotationOffset (${_manualRotationOffset * 90}°)', 'Camera');
                     },
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -262,62 +286,45 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
               ),
             ),
 
-          // Instructions overlay (when not processing)
+          // Instructions banner (positioned below camera controls to avoid overlap)
+          // Wrapped in IgnorePointer so it doesn't block camera control buttons
           if (!_isProcessing)
             Positioned(
-              top: 0,
+              bottom: 100,
               left: 0,
               right: 0,
-              child: Container(
-                padding: EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black87,
-                      Colors.black54,
-                      Colors.transparent,
-                    ],
+              child: IgnorePointer(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade900.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade700, width: 2),
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Scan Recovery QR',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.qr_code_scanner, color: Colors.white, size: 28),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Scan Recovery or Clone QR',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Scan your backup QR code to restore your business configuration',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                        ],
                       ),
-                    ),
-                    SizedBox(height: 12),
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade900.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
+                      SizedBox(height: 8),
+                      Row(
                         children: [
-                          Icon(Icons.info_outline, color: Colors.white, size: 20),
+                          Icon(Icons.info_outline, color: Colors.white70, size: 18),
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -330,8 +337,8 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

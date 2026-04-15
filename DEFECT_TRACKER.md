@@ -228,13 +228,16 @@ This document tracks defects from two sources:
 
 ### CR-011: No Structured Logging Framework
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ CLOSED (DUPLICATE)
 - **Priority:** LOW
 - **Description:** All logging uses print() instead of proper framework
-- **Fix Required:** Add `logger` package, create `AppLogger` utility
-- **Estimated Effort:** 2 hours
-- **Assigned To:**
-- **Target Build:** v0.3.0
+- **Resolution:** DUPLICATE of CR-002 - AppLogger already implemented in Build 5
+  - logger package added
+  - AppLogger utility created with full documentation
+  - All print() statements migrated in Build 8
+  - Framework fully operational
+- **Closed Date:** Build 8 (April 15, 2026)
+- **Notes:** This was identified before AppLogger implementation. CR-002 addressed this completely.
 
 ### CR-012: Test Data in Production Screens
 - **Source:** Code Review
@@ -267,6 +270,47 @@ This document tracks defects from two sources:
 - **Estimated Effort:** 4-6 hours
 - **Assigned To:**
 - **Target Build:** v0.3.0
+
+### CR-015: Camera Default Orientation Not Optimal
+- **Source:** Testing - iPhone/iPad
+- **Status:** 📋 BACKLOG
+- **Priority:** LOW
+- **Description:** QR scanner cameras default to orientations that require manual rotation adjustment. While rotate buttons (90°, 180°) work correctly, users need to tap rotation buttons on nearly every scan session to get optimal camera angle.
+- **Reproduction Steps:**
+  1. Open any QR scanner screen (customer or supplier app)
+  2. Camera opens in default orientation
+  3. QR code appears sideways or upside down
+  4. User must tap rotate 90° or 180° buttons to align
+  5. Same rotation needed consistently across sessions
+- **Expected Behavior:**
+  - Camera should default to orientation matching device physical orientation
+  - Portrait mode → camera portrait
+  - Landscape → camera landscape auto-adjusted
+  - Minimize need for manual rotation button usage
+- **Actual Behavior:**
+  - Camera defaults to orientation requiring manual adjustment
+  - Users tap rotate buttons on most scan sessions
+  - Initial orientation logic doesn't match physical device holding position
+- **Impact:**
+  - Extra tap required on most scans
+  - Minor UX friction
+  - Rotation buttons work perfectly (can always adjust)
+  - Not a blocker - workaround is simple and quick
+- **Workaround:** Tap rotate 90° or 180° button to adjust (working as designed)
+- **Fix Required:**
+  - Investigate device orientation detection heuristics
+  - Consider testing multiple default rotation values
+  - May need device-specific or mode-specific defaults
+  - Balance between iPhone portrait vs iPad landscape use cases
+  - Note: Previous attempts made partial improvements
+- **Estimated Effort:** 2-4 hours (investigation + testing on multiple devices)
+- **Assigned To:**
+- **Target Build:** v0.3.0+
+- **Notes:**
+  - Not urgent - rotation buttons provide full workaround
+  - Low priority enhancement for QoL improvement
+  - Rotation logic attempted previously with some success
+  - May require per-device tuning (iPhone vs iPad behaviors differ)
 
 ---
 
@@ -494,7 +538,7 @@ This document tracks defects from two sources:
 
 ### TEST-003: Supplier Restore Business QR Scanner Issues
 - **Source:** Testing - Both (iPhone and iPad)
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
 - **Screen/Feature:** Supplier App - Restore Business from QR Code
 - **Description:** QR scanner for restoring business configuration has multiple camera orientation/control issues. Camera orientation is incorrect, and camera control buttons (flip and rotate 90°) are non-functional. An information bar may be partially obscuring the buttons.
@@ -532,12 +576,18 @@ This document tracks defects from two sources:
   - May need to adjust QR scanner widget constraints
 - **Estimated Effort:** 2-3 hours
 - **Assigned To:**
-- **Target Build:** Build 5
-- **Notes:** Related to QR scanning camera implementation. May share root cause with any other QR scanner issues. Critical because restoring from backup is key feature for business continuity.
+- **Target Build:** Build 9
+- **Fix Date:** 2026-04-16
+- **Notes:** 
+  - Fixed: Added camera flip button (Icons.flip_camera_ios) to switch front/back cameras
+  - Camera flip calls `_scannerController.switchCamera()` method from mobile_scanner
+  - Manual rotation buttons (90°, 180°) already correctly implemented with `_manualRotationOffset`
+  - All camera controls now functional in import_business_screen.dart
+  - Also added flip buttons to supplier_stamp_card.dart and supplier_redeem_card.dart for consistency
 
 ### TEST-004: Customer QR Scanner Camera Controls Not Working
 - **Source:** Testing - Both (iPhone and iPad)
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
 - **Screen/Feature:** Customer App - QR Scanner (Add Card, Stamp Request)
 - **Description:** Customer app QR scanner camera control buttons (flip and rotate 90°) are non-functional, preventing users from adjusting camera orientation to scan QR codes.
@@ -570,8 +620,15 @@ This document tracks defects from two sources:
   - Test on both iPhone and iPad
 - **Estimated Effort:** 2-3 hours
 - **Assigned To:**
-- **Target Build:** Build 5
-- **Notes:** Same symptoms as TEST-003 in supplier app. Likely shared QR scanner component issue.
+- **Target Build:** Build 9
+- **Fix Date:** 2026-04-16
+- **Notes:** 
+  - Fixed rotation bug: quarterTurns calculation was ignoring `_manualRotationOffset` variable
+  - Changed from `final quarterTurns = isLandscape ? 3 : 0;` to proper calculation using manual offset
+  - Added camera flip button (Icons.flip_camera_ios) to switch front/back cameras
+  - Camera flip calls `_controller.switchCamera()` method from mobile_scanner
+  - All camera controls now functional in qr_scanner_screen.dart
+  - Root cause was missing `_manualRotationOffset` in rotation calculation (other scanners had it correctly)
 
 ### TEST-005: Secure Mode Redemption Creates Duplicate Empty Cards
 - **Source:** Testing - Both (iPhone and iPad)
@@ -700,33 +757,30 @@ This document tracks defects from two sources:
 
 ### By Priority
 - 🔴 CRITICAL: 2 (Code Review) + 1 (Testing) + 1 (NEW) = **4 total** (all FIXED)
-- 🟠 HIGH: 4 (Code Review) + 5 (Testing) + 2 (NEW) = **11 total** (6 FIXED, 5 BACKLOG)
+- 🟠 HIGH: 4 (Code Review) + 5 (Testing) + 2 (NEW) = **11 total** (8 FIXED, 3 BACKLOG)
 - 🟡 MEDIUM: 4 (Code Review) + 1 (Testing) + 1 (NEW) = **6 total** (5 FIXED, 1 BACKLOG)
-- 🔵 LOW: 4 (Code Review) + 0 (Testing) + 1 (NEW) = **5 total** (3 FIXED, 2 BACKLOG)
-- **TOTAL: 26 defects tracked** (21 original + 5 new from code reviews)
+- 🔵 LOW: 5 (Code Review) + 0 (Testing) + 1 (NEW) = **6 total** (3 FIXED, 3 BACKLOG)
+- **TOTAL: 27 defects tracked** (21 original + 6 new from code reviews)
 
 ### By Status
-- 📋 BACKLOG: 7
+- 📋 BACKLOG: 4 (TEST-002, TEST-005, TEST-006, CR-014, CR-015)
 - 🚧 IN PROGRESS: 0
-- ✅ FIXED: 19
+- ✅ FIXED: 21
+- ✅ CLOSED: 1 (CR-011 duplicate)
+- ⚡ READY TO TEST: 2 (TEST-003, TEST-004)
 
 ### By Source
-- Code Review: 19 (14 original + 5 new)
+- Code Review: 20 (14 original + 6 new)
 - Testing: 7
 
 ### Current Build
-- **Build 7** - Completed medium priority fixes (CR-007/008/009/010)
-- **Next: Build 8** - Complete CR-002 migration + new defects (CRITICAL for TestFlight)
+- **Build 9** - Camera control fixes (TEST-003, TEST-004)
+- **Status:** ✅ READY FOR TESTFLIGHT
 
 ### By Target Build
-- Build 8 (URGENT - TestFlight blockers): 4 defects
-  - NEW-001: Complete print() migration (2-3 hrs)
-  - NEW-002: Add AppLogger.database() method (15 min)
-  - NEW-003: Standardize logging (included in NEW-001)
-  - NEW-004: Document AppLogger.qr() (15 min)
-- Build 9+ (High priority testing): 4 defects (TEST-002/003/004/005)
-- Build 10+ (Medium priority): 1 defect (TEST-006)
-- v0.3.0 (Low priority): 2 defects (CR-011 duplicate, CR-014)
+- Build 9 (COMPLETE): 2 defects (TEST-003, TEST-004) - Camera controls fixed
+- Build 10+ (High priority testing): 3 defects (TEST-002, TEST-005, TEST-006)
+- v0.3.0+ (Low priority): 3 defects (CR-014, CR-015)
 
 ---
 

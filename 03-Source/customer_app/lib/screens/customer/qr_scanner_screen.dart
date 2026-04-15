@@ -587,12 +587,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               final mediaQuery = MediaQuery.of(context);
               final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
               
-              // Apply rotation based on simple landscape detection
-              // Landscape: -90°, Portrait: 0° (no rotation)
-              final quarterTurns = isLandscape ? 3 : 0;
+              // Apply rotation: base + manual offset
+              final baseQuarterTurns = isLandscape ? 3 : 0;
+              final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
               
               AppLogger.debug('QR Scanner Orientation');
               AppLogger.debug('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
+              AppLogger.debug('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
               AppLogger.debug('Applying quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
               
               return RotatedBox(
@@ -613,12 +614,30 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               );
             },
           ),
-          // Manual rotation controls
+          // Camera controls
           Positioned(
             top: 80,
             right: 16,
             child: Column(
               children: [
+                // Camera flip (front/back switch)
+                FloatingActionButton(
+                  heroTag: 'flip_camera',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    _controller.switchCamera();
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.flip_camera_ios, size: 20, color: Colors.blue),
+                      Text('Flip', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Rotate 90°
                 FloatingActionButton(
                   heroTag: 'rotate90',
                   mini: true,
@@ -637,6 +656,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // Rotate 180°
                 FloatingActionButton(
                   heroTag: 'rotate180',
                   mini: true,

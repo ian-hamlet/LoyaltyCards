@@ -45,7 +45,13 @@
 - CR-001: Public key encoding (30 min)
 - CR-002: Debug logging cleanup (1-2 hrs)
 - CR-005: Remove TODO (15 min)
-- + Any CRITICAL testing defects
+- TEST-001: Version number synchronization (2-3 hrs)
+- TEST-002: Supplier backup/export functionality (2-3 hrs)
+- TEST-003: Supplier restore QR scanner issues (2-3 hrs)
+- TEST-004: Customer QR scanner camera controls (2-3 hrs)
+- TEST-005: Secure mode duplicate card creation (2-3 hrs)
+- TEST-007: Simple mode rate limit to 5 seconds (5 min)
+- + Any additional CRITICAL testing defects
 
 **Commands:**
 ```bash
@@ -116,15 +122,15 @@ git push origin develop
 **Status:** Testing in progress
 
 **Defects Logged:**
-- 🔴 Critical: 2
-- 🟠 High: 5
-- 🟡 Medium: 4
+- 🔴 Critical: 3
+- 🟠 High: 9
+- 🟡 Medium: 5
 - 🔵 Low: 4
-- **Total:** 15
+- **Total:** 21
 
 **Defects Fixed:** 0  
 **Defects In Progress:** 0  
-**Defects Remaining:** 15
+**Defects Remaining:** 21
 
 ---
 

@@ -299,7 +299,14 @@ This document tracks defects from two sources:
 - **Assigned To:**
 - **Target Build:** Build 5
 - **Notes:** This affects deployment workflow and version tracking reliability. CRITICAL because it's our only way to verify correct version is installed on TestFlight devices.
-- **Fix Applied:** Changed version.dart to use exact same format as pubspec.yaml (0.2.0+5). All three files now use identical version string for easy comparison. Build number incremented to 5.
+- **Fix Applied:** 
+  - Changed version.dart to use exact same format as pubspec.yaml (0.2.0+X)
+  - All three files now use identical version string for easy comparison
+  - Fixed customer app settings screen to display actual version from appVersion variable (was showing hardcoded "1.0.0 (Beta)")
+  - Moved version display to App Information section in customer app
+  - Build number incremented to 6
+  - Both apps now correctly display 0.2.0+6 in settings
+- **Commits:** ddce1d1, 4525807, 82b6a52
 
 ### TEST-002: Supplier App Backup/Export Not Working
 - **Source:** Testing - Both (iPhone and iPad)

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:pointycastle/export.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared/shared.dart';
 
 /// Service for managing cryptographic keys and signing operations
 /// Uses ECDSA (Elliptic Curve Digital Signature Algorithm) with secp256r1 curve

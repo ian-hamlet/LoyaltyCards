@@ -40,5 +40,12 @@
 /// - Check for existing non-redeemed cards before creating new card
 /// - Prioritize cards with most stamps when multiple available
 /// - Apply fix to both Simple and Secure Mode redemptions
+/// 
+/// Build 12 Changes:
+/// - Add filter to hide/show redeemed cards in wallet (TEST-006)
+/// - FilterChip UI control next to search bar
+/// - Default: hide redeemed cards for cleaner wallet view
+/// - Preference persisted using SharedPreferences
+/// - Filter works alongside search functionality
 
-const String appVersion = '0.2.0+11';
+const String appVersion = '0.2.0+12';

@@ -1,8 +1,24 @@
 Update# Defect Tracker - v0.2.0 Post-Testing
 
-**Current Version:** v0.2.0 (Build 4) - On TestFlight  
-**Target Version:** v0.2.1 (Build 5+)  
+**Current Version:** v0.2.0 (Build 7) - Local testing  
+**TestFlight Version:** v0.2.0 (Build 4)  
+**Target Version:** v0.2.1 (Build 8+)  
 **Last Updated:** April 15, 2026
+
+---
+
+## ⚠️ CRITICAL STATUS ALERT
+
+**Build 7 Code Review Completed:** April 15, 2026  
+**Status:** ❌ **NOT READY FOR TESTFLIGHT**  
+**Reason:** CR-002 fix incomplete - 65+ print() statements remain in UI screens
+
+**Required Before TestFlight:**
+1. ❌ Complete print() → AppLogger migration (NEW-001) - 2-3 hours
+2. ❌ Add missing AppLogger.database() method (NEW-002) - 15 minutes  
+3. ❌ Test both apps with logging fixes - 30 minutes
+
+**Earliest TestFlight Ready:** Build 8 (3-4 hours work remaining)
 
 ---
 
@@ -48,7 +64,7 @@ This document tracks defects from two sources:
 
 ### CR-002: Excessive Debug Logging in Production
 - **Source:** Code Review
-- **Status:** ✅ FIXED
+- **Status:** 🚧 IN PROGRESS (INCOMPLETE)
 - **Priority:** CRITICAL
 - **Files:** 
   - `customer_app/lib/services/qr_token_generator.dart` (20+ print statements)
@@ -63,17 +79,23 @@ This document tracks defects from two sources:
   - Console spam makes real debugging difficult
   - Exposes internal operations (card IDs, database queries, key generation)
   - Performance degradation
-- **Fix Implemented:** 
-  - Created shared `AppLogger` utility with structured logging
-  - Replaced ~80+ print() statements with AppLogger calls
-  - Debug logs only appear in debug mode (kDebugMode)
-  - Production shows only warnings and errors
-  - Implemented per CR-011 recommendations
-- **Estimated Effort:** 1-2 hours
+- **Fix Partially Implemented:** 
+  - Created shared `AppLogger` utility with structured logging ✅
+  - Replaced some print() statements in service layers ✅
+  - Debug logs only appear in debug mode (kDebugMode) ✅
+  - Production shows only warnings and errors ✅
+  - **INCOMPLETE: 65+ print() statements remain in UI screens** ❌
+- **Files Still Requiring Fixes:**
+  - `customer_app/lib/screens/customer/qr_display_screen.dart` (15+ prints)
+  - `customer_app/lib/screens/customer/qr_scanner_screen.dart` (25+ prints)
+  - `customer_app/lib/screens/customer/customer_card_detail.dart` (10+ prints)
+  - `supplier_app/lib/screens/supplier/supplier_settings.dart` (7+ prints)
+  - `supplier_app/lib/screens/supplier/supplier_redeem_card.dart` (20+ prints)
+- **Remaining Effort:** 2-3 hours
 - **Testing Required:** Verify apps still function without verbose logging
 - **Assigned To:**
-- **Target Build:** Build 5
-- **Fix Date:** 2026-04-15
+- **Target Build:** Build 8
+- **Status Note:** See NEW-001 for full details on remaining work
 
 ---
 
@@ -243,6 +265,98 @@ This document tracks defects from two sources:
 - **Estimated Effort:** 4-6 hours
 - **Assigned To:**
 - **Target Build:** v0.3.0
+
+---
+
+## 🆕 NEW DEFECTS (Post-Build 7 Code Review - April 15, 2026)
+
+### NEW-001: Incomplete Print Statement Migration (CR-002 Not Fully Fixed)
+- **Source:** Code Review - Post Build 7
+- **Status:** 📋 BACKLOG
+- **Priority:** CRITICAL
+- **Related To:** CR-002
+- **Description:** CR-002 fix incomplete - AppLogger created but 65+ print() statements remain in UI screens
+- **Impact:**
+  - Console spam in TestFlight builds
+  - Security exposure (logs card IDs, internal operations)
+  - Performance degradation from excessive logging
+  - False completion claim on CR-002
+- **Files Requiring Migration:**
+  - `customer_app/lib/screens/customer/qr_display_screen.dart` - 15 print() calls
+  - `customer_app/lib/screens/customer/qr_scanner_screen.dart` - 25 print() calls
+  - `customer_app/lib/screens/customer/customer_card_detail.dart` - 10 print() calls
+  - `supplier_app/lib/screens/supplier/supplier_settings.dart` - 7 print() calls
+  - `supplier_app/lib/screens/supplier/supplier_redeem_card.dart` - 20 print() calls
+- **Examples:**
+  ```dart
+  // WRONG - Still using print()
+  print('>>> Card: ${widget.card.id}, Stamps: ${widget.card.stampsCollected} <<<');
+  print('QR Display: Starting QR generation for card ${widget.card.id}');
+  
+  // CORRECT - Use AppLogger
+  AppLogger.qr('Starting QR generation for card ${widget.card.id}');
+  AppLogger.debug('Card has ${widget.card.stampsCollected} stamps', 'QR');
+  ```
+- **Fix Required:** Replace all remaining print() calls with AppLogger.debug() or AppLogger.info()
+- **Estimated Effort:** 2-3 hours
+- **Testing Required:** Verify no performance issues, check release builds don't have console spam
+- **Assigned To:**
+- **Target Build:** Build 8
+- **Blocker For:** TestFlight deployment
+
+### NEW-002: Missing AppLogger.database() Method
+- **Source:** Code Review - Post Build 7
+- **Status:** 📋 BACKLOG
+- **Priority:** HIGH
+- **File:** `shared/lib/utils/app_logger.dart`
+- **Description:** Code calls `AppLogger.database()` but method not defined in AppLogger class
+- **Impact:** Runtime error when business_repository tries to log database operations
+- **Reproduction:**
+  ```dart
+  // supplier_app/lib/services/business_repository.dart line 20
+  AppLogger.database('Inserting business...');  // Method doesn't exist!
+  ```
+- **Fix Required:** Add database() method to AppLogger or replace calls with debug()
+- **Estimated Effort:** 15 minutes
+- **Testing Required:** Run supplier app onboarding, verify no crash
+- **Assigned To:**
+- **Target Build:** Build 8
+- **Blocker For:** TestFlight deployment
+
+### NEW-003: Inconsistent Logging Strategy Across Screens
+- **Source:** Code Review - Post Build 7
+- **Status:** 📋 BACKLOG
+- **Priority:** HIGH
+- **Description:** Mixed logging approaches - some screens use AppLogger exclusively, others use print(), others use both
+- **Impact:** Developer confusion, inconsistent debugging experience, harder to maintain
+- **Examples:**
+  - qr_display_screen.dart: Mix of `AppLogger.qr()` AND `print()`
+  - qr_scanner_screen.dart: Only `print()` statements, no AppLogger
+  - supplier_redeem_card.dart: Only `print()` statements, no AppLogger
+  - Service layer files: Mostly AppLogger (correct)
+- **Fix Required:** Establish and document logging convention, apply uniformly
+- **Estimated Effort:** Includes time for NEW-001 (2-3 hours for migration)
+- **Assigned To:**
+- **Target Build:** Build 8
+
+### NEW-004: AppLogger.qr() Method Not Documented
+- **Source:** Code Review - Post Build 7
+- **Status:** 📋 BACKLOG
+- **Priority:** MEDIUM
+- **File:** `shared/lib/utils/app_logger.dart` (line 50-60)
+- **Description:** AppLogger.qr() method exists but purpose/usage not documented
+- **Impact:** Documentation gap, developers may not know when to use it
+- **Current Code:**
+  ```dart
+  /// Log QR code operations
+  static void qr(String message) {
+    debug(message, 'QR');
+  }
+  ```
+- **Fix Required:** Add comprehensive documentation with examples
+- **Estimated Effort:** 15 minutes
+- **Assigned To:**
+- **Target Build:** Build 8
 
 ---
 
@@ -558,27 +672,34 @@ This document tracks defects from two sources:
 ## 📊 Defect Summary Statistics
 
 ### By Priority
-- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing) = **3 total**
-- 🟠 HIGH: 4 (Code Review) + 5 (Testing) = **9 total**
-- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing) = **5 total**
+- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing) + 1 (NEW) = **4 total** (CR-001, CR-002, TEST-001, NEW-001)
+- 🟠 HIGH: 4 (Code Review) + 5 (Testing) + 2 (NEW) = **11 total**
+- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing) + 1 (NEW) = **6 total**
 - 🔵 LOW: 4 (Code Review) + 0 (Testing) = **4 total**
-- **TOTAL: 21 defects tracked**
+- **TOTAL: 25 defects tracked** (21 original + 4 new from Build 7 code review)
 
 ### By Status
-- 📋 BACKLOG: 7
-- 🚧 IN PROGRESS: 0
-- ✅ FIXED: 14
+- 📋 BACKLOG: 11 (includes 4 new defects from code review)
+- 🚧 IN PROGRESS: 1 (CR-002 incomplete)
+- ✅ FIXED: 13
 
 ### By Source
-- Code Review: 14
+- Code Review: 18 (14 original + 4 new)
 - Testing: 7
 
+### Current Build
+- **Build 7** - Completed medium priority fixes (CR-007/008/009/010)
+- **Next: Build 8** - Complete CR-002 migration + new defects (CRITICAL for TestFlight)
+
 ### By Target Build
-- Build 5 (Critical fixes): 9 defects (8 full fixes + 1 quick fix)
-- Build 6-10 (High priority): 5 defects (4 code review + 1 configurable rate limit)
-- Build 10+ (Medium priority): 5 defects
-- Build 10+ (Medium priority): 4 defects
-- v0.3.0 (Low priority): 4 defects
+- Build 8 (URGENT - TestFlight blockers): 4 defects
+  - NEW-001: Complete print() migration (2-3 hrs)
+  - NEW-002: Add AppLogger.database() method (15 min)
+  - NEW-003: Standardize logging (included in NEW-001)
+  - NEW-004: Document AppLogger.qr() (15 min)
+- Build 9+ (High priority testing): 4 defects (TEST-002/003/004/005)
+- Build 10+ (Medium priority): 1 defect (TEST-006)
+- v0.3.0 (Low priority): 2 defects (CR-011 duplicate, CR-014)
 
 ---
 

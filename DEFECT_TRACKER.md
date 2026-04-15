@@ -499,7 +499,7 @@ This document tracks defects from two sources:
 
 ### TEST-002: Supplier App Backup/Export Not Working
 - **Source:** Testing - Both (iPhone and iPad)
-- **Status:** 📋 BACKLOG
+- **Status:** � IN PROGRESS
 - **Priority:** HIGH
 - **Screen/Feature:** Supplier App - Business Configuration Backup
 - **Description:** Both backup export methods in supplier app are non-functional. "Save to File" doesn't open file picker/share sheet, and "Save to Photos" doesn't respond or prompt for photo library permission.
@@ -525,16 +525,23 @@ This document tracks defects from two sources:
   - Lose all data if device is lost/replaced
   - Blocks multi-device testing scenarios
 - **Workaround:** None - feature completely broken
-- **Fix Required:** 
-  - Check iOS permissions in Info.plist (NSPhotoLibraryAddUsageDescription)
-  - Check share_plus package implementation
-  - Check image_gallery_saver package implementation
-  - Add error handling to show user what went wrong
-  - Test on both iPhone and iPad (different share sheet behavior)
+- **Fix In Progress (Build 10):** 
+  - ✅ Added comprehensive AppLogger debugging to all 4 backup methods
+  - ✅ Added stack trace logging for all exceptions
+  - ✅ Updated package versions (image_gallery_saver: 2.0.3→2.0.4, share_plus: 10.1.3→10.1.4)
+  - ✅ Enhanced error messages with permission hints
+  - ✅ Verified Info.plist permissions are correctly defined
+  - 🔄 Testing with debug logging to identify failure point
+- **Debug Strategy:**
+  - Log entry/exit of each method
+  - Log all package API calls and results
+  - Check for null data before API calls
+  - Verify file paths and permissions
+  - Test on physical device with Xcode console monitoring
 - **Estimated Effort:** 2-3 hours
 - **Assigned To:**
-- **Target Build:** Build 5
-- **Notes:** This is a regression - feature worked during development. May be iOS 17 permission changes or TestFlight build configuration issue. High priority because it blocks business backup/recovery testing.
+- **Target Build:** Build 10
+- **Notes:** Comprehensive logging added to track execution flow. Buttons call methods correctly. Permissions defined in Info.plist. Package updates may resolve iOS 17 compatibility issues.
 
 ### TEST-003: Supplier Restore Business QR Scanner Issues
 - **Source:** Testing - Both (iPhone and iPad)
@@ -716,12 +723,12 @@ This document tracks defects from two sources:
 - **Target Build:** Build 5 (quick fix), Build 6-10 (configurable)
 - **Notes:** Simple mode only - secure mode uses cryptographic signatures which prevent duplicate stamps inherently. This is a business policy setting that should be flexible per supplier.
 
-### TEST-006: No Filter to Hide Redeemed Cards
+### TEST-006: No Filter Option to Exclude Redeemed Cards
 - **Source:** Testing - Both (iPhone and iPad)
 - **Status:** 📋 BACKLOG
 - **Priority:** MEDIUM
 - **Screen/Feature:** Customer App - Card List
-- **Description:** Card list shows all cards including redeemed ones. No option to filter or hide redeemed cards, leading to clutter as users accumulate redeemed cards over time.
+- **Description:** Card list shows all cards including redeemed ones. Missing filter functionality to exclude/hide redeemed cards from view, leading to cluttered card list as users accumulate redeemed cards over time.
 - **Reproduction Steps:**
   1. Open customer app
   2. View card list on home screen
@@ -763,8 +770,8 @@ This document tracks defects from two sources:
 - **TOTAL: 27 defects tracked** (21 original + 6 new from code reviews)
 
 ### By Status
-- 📋 BACKLOG: 4 (TEST-002, TEST-005, TEST-006, CR-014, CR-015)
-- 🚧 IN PROGRESS: 0
+- 📋 BACKLOG: 3 (TEST-005, TEST-006, CR-015)
+- 🚧 IN PROGRESS: 1 (TEST-002)
 - ✅ FIXED: 21
 - ✅ CLOSED: 1 (CR-011 duplicate)
 - ⚡ READY TO TEST: 2 (TEST-003, TEST-004)

@@ -246,7 +246,7 @@ This document tracks defects from two sources:
 
 ### TEST-001: Inconsistent Version Numbers Across Files
 - **Source:** Testing - Both
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** CRITICAL
 - **Screen/Feature:** Version Management - All Apps
 - **Description:** Version and build numbers are stored in multiple locations and not synchronized. The version.dart display string, customer_app pubspec.yaml, and supplier_app pubspec.yaml can all have different values, causing confusion about what version is actually deployed.
@@ -274,6 +274,7 @@ This document tracks defects from two sources:
 - **Assigned To:**
 - **Target Build:** Build 5
 - **Notes:** This affects deployment workflow and version tracking reliability. CRITICAL because it's our only way to verify correct version is installed on TestFlight devices.
+- **Fix Applied:** Changed version.dart to use exact same format as pubspec.yaml (0.2.0+5). All three files now use identical version string for easy comparison. Build number incremented to 5.
 
 ### TEST-002: Supplier App Backup/Export Not Working
 - **Source:** Testing - Both (iPhone and iPad)
@@ -528,9 +529,9 @@ This document tracks defects from two sources:
 - **TOTAL: 21 defects tracked**
 
 ### By Status
-- 📋 BACKLOG: 21
+- 📋 BACKLOG: 20
 - 🚧 IN PROGRESS: 0
-- ✅ FIXED: 0
+- ✅ FIXED: 1
 
 ### By Source
 - Code Review: 14
@@ -552,6 +553,7 @@ This document tracks defects from two sources:
 **Focus:** Fix showstopper bugs from code review
 
 **Must Fix:**
+- [x] TEST-001: Fix version number synchronization (FIXED - Build 5)
 - [ ] CR-001: Fix public key encoding (30 min)
 - [ ] CR-002: Remove debug logging (1-2 hrs)
 - [ ] CR-005: Remove/complete TODO (15 min)

@@ -2,7 +2,7 @@ name: supplier_app
 description: "LoyaltyCards Business App - Issue and manage loyalty cards"
 publish_to: 'none'
 
-version: 0.2.0+4
+version: 0.2.0+5
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

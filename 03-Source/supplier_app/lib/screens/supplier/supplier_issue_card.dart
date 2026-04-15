@@ -22,7 +22,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   bool _isLoading = true;
   String? _errorMessage;
   int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
-  bool _hasLoggedCardIssuance = false; // Track if we've logged this session
+  final Set<String> _loggedCardIds = {}; // Track logged card IDs to prevent duplicates
 
   @override
   void initState() {
@@ -51,14 +51,14 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         initialStampCount: _initialStampCount,
       );
 
-      // Log card issuance only ONCE per screen session (not on each QR regeneration)
+      // Log card issuance only ONCE per unique card ID (not on each QR regeneration)
       // This prevents counting multiple "issued cards" when user changes initial stamp count
-      if (!_hasLoggedCardIssuance && token.cardId != null) {
+      if (token.cardId != null && !_loggedCardIds.contains(token.cardId)) {
         await _businessRepo.logIssuedCard(
           token.cardId!,
           business.id,
         );
-        _hasLoggedCardIssuance = true;
+        _loggedCardIds.add(token.cardId!);
       }
 
       setState(() {

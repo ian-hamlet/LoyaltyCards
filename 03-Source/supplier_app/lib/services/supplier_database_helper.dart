@@ -26,7 +26,7 @@ class SupplierDatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 4, // Incremented for mode column
+      version: AppConstants.supplierDatabaseVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,

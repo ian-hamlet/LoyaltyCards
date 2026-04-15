@@ -121,7 +121,7 @@ This document tracks defects from two sources:
 
 ### CR-005: Incomplete TODO in Production Code
 - **Source:** Code Review
-- **Status:** � IN PROGRESS
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
 - **File:** `customer_app/lib/screens/customer/customer_add_card.dart` (line 238)
 - **Description:** `// TODO: Implement actual card creation from QR data`
@@ -133,7 +133,7 @@ This document tracks defects from two sources:
 
 ### CR-006: Missing Input Validation in Repositories
 - **Source:** Code Review
-- **Status:** � IN PROGRESS
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
 - **File:** `customer_app/lib/services/card_repository.dart` (line 48-60)
 - **Description:** No validation before database insertion
@@ -149,7 +149,7 @@ This document tracks defects from two sources:
 
 ### CR-007: Card Issuance Logging Race Condition
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** MEDIUM
 - **File:** `supplier_app/lib/screens/supplier/supplier_issue_card.dart` (line 42-50)
 - **Description:** `_hasLoggedCardIssuance` flag only logs once per screen session
@@ -157,11 +157,12 @@ This document tracks defects from two sources:
 - **Fix Required:** Track logged card IDs in Set or use DB deduplication
 - **Estimated Effort:** 30 minutes
 - **Assigned To:**
-- **Target Build:** Build 10+
+- **Target Build:** Build 7
+- **Fixed In:** Build 7
 
 ### CR-008: Hard-coded Security Constants
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** MEDIUM
 - **Files:** `rate_limiter.dart`, `token_validator.dart`
 - **Description:** Rate limits (1000ms, 30000ms) and token expiry times hard-coded
@@ -169,11 +170,12 @@ This document tracks defects from two sources:
 - **Fix Required:** Move to `shared/lib/constants/constants.dart`
 - **Estimated Effort:** 30 minutes
 - **Assigned To:**
-- **Target Build:** Build 10+
+- **Target Build:** Build 7
+- **Fixed In:** Build 7
 
 ### CR-009: Potential Camera Controller Memory Leak
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** MEDIUM
 - **File:** `customer_app/lib/screens/customer/qr_scanner_screen.dart` (line 28-35)
 - **Description:** Async operations may be pending during dispose()
@@ -181,18 +183,20 @@ This document tracks defects from two sources:
 - **Fix Required:** Call `_controller.stop()` before `dispose()`
 - **Estimated Effort:** 10 minutes
 - **Assigned To:**
-- **Target Build:** Build 10+
+- **Target Build:** Build 7
+- **Fixed In:** Build 7
 
 ### CR-010: Database Version Inconsistency
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** MEDIUM
 - **Description:** Customer app uses `AppConstants.databaseVersion`, supplier hard-codes `version: 4`
 - **Impact:** Inconsistent version management
 - **Fix Required:** Both use constants
 - **Estimated Effort:** 15 minutes
 - **Assigned To:**
-- **Target Build:** Build 10+
+- **Target Build:** Build 7
+- **Fixed In:** Build 7
 
 ---
 
@@ -210,7 +214,7 @@ This document tracks defects from two sources:
 
 ### CR-012: Test Data in Production Screens
 - **Source:** Code Review
-- **Status:** � IN PROGRESS
+- **Status:** ✅ FIXED
 - **Priority:** LOW
 - **File:** `customer_app/lib/screens/customer/customer_home.dart` (line 76-91)
 - **Description:** `_addTestCard()` method creates test coffee shop
@@ -221,7 +225,7 @@ This document tracks defects from two sources:
 
 ### CR-013: QR Code Size Defined Twice
 - **Source:** Code Review
-- **Status:** � IN PROGRESS
+- **Status:** ✅ FIXED
 - **Priority:** LOW
 - **Files:** `qr_code_size.dart`, `constants.dart`
 - **Description:** Single source of truth violation
@@ -471,7 +475,7 @@ This document tracks defects from two sources:
 
 ### TEST-007: Simple Mode Stamp Rate Limit Too Short
 - **Source:** Testing - Both (iPhone and iPad)
-- **Status:** � IN PROGRESS
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
 - **Screen/Feature:** Customer App - Simple Mode Stamp Scanning
 - **Description:** The rate limiter on stamp scanning in simple mode is too short (currently ~1 second), allowing rapid duplicate stamps. Rate limit should be ~5 seconds to prevent accidental double-stamping while remaining user-friendly.
@@ -561,9 +565,9 @@ This document tracks defects from two sources:
 - **TOTAL: 21 defects tracked**
 
 ### By Status
-- 📋 BACKLOG: 11
-- 🚧 IN PROGRESS: 5
-- ✅ FIXED: 5
+- 📋 BACKLOG: 7
+- 🚧 IN PROGRESS: 0
+- ✅ FIXED: 14
 
 ### By Source
 - Code Review: 14

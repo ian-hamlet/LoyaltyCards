@@ -106,7 +106,7 @@ class TokenValidator {
     if (mode == OperationMode.secure) {
       final now = DateTime.now().millisecondsSinceEpoch;
       final age = now - token.timestamp;
-      if (age > 2 * 60 * 1000) {
+      if (age > AppConstants.stampExpiryMs) {
         return ValidationResult(
           isValid: false,
           error: 'Stamp expired (older than 2 minutes)',

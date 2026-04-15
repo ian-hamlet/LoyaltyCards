@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart' hide Transaction;
 import 'package:shared/models/transaction.dart' as models;
-import 'package:shared/shared.dart' show TransactionType;
+import 'package:shared/shared.dart' show TransactionType, AppLogger;
 import 'database_helper.dart';
 
 /// Repository for managing transactions in the database
@@ -126,9 +126,9 @@ class TransactionRepository {
 
   /// Delete all transactions (for testing)
   Future<void> deleteAllTransactions() async {
-    print('TransactionRepository: Deleting all transactions from database');
+    AppLogger.database('Deleting all transactions from database');
     final db = await _dbHelper.database;
     await db.delete('transactions');
-    print('TransactionRepository: All transactions deleted');
+    AppLogger.database('All transactions deleted');
   }
 }

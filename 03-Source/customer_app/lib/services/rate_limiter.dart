@@ -40,8 +40,8 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastStamp = now - lastStampTime;
 
-    // Rate limit: 1 second for both modes (prevents accidental duplicate scans)
-    const rateLimitMs = 1000;
+    // Rate limit: prevents accidental duplicate scans
+    final rateLimitMs = AppConstants.stampRateLimitMs;
 
     if (timeSinceLastStamp < rateLimitMs) {
       final remainingMs = rateLimitMs - timeSinceLastStamp;
@@ -83,7 +83,7 @@ class RateLimiter {
     final timeSinceLastIssue = now - lastIssueTime;
 
     // Prevent duplicate issuance within 30 seconds
-    const minIntervalMs = 30 * 1000;
+    final minIntervalMs = AppConstants.issueIntervalMs;
 
     if (timeSinceLastIssue < minIntervalMs) {
       final remainingMs = minIntervalMs - timeSinceLastIssue;

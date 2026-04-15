@@ -18,10 +18,10 @@ class AppConstants {
   
   // Database
   static const String databaseName = 'loyalty_cards.db';
-  static const int databaseVersion = 5;
+  static const int databaseVersion = 5; // Customer app schema version
+  static const int supplierDatabaseVersion = 4; // Supplier app schema version
   
   // QR Code Settings
-  static const int qrCodeSize = 300;
   static const double qrCodePadding = 16.0;
   
   // UI Constraints
@@ -32,6 +32,11 @@ class AppConstants {
   // Timing
   static const Duration animationDuration = Duration(milliseconds: 300);
   static const Duration qrScanSuccessDelay = Duration(milliseconds: 500);
+  
+  // Security Constants
+  static const int stampRateLimitMs = 5000; // 5 seconds between stamps (prevents duplicate scans)
+  static const int issueIntervalMs = 30000; // 30 seconds between card issuances (supplier rate limit)
+  static const int stampExpiryMs = 120000; // 2 minutes stamp token validity (timestamp tolerance)
 }
 
 /// Typography scale for consistent text sizing

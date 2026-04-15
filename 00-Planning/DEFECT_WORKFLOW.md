@@ -128,9 +128,9 @@ git push origin develop
 - 🔵 Low: 4
 - **Total:** 21
 
-**Defects Fixed:** 0  
+**Defects Fixed:** 1
 **Defects In Progress:** 0  
-**Defects Remaining:** 21
+**Defects Remaining:** 20
 
 ---
 

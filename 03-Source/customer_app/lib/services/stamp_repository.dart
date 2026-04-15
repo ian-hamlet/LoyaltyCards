@@ -134,9 +134,9 @@ class StampRepository {
 
   /// Delete all stamps (for testing)
   Future<void> deleteAllStamps() async {
-    print('StampRepository: Deleting all stamps from database');
+    AppLogger.database('Deleting all stamps from database');
     final db = await _dbHelper.database;
     await db.delete('stamps');
-    print('StampRepository: All stamps deleted');
+    AppLogger.database('All stamps deleted');
   }
 }

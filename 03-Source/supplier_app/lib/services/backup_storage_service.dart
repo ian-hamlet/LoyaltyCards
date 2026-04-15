@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared/models/supplier_config_backup.dart';
+import 'package:shared/shared.dart';
 
 /// Service for managing supplier configuration backup storage
 /// Supports four methods: Print, Photos, Email, and Files
@@ -35,7 +36,7 @@ class BackupStorageService {
 
       return result['isSuccess'] == true;
     } catch (e) {
-      print('Error saving to photos: $e');
+      AppLogger.error('Error saving backup to photos: $e');
       return false;
     }
   }
@@ -56,7 +57,7 @@ class BackupStorageService {
 
       return true;
     } catch (e) {
-      print('Error printing backup: $e');
+      AppLogger.error('Error printing backup: $e');
       return false;
     }
   }
@@ -105,7 +106,7 @@ The QR code image is attached to this email.
 
       return true;
     } catch (e) {
-      print('Error sharing via email: $e');
+      AppLogger.error('Error sharing via email: $e');
       return false;
     }
   }
@@ -152,7 +153,7 @@ The QR code image is attached to this email.
 
       return true;
     } catch (e) {
-      print('Error saving to files: $e');
+      AppLogger.error('Error saving backup to files: $e');
       return false;
     }
   }

@@ -19,11 +19,13 @@
 /// - Custom branded app icons
 /// - Offline-capable with local storage
 /// 
-/// Recent Changes (Builds 80-84):
-/// - Build 84: Custom app icons for both apps
-/// - Build 83: 5-minute clone QR expiry (security improvement)
-/// - Build 82: Clone device feature complete
-/// - Build 81: QR scanning frame and rotation controls
-/// - Build 80: Fixed backup/restore private key encoding
+/// Build 9 Changes:
+/// - Fix customer QR scanner rotation buttons (TEST-004)
+/// - Add camera flip button to all QR scanners
+/// - Fix rotation calculation to use _manualRotationOffset variable
+/// - Add flip camera (front/back switch) functionality
+/// - Apply fixes to customer_app/qr_scanner_screen.dart
+/// - Apply fixes to supplier_app/import_business_screen.dart
+/// - Add camera controls to supplier_stamp_card.dart and supplier_redeem_card.dart
 
-const String appVersion = 'v0.2.0 (Build 0)';
+const String appVersion = '0.2.0+9';

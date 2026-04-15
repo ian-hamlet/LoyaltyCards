@@ -198,12 +198,12 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                     final baseQuarterTurns = isLandscape ? 3 : 0;
                     final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
                     
-                    print('=== Redeem Card Scanner Orientation ===');
-                    print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
-                    print('Status bar: $statusBarPosition');
-                    print('Padding - Top: ${padding.top}, Bottom: ${padding.bottom}, Left: ${padding.left}, Right: ${padding.right}');
-                    print('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
-                    print('Final quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+                    AppLogger.debug(
+                      'Scanner: ${isLandscape ? "Landscape" : "Portrait"}, '
+                      'statusBar: $statusBarPosition, '
+                      'rotation: ${quarterTurns * 90}°',
+                      'Scanner'
+                    );
                     
                     return RotatedBox(
                       quarterTurns: quarterTurns,
@@ -229,12 +229,30 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             ],
           ),
 
-          // Manual rotation controls
+          // Camera controls
           Positioned(
             top: 80,
             right: 16,
             child: Column(
               children: [
+                // Camera flip (front/back switch)
+                FloatingActionButton(
+                  heroTag: 'flip_camera_redeem',
+                  mini: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  onPressed: () {
+                    cameraController.switchCamera();
+                  },
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.flip_camera_ios, size: 20, color: Colors.green),
+                      Text('Flip', style: TextStyle(fontSize: 10, color: Colors.green)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Rotate 90°
                 FloatingActionButton(
                   heroTag: 'rotate90',
                   mini: true,
@@ -253,6 +271,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // Rotate 180°
                 FloatingActionButton(
                   heroTag: 'rotate180',
                   mini: true,
@@ -428,10 +447,10 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         businessId: _business!.id,
       );
 
-      print('=== Simple Mode Redemption Logged ===');
-      print('Business: ${_business!.name}');
-      print('Stamps: ${_business!.stampsRequired}');
-      print('Timestamp: ${now.toIso8601String()}');
+      AppLogger.business('Simple Mode Redemption Logged');
+      AppLogger.debug('Business: ${_business!.name}', 'Redemption');
+      AppLogger.debug('Stamps: ${_business!.stampsRequired}', 'Redemption');
+      AppLogger.debug('Timestamp: ${now.toIso8601String()}', 'Redemption');
 
       if (mounted) {
         setState(() => _isProcessing = false);
@@ -486,8 +505,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       _isProcessing = true;
     });
 
-    print('=== Processing Redemption QR ===');
-    print('QR Data: ${qrData.substring(0, qrData.length > 100 ? 100 : qrData.length)}...');
+    AppLogger.qr('Processing Redemption QR');
+    AppLogger.qr('QR Data: ${qrData.substring(0, qrData.length > 100 ? 100 : qrData.length)}...');
 
     try {
       // Try parsing as JSON token first (new format)
@@ -495,10 +514,10 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       
       if (json['type'] == 'redemption_request') {
         final token = RedemptionRequestToken.fromJson(json);
-        print('Redemption token parsed successfully');
-        print('Card ID: ${token.cardId}');
-        print('Stamps collected: ${token.stampsCollected}');
-        print('Signatures to verify: ${token.stampSignatures.length}');
+        AppLogger.qr('Redemption token parsed successfully');
+        AppLogger.qr('Card ID: ${token.cardId}');
+        AppLogger.qr('Stamps collected: ${token.stampsCollected}');
+        AppLogger.qr('Signatures to verify: ${token.stampSignatures.length}');
         
         _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
         return;
@@ -514,7 +533,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         return;
       }
     } catch (e) {
-      print('Failed to parse as JSON token: $e');
+      AppLogger.debug('Failed to parse as JSON token: $e', 'QR');
       
       // Fall back to legacy format: LOYALTYCARD:REDEEM:cardId:stamps
       if (qrData.startsWith('LOYALTYCARD:REDEEM:')) {
@@ -522,7 +541,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         if (parts.length >= 4) {
           final cardId = parts[2];
           final stamps = int.tryParse(parts[3]) ?? 0;
-          print('Legacy redemption format detected');
+          AppLogger.qr('Legacy redemption format detected');
           _showSecureModeRedemptionConfirmation(context, cardId, stamps);
           return;
         }
@@ -555,6 +574,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     // Create signature: cardId:stampsRedeemed:timestamp
     final signatureData = '$cardId:$stamps:${now.millisecondsSinceEpoch}';
     final signature = await keyManager.signData(signatureData, privateKey);
+    
+    if (signature == null) {
+      _showError('Failed to sign redemption token');
+      return;
+    }
 
     final redemptionToken = RedemptionToken(
       cardId: cardId,
@@ -564,11 +588,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       timestamp: now.millisecondsSinceEpoch,
     );
 
-    print('=== Redemption Token Generated ===');
-    print('Card ID: $cardId');
-    print('Stamps redeemed: $stamps');
-    print('Signature: ${signature.substring(0, 20)}...');
-    print('Token type: redemption_token');
+    AppLogger.business('Redemption Token Generated');
+    AppLogger.debug('Card ID: $cardId', 'Redemption');
+    AppLogger.debug('Stamps redeemed: $stamps', 'Redemption');
+    AppLogger.debug('Signature: ${signature.substring(0, 20)}...', 'Redemption');
+    AppLogger.debug('Token type: redemption_token', 'Redemption');
 
     // Log the redemption for analytics
     await businessRepo.logRedemption(
@@ -576,7 +600,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       stampsRedeemed: stamps,
       businessId: business.id,
     );
-    print('Redemption logged to database');
+    AppLogger.database('Redemption logged to database');
 
     // Show QR code for customer to scan
     if (mounted) {

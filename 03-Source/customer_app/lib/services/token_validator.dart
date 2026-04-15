@@ -21,7 +21,7 @@ class TokenValidator {
 
     // Simple mode: Skip timestamp check (tokens are reusable/static)
     if (token.mode == OperationMode.simple) {
-      print('Simple mode: Skipping timestamp validation (reusable token)');
+      AppLogger.debug('Simple mode: Skipping timestamp validation (reusable token)', 'Token');
       // Still verify signature for simple mode
       try {
         final signatureData = token.getSignatureData();
@@ -106,23 +106,25 @@ class TokenValidator {
     if (mode == OperationMode.secure) {
       final now = DateTime.now().millisecondsSinceEpoch;
       final age = now - token.timestamp;
-      if (age > 2 * 60 * 1000) {
+      if (age > AppConstants.stampExpiryMs) {
         return ValidationResult(
           isValid: false,
           error: 'Stamp expired (older than 2 minutes)',
         );
       }
     } else {
-      print('Simple mode: Skipping timestamp validation (reusable token)');
+      AppLogger.debug('Simple mode: Skipping timestamp validation (reusable token)', 'Token');
     }
 
     // Verify previous hash chain
     if (token.previousHash != expectedPreviousHash) {
       // Debug: Log the mismatch details
-      print('Hash mismatch debug:');
-      print('  Token previousHash: "${token.previousHash}"');
-      print('  Expected previousHash: "$expectedPreviousHash"');
-      print('  Token stampNumber: ${token.stampNumber}');
+      AppLogger.warning(
+        'Hash mismatch - Token previousHash: "${token.previousHash}", '
+        'Expected: "$expectedPreviousHash", '
+        'Stamp: ${token.stampNumber}',
+        'Token'
+      );
       
       return ValidationResult(
         isValid: false,

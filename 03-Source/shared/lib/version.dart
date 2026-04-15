@@ -32,5 +32,13 @@
 /// - Fix supplier backup/export functionality (TEST-002)
 /// - Save to File and Save to Photos buttons now working
 /// - File share sheet and photo library save implemented
+/// - Added Future.any() timeout workaround for ImageGallerySaver iOS hang
+/// 
+/// Build 11 Changes:
+/// - Fix duplicate empty card creation on redemption (TEST-005)
+/// - Added findCardWithSpace() helper to CardRepository
+/// - Check for existing non-redeemed cards before creating new card
+/// - Prioritize cards with most stamps when multiple available
+/// - Apply fix to both Simple and Secure Mode redemptions
 
-const String appVersion = '0.2.0+10';
+const String appVersion = '0.2.0+11';

@@ -745,24 +745,35 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       AppLogger.debug('Stamps: ${_card!.stampsCollected}', 'Redemption');
       AppLogger.debug('Redeemed at: ${now.toIso8601String()}', 'Redemption');
       
-      // Auto-create new card for continued loyalty
-      final newCardId = '${_card!.businessId}_${DateTime.now().millisecondsSinceEpoch}';
-      final newCard = models.Card(
-        id: newCardId,
-        businessId: _card!.businessId,
-        businessName: _card!.businessName,
-        businessPublicKey: _card!.businessPublicKey,
-        brandColor: _card!.brandColor,
-        logoIndex: _card!.logoIndex,
-        mode: _card!.mode,
-        stampsRequired: _card!.stampsRequired,
-        stampsCollected: 0,
-        createdAt: now,
-        updatedAt: now,
-      );
+      // Check for existing card with available space before creating new card
+      final existingCard = await _cardRepo.findCardWithSpace(_card!.businessId);
       
-      await _cardRepo.insertCard(newCard);
-      AppLogger.database('New card auto-created: $newCardId');
+      if (existingCard != null) {
+        AppLogger.business('Found existing card with space: ${existingCard.id}');
+        AppLogger.business('  Existing card has ${existingCard.stampsCollected}/${existingCard.stampsRequired} stamps');
+        AppLogger.business('  Skipping new card creation - will use existing card');
+      } else {
+        AppLogger.business('No existing cards with space found - creating new card');
+        
+        // Auto-create new card for continued loyalty
+        final newCardId = '${_card!.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+        final newCard = models.Card(
+          id: newCardId,
+          businessId: _card!.businessId,
+          businessName: _card!.businessName,
+          businessPublicKey: _card!.businessPublicKey,
+          brandColor: _card!.brandColor,
+          logoIndex: _card!.logoIndex,
+          mode: _card!.mode,
+          stampsRequired: _card!.stampsRequired,
+          stampsCollected: 0,
+          createdAt: now,
+          updatedAt: now,
+        );
+        
+        await _cardRepo.insertCard(newCard);
+        AppLogger.database('New card auto-created: $newCardId');
+      }
       
       // Reload card data
       await _loadCardData();

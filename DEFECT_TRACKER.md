@@ -653,7 +653,7 @@ This document tracks defects from two sources:
 
 ### TEST-005: Secure Mode Redemption Creates Duplicate Empty Cards
 - **Source:** Testing - Both (iPhone and iPad)
-- **Status:** 📋 BACKLOG
+- **Status:** � IN PROGRESS
 - **Priority:** HIGH
 - **Screen/Feature:** Customer App - Secure Mode Card Redemption
 - **Description:** When redeeming a full card in secure mode, the system creates an additional empty card even when an existing partially-filled card already exists. This creates duplicate cards for the same business.
@@ -687,10 +687,21 @@ This document tracks defects from two sources:
   - Before creating new card, search for existing cards with space
   - Only create new card if needed
   - May need to refactor card creation logic in redemption handler
+- **Fix Implemented (Build 11):**
+  - ✅ Added `findCardWithSpace()` helper method to CardRepository
+  - ✅ Queries for non-redeemed cards where stampsCollected < stampsRequired
+  - ✅ Prioritizes cards with MOST stamps when multiple cards exist
+  - ✅ Only creates new card if NO cards with available space exist
+  - ✅ Applied fix to both Simple Mode (customer_card_detail.dart) and Secure Mode (qr_scanner_screen.dart)
+  - ✅ Added comprehensive logging to track card selection logic
+- **Testing Notes:**
+  - Test with multiple partially-filled cards for same business
+  - Verify overflow card from stamp surplus is reused instead of creating duplicate
+  - Confirm new card only created when all existing cards are full/redeemed
 - **Estimated Effort:** 2-3 hours
 - **Assigned To:**
-- **Target Build:** Build 5
-- **Notes:** Business logic issue in card lifecycle management. Related to overflow stamp handling.
+- **Target Build:** Build 11
+- **Notes:** Business logic issue in card lifecycle management. Related to overflow stamp handling. Fix ensures user wallet doesn't accumulate duplicate empty cards.
 
 ### TEST-007: Simple Mode Stamp Rate Limit Too Short
 - **Source:** Testing - Both (iPhone and iPad)

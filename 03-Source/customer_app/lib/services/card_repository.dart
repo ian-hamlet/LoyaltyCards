@@ -163,4 +163,40 @@ class CardRepository {
       whereArgs: [cardId],
     );
   }
+
+  /// Find an existing non-redeemed card with available space for stamps
+  /// Returns the card with the MOST stamps if multiple cards exist
+  /// Returns null if no cards with available space exist
+  Future<models.Card?> findCardWithSpace(String businessId) async {
+    AppLogger.database('Searching for cards with available space for business: $businessId');
+    
+    // Get all cards for this business
+    final allCards = await getCardsByBusiness(businessId);
+    AppLogger.database('Found ${allCards.length} total cards for business');
+    
+    // Filter to non-redeemed cards with available space
+    final availableCards = allCards.where((card) {
+      final hasSpace = !card.isRedeemed && card.stampsCollected < card.stampsRequired;
+      if (hasSpace) {
+        AppLogger.database('  Card ${card.id}: ${card.stampsCollected}/${card.stampsRequired} stamps, redeemed=${card.isRedeemed}');
+      }
+      return hasSpace;
+    }).toList();
+    
+    AppLogger.database('Found ${availableCards.length} cards with available space');
+    
+    // If no cards with space, return null
+    if (availableCards.isEmpty) {
+      AppLogger.database('No cards with available space found');
+      return null;
+    }
+    
+    // Sort by stampsCollected descending (most stamps first)
+    availableCards.sort((a, b) => b.stampsCollected.compareTo(a.stampsCollected));
+    
+    final selectedCard = availableCards.first;
+    AppLogger.database('Selected card with most stamps: ${selectedCard.id} (${selectedCard.stampsCollected}/${selectedCard.stampsRequired})');
+    
+    return selectedCard;
+  }
 }

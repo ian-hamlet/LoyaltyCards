@@ -540,25 +540,36 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     await repository.markCardAsRedeemed(card.id);
     AppLogger.database('Card marked as redeemed in database');
     
-    // Auto-create new card for continued loyalty
-    final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
-    final now = DateTime.now();
-    final newCard = models.Card(
-      id: newCardId,
-      businessId: card.businessId,
-      businessName: card.businessName,
-      businessPublicKey: card.businessPublicKey,
-      brandColor: card.brandColor,
-      logoIndex: card.logoIndex,
-      mode: card.mode,
-      stampsRequired: card.stampsRequired,
-      stampsCollected: 0,
-      createdAt: now,
-      updatedAt: now,
-    );
+    // Check for existing card with available space before creating new card
+    final existingCard = await repository.findCardWithSpace(card.businessId);
     
-    await repository.insertCard(newCard);
-    AppLogger.database('New card auto-created: $newCardId');
+    if (existingCard != null) {
+      AppLogger.business('Found existing card with space: ${existingCard.id}');
+      AppLogger.business('  Existing card has ${existingCard.stampsCollected}/${existingCard.stampsRequired} stamps');
+      AppLogger.business('  Skipping new card creation - will use existing card');
+    } else {
+      AppLogger.business('No existing cards with space found - creating new card');
+      
+      // Auto-create new card for continued loyalty
+      final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+      final now = DateTime.now();
+      final newCard = models.Card(
+        id: newCardId,
+        businessId: card.businessId,
+        businessName: card.businessName,
+        businessPublicKey: card.businessPublicKey,
+        brandColor: card.brandColor,
+        logoIndex: card.logoIndex,
+        mode: card.mode,
+        stampsRequired: card.stampsRequired,
+        stampsCollected: 0,
+        createdAt: now,
+        updatedAt: now,
+      );
+      
+      await repository.insertCard(newCard);
+      AppLogger.database('New card auto-created: $newCardId');
+    }
 
     AppLogger.qr('Redemption Complete');
 

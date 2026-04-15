@@ -653,9 +653,10 @@ This document tracks defects from two sources:
 
 ### TEST-005: Secure Mode Redemption Creates Duplicate Empty Cards
 - **Source:** Testing - Both (iPhone and iPad)
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
 - **Screen/Feature:** Customer App - Secure Mode Card Redemption
+- **Fix Date:** 2026-04-16
 - **Description:** When redeeming a full card in secure mode, the system creates an additional empty card even when an existing partially-filled card already exists. This creates duplicate cards for the same business.
 - **Reproduction Steps:**
   1. Open customer app in secure mode
@@ -687,10 +688,21 @@ This document tracks defects from two sources:
   - Before creating new card, search for existing cards with space
   - Only create new card if needed
   - May need to refactor card creation logic in redemption handler
+- **Fix Implemented (Build 11):**
+  - ✅ Added `findCardWithSpace()` helper method to CardRepository
+  - ✅ Queries for non-redeemed cards where stampsCollected < stampsRequired
+  - ✅ Prioritizes cards with MOST stamps when multiple cards exist
+  - ✅ Only creates new card if NO cards with available space exist
+  - ✅ Applied fix to both Simple Mode (customer_card_detail.dart) and Secure Mode (qr_scanner_screen.dart)
+  - ✅ Added comprehensive logging to track card selection logic
+- **Testing Notes:**
+  - Test with multiple partially-filled cards for same business
+  - Verify overflow card from stamp surplus is reused instead of creating duplicate
+  - Confirm new card only created when all existing cards are full/redeemed
 - **Estimated Effort:** 2-3 hours
 - **Assigned To:**
-- **Target Build:** Build 5
-- **Notes:** Business logic issue in card lifecycle management. Related to overflow stamp handling.
+- **Target Build:** Build 11
+- **Notes:** Business logic issue in card lifecycle management. Related to overflow stamp handling. Fix ensures user wallet doesn't accumulate duplicate empty cards.
 
 ### TEST-007: Simple Mode Stamp Rate Limit Too Short
 - **Source:** Testing - Both (iPhone and iPad)
@@ -739,9 +751,10 @@ This document tracks defects from two sources:
 
 ### TEST-006: No Filter Option to Exclude Redeemed Cards
 - **Source:** Testing - Both (iPhone and iPad)
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** MEDIUM
 - **Screen/Feature:** Customer App - Card List
+- **Fix Date:** 2026-04-16
 - **Description:** Card list shows all cards including redeemed ones. Missing filter functionality to exclude/hide redeemed cards from view, leading to cluttered card list as users accumulate redeemed cards over time.
 - **Reproduction Steps:**
   1. Open customer app
@@ -767,10 +780,26 @@ This document tracks defects from two sources:
   - Update card query to filter based on redemption status
   - Persist filter preference in local storage
   - Consider separate tabs: Active / Redeemed
-- **Estimated Effort:** 1-2 hours
+- **Fix Implemented (Build 12):**
+  - ✅ Added shared_preferences package dependency
+  - ✅ Added FilterChip UI control next to search bar
+  - ✅ Label: "Hide Redeemed" (selected by default)
+  - ✅ Default behavior: hide redeemed cards for cleaner wallet
+  - ✅ Preference persisted across app restarts
+  - ✅ Filter works alongside search functionality
+  - ✅ Updated _filterCards() to apply both filters (redeemed + search)
+  - ✅ Icon changes: visibility_off (hidden) / visibility (shown)
+- **Testing Notes:**
+  - Verify redeemed cards hidden by default on first launch
+  - Tap FilterChip to show redeemed cards (deselect "Hide Redeemed")
+  - Close app and reopen - filter state should persist
+  - Test search with filter on/off
+  - Verify empty state shows correct message
+- **Estimated Effort:** 1-2 hours (COMPLETED)
 - **Assigned To:**
-- **Target Build:** Build 10+
-- **Notes:** Enhancement request. Improves UX but not critical for pilot testing.
+- **Target Build:** Build 12
+- **Fix Verified:** 2026-04-16 - Implementation complete, ready for physical device testing
+- **Notes:** Enhancement request. Improves UX but not critical for pilot testing. UI uses Material FilterChip for modern, clean appearance. "Hide Redeemed" chip selected by default for cleaner wallet view.
 
 ---
 

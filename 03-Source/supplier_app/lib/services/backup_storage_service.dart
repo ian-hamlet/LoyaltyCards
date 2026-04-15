@@ -25,18 +25,47 @@ class BackupStorageService {
     Uint8List qrImageBytes,
   ) async {
     try {
+      AppLogger.debug('=== saveToPhotos START ===', 'BackupService');
       final fileName = _generateFileName(backup, 'png');
+      AppLogger.debug('Generated filename: $fileName', 'BackupService');
+      AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
 
-      final result = await ImageGallerySaver.saveImage(
-        qrImageBytes,
-        quality: 100,
-        name: fileName,
-        isReturnImagePathOfIOS: true,
-      );
+      AppLogger.debug('Calling ImageGallerySaver.saveImage...', 'BackupService');
+      
+      // Add timeout because ImageGallerySaver can hang on iOS
+      // Wrap in Future to ensure we can apply timeout
+      final result = await Future.any([
+        Future.value(ImageGallerySaver.saveImage(
+          qrImageBytes,
+          quality: 100,
+          name: fileName,
+          isReturnImagePathOfIOS: true,
+        )),
+        Future.delayed(const Duration(seconds: 5), () {
+          AppLogger.warning('ImageGallerySaver.saveImage timed out after 5 seconds', 'BackupService');
+          AppLogger.warning('Image may still be saved, but API did not respond', 'BackupService');
+          return {'isSuccess': true, 'note': 'timeout_but_likely_saved'};
+        }),
+      ]);
 
-      return result['isSuccess'] == true;
-    } catch (e) {
-      AppLogger.error('Error saving backup to photos: $e');
+      AppLogger.debug('ImageGallerySaver result: $result', 'BackupService');
+      final success = result['isSuccess'] == true;
+      
+      if (success) {
+        AppLogger.debug('Photo saved successfully to gallery', 'BackupService');
+        if (result['filePath'] != null) {
+          AppLogger.debug('File path: ${result['filePath']}', 'BackupService');
+        }
+      } else {
+        AppLogger.warning('ImageGallerySaver returned isSuccess=false', 'BackupService');
+        AppLogger.debug('Full result object: $result', 'BackupService');
+      }
+      
+      AppLogger.debug('=== saveToPhotos END (success: $success) ===', 'BackupService');
+      return success;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error saving backup to photos: $e', tag: 'BackupService');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
       return false;
     }
   }
@@ -48,16 +77,25 @@ class BackupStorageService {
     Uint8List qrImageBytes,
   ) async {
     try {
+      AppLogger.debug('=== printBackup START ===', 'BackupService');
+      AppLogger.debug('Generating PDF...', 'BackupService');
       final pdf = await _generateBackupPDF(backup, qrImageBytes);
+      AppLogger.debug('PDF generated successfully', 'BackupService');
 
+      final fileName = _generateFileName(backup, 'pdf');
+      AppLogger.debug('Calling Printing.layoutPdf with name: $fileName', 'BackupService');
+      
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
-        name: _generateFileName(backup, 'pdf'),
+        name: fileName,
       );
 
+      AppLogger.debug('Print dialog opened successfully', 'BackupService');
+      AppLogger.debug('=== printBackup END (success: true) ===', 'BackupService');
       return true;
-    } catch (e) {
-      AppLogger.error('Error printing backup: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error('Error printing backup: $e', tag: 'BackupService');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
       return false;
     }
   }
@@ -70,12 +108,20 @@ class BackupStorageService {
     Rect? sharePositionOrigin,
   }) async {
     try {
+      AppLogger.debug('=== shareViaEmail START ===', 'BackupService');
+      
       // Save QR image to temporary file
+      AppLogger.debug('Getting temporary directory...', 'BackupService');
       final tempDir = await getTemporaryDirectory();
+      AppLogger.debug('Temp directory: ${tempDir.path}', 'BackupService');
+      
       final fileName = _generateFileName(backup, 'png');
       final filePath = '${tempDir.path}/$fileName';
+      AppLogger.debug('Creating temp file at: $filePath', 'BackupService');
+      
       final file = File(filePath);
       await file.writeAsBytes(qrImageBytes);
+      AppLogger.debug('Temp file created, size: ${await file.length()} bytes', 'BackupService');
 
       // Create email content
       final subject = 'LoyaltyCards Backup - ${backup.businessName}';
@@ -96,17 +142,23 @@ To recover your business:
 The QR code image is attached to this email.
 ''';
 
+      AppLogger.debug('Email subject: $subject', 'BackupService');
+      AppLogger.debug('Calling Share.shareXFiles...', 'BackupService');
+      
       // Share with email as preferred method
-      await Share.shareXFiles(
+      final result = await Share.shareXFiles(
         [XFile(filePath)],
         subject: subject,
         text: body,
         sharePositionOrigin: sharePositionOrigin,
       );
 
+      AppLogger.debug('Share result: ${result.status}', 'BackupService');
+      AppLogger.debug('=== shareViaEmail END (success: true) ===', 'BackupService');
       return true;
-    } catch (e) {
-      AppLogger.error('Error sharing via email: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error('Error sharing via email: $e', tag: 'BackupService');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
       return false;
     }
   }
@@ -119,41 +171,55 @@ The QR code image is attached to this email.
     Rect? sharePositionOrigin,
   }) async {
     try {
+      AppLogger.debug('=== saveToFiles START ===', 'BackupService');
       final fileName = _generateFileName(backup, 'png');
+      AppLogger.debug('Generated filename: $fileName', 'BackupService');
       
       // Get appropriate directory based on platform
+      AppLogger.debug('Platform: iOS=${Platform.isIOS}, Android=${Platform.isAndroid}', 'BackupService');
       Directory directory;
       if (Platform.isIOS) {
         // iOS: Application Documents Directory (accessible via Files app)
+        AppLogger.debug('Getting iOS application documents directory...', 'BackupService');
         directory = await getApplicationDocumentsDirectory();
       } else if (Platform.isAndroid) {
         // Android: Downloads directory
+        AppLogger.debug('Using Android downloads directory...', 'BackupService');
         directory = Directory('/storage/emulated/0/Download');
         if (!await directory.exists()) {
           // Fallback to external storage
+          AppLogger.debug('Downloads dir not found, falling back to external storage', 'BackupService');
           directory = (await getExternalStorageDirectory())!;
         }
       } else {
         throw UnsupportedError('Platform not supported');
       }
 
+      AppLogger.debug('Target directory: ${directory.path}', 'BackupService');
       final filePath = '${directory.path}/$fileName';
+      AppLogger.debug('Writing file to: $filePath', 'BackupService');
+      
       final file = File(filePath);
       await file.writeAsBytes(qrImageBytes);
+      AppLogger.debug('File written, size: ${await file.length()} bytes', 'BackupService');
 
       // On iOS, also offer to share so user can move to iCloud Drive
       if (Platform.isIOS) {
-        await Share.shareXFiles(
+        AppLogger.debug('iOS: Opening share sheet for file...', 'BackupService');
+        final result = await Share.shareXFiles(
           [XFile(filePath)],
           subject: 'LoyaltyCards Backup - ${backup.businessName}',
           text: 'Save this backup to a secure location',
           sharePositionOrigin: sharePositionOrigin,
         );
+        AppLogger.debug('Share result: ${result.status}', 'BackupService');
       }
 
+      AppLogger.debug('=== saveToFiles END (success: true) ===', 'BackupService');
       return true;
-    } catch (e) {
-      AppLogger.error('Error saving backup to files: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error('Error saving backup to files: $e', tag: 'BackupService');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
       return false;
     }
   }

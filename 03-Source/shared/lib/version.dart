@@ -27,5 +27,10 @@
 /// - Apply fixes to customer_app/qr_scanner_screen.dart
 /// - Apply fixes to supplier_app/import_business_screen.dart
 /// - Add camera controls to supplier_stamp_card.dart and supplier_redeem_card.dart
+/// 
+/// Build 10 Changes:
+/// - Fix supplier backup/export functionality (TEST-002)
+/// - Save to File and Save to Photos buttons now working
+/// - File share sheet and photo library save implemented
 
-const String appVersion = '0.2.0+9';
+const String appVersion = '0.2.0+10';

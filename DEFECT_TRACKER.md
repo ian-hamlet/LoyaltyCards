@@ -1,4 +1,4 @@
-# Defect Tracker - v0.2.0 Post-Testing
+Update# Defect Tracker - v0.2.0 Post-Testing
 
 **Current Version:** v0.2.0 (Build 4) - On TestFlight  
 **Target Version:** v0.2.1 (Build 5+)  
@@ -244,26 +244,36 @@ This document tracks defects from two sources:
 - **Target Build:** Build X
 ```
 
-### Example Testing Defect:
-
-### TEST-001: QR Scanner Crashes on iPad Pro
-- **Source:** Testing - iPad
+### TEST-001: Inconsistent Version Numbers Across Files
+- **Source:** Testing - Both
 - **Status:** 📋 BACKLOG
-- **Priority:** CRITICAL
-- **Screen/Feature:** Customer App - QR Scanner
-- **Description:** App crashes when opening QR scanner on iPad Pro 12.9"
+- **Priority:** HIGH
+- **Screen/Feature:** Version Management - All Apps
+- **Description:** Version and build numbers are stored in multiple locations and not synchronized. The version.dart display string, customer_app pubspec.yaml, and supplier_app pubspec.yaml can all have different values, causing confusion about what version is actually deployed.
 - **Reproduction Steps:**
-  1. Open customer app on iPad Pro
-  2. Tap "Add Card" button
-  3. App crashes immediately
-- **Expected Behavior:** Camera opens with QR scanner overlay
-- **Actual Behavior:** App crashes, returns to home screen
-- **Screenshots/Logs:** [Attach crash log]
-- **Workaround:** Use iPhone instead
-- **Fix Required:** Check camera permissions and iPad camera orientation handling
-- **Estimated Effort:** 1-2 hours
+  1. Check `03-Source/shared/lib/version.dart` - shows v0.2.0 (Build 4)
+  2. Check `03-Source/customer_app/pubspec.yaml` - may show version: 0.2.0+4
+  3. Check `03-Source/supplier_app/pubspec.yaml` - may show version: 0.2.0+4
+  4. Launch app on device - About screen shows version from version.dart
+  5. App Store Connect shows version from pubspec.yaml
+  6. These can get out of sync during development
+- **Expected Behavior:** Single source of truth for version/build, or automated sync mechanism
+- **Actual Behavior:** Manual updates required in 3+ places, prone to human error
+- **Impact:** 
+  - Cannot verify which code version is deployed
+  - TestFlight users may report bugs against wrong version
+  - Confusion during debugging ("is this Build 4 or 5?")
+  - Build numbers can be inconsistent between customer and supplier apps
+- **Workaround:** Manually update all files each time, but error-prone
+- **Fix Required:** 
+  - **Option 1:** Single source in version.dart, read by pubspec.yaml files
+  - **Option 2:** Build script that updates all locations from single config
+  - **Option 3:** Pre-commit hook that validates versions match
+  - **Option 4:** Move to constants.dart and generate version display string
+- **Estimated Effort:** 2-3 hours
 - **Assigned To:**
-- **Target Build:** Build 5
+- **Target Build:** Build 6-10
+- **Notes:** This affects deployment workflow and version tracking reliability. Should be fixed before scaling to multiple developers or wider distribution.
 
 ---
 
@@ -271,23 +281,23 @@ This document tracks defects from two sources:
 
 ### By Priority
 - 🔴 CRITICAL: 2 (Code Review) + 0 (Testing) = **2 total**
-- 🟠 HIGH: 4 (Code Review) + 0 (Testing) = **4 total**
+- 🟠 HIGH: 4 (Code Review) + 1 (Testing) = **5 total**
 - 🟡 MEDIUM: 4 (Code Review) + 0 (Testing) = **4 total**
 - 🔵 LOW: 4 (Code Review) + 0 (Testing) = **4 total**
-- **TOTAL: 14 defects tracked**
+- **TOTAL: 15 defects tracked**
 
 ### By Status
-- 📋 BACKLOG: 14
+- 📋 BACKLOG: 15
 - 🚧 IN PROGRESS: 0
 - ✅ FIXED: 0
 
 ### By Source
 - Code Review: 14
-- Testing: 0
+- Testing: 1
 
 ### By Target Build
 - Build 5 (Critical fixes): 3 defects
-- Build 6-10 (High priority): 4 defects
+- Build 6-10 (High priority): 5 defects
 - Build 10+ (Medium priority): 4 defects
 - v0.3.0 (Low priority): 4 defects
 

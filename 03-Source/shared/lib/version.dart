@@ -57,5 +57,14 @@
 ///   * bool for synchronous validation (QR parsing, signatures)
 /// - Added comprehensive documentation to key service files
 /// - No breaking changes - documentation and utilities only
+/// 
+/// Build 14 Changes:
+/// - Code review fixes from comprehensive best practice analysis
+/// - Fixed string substring operations to handle short strings safely
+/// - Commented out dead code methods (canIssueStamp, recordStampIssued)
+///   in rate_limiter.dart that referenced non-existent stamp_log table
+/// - Added length checks before substring(0, 20) in all logging statements
+/// - Prevents potential RangeError with malformed QR signatures
+/// - Minor bug fixes - no functional changes to working features
 
-const String appVersion = '0.2.0+13';
+const String appVersion = '0.2.0+14';

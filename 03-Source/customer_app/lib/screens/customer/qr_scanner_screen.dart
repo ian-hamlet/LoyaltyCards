@@ -173,7 +173,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       final savedStamps = await stampRepository.getStampsByCard(cardId);
       AppLogger.database('Verification: ${savedStamps.length} stamps found in DB for card $cardId');
       for (var s in savedStamps) {
-        AppLogger.debug('  Stamp #${s.stampNumber}: ${s.signature.substring(0, 20)}...');
+        final sigPreview = s.signature.length > 20 ? '${s.signature.substring(0, 20)}...' : s.signature;
+        AppLogger.debug('  Stamp #${s.stampNumber}: $sigPreview');
       }
       AppLogger.qr('End Card Issuance Processing');
     }
@@ -261,8 +262,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     AppLogger.database('Stamps in DB: ${stamps.length}');
     AppLogger.business('Expected next stamp: #${stamps.length + 1}');
     AppLogger.qr('Token stamp number: ${token.stampNumber}');
-    AppLogger.qr('Expected previousHash: "${expectedPrevHash.isEmpty ? "(empty)" : expectedPrevHash.substring(0, 20) + "..."}"');
-    AppLogger.qr('Token previousHash: "${token.previousHash.isEmpty ? "(empty)" : token.previousHash.substring(0, 20) + "..."}"');
+    final expectedPrevHashPreview = expectedPrevHash.isEmpty ? "(empty)" : (expectedPrevHash.length > 20 ? '${expectedPrevHash.substring(0, 20)}...' : expectedPrevHash);
+    final tokenPrevHashPreview = token.previousHash.isEmpty ? "(empty)" : (token.previousHash.length > 20 ? '${token.previousHash.substring(0, 20)}...' : token.previousHash);
+    AppLogger.qr('Expected previousHash: "$expectedPrevHashPreview"');
+    AppLogger.qr('Token previousHash: "$tokenPrevHashPreview"');
     AppLogger.qr('End Validation');
 
     // Validate stamp token (skip crypto validation for simple mode)
@@ -308,8 +311,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     AppLogger.qr('Card ID: ${card.id}');
     AppLogger.qr('Stamp ID: $stampId');
     AppLogger.debug('Mode: ${card.mode.displayName}');
-    AppLogger.qr('previousHash: "${stampPreviousHash.isEmpty ? "(empty -> will be null)" : stampPreviousHash.substring(0, 20) + "..."}"');
-    AppLogger.qr('signature: "${token.signature.substring(0, 20)}..."');
+    final prevHashPreview = stampPreviousHash.isEmpty ? "(empty -> will be null)" : (stampPreviousHash.length > 20 ? '${stampPreviousHash.substring(0, 20)}...' : stampPreviousHash);
+    final sigPreview = token.signature.length > 20 ? '${token.signature.substring(0, 20)}...' : token.signature;
+    AppLogger.qr('previousHash: "$prevHashPreview"');
+    AppLogger.qr('signature: "$sigPreview"');
     
     final stamp = Stamp(
       id: stampId,
@@ -331,8 +336,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
       for (var additionalStamp in token.additionalStamps) {
         AppLogger.qr('Additional Stamp #${additionalStamp.stampNumber}:');
-        AppLogger.qr('  previousHash: "${currentPreviousHash.substring(0, 20)}..."');
-        AppLogger.qr('  signature: "${additionalStamp.signature.substring(0, 20)}..."');
+        final prevHashPreview = currentPreviousHash.length > 20 ? '${currentPreviousHash.substring(0, 20)}...' : currentPreviousHash;
+        final addlSigPreview = additionalStamp.signature.length > 20 ? '${additionalStamp.signature.substring(0, 20)}...' : additionalStamp.signature;
+        AppLogger.qr('  previousHash: "$prevHashPreview"');
+        AppLogger.qr('  signature: "$addlSigPreview"');
         
         // Verify stamp signature (skip in simple mode)
         if (card.mode == OperationMode.secure) {

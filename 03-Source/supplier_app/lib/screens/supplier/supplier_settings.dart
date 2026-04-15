@@ -65,7 +65,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ),
         );
 
-        AppLogger.info('${'='* 60}');
+        AppLogger.info('${'=' * 60}');
         AppLogger.info('SUPPLIER APP: RESETTING BUSINESS - ${DateTime.now().toIso8601String()}');
         AppLogger.info('Business: ${widget.business.name} (ID: ${widget.business.id})');
         

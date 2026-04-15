@@ -192,21 +192,21 @@ class _CustomerSettingsState extends State<CustomerSettings> {
 
                 const Divider(height: 32),
 
-                // About Section
+                // App Information Section
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'About',
+                    'App Information',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const ListTile(
-                  leading: Icon(Icons.info_outline),
-                  title: Text('Version'),
-                  subtitle: Text('1.0.0 (Beta)'),
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: const Text('Version'),
+                  subtitle: Text(appVersion),
                 ),
                 const ListTile(
                   leading: Icon(Icons.security),

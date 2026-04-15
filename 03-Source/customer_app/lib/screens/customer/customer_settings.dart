@@ -189,24 +189,24 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                     ),
                   ),
                 ),
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: const Text('Version'),
+                  subtitle: Text(appVersion),
+                ),
 
                 const Divider(height: 32),
 
-                // App Information Section
+                // About Section
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'App Information',
+                    'About',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('Version'),
-                  subtitle: Text(appVersion),
                 ),
                 const ListTile(
                   leading: Icon(Icons.security),

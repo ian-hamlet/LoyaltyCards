@@ -133,7 +133,8 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
         AppFeedback.error(context, 'Failed to open print dialog');
       }
     } catch (e, stackTrace) {
-      AppLogger.error('Exception in _printBackup: $e', tag: 'Backup');\n      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      AppLogger.error('Exception in _printBackup: $e', tag: 'Backup');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       AppFeedback.error(context, 'Print error: $e');
     }
   }

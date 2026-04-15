@@ -26,4 +26,4 @@
 /// - Build 81: QR scanning frame and rotation controls
 /// - Build 80: Fixed backup/restore private key encoding
 
-const String appVersion = '0.2.0+6';
+const String appVersion = '0.2.0+7';

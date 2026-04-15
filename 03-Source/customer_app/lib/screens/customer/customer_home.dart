@@ -73,39 +73,6 @@ class _CustomerHomeState extends State<CustomerHome> {
     });
   }
 
-  Future<void> _addTestCard() async {
-    final uuid = const Uuid();
-    final testCard = models.Card(
-      id: uuid.v4(),
-      businessId: uuid.v4(),
-      businessName: 'Test Coffee Shop',
-      businessPublicKey: 'test-public-key',
-      stampsRequired: 7,
-      stampsCollected: 3,
-      brandColor: '#8B4513',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    await _cardRepo.insertCard(testCard);
-    
-    // Add transaction
-    final transaction = models.Transaction(
-      id: uuid.v4(),
-      cardId: testCard.id,
-      type: TransactionType.pickup,
-      timestamp: DateTime.now(),
-      businessName: testCard.businessName,
-    );
-    await _transactionRepo.insertTransaction(transaction);
-
-    await _loadCards();
-    
-    if (mounted) {
-      AppFeedback.success(context, 'Test card added!');
-    }
-  }
-
   Future<void> _deleteCard(models.Card card) async {
     final confirmed = await showDialog<bool>(
       context: context,

@@ -40,8 +40,8 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastStamp = now - lastStampTime;
 
-    // Rate limit: 1 second for both modes (prevents accidental duplicate scans)
-    const rateLimitMs = 1000;
+    // Rate limit: 5 seconds for both modes (prevents accidental duplicate scans)
+    const rateLimitMs = 5000;
 
     if (timeSinceLastStamp < rateLimitMs) {
       final remainingMs = rateLimitMs - timeSinceLastStamp;

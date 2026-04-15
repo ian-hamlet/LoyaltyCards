@@ -21,7 +21,6 @@ class AppConstants {
   static const int databaseVersion = 5;
   
   // QR Code Settings
-  static const int qrCodeSize = 300;
   static const double qrCodePadding = 16.0;
   
   // UI Constraints

@@ -48,6 +48,16 @@ class CardRepository {
 
   /// Insert a new card
   Future<void> insertCard(models.Card card) async {
+    // Input validation
+    assert(card.id.isNotEmpty, 'Card ID must not be empty');
+    assert(card.businessId.isNotEmpty, 'Business ID must not be empty');
+    assert(card.businessName.isNotEmpty, 'Business name must not be empty');
+    assert(card.stampsRequired > 0, 'Stamps required must be positive');
+    assert(card.stampsRequired <= 100, 'Stamps required must be <= 100');
+    assert(card.stampsCollected >= 0, 'Stamps collected must be non-negative');
+    assert(card.stampsCollected <= card.stampsRequired, 
+      'Stamps collected cannot exceed stamps required');
+    
     final db = await _dbHelper.database;
     await db.insert(
       'cards',
@@ -58,6 +68,16 @@ class CardRepository {
 
   /// Update an existing card
   Future<void> updateCard(models.Card card) async {
+    // Input validation
+    assert(card.id.isNotEmpty, 'Card ID must not be empty');
+    assert(card.businessId.isNotEmpty, 'Business ID must not be empty');
+    assert(card.businessName.isNotEmpty, 'Business name must not be empty');
+    assert(card.stampsRequired > 0, 'Stamps required must be positive');
+    assert(card.stampsRequired <= 100, 'Stamps required must be <= 100');
+    assert(card.stampsCollected >= 0, 'Stamps collected must be non-negative');
+    assert(card.stampsCollected <= card.stampsRequired, 
+      'Stamps collected cannot exceed stamps required');
+    
     final db = await _dbHelper.database;
     await db.update(
       'cards',

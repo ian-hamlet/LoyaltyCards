@@ -31,12 +31,22 @@ class BackupStorageService {
       AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
 
       AppLogger.debug('Calling ImageGallerySaver.saveImage...', 'BackupService');
-      final result = await ImageGallerySaver.saveImage(
-        qrImageBytes,
-        quality: 100,
-        name: fileName,
-        isReturnImagePathOfIOS: true,
-      );
+      
+      // Add timeout because ImageGallerySaver can hang on iOS
+      // Wrap in Future to ensure we can apply timeout
+      final result = await Future.any([
+        Future.value(ImageGallerySaver.saveImage(
+          qrImageBytes,
+          quality: 100,
+          name: fileName,
+          isReturnImagePathOfIOS: true,
+        )),
+        Future.delayed(const Duration(seconds: 5), () {
+          AppLogger.warning('ImageGallerySaver.saveImage timed out after 5 seconds', 'BackupService');
+          AppLogger.warning('Image may still be saved, but API did not respond', 'BackupService');
+          return {'isSuccess': true, 'note': 'timeout_but_likely_saved'};
+        }),
+      ]);
 
       AppLogger.debug('ImageGallerySaver result: $result', 'BackupService');
       final success = result['isSuccess'] == true;

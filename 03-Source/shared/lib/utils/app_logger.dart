@@ -47,27 +47,54 @@ class AppLogger {
     _logger.e(msg, error: error, stackTrace: stackTrace);
   }
 
-  /// Log version information (always logged)
+  /// Log version information (always logged, even in release builds)
+  /// 
+  /// Use this at app startup to confirm which version is running.
+  /// Example: `AppLogger.version('v0.2.0+8')`
   static void version(String version) {
     _logger.i('🚀 App Version: $version');
   }
 
-  /// Log key generation/storage operations
+  /// Log cryptographic operations (key generation, signing, verification)
+  /// 
+  /// Only logs in debug mode. Use for tracking security-related operations
+  /// like key pair generation, signature creation/verification, and encryption.
+  /// 
+  /// Example: `AppLogger.crypto('Generating ECDSA P-256 key pair')`
   static void crypto(String message) {
     debug(message, 'CRYPTO');
   }
 
-  /// Log database operations
+  /// Log database operations (queries, inserts, updates, deletes)
+  /// 
+  /// Only logs in debug mode. Use for tracking SQLite database operations,
+  /// schema migrations, and data persistence operations.
+  /// 
+  /// Example: `AppLogger.database('Inserting card with ID: abc123')`
   static void database(String message) {
     debug(message, 'DATABASE');
   }
 
-  /// Log QR code operations
+  /// Log QR code operations (generation, scanning, parsing)
+  /// 
+  /// Only logs in debug mode. Use for tracking QR code lifecycle:
+  /// - QR generation (card issuance, stamp tokens, redemption)
+  /// - QR scanning (camera detection, decode results)
+  /// - QR parsing and validation
+  /// 
+  /// Example: 
+  /// - `AppLogger.qr('Generating redemption QR for card abc123')`
+  /// - `AppLogger.qr('Scanned QR data: ${data.substring(0, 50)}...')`
   static void qr(String message) {
     debug(message, 'QR');
   }
 
-  /// Log business logic operations
+  /// Log business logic operations (card issuance, stamping, redemption)
+  /// 
+  /// Only logs in debug mode. Use for tracking high-level business operations
+  /// and workflows like loyalty card issuance, stamp collection, and rewards.
+  /// 
+  /// Example: `AppLogger.business('Card issued: ${card.businessName}')`
   static void business(String message) {
     debug(message, 'BUSINESS');
   }

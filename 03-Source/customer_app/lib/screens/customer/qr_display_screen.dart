@@ -38,7 +38,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
 
   Future<void> _generateQRData() async {
     AppLogger.debug('Generating QR data', 'QR');
-    print('>>> Card: ${widget.card.id}, Stamps: ${widget.card.stampsCollected} <<<');
+    AppLogger.debug('Card: ${widget.card.id}, Stamps: ${widget.card.stampsCollected}', 'QR');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -46,49 +46,48 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
     });
 
     try {
-      print('QR Display: Starting QR generation for card ${widget.card.id}');
-      print('QR Display: Card has ${widget.card.stampsCollected} stamps');
+      AppLogger.qr('Starting QR generation for card ${widget.card.id}');
+      AppLogger.qr('Card has ${widget.card.stampsCollected} stamps');
       final generator = QRTokenGenerator();
 
       switch (widget.mode) {
         case QRDisplayMode.stampRequest:
-          print('QR Display: Generating stamp request QR...');
+          AppLogger.qr('Generating stamp request QR...');
           final token = await generator.generateStampRequest(card: widget.card);
-          print('QR Display: Stamp request token generated successfully');
-          print('QR Display: Token currentStamps = ${token.currentStamps}');
-          print('QR Display: Token lastStampHash = "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"');
+          AppLogger.qr('Stamp request token generated successfully');
+          AppLogger.qr('Token currentStamps = ${token.currentStamps}');
+          AppLogger.qr('Token lastStampHash = "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"');
           setState(() {
             _qrData = token.toQRString();
             _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
             _isLoading = false;
           });
-          print('QR Display: QR data set, screen should update');
+          AppLogger.qr('QR data set, screen should update');
           break;
 
         case QRDisplayMode.redemption:
-          print('QR Display: Generating redemption QR...');
+          AppLogger.qr('Generating redemption QR...');
           // Get all stamps for verification
           final stampRepo = StampRepository(DatabaseHelper());
           final stamps = await stampRepo.getStampsByCard(widget.card.id);
-          print('QR Display: Found ${stamps.length} stamps for redemption');
+          AppLogger.qr('Found ${stamps.length} stamps for redemption');
           final token = generator.generateRedemptionRequest(
             card: widget.card,
             stamps: stamps,
           );
-          print('QR Display: Redemption token generated');
-          print('QR Display: Card ID = ${token.cardId}');
-          print('QR Display: Stamps = ${token.stampsCollected}');
+          AppLogger.qr('Redemption token generated');
+          AppLogger.qr('Card ID = ${token.cardId}');
+          AppLogger.qr('Stamps = ${token.stampsCollected}');
           setState(() {
             _qrData = token.toQRString();
             _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
             _isLoading = false;
           });
-          print('QR Display: Redemption QR ready to scan');
+          AppLogger.qr('Redemption QR ready to scan');
           break;
       }
     } catch (e, stackTrace) {
-      print('QR Display ERROR: $e');
-      print('Stack trace: $stackTrace');
+      AppLogger.error('QR Display ERROR', error: e, stackTrace: stackTrace, tag: 'QR');
       setState(() {
         _error = e.toString();
         _isLoading = false;

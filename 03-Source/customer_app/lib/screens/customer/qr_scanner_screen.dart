@@ -92,7 +92,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Note: In simple mode, signature validation is skipped (trust-based)
     // In secure mode, full cryptographic validation is performed
-    print('Card operation mode: ${token.mode.displayName}');
+    AppLogger.business('Card operation mode: ${token.mode.displayName}');
 
     // Use card ID from token if present (for multi-stamp consistency)
     // Otherwise generate new one (backward compatibility)
@@ -117,9 +117,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final cardRepository = CardRepository(DatabaseHelper());
     await cardRepository.insertCard(card);
     
-    print('=== Processing Card Issuance ===');
-    print('Card ID: $cardId');
-    print('Initial stamps to process: $initialStampCount');
+    AppLogger.qr('Processing Card Issuance');
+    AppLogger.business('Card ID: $cardId');
+    AppLogger.business('Initial stamps to process: $initialStampCount');
 
     // Process initial stamps if present
     if (initialStampCount > 0) {
@@ -127,8 +127,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       String previousHash = ''; // First stamp has empty previous hash
 
       for (var initialStamp in token.initialStamps) {
-        print('Processing initial stamp #${initialStamp.stampNumber}');
-        print('  Card ID for stamp: $cardId');
+        AppLogger.qr('Processing initial stamp #${initialStamp.stampNumber}');
+        AppLogger.qr('  Card ID for stamp: $cardId');
         
         // Verify stamp signature (skip in simple mode)
         if (token.mode == OperationMode.secure) {
@@ -149,7 +149,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             return;
           }
         } else {
-          print('  Simple mode: Skipping signature validation');
+          AppLogger.debug('  Simple mode: Skipping signature validation');
         }
 
         // Create and save stamp
@@ -163,7 +163,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         );
 
         await stampRepository.insertStamp(stamp);
-        print('  Initial stamp #${initialStamp.stampNumber} saved to DB');
+        AppLogger.database('  Initial stamp #${initialStamp.stampNumber} saved to DB');
         
         // Next stamp's previous hash is this stamp's signature
         previousHash = initialStamp.signature;
@@ -171,11 +171,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       
       // Verify stamps were saved
       final savedStamps = await stampRepository.getStampsByCard(cardId);
-      print('Verification: ${savedStamps.length} stamps found in DB for card $cardId');
+      AppLogger.database('Verification: ${savedStamps.length} stamps found in DB for card $cardId');
       for (var s in savedStamps) {
-        print('  Stamp #${s.stampNumber}: ${s.signature.substring(0, 20)}...');
+        AppLogger.debug('  Stamp #${s.stampNumber}: ${s.signature.substring(0, 20)}...');
       }
-      print('=== End Card Issuance Processing ===');
+      AppLogger.qr('End Card Issuance Processing');
     }
 
     if (mounted) {
@@ -209,16 +209,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     
     // For simple mode stamps, look up by businessId since cardId is generic
     if (token.cardId == 'simple-mode-stamp' && token.businessId.isNotEmpty) {
-      print('=== Simple Mode Stamp Detected ===');
-      print('Looking up card by businessId: ${token.businessId}');
+      AppLogger.qr('Simple Mode Stamp Detected');
+      AppLogger.business('Looking up card by businessId: ${token.businessId}');
       final allCards = await repository.getAllCards();
       try {
         card = allCards.firstWhere(
           (c) => c.businessId == token.businessId,
         );
-        print('Found card with ID: ${card.id}');
+        AppLogger.business('Found card with ID: ${card.id}');
       } catch (e) {
-        print('No card found for businessId: ${token.businessId}');
+        AppLogger.debug('No card found for businessId: ${token.businessId}');
         card = null;
       }
     } else {
@@ -255,15 +255,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final stamps = await stampRepo.getStampsByCard(card.id);
     final expectedPrevHash = stamps.isNotEmpty ? stamps.last.signature : '';
     
-    print('=== Validating Stamp Token ===');
-    print('Card ID: ${card.id}');
-    print('Card mode: ${card.mode.displayName}');
-    print('Stamps in DB: ${stamps.length}');
-    print('Expected next stamp: #${stamps.length + 1}');
-    print('Token stamp number: ${token.stampNumber}');
-    print('Expected previousHash: "${expectedPrevHash.isEmpty ? "(empty)" : expectedPrevHash.substring(0, 20) + "..."}"');
-    print('Token previousHash: "${token.previousHash.isEmpty ? "(empty)" : token.previousHash.substring(0, 20) + "..."}"');
-    print('=== End Validation ===');
+    AppLogger.qr('Validating Stamp Token');
+    AppLogger.qr('Card ID: ${card.id}');
+    AppLogger.debug('Card mode: ${card.mode.displayName}');
+    AppLogger.database('Stamps in DB: ${stamps.length}');
+    AppLogger.business('Expected next stamp: #${stamps.length + 1}');
+    AppLogger.qr('Token stamp number: ${token.stampNumber}');
+    AppLogger.qr('Expected previousHash: "${expectedPrevHash.isEmpty ? "(empty)" : expectedPrevHash.substring(0, 20) + "..."}"');
+    AppLogger.qr('Token previousHash: "${token.previousHash.isEmpty ? "(empty)" : token.previousHash.substring(0, 20) + "..."}"');
+    AppLogger.qr('End Validation');
 
     // Validate stamp token (skip crypto validation for simple mode)
     if (card.mode == OperationMode.secure) {
@@ -283,11 +283,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       }
     } else {
       // Simple mode: Trust-based, no cryptographic validation
-      print('Simple mode: Skipping cryptographic validation');
+      AppLogger.debug('Simple mode: Skipping cryptographic validation');
     }
 
     // Add stamp to card
-    print('=== Saving Main Stamp ===');
+    AppLogger.database('Saving Main Stamp');
     
     // In simple mode, generate unique stamp details since QR is reusable
     final nextStampNumber = stamps.length + 1;
@@ -304,12 +304,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         ? expectedPrevHash
         : token.previousHash;
     
-    print('Stamp #$stampNumber');
-    print('Card ID: ${card.id}');
-    print('Stamp ID: $stampId');
-    print('Mode: ${card.mode.displayName}');
-    print('previousHash: "${stampPreviousHash.isEmpty ? "(empty -> will be null)" : stampPreviousHash.substring(0, 20) + "..."}"');
-    print('signature: "${token.signature.substring(0, 20)}..."');
+    AppLogger.qr('Stamp #$stampNumber');
+    AppLogger.qr('Card ID: ${card.id}');
+    AppLogger.qr('Stamp ID: $stampId');
+    AppLogger.debug('Mode: ${card.mode.displayName}');
+    AppLogger.qr('previousHash: "${stampPreviousHash.isEmpty ? "(empty -> will be null)" : stampPreviousHash.substring(0, 20) + "..."}"');
+    AppLogger.qr('signature: "${token.signature.substring(0, 20)}..."');
     
     final stamp = Stamp(
       id: stampId,
@@ -321,18 +321,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
 
     await stampRepo.insertStamp(stamp);
-    print('Main stamp saved to DB');
+    AppLogger.database('Main stamp saved to DB');
     
     // Process additional stamps if present
     int totalStampsAdded = 1;
     if (token.additionalStamps.isNotEmpty) {
-      print('=== Processing ${token.additionalStamps.length} Additional Stamps ===');
+      AppLogger.qr('Processing ${token.additionalStamps.length} Additional Stamps ===');
       String currentPreviousHash = token.signature; // First additional stamp uses main stamp's signature
 
       for (var additionalStamp in token.additionalStamps) {
-        print('Additional Stamp #${additionalStamp.stampNumber}:');
-        print('  previousHash: "${currentPreviousHash.substring(0, 20)}..."');
-        print('  signature: "${additionalStamp.signature.substring(0, 20)}..."');
+        AppLogger.qr('Additional Stamp #${additionalStamp.stampNumber}:');
+        AppLogger.qr('  previousHash: "${currentPreviousHash.substring(0, 20)}..."');
+        AppLogger.qr('  signature: "${additionalStamp.signature.substring(0, 20)}..."');
         
         // Verify stamp signature (skip in simple mode)
         if (card.mode == OperationMode.secure) {
@@ -344,7 +344,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           );
 
           if (!isValid) {
-            print('ERROR: Additional stamp signature verification FAILED');
+            AppLogger.error('Additional stamp signature verification FAILED');
             setState(() {
               _errorMessage = 'Invalid stamp signature at stamp #${additionalStamp.stampNumber}';
               _isProcessing = false;
@@ -353,9 +353,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             // to implement a transaction rollback here.
             return;
           }
-          print('  Signature verified OK');
+          AppLogger.qr('  Signature verified OK');
         } else {
-          print('  Simple mode: Skipping signature validation');
+          AppLogger.debug('  Simple mode: Skipping signature validation');
         }
 
         // Create and save stamp
@@ -370,34 +370,34 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
         await stampRepo.insertStamp(additionalStampRecord);
         totalStampsAdded++;
-        print('  Additional stamp saved to DB');
+        AppLogger.database('  Additional stamp saved to DB');
         
         // Next stamp's previous hash is this stamp's signature
         currentPreviousHash = additionalStamp.signature;
       }
-      print('=== All Additional Stamps Processed ===');
+      AppLogger.qr('All Additional Stamps Processed');
     }
     
     // Check for overflow
     final newTotalStamps = card.stampsCollected + totalStampsAdded;
     if (newTotalStamps > card.stampsRequired) {
-      print('╔═══════════════════════════════════════════════════════════╗');
-      print('║ OVERFLOW DETECTED - AUTO-CREATING NEW CARD               ║');
-      print('╚═══════════════════════════════════════════════════════════╝');
-      print('Current stamps: ${card.stampsCollected}');
-      print('Adding: $totalStampsAdded');
-      print('Total would be: $newTotalStamps');
-      print('Required: ${card.stampsRequired}');
+      AppLogger.business('╔═══════════════════════════════════════════════════════════╗');
+      AppLogger.business('║ OVERFLOW DETECTED - AUTO-CREATING NEW CARD               ║');
+      AppLogger.business('╚═══════════════════════════════════════════════════════════╝');
+      AppLogger.business('Current stamps: ${card.stampsCollected}');
+      AppLogger.business('Adding: $totalStampsAdded');
+      AppLogger.business('Total would be: $newTotalStamps');
+      AppLogger.business('Required: ${card.stampsRequired}');
       
       final overflow = newTotalStamps - card.stampsRequired;
       final stampsForCurrentCard = card.stampsRequired - card.stampsCollected;
       
-      print('Stamps to complete current card: $stampsForCurrentCard');
-      print('Overflow stamps: $overflow');
+      AppLogger.business('Stamps to complete current card: $stampsForCurrentCard');
+      AppLogger.business('Overflow stamps: $overflow');
       
       // Mark current card as complete
       await repository.updateStampCount(card.id, card.stampsRequired);
-      print('Current card now complete with ${card.stampsRequired} stamps');
+      AppLogger.business('Current card now complete with ${card.stampsRequired} stamps');
       
       // Create new card with overflow stamps
       final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
@@ -417,16 +417,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       );
       
       await repository.insertCard(newCard);
-      print('Created new card: $newCardId with $overflow stamps');
+      AppLogger.business('Created new card: $newCardId with $overflow stamps');
       
       // Move overflow stamps to new card
       // Get all stamps for the original card
       final allStamps = await stampRepo.getStampsByCard(card.id);
-      print('Total stamps in original card: ${allStamps.length}');
+      AppLogger.database('Total stamps in original card: ${allStamps.length}');
       
       // Take the last 'overflow' stamps and move them to new card
       final stampsToMove = allStamps.skip(allStamps.length - overflow).toList();
-      print('Moving ${stampsToMove.length} stamps to new card...');
+      AppLogger.database('Moving ${stampsToMove.length} stamps to new card...');
       
       for (var i = 0; i < stampsToMove.length; i++) {
         final oldStamp = stampsToMove[i];
@@ -446,12 +446,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         );
         
         await stampRepo.insertStamp(newStamp);
-        print('  Moved stamp #${oldStamp.stampNumber} -> new card stamp #$newStampNumber');
+        AppLogger.database('  Moved stamp #${oldStamp.stampNumber} -> new card stamp #$newStampNumber');
       }
       
-      print('Card split complete!');
-      print('  Card 1 (COMPLETE): ${card.stampsRequired} stamps');
-      print('  Card 2 (NEW): $overflow stamps');
+      AppLogger.business('Card split complete!');
+      AppLogger.business('  Card 1 (COMPLETE): ${card.stampsRequired} stamps');
+      AppLogger.business('  Card 2 (NEW): $overflow stamps');
       
       if (mounted) {
         Navigator.pop(context, 
@@ -460,7 +460,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     } else {
       // No overflow - just update stamp count
       await repository.updateStampCount(card.id, newTotalStamps);
-      print('Card updated: $newTotalStamps / ${card.stampsRequired} stamps');
+      AppLogger.business('Card updated: $newTotalStamps / ${card.stampsRequired} stamps');
       
       if (mounted) {
         final stampText = totalStampsAdded > 1 
@@ -472,10 +472,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Future<void> _handleRedemptionToken(RedemptionToken token) async {
-    print('=== Processing Redemption Token ===');
-    print('Card ID: ${token.cardId}');
-    print('Stamps redeemed: ${token.stampsRedeemed}');
-    print('Business ID: ${token.businessId}');
+    AppLogger.qr('Processing Redemption Token ===');
+    AppLogger.qr('Card ID: ${token.cardId}');
+    AppLogger.business('Stamps redeemed: ${token.stampsRedeemed}');
+    AppLogger.qr('Business ID: ${token.businessId}');
 
     // Get the card to verify it matches
     final repository = CardRepository(DatabaseHelper());
@@ -526,7 +526,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
 
     if (!isValid) {
-      print('ERROR: Redemption token signature verification FAILED');
+      AppLogger.error('Redemption token signature verification FAILED');
       setState(() {
         _errorMessage = 'Invalid redemption token signature';
         _isProcessing = false;
@@ -534,11 +534,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
-    print('Redemption token signature verified OK');
+    AppLogger.qr('Redemption token signature verified OK');
 
     // Mark card as redeemed
     await repository.markCardAsRedeemed(card.id);
-    print('Card marked as redeemed in database');
+    AppLogger.database('Card marked as redeemed in database');
     
     // Auto-create new card for continued loyalty
     final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
@@ -558,9 +558,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
     
     await repository.insertCard(newCard);
-    print('New card auto-created: $newCardId');
+    AppLogger.database('New card auto-created: $newCardId');
 
-    print('=== Redemption Complete ===');
+    AppLogger.qr('Redemption Complete');
 
     if (mounted) {
       Navigator.pop(context, 
@@ -591,9 +591,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               // Landscape: -90°, Portrait: 0° (no rotation)
               final quarterTurns = isLandscape ? 3 : 0;
               
-              print('=== QR Scanner Orientation ===');
-              print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
-              print('Applying quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+              AppLogger.debug('QR Scanner Orientation');
+              AppLogger.debug('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
+              AppLogger.debug('Applying quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
               
               return RotatedBox(
                 quarterTurns: quarterTurns,

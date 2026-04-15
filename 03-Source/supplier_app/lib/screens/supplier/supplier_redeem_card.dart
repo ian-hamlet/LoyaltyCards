@@ -428,10 +428,10 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         businessId: _business!.id,
       );
 
-      print('=== Simple Mode Redemption Logged ===');
-      print('Business: ${_business!.name}');
-      print('Stamps: ${_business!.stampsRequired}');
-      print('Timestamp: ${now.toIso8601String()}');
+      AppLogger.business('Simple Mode Redemption Logged');
+      AppLogger.debug('Business: ${_business!.name}', 'Redemption');
+      AppLogger.debug('Stamps: ${_business!.stampsRequired}', 'Redemption');
+      AppLogger.debug('Timestamp: ${now.toIso8601String()}', 'Redemption');
 
       if (mounted) {
         setState(() => _isProcessing = false);
@@ -486,8 +486,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       _isProcessing = true;
     });
 
-    print('=== Processing Redemption QR ===');
-    print('QR Data: ${qrData.substring(0, qrData.length > 100 ? 100 : qrData.length)}...');
+    AppLogger.qr('Processing Redemption QR');
+    AppLogger.qr('QR Data: ${qrData.substring(0, qrData.length > 100 ? 100 : qrData.length)}...');
 
     try {
       // Try parsing as JSON token first (new format)
@@ -495,10 +495,10 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       
       if (json['type'] == 'redemption_request') {
         final token = RedemptionRequestToken.fromJson(json);
-        print('Redemption token parsed successfully');
-        print('Card ID: ${token.cardId}');
-        print('Stamps collected: ${token.stampsCollected}');
-        print('Signatures to verify: ${token.stampSignatures.length}');
+        AppLogger.qr('Redemption token parsed successfully');
+        AppLogger.qr('Card ID: ${token.cardId}');
+        AppLogger.qr('Stamps collected: ${token.stampsCollected}');
+        AppLogger.qr('Signatures to verify: ${token.stampSignatures.length}');
         
         _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
         return;
@@ -514,7 +514,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         return;
       }
     } catch (e) {
-      print('Failed to parse as JSON token: $e');
+      AppLogger.debug('Failed to parse as JSON token: $e', 'QR');
       
       // Fall back to legacy format: LOYALTYCARD:REDEEM:cardId:stamps
       if (qrData.startsWith('LOYALTYCARD:REDEEM:')) {
@@ -522,7 +522,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         if (parts.length >= 4) {
           final cardId = parts[2];
           final stamps = int.tryParse(parts[3]) ?? 0;
-          print('Legacy redemption format detected');
+          AppLogger.qr('Legacy redemption format detected');
           _showSecureModeRedemptionConfirmation(context, cardId, stamps);
           return;
         }
@@ -569,11 +569,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       timestamp: now.millisecondsSinceEpoch,
     );
 
-    print('=== Redemption Token Generated ===');
-    print('Card ID: $cardId');
-    print('Stamps redeemed: $stamps');
-    print('Signature: ${signature.substring(0, 20)}...');
-    print('Token type: redemption_token');
+    AppLogger.business('Redemption Token Generated');
+    AppLogger.debug('Card ID: $cardId', 'Redemption');
+    AppLogger.debug('Stamps redeemed: $stamps', 'Redemption');
+    AppLogger.debug('Signature: ${signature.substring(0, 20)}...', 'Redemption');
+    AppLogger.debug('Token type: redemption_token', 'Redemption');
 
     // Log the redemption for analytics
     await businessRepo.logRedemption(
@@ -581,7 +581,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       stampsRedeemed: stamps,
       businessId: business.id,
     );
-    print('Redemption logged to database');
+    AppLogger.database('Redemption logged to database');
 
     // Show QR code for customer to scan
     if (mounted) {

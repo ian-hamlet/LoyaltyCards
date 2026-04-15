@@ -65,18 +65,18 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ),
         );
 
-        print('='.padRight(60, '='));
-        print('SUPPLIER APP: RESETTING BUSINESS - ${DateTime.now().toIso8601String()}');
-        print('Business: ${widget.business.name} (ID: ${widget.business.id})');
+        AppLogger.info('${'='* 60}');
+        AppLogger.info('SUPPLIER APP: RESETTING BUSINESS - ${DateTime.now().toIso8601String()}');
+        AppLogger.info('Business: ${widget.business.name} (ID: ${widget.business.id})');
         
         // Delete business and keys
-        print('Deleting business configuration...');
+        AppLogger.database('Deleting business configuration...');
         await _businessRepo.deleteBusiness(widget.business.id);
-        print('Deleting cryptographic keys...');
+        AppLogger.crypto('Deleting cryptographic keys...');
         await _keyManager.deleteKeys(widget.business.id);
         
-        print('BUSINESS RESET COMPLETE');
-        print('='.padRight(60, '='));
+        AppLogger.info('BUSINESS RESET COMPLETE');
+        AppLogger.info('${'=' * 60}');
 
         if (mounted) {
           // Pop loading dialog

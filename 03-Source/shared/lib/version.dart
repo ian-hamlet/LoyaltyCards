@@ -19,11 +19,11 @@
 /// - Custom branded app icons
 /// - Offline-capable with local storage
 /// 
-/// Recent Changes (Builds 80-84):
-/// - Build 84: Custom app icons for both apps
-/// - Build 83: 5-minute clone QR expiry (security improvement)
-/// - Build 82: Clone device feature complete
-/// - Build 81: QR scanning frame and rotation controls
-/// - Build 80: Fixed backup/restore private key encoding
+/// Build 8 Changes:
+/// - Complete print() → AppLogger migration (NEW-001)
+/// - Add missing AppLogger.database() method (NEW-002)
+/// - Standardize logging strategy across all screens (NEW-003)
+/// - Document AppLogger.qr() method (NEW-004)
+/// - Finish CR-002: Remove all remaining debug print statements
 
-const String appVersion = '0.2.0+7';
+const String appVersion = '0.2.0+8';

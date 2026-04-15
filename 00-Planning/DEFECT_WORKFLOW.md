@@ -117,14 +117,14 @@ git push origin develop
 
 **Defects Logged:**
 - 🔴 Critical: 2
-- 🟠 High: 4
+- 🟠 High: 5
 - 🟡 Medium: 4
 - 🔵 Low: 4
-- **Total:** 14
+- **Total:** 15
 
 **Defects Fixed:** 0  
 **Defects In Progress:** 0  
-**Defects Remaining:** 14
+**Defects Remaining:** 15
 
 ---
 

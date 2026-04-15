@@ -32,17 +32,12 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
   @override
   void initState() {
     super.initState();
-    print('╔═══════════════════════════════════════════════════════════╗');
-    print('║ QR DISPLAY SCREEN - BUILD 4 CODE RUNNING                 ║');
-    print('╚═══════════════════════════════════════════════════════════╝');
-    print('!!! Card ID: ${widget.card.id} !!!');
-    print('!!! Card Stamps: ${widget.card.stampsCollected} !!!');
-    print('!!! Mode: ${widget.mode} !!!');
+    AppLogger.qr('QR Display Screen initialized - Card: ${widget.card.id.substring(0, 8)}, Stamps: ${widget.card.stampsCollected}, Mode: ${widget.mode}');
     _generateQRData();
   }
 
   Future<void> _generateQRData() async {
-    print('>>> _generateQRData() called - BUILD 4 <<<');
+    AppLogger.debug('Generating QR data', 'QR');
     print('>>> Card: ${widget.card.id}, Stamps: ${widget.card.stampsCollected} <<<');
     setState(() {
       _isLoading = true;

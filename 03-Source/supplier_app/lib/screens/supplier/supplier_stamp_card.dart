@@ -123,12 +123,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       // Generate stamp token
       final previousHash = token.lastStampHash; // Use customer's last stamp hash
 
-      print('=== Supplier Processing Stamp Request ===');
-      print('Customer card ID: ${token.cardId}');
-      print('Customer current stamps: ${token.currentStamps}');
-      print('Customer last stamp hash: "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"');
-      print('Will generate stamp #${token.currentStamps + 1}');
-      print('=== End Supplier Processing ===');
+      AppLogger.business(
+        'Processing stamp request - Card: ${token.cardId.substring(0, 8)}, '
+        'Stamps: ${token.currentStamps} → ${token.currentStamps + 1}'
+      );
+      AppLogger.debug(
+        'Last stamp hash: "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"',
+        'Stamp'
+      );
 
       if (mounted) {
         // Show stamp count selector, then generate and show stamp token QR
@@ -555,12 +557,12 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     final baseQuarterTurns = isLandscape ? 3 : 0;
                     final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
                     
-                    print('=== Stamp Card Scanner Orientation ===');
-                    print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
-                    print('Status bar: $statusBarPosition');
-                    print('Padding - Top: ${padding.top}, Bottom: ${padding.bottom}, Left: ${padding.left}, Right: ${padding.right}');
-                    print('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
-                    print('Final quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+                    AppLogger.debug(
+                      'Scanner: ${isLandscape ? "Landscape" : "Portrait"}, '
+                      'statusBar: $statusBarPosition, '
+                      'rotation: ${quarterTurns * 90}°',
+                      'Scanner'
+                    );
                     
                     return RotatedBox(
                       quarterTurns: quarterTurns,

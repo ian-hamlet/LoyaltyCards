@@ -30,6 +30,10 @@ class StampSigner {
     
     // Sign the data
     final signature = await _keyManager.signData(dataToSign, privateKey);
+    
+    if (signature == null) {
+      throw Exception('Failed to sign stamp data for card $cardId');
+    }
 
     return Stamp(
       id: stampId,
@@ -110,10 +114,8 @@ class StampSigner {
     };
   }
 
-  /// Helper to encode public key (delegates to KeyManager)
+  /// Encode public key using KeyManager's cryptographic encoding
   String _encodePublicKey(dynamic publicKey) {
-    // This would use the KeyManager's encoding logic
-    // For now, we'll use a placeholder
-    return publicKey.toString();
+    return _keyManager.encodePublicKey(publicKey);
   }
 }

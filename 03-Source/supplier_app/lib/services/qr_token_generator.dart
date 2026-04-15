@@ -36,6 +36,10 @@ class QRTokenGenerator {
         final stampTimestamp = timestamp + i; // Slight offset to ensure unique timestamps
         final signatureData = '$cardId:$i:$stampTimestamp:$previousHash';
         final signature = await _keyManager.signData(signatureData, privateKey);
+        
+        if (signature == null) {
+          throw Exception('Failed to sign initial stamp #$i');
+        }
 
         initialStamps.add(InitialStamp(
           stampNumber: i,
@@ -71,6 +75,10 @@ class QRTokenGenerator {
 
     final signatureData = token.getSignatureData();
     final signature = await _keyManager.signData(signatureData, privateKey);
+    
+    if (signature == null) {
+      throw Exception('Failed to sign card issuance token');
+    }
 
     // Return token with signature
     return CardIssueToken(
@@ -113,6 +121,10 @@ class QRTokenGenerator {
     
     final signature = await _keyManager.signData(signatureData, privateKey);
     
+    if (signature == null) {
+      throw Exception('Failed to sign stamp token');
+    }
+    
     // Generate unique stamp ID
     final stampId = '${cardId}_stamp_$stampNumber';
     
@@ -126,6 +138,10 @@ class QRTokenGenerator {
         final additionalTimestamp = timestamp + i; // Slight offset
         final additionalSignatureData = '$cardId:$additionalStampNumber:$additionalTimestamp:$currentPreviousHash';
         final additionalSignature = await _keyManager.signData(additionalSignatureData, privateKey);
+        
+        if (additionalSignature == null) {
+          throw Exception('Failed to sign additional stamp #$i');
+        }
 
         additionalStamps.add(AdditionalStamp(
           stampNumber: additionalStampNumber,

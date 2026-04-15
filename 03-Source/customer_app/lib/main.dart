@@ -3,11 +3,8 @@ import 'package:shared/shared.dart';
 import 'screens/customer/customer_home.dart';
 
 void main() {
-  print('='.padRight(60, '='));
-  print('CUSTOMER APP STARTING - ${DateTime.now().toIso8601String()}');
-  print('Version: $appVersion');
-  print('This is the NEW CODE with deployment verification');
-  print('='.padRight(60, '='));
+  AppLogger.version(appVersion);
+  AppLogger.info('Customer App starting at ${DateTime.now().toIso8601String()}');
   runApp(const CustomerApp());
 }
 

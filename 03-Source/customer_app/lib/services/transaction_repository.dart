@@ -126,9 +126,9 @@ class TransactionRepository {
 
   /// Delete all transactions (for testing)
   Future<void> deleteAllTransactions() async {
-    print('TransactionRepository: Deleting all transactions from database');
+    AppLogger.database('Deleting all transactions from database');
     final db = await _dbHelper.database;
     await db.delete('transactions');
-    print('TransactionRepository: All transactions deleted');
+    AppLogger.database('All transactions deleted');
   }
 }

@@ -27,7 +27,7 @@ This document tracks defects from two sources:
 
 ### CR-001: Broken Public Key Encoding in Card Issuance
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** CRITICAL
 - **File:** `supplier_app/lib/services/stamp_signer.dart` (line 113-117)
 - **Description:** `_encodePublicKey()` returns `publicKey.toString()` instead of proper base64 encoding. Outputs "Instance of 'ECPublicKey'" in QR codes.
@@ -48,23 +48,32 @@ This document tracks defects from two sources:
 
 ### CR-002: Excessive Debug Logging in Production
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** CRITICAL
 - **Files:** 
   - `customer_app/lib/services/qr_token_generator.dart` (20+ print statements)
   - `supplier_app/lib/services/key_manager.dart` (8+ statements)
   - `supplier_app/lib/services/supplier_database_helper.dart` (14+ statements)
   - `supplier_app/lib/screens/supplier/supplier_onboarding.dart` (11+ statements)
+  - `customer_app/lib/services/database_helper.dart` (20+ statements)
+  - `customer_app/lib/services/*_repository.dart` files
+  - Additional files throughout both apps
 - **Description:** 50+ debug print statements with exclamation marks expose system internals
 - **Impact:**
   - Console spam makes real debugging difficult
   - Exposes internal operations (card IDs, database queries, key generation)
   - Performance degradation
-- **Fix Required:** Remove all debug print() calls or implement conditional logging
+- **Fix Implemented:** 
+  - Created shared `AppLogger` utility with structured logging
+  - Replaced ~80+ print() statements with AppLogger calls
+  - Debug logs only appear in debug mode (kDebugMode)
+  - Production shows only warnings and errors
+  - Implemented per CR-011 recommendations
 - **Estimated Effort:** 1-2 hours
 - **Testing Required:** Verify apps still function without verbose logging
 - **Assigned To:**
 - **Target Build:** Build 5
+- **Fix Date:** 2026-04-15
 
 ---
 
@@ -72,7 +81,7 @@ This document tracks defects from two sources:
 
 ### CR-003: Duplicated Cryptographic Verification Code
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
 - **Files:** `customer_app/lib/services/key_manager.dart`, `supplier_app/lib/services/key_manager.dart`
 - **Description:** 30+ lines of identical signature verification code in both apps
@@ -84,15 +93,31 @@ This document tracks defects from two sources:
 
 ### CR-004: Silent Failures in Security Operations
 - **Source:** Code Review
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** HIGH
-- **Files:** KeyManager in both apps
+- **Files:** 
+  - `shared/lib/utils/crypto_utils.dart`
+  - `supplier_app/lib/services/key_manager.dart`
+  - `supplier_app/lib/services/qr_token_generator.dart`
+  - `supplier_app/lib/services/stamp_signer.dart`
+  - `supplier_app/lib/screens/supplier/supplier_redeem_card.dart`
 - **Description:** Crypto errors return `false` without logging why verification failed
 - **Impact:** Impossible to debug signature verification failures
-- **Fix Required:** Add error logging, return structured Result<T> type
+- **Fix Implemented:**
+  - Added error logging to all cryptographic operations
+  - CryptoUtils.verifySignature() now logs verification failures
+  - CryptoUtils._decodePublicKey() now logs decode failures
+  - KeyManager.getPrivateKey() now logs retrieval/decode failures
+  - KeyManager.getPublicKey() now logs retrieval failures
+  - KeyManager.signData() now returns null on failure (was throwing)
+  - KeyManager.decodePrivateKey() now returns null on failure with logging
+  - All callers of signData() updated with null checks
+  - Uses AppLogger for consistent error reporting
 - **Estimated Effort:** 2 hours
+- **Testing Required:** Verify error logging appears when crypto operations fail
 - **Assigned To:**
-- **Target Build:** Build 6-10
+- **Target Build:** Build 5
+- **Fix Date:** 2026-04-15
 
 ### CR-005: Incomplete TODO in Production Code
 - **Source:** Code Review
@@ -529,9 +554,9 @@ This document tracks defects from two sources:
 - **TOTAL: 21 defects tracked**
 
 ### By Status
-- 📋 BACKLOG: 20
+- 📋 BACKLOG: 16
 - 🚧 IN PROGRESS: 0
-- ✅ FIXED: 1
+- ✅ FIXED: 5
 
 ### By Source
 - Code Review: 14

@@ -10,6 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
+  # Cryptography for signature verification
+  pointycastle: ^4.0.0
+  
+  # Structured logging
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:

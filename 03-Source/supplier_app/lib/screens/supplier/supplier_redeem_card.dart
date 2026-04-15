@@ -198,12 +198,12 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                     final baseQuarterTurns = isLandscape ? 3 : 0;
                     final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
                     
-                    print('=== Redeem Card Scanner Orientation ===');
-                    print('Orientation: ${isLandscape ? "Landscape" : "Portrait"}');
-                    print('Status bar: $statusBarPosition');
-                    print('Padding - Top: ${padding.top}, Bottom: ${padding.bottom}, Left: ${padding.left}, Right: ${padding.right}');
-                    print('Base quarterTurns: $baseQuarterTurns, Manual offset: $_manualRotationOffset');
-                    print('Final quarterTurns: $quarterTurns (${quarterTurns * 90} degrees)');
+                    AppLogger.debug(
+                      'Scanner: ${isLandscape ? "Landscape" : "Portrait"}, '
+                      'statusBar: $statusBarPosition, '
+                      'rotation: ${quarterTurns * 90}°',
+                      'Scanner'
+                    );
                     
                     return RotatedBox(
                       quarterTurns: quarterTurns,
@@ -555,6 +555,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     // Create signature: cardId:stampsRedeemed:timestamp
     final signatureData = '$cardId:$stamps:${now.millisecondsSinceEpoch}';
     final signature = await keyManager.signData(signatureData, privateKey);
+    
+    if (signature == null) {
+      _showError('Failed to sign redemption token');
+      return;
+    }
 
     final redemptionToken = RedemptionToken(
       cardId: cardId,

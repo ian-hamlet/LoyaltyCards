@@ -21,7 +21,7 @@ class TokenValidator {
 
     // Simple mode: Skip timestamp check (tokens are reusable/static)
     if (token.mode == OperationMode.simple) {
-      print('Simple mode: Skipping timestamp validation (reusable token)');
+      AppLogger.debug('Simple mode: Skipping timestamp validation (reusable token)', 'Token');
       // Still verify signature for simple mode
       try {
         final signatureData = token.getSignatureData();
@@ -113,16 +113,18 @@ class TokenValidator {
         );
       }
     } else {
-      print('Simple mode: Skipping timestamp validation (reusable token)');
+      AppLogger.debug('Simple mode: Skipping timestamp validation (reusable token)', 'Token');
     }
 
     // Verify previous hash chain
     if (token.previousHash != expectedPreviousHash) {
       // Debug: Log the mismatch details
-      print('Hash mismatch debug:');
-      print('  Token previousHash: "${token.previousHash}"');
-      print('  Expected previousHash: "$expectedPreviousHash"');
-      print('  Token stampNumber: ${token.stampNumber}');
+      AppLogger.warning(
+        'Hash mismatch - Token previousHash: "${token.previousHash}", '
+        'Expected: "$expectedPreviousHash", '
+        'Stamp: ${token.stampNumber}',
+        'Token'
+      );
       
       return ValidationResult(
         isValid: false,

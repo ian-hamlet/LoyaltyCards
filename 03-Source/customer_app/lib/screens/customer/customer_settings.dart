@@ -120,18 +120,15 @@ class _CustomerSettingsState extends State<CustomerSettings> {
   }
 
   Future<void> _deleteAllData() async {
-    print('='.padRight(60, '='));
-    print('CUSTOMER APP: DELETING ALL DATA - ${DateTime.now().toIso8601String()}');
-    print('This will delete all cards, stamps, and transactions');
+    AppLogger.database('Deleting all customer data');
     // Delete all cards (stamps and transactions will CASCADE delete)
     final cards = await _cardRepo.getAllCards();
-    print('Found ${cards.length} cards to delete');
+    AppLogger.debug('Found ${cards.length} cards to delete', 'Data');
     for (final card in cards) {
-      print('  Deleting card: ${card.id} (${card.businessName})');
+      AppLogger.debug('Deleting card: ${card.id} (${card.businessName})', 'Data');
       await _cardRepo.deleteCard(card.id);
     }
-    print('ALL DATA DELETED SUCCESSFULLY');
-    print('='.padRight(60, '='));
+    AppLogger.database('All data deleted successfully');
   }
 
   @override

@@ -18,14 +18,14 @@ class BusinessRepository {
 
   /// Insert business configuration
   Future<void> insertBusiness(models.Business business) async {
-    print('BusinessRepository: Inserting business "${business.name}" (ID: ${business.id})');
+    AppLogger.database('Inserting business "${business.name}" (ID: ${business.id})');
     final db = await _dbHelper.database;
     await db.insert(
       'business',
       business.toJson(includePrivateKey: false), // Don't store private key in DB
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    print('BusinessRepository: Business inserted successfully');
+    AppLogger.database('Business inserted successfully');
   }
 
   /// Update business configuration
@@ -47,14 +47,14 @@ class BusinessRepository {
 
   /// Delete business configuration
   Future<void> deleteBusiness(String id) async {
-    print('BusinessRepository: Deleting business with ID: $id');
+    AppLogger.database('Deleting business with ID: $id');
     final db = await _dbHelper.database;
     await db.delete(
       'business',
       where: 'id = ?',
       whereArgs: [id],
     );
-    print('BusinessRepository: Business deleted');
+    AppLogger.database('Business deleted');
   }
 
   /// Log an issued card (for analytics)

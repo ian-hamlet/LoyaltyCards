@@ -16,6 +16,8 @@ export 'constants/business_icons.dart';
 // Export utilities
 export 'utils/haptics.dart';
 export 'utils/qr_code_size.dart';
+export 'utils/crypto_utils.dart';
+export 'utils/app_logger.dart';
 
 // Export widgets
 export 'widgets/feedback.dart';

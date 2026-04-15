@@ -44,36 +44,35 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
     setState(() => _isCreating = true);
 
     try {
-      print('='.padRight(60, '='));
-      print('SUPPLIER APP: SETTING UP NEW BUSINESS - ${DateTime.now().toIso8601String()}');
+      AppLogger.business('Setting up new business');
       
       // Generate business ID
       final businessId = _uuid.v4();
-      print('Generated business ID: $businessId');
-      print('Business name: ${_businessNameController.text.trim()}');
-      print('Stamps required: $_stampsRequired');
-      print('Brand color: $_selectedColor');
-      print('Logo index: $_selectedLogoIndex');
-      print('Operation mode: ${_selectedMode.displayName}');
+      AppLogger.debug('Generated business ID: $businessId', 'Business');
+      AppLogger.debug('Business name: ${_businessNameController.text.trim()}', 'Business');
+      AppLogger.debug('Stamps required: $_stampsRequired', 'Business');
+      AppLogger.debug('Brand color: $_selectedColor', 'Business');
+      AppLogger.debug('Logo index: $_selectedLogoIndex', 'Business');
+      AppLogger.debug('Operation mode: ${_selectedMode.displayName}', 'Business');
 
       // Generate key pair
-      print('Generating cryptographic key pair...');
+      AppLogger.crypto('Generating cryptographic key pair');
       final keyPair = await _keyManager.generateKeyPair();
-      print('Key pair generated successfully');
+      AppLogger.crypto('Key pair generated successfully');
 
       // Store keys securely (cast to EC types)
-      print('Storing private key in secure storage...');
+      AppLogger.crypto('Storing private key in secure storage');
       await _keyManager.storePrivateKey(businessId, keyPair.privateKey as ECPrivateKey);
-      print('Storing public key in secure storage...');
+      AppLogger.crypto('Storing public key in secure storage');
       await _keyManager.storePublicKey(businessId, keyPair.publicKey as ECPublicKey);
 
       // Get public key as encoded string for database storage
-      print('Retrieving public key for database storage...');
+      AppLogger.crypto('Retrieving public key for database storage');
       final publicKeyString = await _keyManager.getPublicKeyString(businessId);
       if (publicKeyString == null) {
         throw Exception('Failed to retrieve generated public key');
       }
-      print('Public key encoded (length: ${publicKeyString.length} chars)');
+      AppLogger.debug('Public key encoded (length: ${publicKeyString.length} chars)', 'Crypto');
 
       // Create business model (without private key in DB)
       final business = Business(
@@ -89,11 +88,10 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       );
 
       // Save to database
-      print('Saving business configuration to database...');
+      AppLogger.database('Saving business configuration to database');
       await _businessRepo.insertBusiness(business);
       
-      print('BUSINESS SETUP COMPLETE');
-      print('='.padRight(60, '='));
+      AppLogger.business('Business setup complete');
 
       if (mounted) {
         Haptics.success();

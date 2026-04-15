@@ -121,10 +121,10 @@ class CardRepository {
 
   /// Delete all cards (for testing)
   Future<void> deleteAllCards() async {
-    print('CardRepository: Deleting all cards from database');
+    AppLogger.database('Deleting all cards from database');
     final db = await _dbHelper.database;
     await db.delete('cards');
-    print('CardRepository: All cards deleted');
+    AppLogger.database('All cards deleted');
   }
 
   /// Mark a card as redeemed (prevents double redemption)

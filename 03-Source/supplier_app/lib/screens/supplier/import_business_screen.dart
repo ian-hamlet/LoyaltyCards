@@ -41,37 +41,34 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
     });
 
     try {
-      print('='.padRight(60, '='));
-      print('IMPORT BUSINESS: Processing QR code - ${DateTime.now().toIso8601String()}');
+      AppLogger.business('Processing business import QR code');
 
       // Step 1: Parse QR data
-      print('Step 1: Parsing QR data...');
+      AppLogger.debug('Step 1: Parsing QR data', 'Import');
       final SupplierConfigBackup backup = SupplierConfigBackup.fromQRString(qrData);
-      print('Parsed backup type: ${backup.type}');
-      print('Business: ${backup.businessName}');
-      print('Version: ${backup.version}');
+      AppLogger.debug('Parsed backup type: ${backup.type}, Business: ${backup.businessName}', 'Import');
 
       // Step 2: Verify signature
-      print('Step 2: Verifying signature...');
+      AppLogger.debug('Step 2: Verifying signature', 'Import');
       final isValid = await backup.verifySignature();
       if (!isValid) {
         throw Exception('Invalid signature - backup may be tampered with');
       }
-      print('Signature verified ✓');
+      AppLogger.debug('Signature verified', 'Import');
 
       // Step 3: Check expiry (for clone type)
       if (backup.type == 'clone') {
-        print('Step 3: Checking clone QR expiry...');
+        AppLogger.debug('Step 3: Checking clone QR expiry', 'Import');
         if (backup.isExpired) {
           throw Exception('Clone QR code has expired. Please generate a new one.');
         }
-        print('Clone QR still valid ✓');
+        AppLogger.debug('Clone QR still valid', 'Import');
       } else {
-        print('Step 3: Recovery backup (no expiry) ✓');
+        AppLogger.debug('Step 3: Recovery backup (no expiry)', 'Import');
       }
 
       // Step 4: Check if business already exists
-      print('Step 4: Checking for existing business...');
+      AppLogger.debug('Step 4: Checking for existing business', 'Import');
       final existingBusiness = await _businessRepo.getBusiness();
       if (existingBusiness != null) {
         throw Exception(
@@ -79,32 +76,31 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
           'Please reset existing business in Settings first.'
         );
       }
-      print('No existing business found ✓');
+      AppLogger.debug('No existing business found', 'Import');
 
       // Step 5: Convert backup to Business
-      print('Step 5: Converting backup to Business model...');
+      AppLogger.debug('Step 5: Converting backup to Business model', 'Import');
       final business = backup.toBusiness();
-      print('Business ID: ${business.id}');
+      AppLogger.debug('Business ID: ${business.id}', 'Import');
 
       // Step 6: Store private key
-      print('Step 6: Storing private key securely...');
+      AppLogger.crypto('Storing private key securely');
       final privateKey = _keyManager.decodePrivateKey(backup.privateKey);
       await _keyManager.storePrivateKey(business.id, privateKey as ECPrivateKey);
-      print('Private key stored ✓');
+      AppLogger.crypto('Private key stored');
 
       // Step 7: Store public key
-      print('Step 7: Storing public key securely...');
+      AppLogger.crypto('Storing public key securely');
       final publicKey = _keyManager.decodePublicKey(backup.publicKey);
       await _keyManager.storePublicKey(business.id, publicKey as ECPublicKey);
-      print('Public key stored ✓');
+      AppLogger.crypto('Public key stored');
 
       // Step 8: Save business to database
-      print('Step 8: Saving business to database...');
+      AppLogger.database('Saving business to database');
       await _businessRepo.insertBusiness(business);
-      print('Business saved to database ✓');
+      AppLogger.database('Business saved to database');
 
-      print('IMPORT COMPLETE - Business restored successfully');
-      print('='.padRight(60, '='));
+      AppLogger.business('Business import complete: ${business.name}');
 
       // Success!
       if (mounted) {
@@ -117,8 +113,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
         );
       }
     } catch (e) {
-      print('IMPORT FAILED: $e');
-      print('='.padRight(60, '='));
+      AppLogger.error('Business import failed: $e');
       
       setState(() {
         _isProcessing = false;

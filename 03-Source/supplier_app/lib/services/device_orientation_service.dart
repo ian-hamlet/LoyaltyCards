@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:shared/shared.dart';
 
 /// Service to get exact device orientation from native iOS
 class DeviceOrientationService {

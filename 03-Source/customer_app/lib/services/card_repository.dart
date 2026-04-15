@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:shared/models/card.dart' as models;
+import 'package:shared/shared.dart';
 import 'database_helper.dart';
 
 /// Repository for managing loyalty cards in the database

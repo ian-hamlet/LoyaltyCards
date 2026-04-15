@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart' hide Transaction;
 import 'package:shared/models/transaction.dart' as models;
-import 'package:shared/shared.dart' show TransactionType;
+import 'package:shared/shared.dart' show TransactionType, AppLogger;
 import 'database_helper.dart';
 
 /// Repository for managing transactions in the database

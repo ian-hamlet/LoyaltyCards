@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared/models/supplier_config_backup.dart';
+import 'package:shared/shared.dart';
 
 /// Service for managing supplier configuration backup storage
 /// Supports four methods: Print, Photos, Email, and Files

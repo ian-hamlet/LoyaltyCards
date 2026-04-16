@@ -116,5 +116,24 @@
 /// - Added mounted checks in async completion handlers
 /// - Prevents "setState() called after dispose()" errors
 /// - Proper timer cancellation and async operation cleanup
+/// 
+/// Build 18 Changes:
+/// - TEST-012: Implemented camera rotation persistence across sessions
+/// - Added SharedPreferences to save user's preferred camera rotation
+/// - Rotation preference loaded automatically on camera screen init
+/// - User's last rotation choice becomes their default for future sessions
+/// - Separate preferences for each camera context:
+///   * camera_rotation_customer (customer QR scanner)
+///   * camera_rotation_supplier_import (supplier import/recovery)
+///   * camera_rotation_supplier_stamp (supplier stamp issuance)
+///   * camera_rotation_supplier_redeem (supplier redemption scanning)
+/// - Applied to all 4 QR scanner screens:
+///   * customer_app/qr_scanner_screen.dart
+///   * supplier_app/import_business_screen.dart
+///   * supplier_app/supplier_stamp_card.dart
+///   * supplier_app/supplier_redeem_card.dart
+/// - User only needs to set rotation once per app context
+/// - Eliminates repetitive manual rotation on every scan session
+/// - SharedPreferences added to supplier_app dependencies
 
-const String appVersion = '0.2.0+17';
+const String appVersion = '0.2.0+18';

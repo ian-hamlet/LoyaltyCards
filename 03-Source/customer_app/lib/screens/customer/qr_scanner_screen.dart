@@ -12,6 +12,7 @@ import '../../services/database_helper.dart';
 import '../../services/key_manager.dart';
 import '../../services/device_orientation_service.dart';
 import 'package:uuid/uuid.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Scanner screen for adding new cards or receiving stamps
 class QRScannerScreen extends StatefulWidget {
@@ -33,10 +34,43 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
   @override
+  void initState() {
+    super.initState();
+    _loadRotationPreference();
+  }
+
+  @override
   void dispose() {
     _controller.stop();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Load saved camera rotation preference from SharedPreferences
+  Future<void> _loadRotationPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedRotation = prefs.getInt('camera_rotation_customer') ?? 1;
+      if (mounted) {
+        setState(() {
+          _manualRotationOffset = savedRotation;
+        });
+        AppLogger.debug('Loaded camera rotation preference: $savedRotation (${savedRotation * 90}°)', 'Camera');
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to load camera rotation preference: $e', 'Camera');
+    }
+  }
+
+  /// Save camera rotation preference to SharedPreferences
+  Future<void> _saveRotationPreference(int rotation) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('camera_rotation_customer', rotation);
+      AppLogger.debug('Saved camera rotation preference: $rotation (${rotation * 90}°)', 'Camera');
+    } catch (e) {
+      AppLogger.warning('Failed to save camera rotation preference: $e', 'Camera');
+    }
   }
 
   Future<void> _handleQRCode(String qrData) async {
@@ -844,9 +878,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -863,9 +899,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,

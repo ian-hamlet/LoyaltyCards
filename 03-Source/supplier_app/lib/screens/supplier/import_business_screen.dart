@@ -5,6 +5,7 @@ import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
 import 'supplier_home.dart';
 import 'package:pointycastle/ecc/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Screen for importing/recovering business configuration from QR code
 /// Supports both:
@@ -32,6 +33,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
   void initState() {
     super.initState();
     _checkExistingBusiness();
+    _loadRotationPreference();
   }
 
   /// Check if business already exists on this device
@@ -49,6 +51,33 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
       }
     } catch (e) {
       AppLogger.error('Error checking for existing business: $e', tag: 'Import');
+    }
+  }
+
+  /// Load saved camera rotation preference from SharedPreferences
+  Future<void> _loadRotationPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedRotation = prefs.getInt('camera_rotation_supplier_import') ?? 0;
+      if (mounted) {
+        setState(() {
+          _manualRotationOffset = savedRotation;
+        });
+        AppLogger.debug('Loaded camera rotation preference: $savedRotation (${savedRotation * 90}°)', 'Camera');
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to load camera rotation preference: $e', 'Camera');
+    }
+  }
+
+  /// Save camera rotation preference to SharedPreferences
+  Future<void> _saveRotationPreference(int rotation) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('camera_rotation_supplier_import', rotation);
+      AppLogger.debug('Saved camera rotation preference: $rotation (${rotation * 90}°)', 'Camera');
+    } catch (e) {
+      AppLogger.warning('Failed to save camera rotation preference: $e', 'Camera');
     }
   }
 
@@ -254,10 +283,12 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     backgroundColor: Colors.white.withOpacity(0.9),
                     onPressed: () {
                       AppLogger.debug('🔄 Rotate 90° button tapped - current offset: $_manualRotationOffset', 'Camera');
+                      final newRotation = (_manualRotationOffset + 1) % 4;
                       setState(() {
-                        _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                        _manualRotationOffset = newRotation;
                       });
-                      AppLogger.debug('🔄 New rotation offset: $_manualRotationOffset (${_manualRotationOffset * 90}°)', 'Camera');
+                      _saveRotationPreference(newRotation);
+                      AppLogger.debug('🔄 New rotation offset: $newRotation (${newRotation * 90}°)', 'Camera');
                     },
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -275,10 +306,12 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     backgroundColor: Colors.white.withOpacity(0.9),
                     onPressed: () {
                       AppLogger.debug('🔁 Rotate 180° button tapped - current offset: $_manualRotationOffset', 'Camera');
+                      final newRotation = (_manualRotationOffset + 2) % 4;
                       setState(() {
-                        _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                        _manualRotationOffset = newRotation;
                       });
-                      AppLogger.debug('🔁 New rotation offset: $_manualRotationOffset (${_manualRotationOffset * 90}°)', 'Camera');
+                      _saveRotationPreference(newRotation);
+                      AppLogger.debug('🔁 New rotation offset: $newRotation (${newRotation * 90}°)', 'Camera');
                     },
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,

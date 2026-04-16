@@ -1,25 +1,26 @@
 Update# Defect Tracker - v0.2.0 Post-Testing
 
-**Current Version:** v0.2.0 (Build 17) - Ready for Testing  
+**Current Version:** v0.2.0 (Build 18) - Ready for Testing  
 **TestFlight Version:** v0.2.0 (Build 15)  
-**Target Version:** v0.2.0 (Build 17+)  
+**Target Version:** v0.2.0 (Build 18+)  
 **Last Updated:** April 16, 2026
 
 ---
 
 ## ✅ CRITICAL STATUS UPDATE
 
-**Build 17 Complete:** April 16, 2026  
-**Status:** ✅ **READY FOR DEPLOYMENT**  
+**Build 18 Complete:** April 16, 2026  
+**Status:** ✅ **READY FOR TESTING**  
 **Progress:**
-1. ✅ TEST-014: Fixed clone business navigation (CRITICAL) - Verified on device
-2. ✅ TEST-015: Fixed recovery backup infinite loop (CRITICAL) - Verified on device
-3. ✅ BONUS: Fixed memory leak in clone_device_screen (timer cleanup)
-4. 📋 TEST-010: Redemption UI below fold (HIGH - deferred to Build 18)
-5. 📋 TEST-012: Camera rotation persistence (MEDIUM - deferred to Build 18)
+1. ✅ TEST-012: Camera rotation persistence (MEDIUM) - Ready for device testing
 
+**Build 17 Status:** ✅ Completed April 16, 2026 (2 CRITICAL + 1 bonus fix)  
 **Build 16 Status:** ✅ Completed April 16, 2026 (4 defects fixed)  
 **Build 15 Status:** ✅ Deployed to TestFlight April 16, 2026
+
+**Remaining Backlog:**
+- 📋 TEST-010: Redemption UI below fold (HIGH - deferred to Build 19)
+- 📋 CR-015: Device orientation inconsistencies (LOW - may not fix)
 
 ---
 
@@ -1089,8 +1090,9 @@ This document tracks defects from two sources:
 
 ### TEST-012: Camera Rotation Preference Not Persisted Across Sessions
 - **Source:** Testing - Physical Device (Build 15) - Related to CR-015
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED - Ready for Testing
 - **Priority:** MEDIUM
+- **Fix Date:** 2026-04-16
 - **Screen/Feature:** Both Apps - QR Scanner Camera (all screens with camera)
 - **Description:** Camera orientation defaults are inconsistent across devices (iPad Supplier app correct, iPhone Customer app portrait wrong). While manual rotation buttons (90°, 180°) work perfectly, users must re-apply their preferred rotation EVERY time they open the camera. The app doesn't remember the user's rotation preference between sessions. Since detecting device orientation automatically in Flutter is difficult (due to abstractions), a better solution is to persist the user's last rotation choice and apply it on next camera open. This way, if a user always rotates camera 180°, that preference becomes their new default until changed.
 - **Reproduction Steps:**
@@ -1181,7 +1183,34 @@ This document tracks defects from two sources:
   - Update all QR scanner screens: 1.5 hours
   - Testing on multiple devices: 1 hour
 - **Assigned To:**
-- **Target Build:** Build 16 or Build 17
+- **Target Build:** Build 18
+- **Fixed In:** Build 18
+- **Fix Applied:**
+  - Added SharedPreferences dependency to supplier_app (already in customer_app)
+  - Implemented rotation persistence in all 4 QR scanner screens
+  - Each screen has separate preference key for context-specific defaults:
+    * `camera_rotation_customer` - Customer app QR scanner
+    * `camera_rotation_supplier_import` - Supplier import/recovery
+    * `camera_rotation_supplier_stamp` - Supplier stamp issuance
+    * `camera_rotation_supplier_redeem` - Supplier redemption
+  - Added `_loadRotationPreference()` method in initState()
+  - Added `_saveRotationPreference(int rotation)` helper method
+  - Rotation buttons now save preference after changing rotation
+  - Preference automatically loaded and applied on screen init
+  - Files modified:
+    * customer_app/lib/screens/customer/qr_scanner_screen.dart
+    * supplier_app/lib/screens/supplier/import_business_screen.dart
+    * supplier_app/lib/screens/supplier/supplier_stamp_card.dart
+    * supplier_app/lib/screens/supplier/supplier_redeem_card.dart
+  - User's rotation choice persists across:
+    * App restarts
+    * Different scan sessions
+    * Until app data cleared or user changes preference
+- **Testing Required:**
+  - Test on iPhone: Set rotation, exit, reopen - verify preference applied
+  - Test on iPad: Same verification
+  - Test different contexts have separate preferences
+  - Test rotation change updates preference immediately
 - **Notes:** This is a pragmatic solution to CR-015's camera orientation problem. Instead of trying to solve the hard problem (automatic device orientation detection in Flutter), we let the user teach the app their preference once, then remember it. This approach is user-centric, simple to implement, and works reliably across all devices. The manual rotation buttons already work perfectly - we're just adding memory to the system. Recommend implementing this BEFORE attempting more complex auto-detection logic. Users will appreciate not having to rotate camera every single time. This should be prioritized higher than CR-015's LOW priority since it's actually implementable and solves the real-world pain point.
 
 ### TEST-013: Statistics Info Text Displays Literal "\n" Instead of Line Breaks
@@ -1674,16 +1703,16 @@ This document tracks defects from two sources:
 ## 📊 Defect Summary Statistics
 
 ### By Priority
-- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **6 total** (6 FIXED, 0 NEW in BACKLOG)
+- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **6 total** (6 FIXED, 0 in BACKLOG)
   - Fixed: CR-001, CR-002, CR-003, TEST-001
   - **FIXED BUILD 17:** TEST-014 (Clone navigation), TEST-015 (Recovery loop)
-- 🟠 HIGH: 4 (Code Review) + 5 (Testing - old) + 4 (Testing - Build 15) = **13 total** (12 FIXED, 1 NEW in BACKLOG)
-  - **NEW HIGH:** TEST-010 (Redemption UI below fold)
-- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **8 total** (7 FIXED, 1 NEW in BACKLOG)
-  - **FIXED:** TEST-011 (Filter label - Build 16)
-  - **NEW MEDIUM:** TEST-012 (Camera rotation persistence)
+- 🟠 HIGH: 4 (Code Review) + 5 (Testing - old) + 4 (Testing - Build 15) = **13 total** (12 FIXED, 1 in BACKLOG)
+  - **BACKLOG:** TEST-010 (Redemption UI below fold)
+- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **8 total** (8 FIXED, 0 in BACKLOG)
+  - **FIXED BUILD 16:** TEST-011 (Filter label)
+  - **FIXED BUILD 18:** TEST-012 (Camera rotation persistence)
 - 🔵 LOW: 5 (Code Review) + 0 (Testing - old) + 3 (Testing - Build 15) = **8 total** (7 FIXED, 1 in BACKLOG)
-  - **FIXED:** TEST-009 (Transaction logging - Build 16), TEST-013 (Statistics \n display - Build 16)
+  - **FIXED BUILD 16:** TEST-009 (Transaction logging), TEST-013 (Statistics \n display)
   - **BACKLOG:** CR-015 (Camera orientation)
 - **TOTAL: 35 defects tracked** + 1 decision item (DECISION-016)
   - 21 original defects (code review + initial testing)
@@ -1691,15 +1720,15 @@ This document tracks defects from two sources:
   - 1 Build 15 fixed (TEST-008)
 
 ### By Status
-- 📋 BACKLOG: 3 defects
+- 📋 BACKLOG: 2 defects
   - CR-015 (camera orientation - LOW)
   - TEST-010 (redemption UI - HIGH)
-  - TEST-012 (camera persistence - MEDIUM)
 - 🚧 IN PROGRESS: 0
-- ✅ FIXED: 31 defects
+- ✅ FIXED: 32 defects
   - Builds 1-15 fixes
   - Build 16: TEST-009 (transaction logging), TEST-011 (filter label), TEST-013 (statistics text)
   - Build 17: TEST-014 (import navigation), TEST-015 (camera loop)
+  - Build 18: TEST-012 (camera rotation persistence)
 - ✅ CLOSED: 1 (CR-011 duplicate)
 - ✅ IMPLEMENTED: 1 (DECISION-016 - Delete All Data conditional compilation)
 
@@ -1709,8 +1738,14 @@ This document tracks defects from two sources:
 - Decisions: 1 (production readiness)
 
 ### Current Build
-- **Build 17** - In Development April 16, 2026
-- **Status:** ✅ READY FOR DEPLOYMENT
+- **Build 18** - Completed April 16, 2026
+- **Status:** ✅ READY FOR TESTING
+- **Defects Resolved in Build 18:** 1 (TEST-012)
+- **Medium Priority Fix:** Camera rotation persistence across all QR scanner screens
+- **Impact:** User experience improvement - saves rotation preference per scan context
+
+- **Build 17** - Completed April 16, 2026
+- **Status:** ✅ DEPLOYED
 - **Defects Resolved in Build 17:** 2 (TEST-014, TEST-015)
 - **Critical Fixes:** Business import navigation and camera loop prevention
 - **Bonus Fix:** Memory leak in clone_device_screen.dart

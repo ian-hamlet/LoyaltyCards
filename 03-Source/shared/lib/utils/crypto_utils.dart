@@ -4,7 +4,22 @@ import 'package:pointycastle/export.dart';
 import 'app_logger.dart';
 
 /// Shared cryptographic utilities for signature verification
+/// 
 /// Used by both Customer and Supplier apps to verify ECDSA signatures
+/// using secp256r1 (P-256) curve with SHA256 hashing.
+/// 
+/// ERROR HANDLING PATTERN:
+/// All methods return bool (synchronous validation):
+/// - Returns true if data is valid
+/// - Returns false if data is invalid or verification fails
+/// - Does NOT throw exceptions (failures are expected - invalid QR codes are normal)
+/// - Does NOT log failures (validation failures are not errors)
+/// - Silent failures prevent console spam from scanning invalid QR codes
+/// 
+/// Use cases:
+/// - QR code signature verification
+/// - Stamp chain validation
+/// - Public key validation
 class CryptoUtils {
   /// Verify ECDSA signature using secp256r1 (P-256) curve with SHA256
   /// 

@@ -56,8 +56,17 @@ class RateLimiter {
     return RateLimitResult(canProceed: true);
   }
 
+  // NOTE: The following methods are unused dead code (code review April 2026)
+  // They reference a 'stamp_log' table that doesn't exist in the customer app database.
+  // These were likely intended for supplier-side functionality but never implemented/used.
+  // Commented out to prevent accidental usage and database errors.
+  // If supplier functionality is needed in customer app, create stamp_log table first.
+  
+  /*
   /// Check if a supplier can issue a stamp to a card
   /// Prevents duplicate processing within short time window
+  /// 
+  /// WARNING: DEAD CODE - References non-existent 'stamp_log' table
   Future<RateLimitResult> canIssueStamp({
     required String cardId,
   }) async {
@@ -108,6 +117,8 @@ class RateLimiter {
   }
 
   /// Record stamp issuance for rate limiting
+  /// 
+  /// WARNING: DEAD CODE - References non-existent 'stamp_log' table
   Future<void> recordStampIssued({
     required String stampLogId,
     required String cardId,
@@ -127,6 +138,7 @@ class RateLimiter {
       },
     );
   }
+  */
 }
 
 /// Result of rate limit check

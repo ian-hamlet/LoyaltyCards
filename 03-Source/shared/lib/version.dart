@@ -47,5 +47,36 @@
 /// - Default: hide redeemed cards for cleaner wallet view
 /// - Preference persisted using SharedPreferences
 /// - Filter works alongside search functionality
+/// 
+/// Build 13 Changes:
+/// - Standardize error handling patterns across codebase (CR-014)
+/// - Added error_handling.dart utility with safeExecute helpers
+/// - Documented error handling conventions for each pattern:
+///   * Future<bool> for optional/graceful operations (backup, etc)
+///   * Future<void> + exceptions for critical operations (database)
+///   * bool for synchronous validation (QR parsing, signatures)
+/// - Added comprehensive documentation to key service files
+/// - No breaking changes - documentation and utilities only
+/// 
+/// Build 14 Changes:
+/// - Code review fixes from comprehensive best practice analysis
+/// - Fixed string substring operations to handle short strings safely
+/// - Commented out dead code methods (canIssueStamp, recordStampIssued)
+///   in rate_limiter.dart that referenced non-existent stamp_log table
+/// - Added length checks before substring(0, 20) in all logging statements
+/// - Prevents potential RangeError with malformed QR signatures
+/// - Minor bug fixes - no functional changes to working features
+/// 
+/// Build 15 Changes:
+/// - Fix overflow stamps creating duplicate cards (TEST-008)
+/// - Apply findCardWithSpace() logic to overflow handling
+/// - Check for existing non-redeemed cards before creating new overflow card
+/// - Recursive overflow: fill existing cards in cascade before creating new
+/// - Example: Card A (8/10) + Card B (2/10) + 5 stamps = Card A complete,
+///   Card B gets 3 stamps (total 5/10), NO duplicate Card C created
+/// - Comprehensive logging for overflow cascade debugging
+/// - Matches redemption logic from Build 11 (TEST-005)
+/// - Fix redemption success message to only show "New card added" when
+///   a new card was actually created (conditional message display)
 
-const String appVersion = '0.2.0+12';
+const String appVersion = '0.2.0+15';

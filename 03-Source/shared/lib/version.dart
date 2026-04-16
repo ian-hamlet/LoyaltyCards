@@ -78,5 +78,24 @@
 /// - Matches redemption logic from Build 11 (TEST-005)
 /// - Fix redemption success message to only show "New card added" when
 ///   a new card was actually created (conditional message display)
+/// 
+/// Build 16 Changes:
+/// - DECISION-016: Conditional compilation for dangerous delete operations
+/// - Wrapped "Delete All Data" sections in kDebugMode checks
+/// - Dangerous operations only visible in debug/TestFlight builds
+/// - Hidden in production App Store releases for user safety
+/// - TEST-013: Fixed statistics info text line breaks
+/// - Changed \\n to \n in supplier_home.dart statistics banner
+/// - Text now displays on three separate lines correctly
+/// - TEST-009: Implemented complete transaction logging system
+/// - Fixed broken "Transactions" counter (was always 0)
+/// - Added transaction logging for all key events (pickup, stamp, redemption)
+/// - Reorganized Settings into "Your Wallet" and "Activity History" sections
+/// - New wallet counter: Ready to Redeem (complete cards awaiting redemption)
+/// - New activity counters: Cards Added, Stamps Earned, Rewards Redeemed
+/// - All counters now show real-time meaningful data with descriptive subtitles
+/// - TEST-011: Fixed redeemed card filter label confusion
+/// - Changed filter label to be dynamic (shows action, not state)
+/// - Label now reads "Show Redeemed" when hiding, "Hide Redeemed" when showing
 
-const String appVersion = '0.2.0+15';
+const String appVersion = '0.2.0+16';

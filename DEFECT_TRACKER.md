@@ -1,24 +1,27 @@
 Update# Defect Tracker - v0.2.0 Post-Testing
 
-**Current Version:** v0.2.0 (Build 8) - Ready for TestFlight  
-**TestFlight Version:** v0.2.0 (Build 4)  
-**Target Version:** v0.2.1 (Build 9+)  
-**Last Updated:** April 15, 2026
+**Current Version:** v0.2.0 (Build 16) - In Progress  
+**TestFlight Version:** v0.2.0 (Build 15)  
+**Target Version:** v0.2.0 (Build 16+)  
+**Last Updated:** April 16, 2026
 
 ---
 
 ## ✅ CRITICAL STATUS UPDATE
 
-**Build 8 Complete:** April 15, 2026  
-**Status:** ✅ **READY FOR TESTFLIGHT**  
-**All Critical Blockers Resolved:**
-1. ✅ Completed print() → AppLogger migration (CR-002, NEW-001)
-2. ✅ Added missing AppLogger.database() method (NEW-002)
-3. ✅ Standardized logging across all screens (NEW-003)
-4. ✅ Documented all AppLogger methods (NEW-004)
-5. ✅ Both apps build successfully
+**Build 16 In Progress:** April 16, 2026  
+**Status:** 🚧 **IN DEVELOPMENT**  
+**Progress:**
+1. ✅ DECISION-016: Conditional compilation for delete operations (production safety)
+2. ✅ TEST-013: Fixed statistics text line breaks (cosmetic)
+3. ✅ TEST-009: Implemented transaction logging & activity history (feature completion)
+4. ✅ TEST-011: Fixed filter label confusion (UX improvement) - Ready for Testing
+5. 📋 TEST-014: Clone business navigation (CRITICAL - pending)
+6. 📋 TEST-015: Recovery backup infinite loop (CRITICAL - pending)
+7. 📋 TEST-010: Redemption UI below fold (HIGH - pending)
+8. 📋 TEST-012: Camera rotation persistence (MEDIUM - pending)
 
-**TestFlight Deployment:** Ready to proceed with Build 8
+**Build 15 Status:** ✅ Deployed to TestFlight April 16, 2026
 
 ---
 
@@ -863,39 +866,82 @@ This document tracks defects from two sources:
 - **Fix Verified:** 2026-04-16 - Implementation complete, ready for physical device testing
 - **Notes:** Enhancement request. Improves UX but not critical for pilot testing. UI uses Material FilterChip for modern, clean appearance. "Hide Redeemed" chip selected by default for cleaner wallet view.
 
-### TEST-009: Settings Label Typo - "Trtansactions" Display Issue
+### TEST-009: Settings Label Clarity - "Transactions" Purpose Unclear
 - **Source:** Testing - Physical Device (Build 15)
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
 - **Priority:** LOW
+- **Fix Date:** 2026-04-16
 - **Screen/Feature:** Customer App - Settings → App Information
-- **Description:** The "Transactions" statistics label appears to display incorrectly or contains a typo ("Trtansactions"). Additionally, the purpose of this counter is unclear to users - it's not immediately obvious what "transactions" refers to in the context of a loyalty card app.
+- **Description:** The "Transactions" statistics label is unclear to users - it's not immediately obvious what "transactions" refers to in the context of a loyalty card app. The label is spelled correctly but uses business/financial jargon that doesn't communicate its purpose to regular users. This counter tracks ALL customer activity: card pickups (adding new cards), stamps collected, and redemptions completed. Users don't understand this from the label "Transactions" alone.
 - **Reproduction Steps:**
   1. Open Customer app
   2. Navigate to Settings (gear icon)
   3. Scroll to "App Information" section
   4. Observe statistics: Cards, Stamps Collected, Transactions
-  5. "Transactions" label displays with potential typo
+  5. "Transactions" label is vague - users don't know what it counts
 - **Expected Behavior:** 
-  - Label should display as "Transactions" (correctly spelled)
-  - Purpose of counter should be clear to users
-  - Counter shows total number of stamp additions + redemptions
+  - Label should clearly communicate what it counts
+  - Users immediately understand: "This shows my total activity"
+  - Counter represents: card pickups + stamps collected + redemptions completed
+  - Examples: "Activity Log", "Total Activity", "Wallet Activity", or "History Items"
+  - OR: Keep "Transactions" but add explanatory subtitle
 - **Actual Behavior:** 
-  - Label appears as "Trtansactions" (typo) on device display
-  - Purpose is unclear - users don't understand what this counts
+  - Label displays as "Transactions" (correctly spelled)
+  - Purpose is unclear - business jargon not user-friendly
+  - Users don't understand what this counts without explanation
+  - No subtitle or tooltip to clarify meaning
+- **Technical Context:**
+  - File: `customer_settings.dart` (line ~180)
+  - Code: `title: const Text('Transactions')`
+  - Counter source: `TransactionRepository.getAllTransactions()`
+  - Transaction types tracked (from `shared/lib/models/transaction.dart`):
+    * **pickup** - Customer picked up/added a new card
+    * **stamp** - Customer received a stamp
+    * **redemption** - Customer redeemed a completed card
+  - This is a comprehensive activity log counter
 - **Impact:** 
-  - Cosmetic issue - doesn't affect functionality
-  - Looks unprofessional/sloppy in production app
-  - Low priority but should be fixed before wider release
-- **Workaround:** None needed - purely cosmetic
-- **Fix Required:** 
-  - Verify label spelling in customer_settings.dart (line 182: `title: const Text('Transactions')`)
-  - Check if typo exists in constants or if it's a display bug
-  - Consider renaming to clearer label: "Stamp History" or "Activity Count"
-  - Or add subtitle explaining what it counts: "Stamps added and redeemed"
-- **Estimated Effort:** 15-30 minutes (simple label fix)
+  - Low priority - doesn't affect functionality
+  - Users can't interpret the statistic
+  - Makes app feel technical/unintuitive
+  - Minor UX issue but affects perceived quality
+- **Workaround:** None needed - purely cosmetic/clarity issue
+- **Root Cause (Discovered):**
+  - Transaction logging was never implemented - `insertTransaction()` never called anywhere
+  - Counter always showed 0 regardless of actual activity
+  - Feature was completely broken, not just unclear labeling
+- **Fix Applied (Build 16):**
+  - **Replaced "Transactions" counter with meaningful activity tracking**
+  - Implemented full transaction logging system
+  - Added transaction logging for all key events:
+    * **Card Added** - Logged when customer receives/adds a new loyalty card (TransactionType.pickup)
+    * **Stamp Earned** - Logged each time customer receives a stamp (TransactionType.stamp)
+    * **Reward Redeemed** - Logged when customer redeems completed card (TransactionType.redemption)
+  - Reorganized Settings UI with two sections:
+    1. **Your Wallet** (current inventory):
+       - Loyalty Cards (total cards)
+       - Stamps Collected (total stamps on all cards)
+       - **Ready to Redeem** (complete cards awaiting redemption) ← NEW
+    2. **Activity History** (new section with transaction-based counters):
+       - Cards Added (count of pickup transactions)
+       - Stamps Earned (count of stamp transactions)
+       - Rewards Redeemed (count of redemption transactions)
+  - All counters now show actual meaningful data that updates in real-time
+  - Added subtitles to each counter for clarity
+  - Changed icons to be more intuitive (add_card, star, card_giftcard)
+- **Files Modified:**
+  - `customer_app/lib/screens/customer/customer_settings.dart` - UI and counter logic
+  - `customer_app/lib/screens/customer/qr_scanner_screen.dart` - Card pickup & stamp transaction logging
+  - `customer_app/lib/screens/customer/customer_card_detail.dart` - Redemption transaction logging (simple mode)
+- **Transaction Logging Locations:**
+  - After card insertion → pickup transaction
+  - After each stamp insertion (initial, main, and additional) → stamp transactions
+  - After card marked as redeemed (simple and secure modes) → redemption transaction
+- **Dependencies Added:** uuid package for transaction IDs
+- **Estimated Effort:** 1.5 hours (COMPLETED)
 - **Assigned To:**
 - **Target Build:** Build 16
-- **Notes:** Code shows correct spelling, so may be a display/rendering issue or the typo exists elsewhere. Also consider improving clarity of what "transactions" means to end users. Current implementation tracks all database transactions (stamp additions, redemptions, etc.) but this isn't obvious from the label alone.
+- **Fixed In:** Build 16
+- **Notes:** This transformed from a simple label fix into a complete feature implementation. Transaction logging was never working, so we implemented it properly and created meaningful activity metrics that users actually care about. The new Activity History section provides valuable insights into customer loyalty behavior. The **Ready to Redeem** counter shows the current number of complete cards (stampsCollected >= stampsRequired) that haven't been redeemed yet - this is a real-time inventory metric that updates automatically as cards are completed and redeemed.
 
 ### TEST-010: Secure Mode Redemption Second Step Hidden Below Fold on iPhone
 - **Source:** Testing - Physical Device (iPhone - Build 15)
@@ -974,7 +1020,7 @@ This document tracks defects from two sources:
 
 ### TEST-011: Redeemed Card Filter Label is Confusing and Backwards
 - **Source:** Testing - Physical Device (Build 15)
-- **Status:** 📋 BACKLOG
+- **Status:** � IN PROGRESS
 - **Priority:** MEDIUM
 - **Screen/Feature:** Customer App - Card List → Filter Chip
 - **Description:** The redeemed card filter (implemented in TEST-006, Build 12) has confusing labeling. The FilterChip displays "Hide Redeemed" and is selected by default (when redeemed cards ARE hidden). This is backwards from user expectations - when cards are hidden, users expect to see an option to "Show" them, not a selected "Hide" button. The current implementation makes it unclear what state the filter is in and what action clicking it will perform. The combination of FilterChip UI element, static label, selected state, and eye icon creates cognitive dissonance.
@@ -1028,32 +1074,20 @@ This document tracks defects from two sources:
   - Users can eventually figure it out through trial and error
   - Click chip and observe what happens
   - Not intuitive but functional
-- **Fix Required:** 
-  - **Option 1 (Quick):** Change label dynamically:
-    ```dart
-    label: Text(_hideRedeemed ? 'Show Redeemed' : 'Hide Redeemed')
-    ```
-    Flip selected logic: `selected: !_hideRedeemed`
-  - **Option 2 (Better):** Use IconButton or ToggleButtons instead:
-    - More appropriate for show/hide action
-    - Clearer visual affordance
-    - Standard pattern for visibility toggles
-  - **Option 3 (Best):** Two separate UI approaches:
-    - Replace FilterChip with text button + icon
-    - "Show/Hide Redeemed Cards (N)" with count
-    - More descriptive, less ambiguous
-  - **Also Consider:**
-    - Remove checkmark from selected state (confusing in this context)
-    - Use different icon (maybe archive box instead of eye)
-    - Add tooltip on long-press explaining filter
-    - Show count of hidden cards when filter active
-- **Estimated Effort:** 
-  - Option 1 (dynamic label): 30 minutes
-  - Option 2 (different widget): 1-2 hours
-  - Option 3 (redesign): 2-3 hours
+- **Fix Applied (Build 16):**
+  - Changed label from static to dynamic text
+  - When redeemed cards ARE hidden: Shows "Show Redeemed"
+  - When redeemed cards ARE shown: Shows "Hide Redeemed"
+  - Label now describes the ACTION available, not the current state
+  - Selected state remains the same (selected when hiding)
+  - Icon behavior unchanged (visibility_off when hiding, visibility when showing)
+  - File: `customer_app/lib/screens/customer/customer_home.dart` (line 213)
+  - Simple one-line change: `label: Text(_hideRedeemed ? 'Show Redeemed' : 'Hide Redeemed')`
+- **Estimated Effort:** 30 minutes (COMPLETED)
 - **Assigned To:**
 - **Target Build:** Build 16
-- **Notes:** This is a regression/refinement of TEST-006 (Build 12) where the filter was implemented. The functionality works correctly - cards hide and show properly, and preference persists. The issue is purely UX/labeling. The FilterChip widget is designed for selecting filter criteria (like tags or categories), not for toggle actions. Consider this a polish issue that should be addressed before wider user testing. Users in pilot testing will likely give feedback on this confusion. Recommend Option 1 (dynamic label) as quick fix for Build 16, then revisit with Option 3 (redesign) in later build based on user feedback.
+- **Fixed In:** Build 16
+- **Notes:** Quick UX fix that makes the filter behavior intuitive. Users now immediately understand what clicking the chip will do. This is a polish issue that improves perceived quality and reduces user confusion during pilot testing.
 
 ### TEST-012: Camera Rotation Preference Not Persisted Across Sessions
 - **Source:** Testing - Physical Device (Build 15) - Related to CR-015
@@ -1154,7 +1188,8 @@ This document tracks defects from two sources:
 
 ### TEST-013: Statistics Info Text Displays Literal "\n" Instead of Line Breaks
 - **Source:** Testing - Physical Device (Build 15)
-- **Status:** 📋 BACKLOG
+- **Status:** ✅ FIXED
+- **Fix Date:** 2026-04-16
 - **Priority:** LOW
 - **Screen/Feature:** Supplier App - Home Screen → Statistics Section (Info Banner)
 - **Description:** The Statistics info banner displays literal "\n" characters in the text instead of rendering them as actual line breaks. The text should display on multiple lines for readability, but currently shows as a single line with visible "\n" escape sequences. This makes the explanatory text difficult to read and looks unprofessional.
@@ -1190,36 +1225,16 @@ This document tracks defects from two sources:
   - Text widget concatenation with `\\n` results in literal string display
   - Flutter Text widget not interpreting as line breaks
 - **Workaround:** None - purely visual issue
-- **Fix Required:** 
-  - **Option 1 (Quick):** Change `\\n` to `\n` in string:
-    ```dart
-    Text(
-      'Issued: Number of new cards you created for customers\n'
-      'Stamped: Unique customer cards you have stamped directly\n'
-      'Redeemed: Number of completed cards that have been redeemed',
-    ```
-  - **Option 2 (Better):** Use Column with separate Text widgets:
-    ```dart
-    Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Issued: Number of new cards you created for customers'),
-        Text('Stamped: Unique customer cards you have stamped directly'),
-        Text('Redeemed: Number of completed cards that have been redeemed'),
-      ],
-    )
-    ```
-  - **Option 3 (Best):** Use RichText with TextSpans for formatting:
-    - Bold the label (Issued:, Stamped:, Redeemed:)
-    - Regular weight for definitions
-    - Better visual hierarchy
-- **Estimated Effort:** 
-  - Option 1: 5 minutes
-  - Option 2: 15 minutes
-  - Option 3: 30 minutes
+- **Fix Applied (Build 16):** 
+  - Changed `\\n` to `\n` in string concatenation (Option 1)
+  - Text now properly displays on three separate lines
+  - File: `supplier_home.dart` (lines 297-299)
+  - Simple character replacement fix
+- **Estimated Effort:** 5 minutes (COMPLETED)
 - **Assigned To:**
 - **Target Build:** Build 16
-- **Notes:** Simple typo/formatting error. The developer likely used `\\n` thinking it would create line breaks, but the double backslash escapes it into a literal string. This is a common mistake when working with string concatenation in Dart. Quick fix but affects perceived app quality. Should be bundled with other cosmetic fixes for Build 16.
+- **Fixed In:** Build 16
+- **Notes:** Simple typo/formatting error. The developer likely used `\\n` thinking it would create line breaks, but the double backslash escapes it into a literal string. This is a common mistake when working with string concatenation in Dart. Quick fix but affects perceived app quality.
 
 ### TEST-014: Clone Business Navigation Confusion After Successful Import
 - **Source:** Testing - Physical Device (Build 15)
@@ -1467,8 +1482,10 @@ This document tracks defects from two sources:
 
 ### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production
 - **Type:** Architecture/UX Decision
-- **Status:** 📋 PENDING DECISION
+- **Status:** ✅ IMPLEMENTED
 - **Priority:** MEDIUM
+- **Implementation Date:** April 16, 2026
+- **Solution:** Option 3 - Conditional Compilation
 - **Screen/Feature:** Both Apps - Settings → Dangerous Operations → Delete All Data
 - **Context:** Both Customer and Supplier apps have "Delete All Data" buttons in settings that completely wipe the app's database. These are useful during development and TestFlight testing but pose risks for production release to friends, family, and pilot businesses. As we approach wider real-world usage, we need to decide whether to keep, remove, or conditionally hide these features.
 - **Current Behavior:**
@@ -1553,6 +1570,32 @@ This document tracks defects from two sources:
 
 **Recommendation for Build 16:**
 
+**IMPLEMENTED - Option 3 (Conditional Compilation)**
+
+**Implementation Details (Build 16 - April 16, 2026):**
+- ✅ Added `import 'package:flutter/foundation.dart';` to both settings files
+- ✅ Wrapped "Danger Zone" sections in `if (kDebugMode) ...[...]` blocks
+- ✅ Customer app: "Delete All Data" only visible in debug/TestFlight
+- ✅ Supplier app: "Reset Business Configuration" only visible in debug/TestFlight
+- ✅ Production App Store builds will NOT show these dangerous operations
+- ✅ TestFlight testers retain full reset capabilities for testing scenarios
+
+**Result:**
+- Debug builds (development): ✅ Visible
+- Profile builds (TestFlight): ✅ Visible  
+- Release builds (App Store): ❌ Hidden
+
+**Next Steps:**
+- For early pilot businesses: Consider adding Option 2 enhanced protections if needed
+- For production v1.0: Current implementation is production-ready
+- Document uninstall/reinstall workflow for users who need fresh start
+
+**Files Modified:**
+- [customer_app/lib/screens/customer/customer_settings.dart](03-Source/customer_app/lib/screens/customer/customer_settings.dart)
+- [supplier_app/lib/screens/supplier/supplier_settings.dart](03-Source/supplier_app/lib/screens/supplier/supplier_settings.dart)
+
+**Progression Plan (Original):**
+
 **Use Option 3 (Conditional Compilation)** with progression plan:
 
 1. **TestFlight Builds (friends/family pilot - now):**
@@ -1598,25 +1641,27 @@ This document tracks defects from two sources:
   - **NEW CRITICAL:** TEST-014 (Clone navigation), TEST-015 (Recovery loop)
 - 🟠 HIGH: 4 (Code Review) + 5 (Testing - old) + 4 (Testing - Build 15) = **13 total** (12 FIXED, 1 NEW in BACKLOG)
   - **NEW HIGH:** TEST-010 (Redemption UI below fold)
-- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **8 total** (6 FIXED, 2 NEW in BACKLOG)
-  - **NEW MEDIUM:** TEST-011 (Filter label), TEST-012 (Camera rotation persistence)
-- 🔵 LOW: 5 (Code Review) + 0 (Testing - old) + 3 (Testing - Build 15) = **8 total** (5 FIXED, 3 in BACKLOG)
-  - **NEW LOW:** TEST-009 (Transactions typo), TEST-013 (Statistics \n display)
-  - BACKLOG: CR-015 (Camera orientation)
+- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **8 total** (7 FIXED, 1 NEW in BACKLOG)
+  - **FIXED:** TEST-011 (Filter label - Build 16)
+  - **NEW MEDIUM:** TEST-012 (Camera rotation persistence)
+- 🔵 LOW: 5 (Code Review) + 0 (Testing - old) + 3 (Testing - Build 15) = **8 total** (7 FIXED, 1 in BACKLOG)
+  - **FIXED:** TEST-009 (Transaction logging - Build 16), TEST-013 (Statistics \n display - Build 16)
+  - **BACKLOG:** CR-015 (Camera orientation)
 - **TOTAL: 35 defects tracked** + 1 decision item (DECISION-016)
   - 21 original defects (code review + initial testing)
   - 7 new from Build 15 testing (TEST-009 through TEST-015)
   - 1 Build 15 fixed (TEST-008)
 
 ### By Status
-- 📋 BACKLOG: 8 defects
+- 📋 BACKLOG: 5 defects
   - CR-015 (camera orientation - LOW)
-  - TEST-009, TEST-010, TEST-011, TEST-012, TEST-013, TEST-014, TEST-015 (Build 15 findings)
+  - TEST-010, TEST-012, TEST-014, TEST-015 (Build 15 findings)
 - 🚧 IN PROGRESS: 0
-- ✅ FIXED: 26 defects
+- ✅ FIXED: 29 defects
   - Builds 1-15 fixes
+  - Build 16: TEST-009 (transaction logging), TEST-011 (filter label), TEST-013 (statistics text)
 - ✅ CLOSED: 1 (CR-011 duplicate)
-- 📝 PENDING DECISION: 1 (DECISION-016 - Delete All Data feature)
+- ✅ IMPLEMENTED: 1 (DECISION-016 - Delete All Data conditional compilation)
 
 ### By Source
 - Code Review: 20 defects (14 original + 6 new reviews)
@@ -1637,19 +1682,21 @@ This document tracks defects from two sources:
 - Build 12 (COMPLETE): 1 defect - Redeemed cards filter
 - Build 13-14 (COMPLETE): 3 defects - Error handling docs + code review
 - Build 15 (COMPLETE): 1 defect - Overflow card cascade (TEST-008)
-- **Build 16 (PLANNED):** 7 defects (Build 15 findings)
+- **Build 16 (IN PROGRESS):** 7 defects (Build 15 findings) - 3 FIXED, 4 REMAINING
+  - ✅ FIXED: TEST-009 (transaction logging), TEST-011 (filter label), TEST-013 (statistics text)
   - 🔴 CRITICAL: TEST-014, TEST-015 (business setup workflows)
   - 🟠 HIGH: TEST-010 (redemption UI)
-  - 🟡 MEDIUM: TEST-011 (filter label), TEST-012 (camera persistence)
-  - 🔵 LOW: TEST-009 (transactions typo), TEST-013 (statistics text)
+  - 🟡 MEDIUM: TEST-012 (camera persistence)
 - v0.3.0+ (Deferred): 1 defect - CR-015 (camera default orientation)
 
 ### Build 16 Priority Order
-1. **CRITICAL (Must Fix):** TEST-014, TEST-015 - Business setup navigation bugs
-2. **HIGH:** TEST-010 - Redemption flow UI visibility
-3. **MEDIUM:** TEST-011, TEST-012 - UX improvements
-4. **LOW:** TEST-009, TEST-013 - Cosmetic fixes
-5. **DECISION:** DECISION-016 - Delete All Data feature (discuss before Build 16)
+1. ✅ **COMPLETED:** DECISION-016 - Conditional compilation for delete operations
+2. ✅ **COMPLETED:** TEST-013 - Statistics text line breaks (cosmetic fix)
+3. ✅ **COMPLETED:** TEST-009 - Transaction logging & activity history (feature completion)
+4. ✅ **COMPLETED:** TEST-011 - Filter label dynamic text (UX fix) - Ready for Testing
+5. **CRITICAL (Must Fix):** TEST-014, TEST-015 - Business setup navigation bugs
+6. **HIGH:** TEST-010 - Redemption flow UI visibility
+7. **MEDIUM:** TEST-012 - Camera rotation persistence
 
 ---
 

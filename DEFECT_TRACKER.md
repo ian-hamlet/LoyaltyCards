@@ -863,40 +863,793 @@ This document tracks defects from two sources:
 - **Fix Verified:** 2026-04-16 - Implementation complete, ready for physical device testing
 - **Notes:** Enhancement request. Improves UX but not critical for pilot testing. UI uses Material FilterChip for modern, clean appearance. "Hide Redeemed" chip selected by default for cleaner wallet view.
 
+### TEST-009: Settings Label Typo - "Trtansactions" Display Issue
+- **Source:** Testing - Physical Device (Build 15)
+- **Status:** 📋 BACKLOG
+- **Priority:** LOW
+- **Screen/Feature:** Customer App - Settings → App Information
+- **Description:** The "Transactions" statistics label appears to display incorrectly or contains a typo ("Trtansactions"). Additionally, the purpose of this counter is unclear to users - it's not immediately obvious what "transactions" refers to in the context of a loyalty card app.
+- **Reproduction Steps:**
+  1. Open Customer app
+  2. Navigate to Settings (gear icon)
+  3. Scroll to "App Information" section
+  4. Observe statistics: Cards, Stamps Collected, Transactions
+  5. "Transactions" label displays with potential typo
+- **Expected Behavior:** 
+  - Label should display as "Transactions" (correctly spelled)
+  - Purpose of counter should be clear to users
+  - Counter shows total number of stamp additions + redemptions
+- **Actual Behavior:** 
+  - Label appears as "Trtansactions" (typo) on device display
+  - Purpose is unclear - users don't understand what this counts
+- **Impact:** 
+  - Cosmetic issue - doesn't affect functionality
+  - Looks unprofessional/sloppy in production app
+  - Low priority but should be fixed before wider release
+- **Workaround:** None needed - purely cosmetic
+- **Fix Required:** 
+  - Verify label spelling in customer_settings.dart (line 182: `title: const Text('Transactions')`)
+  - Check if typo exists in constants or if it's a display bug
+  - Consider renaming to clearer label: "Stamp History" or "Activity Count"
+  - Or add subtitle explaining what it counts: "Stamps added and redeemed"
+- **Estimated Effort:** 15-30 minutes (simple label fix)
+- **Assigned To:**
+- **Target Build:** Build 16
+- **Notes:** Code shows correct spelling, so may be a display/rendering issue or the typo exists elsewhere. Also consider improving clarity of what "transactions" means to end users. Current implementation tracks all database transactions (stamp additions, redemptions, etc.) but this isn't obvious from the label alone.
+
+### TEST-010: Secure Mode Redemption Second Step Hidden Below Fold on iPhone
+- **Source:** Testing - Physical Device (iPhone - Build 15)
+- **Status:** 📋 BACKLOG
+- **Priority:** HIGH
+- **Screen/Feature:** Customer App - Card Detail → Secure Mode Redemption Flow
+- **Description:** In secure mode, the redemption process requires TWO steps: (1) show customer's redemption QR to supplier, and (2) scan supplier's redemption confirmation token. However, on iPhone, the "Scan Redemption Token" button (step 2) is positioned below the screen fold and not visible without scrolling. Users don't realize there's a second step required, making the redemption process confusing and potentially impossible to complete without prior knowledge. There's no visual indicator (arrow, banner, badge) suggesting that scrolling is required to see additional content.
+- **Reproduction Steps:**
+  1. Open Customer app on iPhone (not tested on smaller iPhones yet)
+  2. Complete a loyalty card (10/10 stamps) in Secure Mode
+  3. Open card detail screen
+  4. Card shows: "Show this QR code to redeem your reward" with customer's redemption QR displayed
+  5. QR code fills most of screen
+  6. Button "Scan Redemption Token" is below the visible area (below fold)
+  7. User shows QR to supplier (step 1 complete)
+  8. User doesn't see button for step 2 without scrolling
+  9. No visual indicator that there's more content below (no scroll hint, no arrow, no banner)
+- **Expected Behavior:** 
+  - Both steps of redemption process should be visible without scrolling on standard iPhone
+  - OR: Clear visual indicator that scrolling is needed (down arrow, "step 1 of 2" badge, etc.)
+  - OR: Info banner above QR explaining: "After showing this QR, scroll down to scan supplier's confirmation"
+  - OR: Make QR code smaller so button fits on screen
+  - Ideally: User understands this is a 2-step process without having to discover it by accident
+- **Actual Behavior:** 
+  - "Scan Redemption Token" button is completely hidden below fold
+  - No visual cue that scrolling is required
+  - No indication this is a multi-step process
+  - User must know the app workflow beforehand to complete redemption
+  - Process appears incomplete after showing QR (step 1)
+- **Impact:** 
+  - HIGH: Prevents users from completing redemptions in Secure Mode
+  - Users think process is broken or incomplete
+  - Requires user to already know workflow (not intuitive)
+  - First-time users will be confused
+  - Could lead to abandoned redemptions
+  - Affects all Secure Mode redemptions (core feature)
+- **Device Testing:** 
+  - Confirmed on iPhone (standard size - model TBD)
+  - Not yet tested on smaller iPhones (SE, mini) - likely worse
+  - Not tested in different orientations (portrait/landscape)
+  - Likely affects iPads in portrait mode as well
+- **Workaround:** 
+  - Scroll down to find "Scan Redemption Token" button
+  - Requires user to know it exists
+  - Not discoverable without instruction
+- **Fix Required:** 
+  - **Option 1 (Quick Fix):** Add prominent info banner above QR code:
+    ```
+    "STEP 1: Show QR to supplier
+     STEP 2: Scroll down to scan their confirmation"
+    ```
+  - **Option 2 (Medium):** Make QR code smaller (~70% current size) to fit button on screen
+  - **Option 3 (Better UX):** Add visual scroll indicator:
+    - Animated down arrow below QR
+    - "Step 1 of 2" badge at top
+    - Pulsing "More below ↓" button
+  - **Option 4 (Best):** Redesign redemption flow:
+    - Show QR in dialog/modal (smaller, centered)
+    - Button immediately visible below QR in same view
+    - Clear "Next" flow progression
+  - **Option 5 (Comprehensive):** Conduct full UI/UX review:
+    - Test on multiple device sizes (iPhone SE, 13, 14 Pro Max)
+    - Test portrait and landscape orientations
+    - Ensure all critical actions visible on smallest supported device
+    - Apply responsive design principles
+    - Add safe area padding for notched screens
+- **Estimated Effort:** 
+  - Quick fix (Option 1): 30 minutes - 1 hour
+  - Layout adjustment (Option 2): 1-2 hours
+  - Visual indicators (Option 3): 2-3 hours
+  - Flow redesign (Option 4): 4-6 hours
+  - Full UX review (Option 5): 1-2 days
+- **Assigned To:**
+- **Target Build:** Build 16 (high priority for usability)
+- **Notes:** This is critical for Secure Mode adoption. If users can't intuitively complete redemptions, they'll abandon the feature or reject the app entirely. Consider this a blocker for wider pilot deployment. The two-step redemption process is inherently complex (show → scan) compared to Simple Mode's single tap, so making it obvious and discoverable is essential. Recommend implementing Option 1 (quick info banner) immediately for Build 16, then Option 4 (flow redesign) for Build 17 based on user feedback.
+
+### TEST-011: Redeemed Card Filter Label is Confusing and Backwards
+- **Source:** Testing - Physical Device (Build 15)
+- **Status:** 📋 BACKLOG
+- **Priority:** MEDIUM
+- **Screen/Feature:** Customer App - Card List → Filter Chip
+- **Description:** The redeemed card filter (implemented in TEST-006, Build 12) has confusing labeling. The FilterChip displays "Hide Redeemed" and is selected by default (when redeemed cards ARE hidden). This is backwards from user expectations - when cards are hidden, users expect to see an option to "Show" them, not a selected "Hide" button. The current implementation makes it unclear what state the filter is in and what action clicking it will perform. The combination of FilterChip UI element, static label, selected state, and eye icon creates cognitive dissonance.
+- **Reproduction Steps:**
+  1. Open Customer app
+  2. Navigate to card list (home screen)
+  3. Observe FilterChip above card list
+  4. By default, chip shows: "Hide Redeemed" with eye-slash icon (selected/ticked)
+  5. Redeemed cards are hidden (correct behavior)
+  6. Click chip to deselect it
+  7. Chip still shows: "Hide Redeemed" but now with eye icon (not selected)
+  8. Redeemed cards now shown (correct behavior)
+  9. Label doesn't change, only icon and selection state
+- **Expected Behavior:** 
+  - **When redeemed cards ARE hidden (default):**
+    - Button should say: "Show Redeemed Cards" or "Show Redeemed"
+    - Not selected/ticked state
+    - Icon: visibility (eye) - offering to show
+    - User knows: clicking will show redeemed cards
+  - **When redeemed cards ARE shown:**
+    - Button should say: "Hide Redeemed Cards" or "Hide Redeemed"
+    - Selected/ticked state
+    - Icon: visibility_off (eye-slash) - offering to hide
+    - User knows: clicking will hide redeemed cards
+  - **Label should dynamically change** to reflect action available, not current state
+  - Common pattern: Button text describes what it WILL do, not what's already done
+- **Actual Behavior:** 
+  - Label is static: Always shows "Hide Redeemed"
+  - When hidden (default): Shows "Hide Redeemed" (selected with eye-slash)
+    - Confusing: "Hide" is already active, why is button selected?
+    - Users expect: "Show Redeemed" option
+  - When shown: Shows "Hide Redeemed" (not selected with eye)
+    - Correct wording, wrong visual state
+  - Icon changes but label doesn't
+  - Selection state indicates filter is "on" but label suggests opposite
+  - FilterChip's selected state paradigm conflicts with action button paradigm
+- **Impact:** 
+  - Users confused about filter state
+  - Unclear what clicking chip will do
+  - Backwards from standard UI patterns
+  - Medium priority: Feature works but UX is poor
+  - Not a blocker but affects perceived quality
+  - Makes app feel amateurish/unpolished
+- **UI/UX Issues:**
+  - FilterChip may not be right UI element for this use case
+  - Selected state typically means "filter active" not "hiding active"
+  - Static label with changing icon creates confusion
+  - Eye icon doesn't clearly communicate "redeemed cards" concept
+  - Chip spacing and visual weight could be better
+- **Workaround:** 
+  - Users can eventually figure it out through trial and error
+  - Click chip and observe what happens
+  - Not intuitive but functional
+- **Fix Required:** 
+  - **Option 1 (Quick):** Change label dynamically:
+    ```dart
+    label: Text(_hideRedeemed ? 'Show Redeemed' : 'Hide Redeemed')
+    ```
+    Flip selected logic: `selected: !_hideRedeemed`
+  - **Option 2 (Better):** Use IconButton or ToggleButtons instead:
+    - More appropriate for show/hide action
+    - Clearer visual affordance
+    - Standard pattern for visibility toggles
+  - **Option 3 (Best):** Two separate UI approaches:
+    - Replace FilterChip with text button + icon
+    - "Show/Hide Redeemed Cards (N)" with count
+    - More descriptive, less ambiguous
+  - **Also Consider:**
+    - Remove checkmark from selected state (confusing in this context)
+    - Use different icon (maybe archive box instead of eye)
+    - Add tooltip on long-press explaining filter
+    - Show count of hidden cards when filter active
+- **Estimated Effort:** 
+  - Option 1 (dynamic label): 30 minutes
+  - Option 2 (different widget): 1-2 hours
+  - Option 3 (redesign): 2-3 hours
+- **Assigned To:**
+- **Target Build:** Build 16
+- **Notes:** This is a regression/refinement of TEST-006 (Build 12) where the filter was implemented. The functionality works correctly - cards hide and show properly, and preference persists. The issue is purely UX/labeling. The FilterChip widget is designed for selecting filter criteria (like tags or categories), not for toggle actions. Consider this a polish issue that should be addressed before wider user testing. Users in pilot testing will likely give feedback on this confusion. Recommend Option 1 (dynamic label) as quick fix for Build 16, then revisit with Option 3 (redesign) in later build based on user feedback.
+
+### TEST-012: Camera Rotation Preference Not Persisted Across Sessions
+- **Source:** Testing - Physical Device (Build 15) - Related to CR-015
+- **Status:** 📋 BACKLOG
+- **Priority:** MEDIUM
+- **Screen/Feature:** Both Apps - QR Scanner Camera (all screens with camera)
+- **Description:** Camera orientation defaults are inconsistent across devices (iPad Supplier app correct, iPhone Customer app portrait wrong). While manual rotation buttons (90°, 180°) work perfectly, users must re-apply their preferred rotation EVERY time they open the camera. The app doesn't remember the user's rotation preference between sessions. Since detecting device orientation automatically in Flutter is difficult (due to abstractions), a better solution is to persist the user's last rotation choice and apply it on next camera open. This way, if a user always rotates camera 180°, that preference becomes their new default until changed.
+- **Reproduction Steps:**
+  1. Open Customer app on iPhone (portrait mode)
+  2. Navigate to card detail, tap "Scan Stamp Token"
+  3. Camera opens in default orientation (wrong for portrait)
+  4. Tap rotation button (e.g., 180°) to correct orientation
+  5. Scan QR code successfully
+  6. Exit camera
+  7. Open camera again later (same screen or different screen)
+  8. Camera resets to default orientation (wrong again)
+  9. User must re-select 180° rotation
+  10. Rotation preference is NOT saved between sessions
+- **Expected Behavior:** 
+  - User's last camera rotation preference should be saved to device storage (SharedPreferences)
+  - Next time camera opens (any QR scanner screen), apply saved rotation automatically
+  - Preference persists across:
+    - App restarts
+    - Different QR scanner screens (stamp, redemption, add card)
+    - Days/weeks (until app data cleared)
+  - User only needs to set rotation ONCE per device
+  - If user changes rotation, new preference is saved
+  - Separate preferences for Customer app vs Supplier app (different use cases)
+- **Actual Behavior:** 
+  - Camera always opens with same default orientation
+  - Manual rotation buttons must be used on EVERY scan
+  - No persistence of user preference
+  - User experience is repetitive and tedious
+  - Especially frustrating for users who always hold device same way
+- **Impact:** 
+  - Medium: Feature works but requires extra taps every time
+  - Degrades user experience for frequent users
+  - Not critical but annoying with daily use
+  - Affects both Customer and Supplier apps
+  - More noticeable on iPhone (portrait) than iPad (landscape works better)
+  - Compounds CR-015 issue (wrong default + no persistence = poor UX)
+- **Technical Context:**
+  - CR-015 attempts to detect device orientation automatically (difficult in Flutter)
+  - Flutter camera abstractions make orientation detection unreliable
+  - Device sensors don't always match physical holding position
+  - Portrait/landscape mode detection is tricky with notched screens
+  - Different behavior on iPhone vs iPad
+  - Previous attempts had limited success
+- **Proposed Solution (User Suggestion):**
+  Instead of fighting Flutter abstractions to detect orientation automatically:
+  1. Use SharedPreferences to store last rotation value (0°, 90°, 180°, 270°)
+  2. Key: `camera_rotation_preference_customer` or `camera_rotation_preference_supplier`
+  3. When camera screen opens:
+     - Read saved preference
+     - Apply rotation automatically via `_manualRotationOffset`
+     - Initialize camera with user's preferred rotation
+  4. When user taps rotation button:
+     - Apply rotation as normal
+     - Save new rotation value to SharedPreferences
+  5. Preference persists until app data cleared
+  6. Works across all QR scanner screens in the app
+- **Advantages of This Approach:**
+  - ✅ Sidesteps difficult device orientation detection
+  - ✅ Simple implementation using existing rotation logic
+  - ✅ User teaches app their preference (self-correcting)
+  - ✅ Works reliably regardless of device type
+  - ✅ No complex sensor reading or heuristics needed
+  - ✅ Preference is per-app (Customer vs Supplier can differ)
+  - ✅ User in control of their preference
+  - ✅ Fixes 99% of CR-015 use case without solving hard problem
+- **Implementation Details:**
+  - Add SharedPreferences dependency (already used for TEST-006 filter)
+  - Store int value: 0 = no rotation, 1 = 90°, 2 = 180°, 3 = 270°
+  - Load preference in `initState()` of QR scanner screens
+  - Set `_manualRotationOffset` to loaded value before camera initializes
+  - Update SharedPreferences in rotation button `onPressed` handlers
+  - Consider separate keys for different contexts:
+    - `camera_rotation_customer_stamp` (stamp scanning)
+    - `camera_rotation_customer_redeem` (redemption scanning)
+    - Or single global: `camera_rotation_customer` (simpler, recommended)
+- **Fix Required:** 
+  - Add SharedPreferences persistence to QR scanner screens:
+    - `customer_app/lib/screens/customer/qr_scanner_screen.dart`
+    - `supplier_app/lib/screens/supplier/import_business_screen.dart`
+    - `supplier_app/lib/screens/supplier/supplier_stamp_card.dart`
+    - `supplier_app/lib/screens/supplier/supplier_redeem_card.dart`
+  - Load preference on camera init
+  - Save preference on rotation button tap
+  - Test on iPhone (portrait) and iPad (landscape)
+  - Verify preference persists across app restarts
+- **Estimated Effort:** 2-3 hours
+  - Add SharedPreferences storage: 30 min
+  - Update all QR scanner screens: 1.5 hours
+  - Testing on multiple devices: 1 hour
+- **Assigned To:**
+- **Target Build:** Build 16 or Build 17
+- **Notes:** This is a pragmatic solution to CR-015's camera orientation problem. Instead of trying to solve the hard problem (automatic device orientation detection in Flutter), we let the user teach the app their preference once, then remember it. This approach is user-centric, simple to implement, and works reliably across all devices. The manual rotation buttons already work perfectly - we're just adding memory to the system. Recommend implementing this BEFORE attempting more complex auto-detection logic. Users will appreciate not having to rotate camera every single time. This should be prioritized higher than CR-015's LOW priority since it's actually implementable and solves the real-world pain point.
+
+### TEST-013: Statistics Info Text Displays Literal "\n" Instead of Line Breaks
+- **Source:** Testing - Physical Device (Build 15)
+- **Status:** 📋 BACKLOG
+- **Priority:** LOW
+- **Screen/Feature:** Supplier App - Home Screen → Statistics Section (Info Banner)
+- **Description:** The Statistics info banner displays literal "\n" characters in the text instead of rendering them as actual line breaks. The text should display on multiple lines for readability, but currently shows as a single line with visible "\n" escape sequences. This makes the explanatory text difficult to read and looks unprofessional.
+- **Reproduction Steps:**
+  1. Open Supplier app
+  2. Ensure you're in Secure Mode (Simple Mode hides statistics)
+  3. Scroll to Statistics section on home screen
+  4. Observe blue info banner below statistics numbers
+  5. Text reads: "Issued: Number of new cards you created for customers\nStamped: Unique customer cards you have stamped directly\nRedeemed: Number of completed cards that have been redeemed"
+  6. The "\n" characters display literally instead of creating line breaks
+- **Expected Behavior:** 
+  - Text should display on three separate lines:
+    ```
+    Issued: Number of new cards you created for customers
+    Stamped: Unique customer cards you have stamped directly
+    Redeemed: Number of completed cards that have been redeemed
+    ```
+  - Each definition on its own line for readability
+  - No visible escape sequences
+- **Actual Behavior:** 
+  - Text displays as single line with literal "\n" characters visible
+  - Escape sequences not interpreted as line breaks
+  - Text is cramped and difficult to read
+  - Looks like a coding error (unprofessional)
+- **Impact:** 
+  - Cosmetic issue - doesn't affect functionality
+  - Makes app look unfinished/buggy
+  - Low priority but should be fixed for polish
+  - Statistics still function correctly
+- **Root Cause:**
+  - File: `supplier_home.dart` (lines 297-299)
+  - Code uses `\\n` (escaped backslash + n) instead of `\n` (newline character)
+  - Text widget concatenation with `\\n` results in literal string display
+  - Flutter Text widget not interpreting as line breaks
+- **Workaround:** None - purely visual issue
+- **Fix Required:** 
+  - **Option 1 (Quick):** Change `\\n` to `\n` in string:
+    ```dart
+    Text(
+      'Issued: Number of new cards you created for customers\n'
+      'Stamped: Unique customer cards you have stamped directly\n'
+      'Redeemed: Number of completed cards that have been redeemed',
+    ```
+  - **Option 2 (Better):** Use Column with separate Text widgets:
+    ```dart
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Issued: Number of new cards you created for customers'),
+        Text('Stamped: Unique customer cards you have stamped directly'),
+        Text('Redeemed: Number of completed cards that have been redeemed'),
+      ],
+    )
+    ```
+  - **Option 3 (Best):** Use RichText with TextSpans for formatting:
+    - Bold the label (Issued:, Stamped:, Redeemed:)
+    - Regular weight for definitions
+    - Better visual hierarchy
+- **Estimated Effort:** 
+  - Option 1: 5 minutes
+  - Option 2: 15 minutes
+  - Option 3: 30 minutes
+- **Assigned To:**
+- **Target Build:** Build 16
+- **Notes:** Simple typo/formatting error. The developer likely used `\\n` thinking it would create line breaks, but the double backslash escapes it into a literal string. This is a common mistake when working with string concatenation in Dart. Quick fix but affects perceived app quality. Should be bundled with other cosmetic fixes for Build 16.
+
+### TEST-014: Clone Business Navigation Confusion After Successful Import
+- **Source:** Testing - Physical Device (Build 15)
+- **Status:** 📋 BACKLOG
+- **Priority:** CRITICAL
+- **Screen/Feature:** Supplier App - Business Setup → Clone to New Device
+- **Description:** When cloning business data to a new device via QR scan, the operation succeeds but the UI navigation is confusing and makes it appear as if nothing happened. After successful QR scan and import, a back button is still visible which returns user to the empty "Create Business" screen (business name field is not populated). User thinks the clone failed. However, closing and reopening the app reveals the business WAS successfully cloned. Additionally, attempting to scan again with a different QR code has no effect - only the first scan is stored. This creates serious confusion during multi-device setup and could lead users to believe the feature is broken.
+- **Reproduction Steps:**
+  1. Install Supplier app on NEW device (fresh install, no business)
+  2. Open app → Business setup screen appears
+  3. Select "Clone to New Device" option
+  4. Tap button to scan QR code from existing device
+  5. Scan business clone QR successfully
+  6. Import operation completes (appears to work)
+  7. **BUG:** Back button still visible, tap it
+  8. Returns to "Create Business" screen
+  9. Business name field is EMPTY (looks like nothing happened)
+  10. Close app completely
+  11. Reopen Supplier app
+  12. **Business IS cloned** correctly (all data present)
+  13. **SECOND BUG:** Go back to setup, try to scan DIFFERENT QR code
+  14. Scan completes but only FIRST business is stored (second scan ignored)
+- **Expected Behavior:** 
+  - After successful clone scan:
+    - Navigate directly to main app screen (home/supplier screen)
+    - No back button to create business screen
+    - Business data immediately visible
+    - User knows clone succeeded
+  - OR: Show success confirmation dialog before navigating:
+    - "Business cloned successfully! [Business Name]"
+    - Button: "Continue to App"
+  - If scanning again with different QR:
+    - Should either replace existing business (with confirmation)
+    - Or show error: "Business already exists. Delete current business first to clone a different one."
+- **Actual Behavior:** 
+  - Clone operation succeeds silently in background
+  - Back button remains visible (shouldn't be there)
+  - Tapping back returns to empty create screen
+  - Business name field not populated (misleading)
+  - User has no confirmation of success
+  - Must restart app to see cloned business
+  - Second scan is processed but data not saved (first scan wins)
+  - No error message or indication of what happened
+- **Impact:** 
+  - **CRITICAL:** Breaks multi-device setup workflow
+  - Users think feature is broken
+  - Creates confusion and frustration during onboarding
+  - Could lead to:
+    - Abandonment of multi-device feature
+    - Multiple clone attempts (thinking first failed)
+    - Support requests
+    - Loss of trust in app reliability
+  - Affects all new device setups using clone feature
+  - Core feature for multi-device supplier support (REQ-021)
+- **Root Cause (Suspected):**
+  - Navigation logic after successful clone not properly implemented
+  - Data persistence happens asynchronously
+  - UI doesn't wait for persistence to complete
+  - Back button not disabled/hidden after import
+  - Screen state not updated with imported business data
+  - Second scan check missing (should reject if business exists)
+- **Workaround:** 
+  - Close and reopen app after clone scan
+  - Ignore empty create screen after scanning
+  - Only scan ONCE (first scan is the one that counts)
+  - Not intuitive - requires prior knowledge
+- **Fix Required:** 
+  1. **Immediate (Navigation):** After successful clone scan:
+     - Hide back button or disable it
+     - Show loading indicator: "Importing business..."
+     - Wait for data persistence to complete
+     - Navigate to home screen with success message
+     - Never return to create business screen
+  
+  2. **User Feedback:** Add success confirmation:
+     - Dialog or snackbar: "✓ Business '[Name]' cloned successfully!"
+     - Brief delay to show success (500ms)
+     - Then navigate to main app
+  
+  3. **State Management:** Update create business screen:
+     - If business already exists, don't show create options
+     - Redirect to home screen immediately
+     - Or show: "Business already set up. [View Business]"
+  
+  4. **Second Scan Prevention:**
+     - Before processing QR scan, check if business exists
+     - If exists, show dialog:
+       - "Business already exists: [Current Name]"
+       - "To clone a different business, delete current one first"
+       - Button: "Go to Settings" / "Cancel"
+     - Don't process scan if business present
+  
+  5. **Testing:** Verify on fresh install devices
+- **Estimated Effort:** 3-4 hours
+  - Fix navigation flow: 1 hour
+  - Add success feedback: 1 hour
+  - Add duplicate check: 1 hour
+  - Testing on multiple devices: 1 hour
+- **Assigned To:**
+- **Target Build:** Build 16 (CRITICAL - blocks multi-device adoption)
+- **Notes:** This is a blocker for multi-device supplier deployment. The clone feature is a key selling point (REQ-021) for businesses wanting to use multiple iPads/registers. Current behavior makes feature appear broken and unreliable. Must be fixed before wider pilot testing. The underlying data persistence works correctly - this is purely a UI/navigation/feedback issue. Priority should be equal to or higher than TEST-010 (redemption UI) since both affect core workflows.
+
+### TEST-015: Recovery Backup Scan Causes Infinite Loop After Error
+- **Source:** Testing - Physical Device (Build 15)
+- **Status:** 📋 BACKLOG
+- **Priority:** CRITICAL
+- **Screen/Feature:** Supplier App - Business Setup → Recovery/Restore from Backup
+- **Description:** When using the recovery option to restore business from backup QR code, the scan succeeds but navigation returns user to a screen where they can scan again (incorrect workflow). If user scans again with a different QR code, an error correctly states "business already exists" - but after dismissing this error, the camera enters an infinite loop continuously trying to capture and reject images. The app becomes stuck in this loop with no escape except forcing back to the configure business screen. This appears to be caused by mixed modal and non-modal navigation patterns creating workflow confusion and breaking the screen state machine.
+- **Reproduction Steps:**
+  1. Install Supplier app on fresh device (no business)
+  2. Open app → Business setup screen
+  3. Select "Recovery" or "Restore from Backup" option
+  4. Scan business backup QR code (first QR - successful)
+  5. Business data imports successfully
+  6. **BUG 1:** Screen returns to scan screen (should exit to main app)
+  7. User can scan again (shouldn't be possible)
+  8. Scan DIFFERENT business backup QR code (second QR)
+  9. Error dialog appears: "Business already exists" or similar
+  10. Dismiss error dialog
+  11. **BUG 2:** Camera enters infinite loop:
+      - Continuously attempts to capture image
+      - Immediately rejects all captures
+      - Loop repeats indefinitely
+      - Screen shows camera view but non-functional
+      - No scan succeeds
+      - No way to escape loop
+  12. Can stay in this broken state indefinitely
+  13. Only escape: Back button multiple times to return to configure business screen
+- **Expected Behavior:** 
+  - **After first successful scan:**
+    - Business data imported
+    - Navigate to main app immediately
+    - Show success message: "Business restored successfully!"
+    - No option to scan again
+    - User proceeds to use app
+  - **If somehow user attempts second scan:**
+    - Before scanning, check if business exists
+    - Prevent scan from starting
+    - Show message: "Business already restored. Please restart app."
+  - **Camera behavior:**
+    - Never enter infinite loop
+    - Respect normal scan timeout/cancellation
+    - Allow user to exit camera gracefully
+- **Actual Behavior:** 
+  - First scan succeeds but returns to scan screen (wrong)
+  - Second scan allowed (wrong)
+  - Error dialog shows (correct error detection)
+  - After dismissing error, camera breaks (critical bug)
+  - Infinite capture/reject loop (unusable)
+  - No escape except backing out entirely
+  - Have to navigate back through multiple screens
+  - User confused and frustrated
+- **Impact:** 
+  - **CRITICAL:** Breaks backup restore workflow
+  - Users get trapped in infinite loop
+  - App appears frozen/broken
+  - Requires force navigation to escape
+  - Affects disaster recovery feature (important for business continuity)
+  - Could lead to:
+    - Data loss concerns
+    - App uninstall/abandonment
+    - Multiple restore attempts (making problem worse)
+    - Support escalations
+  - Related to TEST-014 - same root cause (navigation/workflow issues)
+  - Affects all backup restore operations
+- **Root Cause (Suspected):**
+  - **Mixed navigation paradigms:**
+    - Modal dialogs mixed with non-modal screen navigation
+    - State machine doesn't properly track workflow progress
+    - After first scan, state not reset correctly
+    - Second scan triggers error but leaves camera in invalid state
+  - **Camera state management:**
+    - Error dismissal doesn't properly reset camera
+    - Camera continues running in background
+    - Capture logic still active but validation always fails
+    - No proper cleanup/reset mechanism
+  - **Workflow design flaw:**
+    - Recovery flow allows multiple scans (shouldn't)
+    - No single "scan complete" exit point
+    - Navigation stack corrupted after error
+- **Related Issues:**
+  - TEST-014: Same navigation confusion in clone workflow
+  - Both issues stem from business setup screen workflow problems
+  - Likely share common code path
+- **Workaround:** 
+  - Only scan backup QR ONCE
+  - If error occurs, force quit app completely
+  - Restart app to escape loop
+  - Don't attempt multiple scans in single session
+  - Not acceptable workaround for production use
+- **Fix Required:** 
+  1. **Immediate (Navigation Fix):**
+     - After successful backup restore scan:
+       - Stop camera immediately
+       - Dispose camera controller
+       - Navigate to main app (not back to scan screen)
+       - Show success confirmation
+       - No option to scan again
+  
+  2. **Duplicate Scan Prevention:**
+     - Check if business exists BEFORE showing camera
+     - If exists, show dialog:
+       - "Business already exists. Restore will overwrite current data."
+       - Options: "Cancel" / "Overwrite and Continue"
+     - Don't allow scan if user cancels
+  
+  3. **Camera State Management:**
+     - Proper cleanup on error dismissal:
+       - Stop camera controller
+       - Dispose resources
+       - Reset scan state
+       - Exit to previous screen cleanly
+     - Never leave camera in limbo state
+     - Implement timeout/escape mechanism
+  
+  4. **Workflow Redesign:**
+     - Single-scan pattern: One scan → Done
+     - Clear entry and exit points
+     - Modal approach: Show camera in dialog/modal view
+     - Success → Close modal → Navigate to app
+     - Error → Close modal → Back to setup screen
+     - No mixed modal/non-modal patterns
+  
+  5. **State Machine:**
+     - Define clear states:
+       - NotStarted → Scanning → Success → Complete
+       - NotStarted → Scanning → Error → Reset → NotStarted
+     - Never allow: Error → Scanning (current bug)
+     - Enforce state transitions
+  
+  6. **Testing:**
+     - Test on fresh device
+     - Test multiple scan attempts
+     - Test error recovery
+     - Test camera disposal
+     - Test back button behavior
+- **Estimated Effort:** 4-6 hours
+  - Navigation flow fix: 2 hours
+  - Camera state cleanup: 1 hour
+  - Duplicate scan prevention: 1 hour
+  - Testing and edge cases: 2 hours
+- **Assigned To:**
+- **Target Build:** Build 16 (CRITICAL - blocks backup/restore feature)
+- **Notes:** This is a critical blocker paired with TEST-014. Both issues affect business setup workflows and stem from poor navigation/state management. The backup restore feature is essential for business continuity and disaster recovery scenarios. Current behavior makes feature unusable in edge cases and creates serious user experience problems. Must be fixed before pilot deployment expands. Consider refactoring entire business setup flow to use consistent navigation pattern (recommend modal approach for all scanning operations). This issue demonstrates why mixing modal and non-modal navigation is dangerous - state becomes unpredictable and error recovery breaks down.
+
+### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production
+- **Type:** Architecture/UX Decision
+- **Status:** 📋 PENDING DECISION
+- **Priority:** MEDIUM
+- **Screen/Feature:** Both Apps - Settings → Dangerous Operations → Delete All Data
+- **Context:** Both Customer and Supplier apps have "Delete All Data" buttons in settings that completely wipe the app's database. These are useful during development and TestFlight testing but pose risks for production release to friends, family, and pilot businesses. As we approach wider real-world usage, we need to decide whether to keep, remove, or conditionally hide these features.
+- **Current Behavior:**
+  - Settings screen has "Dangerous Operations" section
+  - "Delete All Data" button with red warning styling
+  - Confirmation dialog before deletion
+  - Wipes all cards, stamps, transactions (Customer)
+  - Wipes business data, keys, statistics (Supplier)
+  - Useful for testers to reset and start fresh
+  - No recovery after deletion
+- **Concerns:**
+  - Accidental taps could destroy valuable business data
+  - No backup/restore mechanism before deletion
+  - Users in real scenarios don't need this feature
+  - Standard consumer apps don't expose data destruction
+  - Could lead to support issues if used accidentally
+  - Especially dangerous for Supplier app (business loses all setup)
+- **Options:**
+
+**Option 1: Remove Entirely (Safest)**
+- **Pros:**
+  - Eliminates risk of accidental data loss
+  - Standard practice for consumer apps
+  - Cleaner settings UI
+  - Forces proper uninstall if user wants fresh start
+- **Cons:**
+  - Helpful for pilot testers to reset scenarios
+  - No easy way for users to start completely fresh
+  - May need during early pilot phase
+- **Implementation:** Comment out or delete dangerous operations section
+- **Effort:** 15 minutes
+
+**Option 2: Keep with Enhanced Protection (Balanced)**
+- **Pros:**
+  - Available if genuinely needed
+  - Useful for pilot testing phase
+  - Helps users recover from mistakes
+- **Cons:**
+  - Still poses some risk
+  - Requires more UI work
+- **Protections to Add:**
+  - Require typing business name to confirm (Supplier)
+  - Multiple confirmation dialogs (2-step)
+  - Add "Are you SURE?" second confirmation
+  - 5-second delay before allowed (cooling off)
+  - Show count of data to be deleted
+  - Bold red warning text
+  - Haptic feedback (strong warning vibration)
+- **Effort:** 1-2 hours
+
+**Option 3: Conditional Compilation (Best for Hybrid Approach)**
+- **Pros:**
+  - Keep in TestFlight builds for testers
+  - Remove from App Store production builds
+  - Best of both worlds
+- **Cons:**
+  - Requires build configuration
+  - More complex build process
+- **Implementation:**
+  ```dart
+  // Only show dangerous operations in debug/TestFlight builds
+  if (kDebugMode || kProfileMode) {
+    _buildDangerousOperationsSection()
+  }
+  ```
+- **Effort:** 30 minutes - 1 hour
+
+**Option 4: Hide Behind Developer Mode (Advanced)**
+- **Pros:**
+  - Feature exists but hidden from normal users
+  - Power users can access if needed
+  - Standard pattern in many apps
+- **Implementation:**
+  - Tap version number 7 times to enable developer mode
+  - Store flag in SharedPreferences
+  - Show dangerous operations only when enabled
+  - Add toggle to disable dev mode
+- **Cons:**
+  - More complex
+  - Users may discover and cause confusion
+- **Effort:** 2-3 hours
+
+**Recommendation for Build 16:**
+
+**Use Option 3 (Conditional Compilation)** with progression plan:
+
+1. **TestFlight Builds (friends/family pilot - now):**
+   - Keep "Delete All Data" visible
+   - These users are testing and need reset capability
+   - They're known contacts who can ask for help
+
+2. **Early Pilot (friendly businesses - next month):**
+   - Use Option 2: Enhanced protection
+   - Require typing business name
+   - Multiple confirmations
+   - Less likely to be used accidentally
+
+3. **Production Release (App Store - future):**
+   - Use Option 1: Remove entirely
+   - Force proper iOS uninstall/reinstall for fresh start
+   - No risk of data loss
+
+**Implementation Order:**
+- **Now (Build 16):** Do Option 3 - wrap in `kDebugMode` check
+- **Later (Build 17-18):** If needed, add Option 2 protections for pilot
+- **Production (v1.0):** Switch to Option 1 - remove completely
+
+**Code Location:**
+- Customer: `customer_app/lib/screens/customer/customer_settings.dart`
+- Supplier: `supplier_app/lib/screens/supplier/supplier_settings.dart`
+
+**Related Considerations:**
+- Add proper backup/export feature before removing delete option
+- Ensure uninstall → reinstall workflow is clear in documentation
+- Add "Getting Started" guide for fresh install scenarios
+- Consider "Reset Account" in Settings as safer alternative (keeps app but clears data)
+
+**Decision Required:** Product owner (you) should decide which option for Build 16 release.
+
 ---
 
 ## 📊 Defect Summary Statistics
 
 ### By Priority
-- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing) + 1 (NEW) = **4 total** (all FIXED)
-- 🟠 HIGH: 4 (Code Review) + 5 (Testing) + 3 (NEW) = **12 total** (all FIXED ✅)
-- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing) + 1 (NEW) = **6 total** (all FIXED)
-- 🔵 LOW: 5 (Code Review) + 0 (Testing) + 1 (NEW) = **6 total** (5 FIXED, 1 BACKLOG)
-- **TOTAL: 28 defects tracked** (21 original + 7 new from code reviews and testing)
+- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **6 total** (4 FIXED, 2 NEW in BACKLOG)
+  - Fixed: CR-001, CR-002, CR-003, TEST-001
+  - **NEW CRITICAL:** TEST-014 (Clone navigation), TEST-015 (Recovery loop)
+- 🟠 HIGH: 4 (Code Review) + 5 (Testing - old) + 4 (Testing - Build 15) = **13 total** (12 FIXED, 1 NEW in BACKLOG)
+  - **NEW HIGH:** TEST-010 (Redemption UI below fold)
+- 🟡 MEDIUM: 4 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **8 total** (6 FIXED, 2 NEW in BACKLOG)
+  - **NEW MEDIUM:** TEST-011 (Filter label), TEST-012 (Camera rotation persistence)
+- 🔵 LOW: 5 (Code Review) + 0 (Testing - old) + 3 (Testing - Build 15) = **8 total** (5 FIXED, 3 in BACKLOG)
+  - **NEW LOW:** TEST-009 (Transactions typo), TEST-013 (Statistics \n display)
+  - BACKLOG: CR-015 (Camera orientation)
+- **TOTAL: 35 defects tracked** + 1 decision item (DECISION-016)
+  - 21 original defects (code review + initial testing)
+  - 7 new from Build 15 testing (TEST-009 through TEST-015)
+  - 1 Build 15 fixed (TEST-008)
 
 ### By Status
-- 📋 BACKLOG: 1 (CR-015)
+- 📋 BACKLOG: 8 defects
+  - CR-015 (camera orientation - LOW)
+  - TEST-009, TEST-010, TEST-011, TEST-012, TEST-013, TEST-014, TEST-015 (Build 15 findings)
 - 🚧 IN PROGRESS: 0
-- ✅ FIXED: 26
+- ✅ FIXED: 26 defects
+  - Builds 1-15 fixes
 - ✅ CLOSED: 1 (CR-011 duplicate)
+- 📝 PENDING DECISION: 1 (DECISION-016 - Delete All Data feature)
 
 ### By Source
-- Code Review: 20 (14 original + 6 new)
-- Testing: 8 (7 original + 1 new)
+- Code Review: 20 defects (14 original + 6 new reviews)
+- Testing: 15 defects (8 original + 7 Build 15 findings)
+- Decisions: 1 (production readiness)
 
 ### Current Build
-- **Build 15** - Recursive overflow handling, conditional messages, error docs, code review fixes
-- **Status:** ✅ READY FOR TESTFLIGHT
-- **Defects Resolved:** 96% (26/27 active defects fixed)
+- **Build 15** - Deployed to TestFlight April 16, 2026
+- **Status:** ✅ DEPLOYED, 🐛 NEW ISSUES FOUND
+- **Defects Resolved in Build 15:** 1 (TEST-008)
+- **New Defects Found in Build 15:** 7 (TEST-009 through TEST-015)
+- **Critical Blockers for Build 16:** 2 (TEST-014, TEST-015)
 
 ### By Target Build
-- Build 9 (COMPLETE): 2 defects (TEST-003, TEST-004) - Camera controls fixed
-- Build 10 (COMPLETE): 1 defect (TEST-002) - Backup/export timeout workaround
-- Build 11 (COMPLETE): 1 defect (TEST-005) - Duplicate card prevention on redemption
-- Build 12 (COMPLETE): 1 defect (TEST-006) - Redeemed cards filter
-- Build 13-14 (COMPLETE): 3 defects (CR-014 + code review fixes) - Error handling docs
-- Build 15 (COMPLETE): 1 defect (TEST-008) - Overflow card cascade logic
-- v0.3.0+ (Low priority): 1 defect (CR-015) - Camera default orientation
+- Build 9 (COMPLETE): 2 defects - Camera controls fixed
+- Build 10 (COMPLETE): 1 defect - Backup/export timeout
+- Build 11 (COMPLETE): 1 defect - Duplicate card prevention
+- Build 12 (COMPLETE): 1 defect - Redeemed cards filter
+- Build 13-14 (COMPLETE): 3 defects - Error handling docs + code review
+- Build 15 (COMPLETE): 1 defect - Overflow card cascade (TEST-008)
+- **Build 16 (PLANNED):** 7 defects (Build 15 findings)
+  - 🔴 CRITICAL: TEST-014, TEST-015 (business setup workflows)
+  - 🟠 HIGH: TEST-010 (redemption UI)
+  - 🟡 MEDIUM: TEST-011 (filter label), TEST-012 (camera persistence)
+  - 🔵 LOW: TEST-009 (transactions typo), TEST-013 (statistics text)
+- v0.3.0+ (Deferred): 1 defect - CR-015 (camera default orientation)
+
+### Build 16 Priority Order
+1. **CRITICAL (Must Fix):** TEST-014, TEST-015 - Business setup navigation bugs
+2. **HIGH:** TEST-010 - Redemption flow UI visibility
+3. **MEDIUM:** TEST-011, TEST-012 - UX improvements
+4. **LOW:** TEST-009, TEST-013 - Cosmetic fixes
+5. **DECISION:** DECISION-016 - Delete All Data feature (discuss before Build 16)
 
 ---
 

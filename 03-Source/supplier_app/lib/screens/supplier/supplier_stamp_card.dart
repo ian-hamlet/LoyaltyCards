@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -30,6 +31,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   bool _isProcessing = false;
   String? _errorMessage;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
+  Timer? _countdownTimer;
+  Duration? _remainingTime;
 
   @override
   void initState() {
@@ -89,6 +92,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     _cameraController.dispose();
     super.dispose();
   }
@@ -760,7 +764,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 }
 
 // Screen to display stamp token QR code (non-modal)
-class _StampTokenScreen extends StatelessWidget {
+class _StampTokenScreen extends StatefulWidget {
   final StampToken token;
   final int currentStamps;
   final int stampCount;
@@ -773,18 +777,60 @@ class _StampTokenScreen extends StatelessWidget {
     required this.business,
   });
 
-  String _getExpiryTime() {
-    final expiryTime = DateTime.fromMillisecondsSinceEpoch(token.timestamp)
+  @override
+  State<_StampTokenScreen> createState() => _StampTokenScreenState();
+}
+
+class _StampTokenScreenState extends State<_StampTokenScreen> {
+  Timer? _countdownTimer;
+  Duration? _remainingTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    _updateRemainingTime();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _updateRemainingTime();
+    });
+  }
+
+  void _updateRemainingTime() {
+    final expiryTime = DateTime.fromMillisecondsSinceEpoch(widget.token.timestamp)
         .add(const Duration(minutes: 2));
-    final hour = expiryTime.hour.toString().padLeft(2, '0');
-    final minute = expiryTime.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
+    final remaining = expiryTime.difference(DateTime.now());
+    
+    if (remaining.isNegative) {
+      _countdownTimer?.cancel();
+      if (mounted) {
+        setState(() => _remainingTime = Duration.zero);
+      }
+    } else {
+      if (mounted) {
+        setState(() => _remainingTime = remaining);
+      }
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final newStampCount = currentStamps + stampCount;
-    final stampText = stampCount > 1 ? '$stampCount Stamps' : '${stampCount} Stamp';
+    final newStampCount = widget.currentStamps + widget.stampCount;
+    final stampText = widget.stampCount > 1 ? '${widget.stampCount} Stamps' : '${widget.stampCount} Stamp';
 
     return Scaffold(
       appBar: AppBar(
@@ -825,7 +871,7 @@ class _StampTokenScreen extends StatelessWidget {
               const SizedBox(height: 8),
               
               Text(
-                'Progress: $currentStamps → $newStampCount',
+                'Progress: ${widget.currentStamps} → $newStampCount',
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.grey[600],
@@ -848,7 +894,7 @@ class _StampTokenScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Now ask customer to scan this code and get their ${stampCount > 1 ? "$stampCount stamps" : "stamp"}',
+                        'Now ask customer to scan this code and get their ${widget.stampCount > 1 ? "${widget.stampCount} stamps" : "stamp"}',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -878,7 +924,7 @@ class _StampTokenScreen extends StatelessWidget {
                   ],
                 ),
                 child: QrImageView(
-                  data: token.toQRString(),
+                  data: widget.token.toQRString(),
                   version: QrVersions.auto,
                   size: QRCodeSize.calculate(context),
                   backgroundColor: Colors.white,
@@ -887,11 +933,13 @@ class _StampTokenScreen extends StatelessWidget {
               
               const SizedBox(height: 24),
               
-              // Expiry info
+              // Expiry info with countdown
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: _remainingTime != null && _remainingTime!.inMinutes < 1
+                      ? Colors.red.shade50
+                      : Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -900,14 +948,20 @@ class _StampTokenScreen extends StatelessWidget {
                     Icon(
                       Icons.timer_outlined,
                       size: 16,
-                      color: Colors.orange.shade700,
+                      color: _remainingTime != null && _remainingTime!.inMinutes < 1
+                          ? Colors.red.shade700
+                          : Colors.orange.shade700,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Valid for 2 min (expires ${_getExpiryTime()})',
+                      _remainingTime != null
+                          ? 'Expires in: ${_formatDuration(_remainingTime!)}'
+                          : 'Valid for 2 min',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.orange.shade900,
+                        color: _remainingTime != null && _remainingTime!.inMinutes < 1
+                            ? Colors.red.shade900
+                            : Colors.orange.shade900,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

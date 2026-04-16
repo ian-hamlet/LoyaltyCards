@@ -299,15 +299,16 @@ This document tracks defects from two sources:
 
 ### CR-015: Camera Default Orientation Not Optimal
 - **Source:** Testing - iPhone/iPad
-- **Status:** 📋 BACKLOG
+- **Status:** 📋 BACKLOG - Deferred to v0.3.0+ (May not fix - effectively addressed by TEST-012)
 - **Priority:** LOW
 - **Description:** QR scanner cameras default to orientations that require manual rotation adjustment. While rotate buttons (90°, 180°) work correctly, users need to tap rotation buttons on nearly every scan session to get optimal camera angle.
+- **NOTE:** **TEST-012 (Build 18) effectively solves the user pain point** - Camera rotation now persists across sessions. Users only need to set rotation ONCE and it's remembered forever. The underlying technical challenge (auto-detecting device orientation in Flutter) remains unsolved, but the user experience problem is eliminated.
 - **Reproduction Steps:**
   1. Open any QR scanner screen (customer or supplier app)
   2. Camera opens in default orientation
   3. QR code appears sideways or upside down
   4. User must tap rotate 90° or 180° buttons to align
-  5. Same rotation needed consistently across sessions
+  5. ~~Same rotation needed consistently across sessions~~ **FIXED in Build 18:** Rotation now persists
 - **Expected Behavior:**
   - Camera should default to orientation matching device physical orientation
   - Portrait mode → camera portrait
@@ -315,28 +316,35 @@ This document tracks defects from two sources:
   - Minimize need for manual rotation button usage
 - **Actual Behavior:**
   - Camera defaults to orientation requiring manual adjustment
-  - Users tap rotate buttons on most scan sessions
+  - ~~Users tap rotate buttons on most scan sessions~~ **Users tap rotation buttons ONCE, then it's remembered**
   - Initial orientation logic doesn't match physical device holding position
 - **Impact:**
-  - Extra tap required on most scans
-  - Minor UX friction
+  - ~~Extra tap required on most scans~~ **Extra tap required ONLY on first scan**
+  - ~~Minor UX friction~~ **Minimal UX friction - one-time setup**
   - Rotation buttons work perfectly (can always adjust)
   - Not a blocker - workaround is simple and quick
+  - **TEST-012 eliminates repetitive friction**
 - **Workaround:** Tap rotate 90° or 180° button to adjust (working as designed)
 - **Fix Required:**
-  - Investigate device orientation detection heuristics
-  - Consider testing multiple default rotation values
-  - May need device-specific or mode-specific defaults
-  - Balance between iPhone portrait vs iPad landscape use cases
-  - Note: Previous attempts made partial improvements
+  - ~~Investigate device orientation detection heuristics~~
+  - ~~Consider testing multiple default rotation values~~
+  - ~~May need device-specific or mode-specific defaults~~
+  - ~~Balance between iPhone portrait vs iPad landscape use cases~~
+  - **DECISION:** May not implement automatic detection - TEST-012 persistence is sufficient
+  - Note: Previous attempts at auto-detection made partial improvements but unreliable
+  - Automatic orientation detection in Flutter is technically challenging (see ABOUT_LOYALTYCARDS.md for detailed explanation)
 - **Estimated Effort:** 2-4 hours (investigation + testing on multiple devices)
 - **Assigned To:**
-- **Target Build:** v0.3.0+
+- **Target Build:** v0.3.0+ (LOW PRIORITY - May not implement)
 - **Notes:**
   - Not urgent - rotation buttons provide full workaround
-  - Low priority enhancement for QoL improvement
+  - TEST-012 (Build 18) addresses core user pain point
+  - Users teach the app their preference once, it remembers forever
+  - May close as "Won't Fix - Addressed by TEST-012" after user feedback
+  - Automatic detection still has value but much lower priority now
   - Rotation logic attempted previously with some success
   - May require per-device tuning (iPhone vs iPad behaviors differ)
+  - Consider user feedback from Build 18 testing before deciding whether to implement
 
 ---
 

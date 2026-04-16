@@ -83,7 +83,7 @@ class _SupplierHomeState extends State<SupplierHome> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${_business!.name} $appVersion'),
+        title: const Text('Customer Loyalty Cards'),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),

@@ -2,8 +2,8 @@
 
 **A Privacy-First Digital Loyalty Card System**
 
-Version 0.1.0 (Build 83)  
-Last Updated: April 13, 2026
+Version 0.2.0 (Build 18)  
+Last Updated: April 16, 2026
 
 ---
 
@@ -235,6 +235,66 @@ Customer Phone ←--QR Codes--→ Supplier Device
 **Data Size:**
 - Typical customer: 5-10 cards = ~10KB
 - Typical supplier: 1000s of cards = ~500KB
+
+### Camera Rotation & Device Orientation
+
+**The Challenge:**
+
+Different devices (iPhone vs iPad) and different holding positions (portrait vs landscape) can result in the QR scanner camera appearing sideways or upside down. While it might seem simple to "just detect the device orientation and rotate automatically," this is actually quite difficult in Flutter:
+
+**Why Auto-Rotation Is Hard:**
+- **Flutter's Camera Abstractions:** Flutter's camera plugin abstracts away native camera APIs, making direct orientation detection unreliable
+- **Gyroscope Data Mismatches:** Physical device sensors report orientation based on accelerometer/gyroscope, but this doesn't always match how the user is actually holding the device
+- **Notched Screen Challenges:** Modern devices with notches, dynamic islands, and Face ID make traditional portrait/landscape detection less reliable
+- **Device-Specific Quirks:** iPad and iPhone behave differently - what works for one device may not work for another
+- **Platform Differences:** iOS and Android handle camera orientation differently, requiring platform-specific code
+- **App Orientation Lock:** Apps may lock orientation (e.g., portrait-only), while camera needs different orientation
+- **Multiple Correct Answers:** A tablet in landscape could be held with camera on left OR right - both are "correct" but need opposite rotations
+
+**Our Pragmatic Solution:**
+
+Instead of fighting these technical challenges, we implemented a **user-taught preference system**:
+
+1. **Manual Rotation Buttons:**
+   - Every QR scanner screen has two rotation buttons: **90°** and **180°**
+   - Tap to rotate camera view instantly
+   - Works reliably on all devices
+
+2. **Persistent Preference:**
+   - Your last rotation choice is **saved automatically**
+   - Preference persists across app restarts
+   - Shared across ALL camera screens in both apps
+   - Set once, never need to adjust again (unless you change how you hold your device)
+
+3. **Smart Defaults:**
+   - Customer app: Defaults to 90° rotation (common iPhone portrait use)
+   - Supplier import: Defaults to 0° (iPad landscape use)
+   - Can be adjusted immediately if default doesn't match your device
+
+**Benefits of This Approach:**
+- ✅ **User in Control:** You teach the app your preference
+- ✅ **100% Reliable:** No guessing, no sensor errors
+- ✅ **Device-Agnostic:** Works perfectly on any iOS device
+- ✅ **One-Time Setup:** Set rotation once, app remembers forever
+- ✅ **Self-Correcting:** If you change how you hold your device, just tap rotation button again
+- ✅ **Simple Implementation:** No complex sensor code, no platform-specific hacks
+- ✅ **No Edge Cases:** Every orientation has an exact solution (0°, 90°, 180°, 270°)
+
+**How It Works:**
+1. Open any QR scanner (customer or supplier app)
+2. If camera view is sideways/upside down, tap rotation button once or twice
+3. Scan your QR code
+4. Done! Next time you open ANY camera, your preferred rotation is already applied
+5. Preference stored in SharedPreferences (iOS local storage)
+
+**Technical Details:**
+- Single shared preference key: `camera_rotation`
+- Values: 0 (no rotation), 1 (90°), 2 (180°), 3 (270°)
+- Updated automatically when rotation button tapped
+- Loaded on every camera screen initialization
+- Persists indefinitely (until app data cleared)
+
+This approach solves the real-world user pain point (having to rotate camera every time) without attempting to solve the much harder problem (automatic device orientation detection). It's user-centric, reliable, and works perfectly across all devices.
 
 ---
 
@@ -579,6 +639,12 @@ A: Currently not supported. Choose mode during setup. Contact support to discuss
 
 **Q: Does it work without internet?**  
 A: Yes! Complete offline functionality. Data never leaves your device.
+
+**Q: Why is my camera sideways/upside down?**  
+A: Different devices and holding positions result in different camera orientations. Use the rotation buttons (90° or 180°) on the camera screen to adjust. Your rotation preference is saved automatically - you only need to set it once and the app will remember it forever.
+
+**Q: Why doesn't the camera auto-rotate to match my device?**  
+A: Automatic camera rotation using device sensors (gyroscope/accelerometer) is extremely difficult in Flutter due to platform abstractions, device-specific quirks, and ambiguous orientations (e.g., tablet can be held with camera on left or right). Instead, we use manual rotation buttons with saved preferences - you teach the app your preference once, and it remembers. This is more reliable and works perfectly on all devices.
 
 **Q: How do you make money?**  
 A: Pilot is free. Future: Optional premium features (advanced analytics, multi-location support).

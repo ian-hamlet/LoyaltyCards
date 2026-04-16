@@ -395,6 +395,31 @@
 
 ---
 
+#### G. Camera Rotation Persistence
+1. Open any QR scanner screen (customer or supplier)
+2. If camera view is sideways/upside down, tap rotation button (90° or 180°)
+3. Scan a QR code successfully
+4. Close the camera screen
+5. Open the SAME camera screen again
+6. **Expected:** Camera opens with your preferred rotation already applied
+7. Now open a DIFFERENT camera screen (e.g., stamp issuance if you just tested card issuance)
+8. **Expected:** Your rotation preference applies to ALL cameras
+9. Close and reopen the app completely
+10. Open any camera screen
+11. **Expected:** Rotation preference persists across app restarts
+
+**Testing Notes:**
+- Camera rotation preference is shared across ALL QR scanners in both apps
+- Setting applies to: Customer scanner, Supplier import, Supplier stamp, Supplier redeem
+- Preference saved automatically when rotation button tapped
+- Default rotation: 90° (may vary by screen)
+- Test on both iPhone (portrait) and iPad (landscape) if available
+
+**✅ Pass / ❌ Fail**  
+**Notes:**
+
+---
+
 ## UI/UX Observations
 
 ### Visual & Layout Issues

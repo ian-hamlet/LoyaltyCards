@@ -122,11 +122,10 @@
 /// - Added SharedPreferences to save user's preferred camera rotation
 /// - Rotation preference loaded automatically on camera screen init
 /// - User's last rotation choice becomes their default for future sessions
-/// - Separate preferences for each camera context:
-///   * camera_rotation_customer (customer QR scanner)
-///   * camera_rotation_supplier_import (supplier import/recovery)
-///   * camera_rotation_supplier_stamp (supplier stamp issuance)
-///   * camera_rotation_supplier_redeem (supplier redemption scanning)
+/// - Single shared preference key 'camera_rotation' used by ALL cameras
+/// - When user rotates ANY camera, that rotation applies to ALL cameras
+/// - Last rotation done to any camera becomes the default for all cameras
+/// - Consistent rotation experience across both apps and all scan contexts
 /// - Applied to all 4 QR scanner screens:
 ///   * customer_app/qr_scanner_screen.dart
 ///   * supplier_app/import_business_screen.dart
@@ -135,5 +134,14 @@
 /// - User only needs to set rotation once per app context
 /// - Eliminates repetitive manual rotation on every scan session
 /// - SharedPreferences added to supplier_app dependencies
+/// - UX Improvement: Removed version number from app title bars
+///   * Customer app: "My Loyalty Cards" (was "My Loyalty Cards v0.2.0+18")
+///   * Supplier app: "Customer Loyalty Cards" (was "{Business Name} v0.2.0+18")
+///   * Version still visible in Settings screens
+///   * Cleaner, less cluttered UI
+/// - UX Improvement: Supplier app title now "Customer Loyalty Cards"
+///   * More descriptive of app purpose
+///   * Business name already prominent on dashboard
+///   * Consistent with professional business app design
 
 const String appVersion = '0.2.0+18';

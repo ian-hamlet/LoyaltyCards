@@ -138,7 +138,7 @@ class _CustomerHomeState extends State<CustomerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Loyalty Cards $appVersion'),
+        title: const Text('My Loyalty Cards'),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),

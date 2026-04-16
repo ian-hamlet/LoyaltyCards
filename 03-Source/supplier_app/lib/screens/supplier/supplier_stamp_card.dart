@@ -64,7 +64,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   Future<void> _loadRotationPreference() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final savedRotation = prefs.getInt('camera_rotation_supplier_stamp') ?? 1;
+      final savedRotation = prefs.getInt('camera_rotation') ?? 1;
       if (mounted) {
         setState(() {
           _manualRotationOffset = savedRotation;
@@ -80,7 +80,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   Future<void> _saveRotationPreference(int rotation) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('camera_rotation_supplier_stamp', rotation);
+      await prefs.setInt('camera_rotation', rotation);
       AppLogger.debug('Saved camera rotation preference: $rotation (${rotation * 90}°)', 'Camera');
     } catch (e) {
       AppLogger.warning('Failed to save camera rotation preference: $e', 'Camera');

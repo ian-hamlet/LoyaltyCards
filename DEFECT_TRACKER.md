@@ -13,6 +13,8 @@ Update# Defect Tracker - v0.2.0 Post-Testing
 **Status:** ✅ **READY FOR TESTING**  
 **Progress:**
 1. ✅ TEST-012: Camera rotation persistence (MEDIUM) - Ready for device testing
+2. ✅ UX Improvement: Removed version number from app title bars
+3. ✅ UX Improvement: Supplier app title changed to "Customer Loyalty Cards"
 
 **Build 17 Status:** ✅ Completed April 16, 2026 (2 CRITICAL + 1 bonus fix)  
 **Build 16 Status:** ✅ Completed April 16, 2026 (4 defects fixed)  

@@ -771,6 +771,45 @@ This document tracks defects from two sources:
 - **Target Build:** Build 5 (quick fix), Build 6-10 (configurable)
 - **Notes:** Simple mode only - secure mode uses cryptographic signatures which prevent duplicate stamps inherently. This is a business policy setting that should be flexible per supplier.
 
+### TEST-008: Additional Stamps Create New Card Instead of Filling Existing Cards
+- **Source:** Testing - Physical Device (Secure Mode)
+- **Status:** 🚧 IN PROGRESS
+- **Priority:** HIGH
+- **Screen/Feature:** Customer App - Secure Mode Stamp Processing with overflow
+- **Description:** When receiving additional stamps (multi-stamp QR) that cause overflow, the system always creates a NEW card for overflow stamps even when existing partially-filled cards have available space. This creates unnecessary duplicate cards instead of intelligently filling existing cards first.
+- **Reproduction Steps:**
+  1. Customer has a card requiring 10 stamps (Card A, currently 8/10)
+  2. Customer also has an overflow card (Card B, currently 2/10)
+  3. Supplier issues stamp QR with 5 additional stamps
+  4. Expected: Card A gets 2 stamps → complete, Card B gets 3 stamps → 5/10
+  5. Actual: Card A gets 2 stamps → complete, NEW Card C created with 3 stamps
+  6. Result: User now has Card A (complete), Card B (2/10), Card C (3/10)
+- **Expected Behavior:** 
+  - When overflow occurs, check for existing non-redeemed cards with available space
+  - Fill cards by priority (most stamps first, same logic as TEST-005 fix)
+  - Only create new card when ALL existing cards are full
+  - Repeat overflow logic recursively if needed (overflow from Card A → Card B → Card C, etc.)
+- **Actual Behavior:** 
+  - Always creates new card for overflow stamps
+  - Doesn't use findCardWithSpace() logic that was added for redemption (TEST-005)
+  - Results in multiple partially-filled cards for same business
+- **Impact:** 
+  - Wallet cluttered with duplicate cards
+  - Poor UX - confusing to have multiple cards for same business
+  - Defeats purpose of overflow card logic
+  - Related to TEST-005 but different code path (stamps vs redemption)
+- **Workaround:** Manually delete extra cards, but tedious
+- **Fix Required:** 
+  - Apply same findCardWithSpace() logic from TEST-005 to overflow stamp handling
+  - Location: qr_scanner_screen.dart, around line 400-420 (overflow handling)
+  - Replace "always create new card" with "check existing cards first"
+  - Implement recursive overflow: fill Card A → overflow to Card B → if Card B overflows, use Card C or create new
+  - Reuse existing CardRepository.findCardWithSpace() method
+- **Estimated Effort:** 1-2 hours
+- **Assigned To:**
+- **Target Build:** Build 15
+- **Notes:** This is the same pattern as TEST-005 but for a different code path. The findCardWithSpace() utility already exists and works correctly for redemption. Need to apply same logic to additional stamp overflow scenario.
+
 ### TEST-006: No Filter Option to Exclude Redeemed Cards
 - **Source:** Testing - Both (iPhone and iPad)
 - **Status:** ✅ FIXED

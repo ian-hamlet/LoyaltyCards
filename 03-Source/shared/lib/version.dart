@@ -66,5 +66,17 @@
 /// - Added length checks before substring(0, 20) in all logging statements
 /// - Prevents potential RangeError with malformed QR signatures
 /// - Minor bug fixes - no functional changes to working features
+/// 
+/// Build 15 Changes:
+/// - Fix overflow stamps creating duplicate cards (TEST-008)
+/// - Apply findCardWithSpace() logic to overflow handling
+/// - Check for existing non-redeemed cards before creating new overflow card
+/// - Recursive overflow: fill existing cards in cascade before creating new
+/// - Example: Card A (8/10) + Card B (2/10) + 5 stamps = Card A complete,
+///   Card B gets 3 stamps (total 5/10), NO duplicate Card C created
+/// - Comprehensive logging for overflow cascade debugging
+/// - Matches redemption logic from Build 11 (TEST-005)
+/// - Fix redemption success message to only show "New card added" when
+///   a new card was actually created (conditional message display)
 
-const String appVersion = '0.2.0+14';
+const String appVersion = '0.2.0+15';

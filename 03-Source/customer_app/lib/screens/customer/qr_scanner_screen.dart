@@ -406,63 +406,180 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       await repository.updateStampCount(card.id, card.stampsRequired);
       AppLogger.business('Current card now complete with ${card.stampsRequired} stamps');
       
-      // Create new card with overflow stamps
-      final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
-      final now = DateTime.now();
-      final newCard = models.Card(
-        id: newCardId,
-        businessId: card.businessId,
-        businessName: card.businessName,
-        businessPublicKey: card.businessPublicKey,
-        brandColor: card.brandColor,
-        logoIndex: card.logoIndex,
-        mode: card.mode, // Preserve the operation mode
-        stampsRequired: card.stampsRequired,
-        stampsCollected: overflow,
-        createdAt: now,
-        updatedAt: now,
-      );
+      // Handle overflow stamps - check for existing card with space first (TEST-008 fix)
+      final existingCard = await repository.findCardWithSpace(card.businessId);
       
-      await repository.insertCard(newCard);
-      AppLogger.business('Created new card: $newCardId with $overflow stamps');
-      
-      // Move overflow stamps to new card
-      // Get all stamps for the original card
-      final allStamps = await stampRepo.getStampsByCard(card.id);
-      AppLogger.database('Total stamps in original card: ${allStamps.length}');
-      
-      // Take the last 'overflow' stamps and move them to new card
-      final stampsToMove = allStamps.skip(allStamps.length - overflow).toList();
-      AppLogger.database('Moving ${stampsToMove.length} stamps to new card...');
-      
-      for (var i = 0; i < stampsToMove.length; i++) {
-        final oldStamp = stampsToMove[i];
-        final newStampNumber = i + 1;
+      if (existingCard != null) {
+        AppLogger.business('Found existing card with space: ${existingCard.id}');
+        AppLogger.business('  Existing card: ${existingCard.stampsCollected}/${existingCard.stampsRequired}');
         
-        // Delete from old card
-        await stampRepo.deleteStamp(oldStamp.id);
+        // Calculate how many stamps can fit in existing card
+        final availableSpace = existingCard.stampsRequired - existingCard.stampsCollected;
+        final stampsToExistingCard = overflow < availableSpace ? overflow : availableSpace;
+        final remainingOverflow = overflow - stampsToExistingCard;
         
-        // Create on new card with renumbered stamp number
-        final newStamp = Stamp(
-          id: '${newCardId}_stamp_$newStampNumber',
-          cardId: newCardId,
-          stampNumber: newStampNumber,
-          timestamp: oldStamp.timestamp,
-          signature: oldStamp.signature,
-          previousHash: i == 0 ? null : stampsToMove[i - 1].signature,
+        AppLogger.business('  Available space in existing card: $availableSpace');
+        AppLogger.business('  Adding $stampsToExistingCard stamps to existing card');
+        AppLogger.business('  Remaining overflow after: $remainingOverflow');
+        
+        // Update existing card with new stamp count
+        await repository.updateStampCount(existingCard.id, existingCard.stampsCollected + stampsToExistingCard);
+        
+        // Move overflow stamps to existing card
+        final allStamps = await stampRepo.getStampsByCard(card.id);
+        final stampsToMove = allStamps.skip(allStamps.length - overflow).take(stampsToExistingCard).toList();
+        
+        AppLogger.database('Moving ${stampsToMove.length} stamps to existing card ${existingCard.id}...');
+        
+        for (var i = 0; i < stampsToMove.length; i++) {
+          final oldStamp = stampsToMove[i];
+          final newStampNumber = existingCard.stampsCollected + i + 1;
+          
+          // Delete from old card
+          await stampRepo.deleteStamp(oldStamp.id);
+          
+          // Get previous hash (last stamp on existing card, or null if empty)
+          final existingStamps = await stampRepo.getStampsByCard(existingCard.id);
+          final previousHash = existingStamps.isNotEmpty ? existingStamps.last.signature : null;
+          
+          // Create on existing card
+          final newStamp = Stamp(
+            id: '${existingCard.id}_stamp_$newStampNumber',
+            cardId: existingCard.id,
+            stampNumber: newStampNumber,
+            timestamp: oldStamp.timestamp,
+            signature: oldStamp.signature,
+            previousHash: i == 0 ? previousHash : stampsToMove[i - 1].signature,
+          );
+          
+          await stampRepo.insertStamp(newStamp);
+          AppLogger.database('  Moved stamp #${oldStamp.stampNumber} -> existing card stamp #$newStampNumber');
+        }
+        
+        // If there's STILL overflow after filling existing card, create new card for remainder
+        if (remainingOverflow > 0) {
+          AppLogger.business('Still have $remainingOverflow stamps after filling existing card');
+          AppLogger.business('Creating new card for remaining overflow stamps');
+          
+          final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+          final now = DateTime.now();
+          final newCard = models.Card(
+            id: newCardId,
+            businessId: card.businessId,
+            businessName: card.businessName,
+            businessPublicKey: card.businessPublicKey,
+            brandColor: card.brandColor,
+            logoIndex: card.logoIndex,
+            mode: card.mode,
+            stampsRequired: card.stampsRequired,
+            stampsCollected: remainingOverflow,
+            createdAt: now,
+            updatedAt: now,
+          );
+          
+          await repository.insertCard(newCard);
+          AppLogger.business('Created new card: $newCardId with $remainingOverflow stamps');
+          
+          // Move remaining overflow stamps to new card
+          final remainingStamps = allStamps.skip(allStamps.length - remainingOverflow).toList();
+          AppLogger.database('Moving ${remainingStamps.length} remaining stamps to new card...');
+          
+          for (var i = 0; i < remainingStamps.length; i++) {
+            final oldStamp = remainingStamps[i];
+            final newStampNumber = i + 1;
+            
+            // Delete from old card
+            await stampRepo.deleteStamp(oldStamp.id);
+            
+            // Create on new card
+            final newStamp = Stamp(
+              id: '${newCardId}_stamp_$newStampNumber',
+              cardId: newCardId,
+              stampNumber: newStampNumber,
+              timestamp: oldStamp.timestamp,
+              signature: oldStamp.signature,
+              previousHash: i == 0 ? null : remainingStamps[i - 1].signature,
+            );
+            
+            await stampRepo.insertStamp(newStamp);
+            AppLogger.database('  Moved stamp #${oldStamp.stampNumber} -> new card stamp #$newStampNumber');
+          }
+          
+          AppLogger.business('Overflow complete! Cards cascade:');
+          AppLogger.business('  Original card (COMPLETE): ${card.stampsRequired} stamps');
+          AppLogger.business('  Existing card (FILLED): ${existingCard.stampsCollected + stampsToExistingCard}/${existingCard.stampsRequired} stamps');
+          AppLogger.business('  New card: $remainingOverflow stamps');
+        } else {
+          AppLogger.business('Overflow complete! All stamps placed in existing cards');
+          AppLogger.business('  Original card (COMPLETE): ${card.stampsRequired} stamps');
+          AppLogger.business('  Existing card: ${existingCard.stampsCollected + stampsToExistingCard}/${existingCard.stampsRequired} stamps');
+        }
+        
+        if (mounted) {
+          Navigator.pop(context, 
+            'Card complete! 🎉 ${stampsToExistingCard} stamp${stampsToExistingCard > 1 ? 's' : ''} added to existing card${remainingOverflow > 0 ? ", new card started with $remainingOverflow" : ""}');
+        }
+      } else {
+        // No existing card with space - create new card (original behavior)
+        AppLogger.business('No existing cards with space - creating new card');
+        
+        final newCardId = '${card.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+        final now = DateTime.now();
+        final newCard = models.Card(
+          id: newCardId,
+          businessId: card.businessId,
+          businessName: card.businessName,
+          businessPublicKey: card.businessPublicKey,
+          brandColor: card.brandColor,
+          logoIndex: card.logoIndex,
+          mode: card.mode, // Preserve the operation mode
+          stampsRequired: card.stampsRequired,
+          stampsCollected: overflow,
+          createdAt: now,
+          updatedAt: now,
         );
         
-        await stampRepo.insertStamp(newStamp);
-        AppLogger.database('  Moved stamp #${oldStamp.stampNumber} -> new card stamp #$newStampNumber');
-      }
-      
-      AppLogger.business('Card split complete!');
-      AppLogger.business('  Card 1 (COMPLETE): ${card.stampsRequired} stamps');
-      AppLogger.business('  Card 2 (NEW): $overflow stamps');
-      
-      if (mounted) {
-        Navigator.pop(context, 
-          'Card complete! 🎉 New card started with $overflow stamp${overflow > 1 ? 's' : ''}');
+        await repository.insertCard(newCard);
+        AppLogger.business('Created new card: $newCardId with $overflow stamps');
+        
+        // Move overflow stamps to new card
+        // Get all stamps for the original card
+        final allStamps = await stampRepo.getStampsByCard(card.id);
+        AppLogger.database('Total stamps in original card: ${allStamps.length}');
+        
+        // Take the last 'overflow' stamps and move them to new card
+        final stampsToMove = allStamps.skip(allStamps.length - overflow).toList();
+        AppLogger.database('Moving ${stampsToMove.length} stamps to new card...');
+        
+        for (var i = 0; i < stampsToMove.length; i++) {
+          final oldStamp = stampsToMove[i];
+          final newStampNumber = i + 1;
+          
+          // Delete from old card
+          await stampRepo.deleteStamp(oldStamp.id);
+          
+          // Create on new card with renumbered stamp number
+          final newStamp = Stamp(
+            id: '${newCardId}_stamp_$newStampNumber',
+            cardId: newCardId,
+            stampNumber: newStampNumber,
+            timestamp: oldStamp.timestamp,
+            signature: oldStamp.signature,
+            previousHash: i == 0 ? null : stampsToMove[i - 1].signature,
+          );
+          
+          await stampRepo.insertStamp(newStamp);
+          AppLogger.database('  Moved stamp #${oldStamp.stampNumber} -> new card stamp #$newStampNumber');
+        }
+        
+        AppLogger.business('Card split complete!');
+        AppLogger.business('  Card 1 (COMPLETE): ${card.stampsRequired} stamps');
+        AppLogger.business('  Card 2 (NEW): $overflow stamps');
+        
+        if (mounted) {
+          Navigator.pop(context, 
+            'Card complete! 🎉 New card started with $overflow stamp${overflow > 1 ? 's' : ''}');
+        }
       }
     } else {
       // No overflow - just update stamp count
@@ -549,6 +666,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     
     // Check for existing card with available space before creating new card
     final existingCard = await repository.findCardWithSpace(card.businessId);
+    bool newCardCreated = false;
     
     if (existingCard != null) {
       AppLogger.business('Found existing card with space: ${existingCard.id}');
@@ -576,13 +694,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       
       await repository.insertCard(newCard);
       AppLogger.database('New card auto-created: $newCardId');
+      newCardCreated = true;
     }
 
     AppLogger.qr('Redemption Complete');
 
     if (mounted) {
       Navigator.pop(context, 
-        '🎉 Redemption confirmed! New card added to your wallet.');
+        newCardCreated 
+          ? '🎉 Redemption confirmed! New card added to your wallet.'
+          : '🎉 Redemption confirmed!');
     }
   }
 

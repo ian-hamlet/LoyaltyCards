@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
 import '../../services/device_orientation_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SupplierRedeemCard extends StatefulWidget {
   const SupplierRedeemCard({super.key});
@@ -31,6 +32,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   void initState() {
     super.initState();
     _loadBusiness();
+    _loadRotationPreference();
   }
 
   Future<void> _loadBusiness() async {
@@ -42,6 +44,33 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  /// Load saved camera rotation preference from SharedPreferences
+  Future<void> _loadRotationPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedRotation = prefs.getInt('camera_rotation') ?? 1;
+      if (mounted) {
+        setState(() {
+          _manualRotationOffset = savedRotation;
+        });
+        AppLogger.debug('Loaded camera rotation preference: $savedRotation (${savedRotation * 90}°)', 'Camera');
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to load camera rotation preference: $e', 'Camera');
+    }
+  }
+
+  /// Save camera rotation preference to SharedPreferences
+  Future<void> _saveRotationPreference(int rotation) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('camera_rotation', rotation);
+      AppLogger.debug('Saved camera rotation preference: $rotation (${rotation * 90}°)', 'Camera');
+    } catch (e) {
+      AppLogger.warning('Failed to save camera rotation preference: $e', 'Camera');
     }
   }
 
@@ -258,9 +287,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -277,9 +308,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,

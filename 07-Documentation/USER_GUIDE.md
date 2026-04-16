@@ -2,8 +2,8 @@
 
 **Quick Start Guide for Businesses & Customers**
 
-Version 0.1.0 (Build 83)  
-Last Updated: April 13, 2026
+Version 0.2.0 (Build 18)  
+Last Updated: April 16, 2026
 
 ---
 
@@ -99,11 +99,21 @@ Last Updated: April 13, 2026
 
 ### Troubleshooting (Customer)
 
+**"Camera orientation is wrong/sideways"**
+- Use the rotation buttons on the camera screen:
+  - **90°** button: Rotate camera view 90 degrees clockwise
+  - **180°** button: Flip camera view upside down
+- **Your rotation preference is saved automatically**
+- Next time you open any camera, your preferred rotation is applied
+- Different devices may need different rotations (iPad vs iPhone)
+- Tip: Set rotation once, app remembers it forever
+
 **"Can't scan QR code"**
 - Ensure camera permission is granted
 - Good lighting helps
 - Hold phone steady for 1 second
 - Try moving closer/farther
+- If camera view is sideways, use rotation buttons (see above)
 
 **"Stamp not added"**
 - Simple mode: Wait 1 hour (rate limited)
@@ -443,6 +453,16 @@ Last Updated: April 13, 2026
 
 ### Troubleshooting (Business)
 
+**"Camera orientation is wrong/sideways"**
+- Use the rotation buttons on camera screens:
+  - **90°** button: Rotate camera view 90 degrees clockwise
+  - **180°** button: Flip camera view upside down
+- **Your rotation preference is saved automatically**
+- Rotation persists across all QR scanner screens
+- Works for: Business import/recovery, stamp issuance, redemption
+- Set once per device, app remembers forever
+- Note: Different devices (iPad vs iPhone) may need different settings
+
 **"Customer says stamp didn't work"**
 - Simple mode: They may have scanned within 1 hour (rate limited)
 - Secure mode: QR may have expired, generate new one
@@ -498,6 +518,7 @@ Last Updated: April 13, 2026
 - Check progress regularly
 - Redeem promptly when complete
 - Keep app updated
+- Use camera rotation buttons if view is sideways (preference saves automatically)
 
 ❌ **DON'T:**
 - Try to scan same QR repeatedly (rate limited)

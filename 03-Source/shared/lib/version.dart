@@ -78,5 +78,70 @@
 /// - Matches redemption logic from Build 11 (TEST-005)
 /// - Fix redemption success message to only show "New card added" when
 ///   a new card was actually created (conditional message display)
+/// 
+/// Build 16 Changes:
+/// - DECISION-016: Conditional compilation for dangerous delete operations
+/// - Wrapped "Delete All Data" sections in kDebugMode checks
+/// - Dangerous operations only visible in debug/TestFlight builds
+/// - Hidden in production App Store releases for user safety
+/// - TEST-013: Fixed statistics info text line breaks
+/// - Changed \\n to \n in supplier_home.dart statistics banner
+/// - Text now displays on three separate lines correctly
+/// - TEST-009: Implemented complete transaction logging system
+/// - Fixed broken "Transactions" counter (was always 0)
+/// - Added transaction logging for all key events (pickup, stamp, redemption)
+/// - Reorganized Settings into "Your Wallet" and "Activity History" sections
+/// - New wallet counter: Ready to Redeem (complete cards awaiting redemption)
+/// - New activity counters: Cards Added, Stamps Earned, Rewards Redeemed
+/// - All counters now show real-time meaningful data with descriptive subtitles
+/// - TEST-011: Fixed redeemed card filter label confusion
+/// - Changed filter label to be dynamic (shows action, not state)
+/// - Label now reads "Show Redeemed" when hiding, "Hide Redeemed" when showing
+/// 
+/// Build 17 Changes:
+/// - TEST-014: Fixed business import navigation allowing duplicate creation
+/// - Changed navigation from pushReplacement to pushAndRemoveUntil
+/// - Clears entire navigation stack after successful import/creation
+/// - Prevents back button from returning to onboarding screen
+/// - Blocks duplicate business creation after import completes
+/// - Applied to both import_business_screen and supplier_onboarding
+/// - TEST-015: Fixed camera infinite loop after import errors
+/// - Added camera stop() calls after successful import
+/// - Added camera stop() calls after import errors
+/// - Pre-flight check prevents scanning when business already exists
+/// - Clear error messages with "Go Back" button when blocked
+/// - Camera cleanup prevents infinite scan/reject loops
+/// - Bonus: Fixed memory leak in clone_device_screen.dart
+/// - Added mounted checks before all setState() calls in timer callbacks
+/// - Added mounted checks in async completion handlers
+/// - Prevents "setState() called after dispose()" errors
+/// - Proper timer cancellation and async operation cleanup
+/// 
+/// Build 18 Changes:
+/// - TEST-012: Implemented camera rotation persistence across sessions
+/// - Added SharedPreferences to save user's preferred camera rotation
+/// - Rotation preference loaded automatically on camera screen init
+/// - User's last rotation choice becomes their default for future sessions
+/// - Single shared preference key 'camera_rotation' used by ALL cameras
+/// - When user rotates ANY camera, that rotation applies to ALL cameras
+/// - Last rotation done to any camera becomes the default for all cameras
+/// - Consistent rotation experience across both apps and all scan contexts
+/// - Applied to all 4 QR scanner screens:
+///   * customer_app/qr_scanner_screen.dart
+///   * supplier_app/import_business_screen.dart
+///   * supplier_app/supplier_stamp_card.dart
+///   * supplier_app/supplier_redeem_card.dart
+/// - User only needs to set rotation once per app context
+/// - Eliminates repetitive manual rotation on every scan session
+/// - SharedPreferences added to supplier_app dependencies
+/// - UX Improvement: Removed version number from app title bars
+///   * Customer app: "My Loyalty Cards" (was "My Loyalty Cards v0.2.0+18")
+///   * Supplier app: "Customer Loyalty Cards" (was "{Business Name} v0.2.0+18")
+///   * Version still visible in Settings screens
+///   * Cleaner, less cluttered UI
+/// - UX Improvement: Supplier app title now "Customer Loyalty Cards"
+///   * More descriptive of app purpose
+///   * Business name already prominent on dashboard
+///   * Consistent with professional business app design
 
-const String appVersion = '0.2.0+15';
+const String appVersion = '0.2.0+18';

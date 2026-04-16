@@ -138,7 +138,7 @@ class _CustomerHomeState extends State<CustomerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Loyalty Cards $appVersion'),
+        title: const Text('My Loyalty Cards'),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),
@@ -210,7 +210,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                 spacing: AppSpacing.sm,
                 children: [
                   FilterChip(
-                    label: const Text('Hide Redeemed'),
+                    label: Text(_hideRedeemed ? 'Show Redeemed' : 'Hide Redeemed'),
                     selected: _hideRedeemed,
                     onSelected: (value) {
                       Haptics.light();

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
@@ -227,35 +228,37 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ),
           const Divider(height: 32),
 
-          // Danger Zone
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Danger Zone',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
+          // Danger Zone - Only visible in debug/TestFlight builds
+          if (kDebugMode) ...[            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Danger Zone',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
               ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.warning, color: Colors.red),
-            title: const Text(
-              'Reset Business Configuration',
-              style: TextStyle(color: Colors.red),
+            ListTile(
+              leading: const Icon(Icons.warning, color: Colors.red),
+              title: const Text(
+                'Reset Business Configuration',
+                style: TextStyle(color: Colors.red),
+              ),
+              subtitle: const Text(
+                'Delete business and start over with new name',
+                style: TextStyle(fontSize: 12),
+              ),
+              onTap: () {
+                Haptics.medium();
+                _confirmAndResetBusiness();
+              },
             ),
-            subtitle: const Text(
-              'Delete business and start over with new name',
-              style: TextStyle(fontSize: 12),
-            ),
-            onTap: () {
-              Haptics.medium();
-              _confirmAndResetBusiness();
-            },
-          ),
+            const SizedBox(height: 32),
+          ],
 
-          const SizedBox(height: 32),
+          const Divider(height: 32),
 
           // Tips Section
           Container(

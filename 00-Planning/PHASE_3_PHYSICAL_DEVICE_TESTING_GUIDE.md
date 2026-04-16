@@ -507,6 +507,77 @@ Now the fun part! Testing P2P interactions.
 
 ---
 
+### Test Scenario 3B: Camera Rotation Persistence
+
+**Goal:** Verify camera rotation preference saves and persists  
+**Device:** iPhone or iPad  
+**Time:** 3 minutes  
+**Added:** Build 18 (April 2026)
+
+**Background:**
+Different devices (iPhone vs iPad) and holding positions (portrait vs landscape) may show camera view sideways or upside down. Manual rotation buttons allow adjustment, and your preference is saved automatically.
+
+**Steps:**
+
+1. **Open any QR scanner screen**
+   - Customer app: Tap "Add Card"
+   - OR Supplier app: Tap "Issue Card"
+
+2. **Check camera orientation:**
+   - Is the camera view sideways or upside down?
+   - Or is it already correct?
+
+3. **Test rotation buttons:**
+   - Locate **90°** and **180°** buttons on camera screen
+   - Tap **90°** button → camera view rotates 90° clockwise
+   - Tap again → rotates another 90° (now 180° total)
+   - Tap **180°** button → flips camera view upside down
+   - Experiment until you find optimal orientation
+
+4. **Close camera screen** (back button or cancel)
+
+5. **Reopen SAME camera screen**
+   - **Expected:** Camera opens with your last rotation applied
+   - **Verify:** You don't need to rotate again
+
+6. **Open DIFFERENT camera screen:**
+   - If you tested customer "Add Card", now open supplier "Issue Card"
+   - OR vice versa
+   - **Expected:** Your rotation preference applies to ALL cameras
+
+7. **Force quit app completely:**
+   - Swipe up from bottom (or double-click home)
+   - Swipe app away to close
+   - Reopen app from home screen
+
+8. **Open any camera screen again**
+   - **Expected:** Rotation preference persists across app restarts
+   - **Verify:** Still using your preferred rotation
+
+**Verification:**
+- ✅ Rotation buttons (90°, 180°) visible on camera screen
+- ✅ Tapping buttons rotates camera view immediately
+- ✅ Rotation persists when reopening same camera
+- ✅ Rotation applies to all camera screens (shared preference)
+- ✅ Rotation persists after app restart
+
+**Technical Details:**
+- Single shared preference key: `camera_rotation`
+- Values: 0° (no rotation), 90°, 180°, 270°
+- Saved automatically when rotation button tapped
+- Default: Usually 90° (but may vary by screen)
+- Works on both iPhone (portrait) and iPad (landscape)
+
+**Troubleshooting:**
+- ❌ Rotation buttons not visible → May not be implemented on this screen yet
+- ❌ Rotation resets after reopen → Preference not saving correctly
+- ❌ Different cameras have different rotations → Bug (should share preference)
+
+**Result:** ✅ PASS / ⚠️ NOT IMPLEMENTED / ❌ FAIL  
+**Notes:**
+
+---
+
 ### Test Scenario 4: Card Pickup Flow (P2P Test)
 
 **Goal:** Customer scans supplier QR to add card  

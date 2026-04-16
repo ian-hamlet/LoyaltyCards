@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:shared/models/card.dart' as models;
+import 'package:shared/models/transaction.dart' as models;
 import 'dart:convert';
 import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
+import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import 'qr_display_screen.dart';
 import 'qr_scanner_screen.dart';
+import 'package:uuid/uuid.dart';
 
 class CustomerCardDetail extends StatefulWidget {
   final String cardId;
@@ -738,6 +741,18 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       
       // Mark card as redeemed
       await _cardRepo.markCardAsRedeemed(_card!.id);
+      
+      // Log redemption transaction
+      final transactionRepo = TransactionRepository(DatabaseHelper());
+      final redemptionTransaction = models.Transaction(
+        id: const Uuid().v4(),
+        cardId: _card!.id,
+        type: TransactionType.redemption,
+        timestamp: now,
+        businessName: _card!.businessName,
+        details: 'Reward redeemed: ${_card!.stampsCollected} stamps',
+      );
+      await transactionRepo.insertTransaction(redemptionTransaction);
       
       AppLogger.business('Simple Mode Redemption');
       AppLogger.debug('Card ID: ${_card!.id}', 'Redemption');

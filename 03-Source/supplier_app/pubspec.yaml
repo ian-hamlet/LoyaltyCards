@@ -2,7 +2,7 @@ name: supplier_app
 description: "LoyaltyCards Business App - Issue and manage loyalty cards"
 publish_to: 'none'
 
-version: 0.2.0+15
+version: 0.2.0+18
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -34,6 +34,7 @@ dependencies:
   # Utilities
   uuid: ^4.3.0
   intl: ^0.20.2
+  shared_preferences: ^2.3.3
   
   # UI
   cupertino_icons: ^1.0.6

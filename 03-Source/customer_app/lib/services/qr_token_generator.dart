@@ -13,12 +13,7 @@ class QRTokenGenerator {
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       
-      print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-      print('!!! GENERATING STAMP REQUEST QR - BUILD 4 !!!');
-      print('!!! This log MUST appear if new code is running !!!');
-      print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-      print('Input card ID: ${card.id}');
-      print('Input card stamps collected: ${card.stampsCollected}');
+      AppLogger.qr('Generating stamp request for card ${card.id}');
       
       // IMPORTANT: Reload card from database to get fresh stamp count
       // The widget might have stale data if stamps were recently added
@@ -26,31 +21,25 @@ class QRTokenGenerator {
       final freshCard = await cardRepo.getCardById(card.id);
       
       if (freshCard == null) {
-        print('ERROR: Card not found in database!');
+        AppLogger.error('Card not found in database', tag: 'QR');
         throw Exception('Card not found');
       }
       
-      print('Fresh card stamps collected: ${freshCard.stampsCollected}');
+      AppLogger.debug('Card has ${freshCard.stampsCollected} stamps', 'QR');
       
       // Get the last stamp's signature for hash chain validation
       String lastStampHash = '';
       if (freshCard.stampsCollected > 0) {
         final stampRepo = StampRepository(DatabaseHelper());
         final stamps = await stampRepo.getStampsByCard(freshCard.id);
-        print('Stamps found in DB: ${stamps.length}');
+        
         if (stamps.isNotEmpty) {
-          for (var i = 0; i < stamps.length; i++) {
-            print('  Stamp #${stamps[i].stampNumber}: signature="${stamps[i].signature.substring(0, 20)}..."');
-          }
           lastStampHash = stamps.last.signature;
-          print('Using lastStampHash: "${lastStampHash.substring(0, 20)}..."');
+          AppLogger.debug('Using hash from stamp #${stamps.last.stampNumber}', 'QR');
         } else {
-          print('WARNING: Card says ${freshCard.stampsCollected} stamps but DB has 0!');
+          AppLogger.warning('Card indicates ${freshCard.stampsCollected} stamps but DB has 0', 'QR');
         }
-      } else {
-        print('First stamp (no previous hash)');
       }
-      print('=== End Stamp Request QR ===');
       
       return CardStampRequestToken(
         cardId: freshCard.id,
@@ -61,8 +50,7 @@ class QRTokenGenerator {
         timestamp: timestamp,
       );
     } catch (e, stackTrace) {
-      print('ERROR in generateStampRequest: $e');
-      print('Stack trace: $stackTrace');
+      AppLogger.error('Failed to generate stamp request', error: e, stackTrace: stackTrace, tag: 'QR');
       rethrow;
     }
   }

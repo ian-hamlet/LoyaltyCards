@@ -38,12 +38,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       final card = await _cardRepo.getCardById(widget.cardId);
       final stamps = await _stampRepo.getStampsByCard(widget.cardId);
       
-      print('=== Card Data Loaded ===');
-      print('Card: ${card?.businessName} (${card?.id})');
-      print('Stamps collected: ${card?.stampsCollected}');
-      print('Stamp records in DB: ${stamps.length}');
+      AppLogger.debug('Card data loaded: ${card?.businessName} (${card?.id})', 'CardDetail');
+      AppLogger.debug('Stamps collected: ${card?.stampsCollected}', 'CardDetail');
+      AppLogger.debug('Stamp records in DB: ${stamps.length}', 'CardDetail');
       for (var stamp in stamps) {
-        print('  Stamp #${stamp.stampNumber} at ${stamp.timestamp}');
+        AppLogger.debug('  Stamp #${stamp.stampNumber} at ${stamp.timestamp}', 'CardDetail');
       }
       
       setState(() {
@@ -52,7 +51,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading card data: $e');
+      AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
       setState(() => _isLoading = false);
       if (mounted) {
         AppFeedback.error(context, 'Error loading card: $e');
@@ -65,14 +64,14 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
     
     // If card has been redeemed, don't generate any QR
     if (_card!.isRedeemed) {
-      print('Card Detail QR: Card REDEEMED - no QR generation');
+      AppLogger.qr('Card REDEEMED - no QR generation');
       return 'REDEEMED'; // Special marker to show redeemed message instead of QR
     }
     
     // If card is complete, generate redemption QR instead
     if (_card!.isComplete) {
-      print('Card Detail QR: Card is COMPLETE - generating REDEMPTION QR');
-      print('Card Detail QR: ${_stamps.length} stamps for redemption');
+      AppLogger.qr('Card is COMPLETE - generating REDEMPTION QR');
+      AppLogger.qr('Including ${_stamps.length} stamps for redemption');
       
       final signatures = _stamps.map((s) => s.signature).toList();
       
@@ -92,10 +91,10 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
     String lastStampHash = '';
     if (_stamps.isNotEmpty) {
       lastStampHash = _stamps.last.signature;
-      print('Card Detail QR: Including lastStampHash from stamp #${_stamps.last.stampNumber}');
-      print('Card Detail QR: Hash = "${lastStampHash.substring(0, 20)}..."');
+      AppLogger.qr('Including lastStampHash from stamp #${_stamps.last.stampNumber}');
+      AppLogger.qr('Hash = "${lastStampHash.substring(0, 20)}..."');
     } else {
-      print('Card Detail QR: No stamps, lastStampHash will be empty');
+      AppLogger.qr('No stamps, lastStampHash will be empty');
     }
     
     final qrData = {
@@ -740,30 +739,41 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       // Mark card as redeemed
       await _cardRepo.markCardAsRedeemed(_card!.id);
       
-      print('=== Simple Mode Redemption ===');
-      print('Card ID: ${_card!.id}');
-      print('Business: ${_card!.businessName}');
-      print('Stamps: ${_card!.stampsCollected}');
-      print('Redeemed at: ${now.toIso8601String()}');
+      AppLogger.business('Simple Mode Redemption');
+      AppLogger.debug('Card ID: ${_card!.id}', 'Redemption');
+      AppLogger.debug('Business: ${_card!.businessName}', 'Redemption');
+      AppLogger.debug('Stamps: ${_card!.stampsCollected}', 'Redemption');
+      AppLogger.debug('Redeemed at: ${now.toIso8601String()}', 'Redemption');
       
-      // Auto-create new card for continued loyalty
-      final newCardId = '${_card!.businessId}_${DateTime.now().millisecondsSinceEpoch}';
-      final newCard = models.Card(
-        id: newCardId,
-        businessId: _card!.businessId,
-        businessName: _card!.businessName,
-        businessPublicKey: _card!.businessPublicKey,
-        brandColor: _card!.brandColor,
-        logoIndex: _card!.logoIndex,
-        mode: _card!.mode,
-        stampsRequired: _card!.stampsRequired,
-        stampsCollected: 0,
-        createdAt: now,
-        updatedAt: now,
-      );
+      // Check for existing card with available space before creating new card
+      final existingCard = await _cardRepo.findCardWithSpace(_card!.businessId);
       
-      await _cardRepo.insertCard(newCard);
-      print('New card auto-created: $newCardId');
+      if (existingCard != null) {
+        AppLogger.business('Found existing card with space: ${existingCard.id}');
+        AppLogger.business('  Existing card has ${existingCard.stampsCollected}/${existingCard.stampsRequired} stamps');
+        AppLogger.business('  Skipping new card creation - will use existing card');
+      } else {
+        AppLogger.business('No existing cards with space found - creating new card');
+        
+        // Auto-create new card for continued loyalty
+        final newCardId = '${_card!.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+        final newCard = models.Card(
+          id: newCardId,
+          businessId: _card!.businessId,
+          businessName: _card!.businessName,
+          businessPublicKey: _card!.businessPublicKey,
+          brandColor: _card!.brandColor,
+          logoIndex: _card!.logoIndex,
+          mode: _card!.mode,
+          stampsRequired: _card!.stampsRequired,
+          stampsCollected: 0,
+          createdAt: now,
+          updatedAt: now,
+        );
+        
+        await _cardRepo.insertCard(newCard);
+        AppLogger.database('New card auto-created: $newCardId');
+      }
       
       // Reload card data
       await _loadCardData();

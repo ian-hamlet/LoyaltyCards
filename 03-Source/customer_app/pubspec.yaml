@@ -2,7 +2,7 @@ name: customer_app
 description: "LoyaltyCards Customer App - Digital loyalty card wallet"
 publish_to: 'none'
 
-version: 0.2.0+4
+version: 0.2.0+15
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -33,6 +33,9 @@ dependencies:
   # UI
   cupertino_icons: ^1.0.6
   google_fonts: ^8.0.2
+  
+  # Preferences
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:shared/models/card.dart' as models;
 import 'package:shared/models/transaction.dart' as models;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../services/card_repository.dart';
 import '../../services/transaction_repository.dart';
@@ -26,10 +27,15 @@ class _CustomerHomeState extends State<CustomerHome> {
   bool _isLoading = true;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  
+  // Filter preference
+  bool _hideRedeemed = true; // Default: hide redeemed cards
+  static const String _hideRedeemedKey = 'hide_redeemed_cards';
 
   @override
   void initState() {
     super.initState();
+    _loadFilterPreference();
     _loadCards();
   }
 
@@ -37,6 +43,23 @@ class _CustomerHomeState extends State<CustomerHome> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadFilterPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _hideRedeemed = prefs.getBool(_hideRedeemedKey) ?? true; // Default: hide redeemed
+    });
+  }
+
+  Future<void> _setHideRedeemed(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hideRedeemedKey, value);
+    setState(() {
+      _hideRedeemed = value;
+      _filterCards();
+    });
+    AppLogger.debug('Hide redeemed cards: $value', 'Filter');
   }
 
   Future<void> _loadCards() async {
@@ -57,13 +80,21 @@ class _CustomerHomeState extends State<CustomerHome> {
   }
 
   void _filterCards() {
-    if (_searchQuery.isEmpty) {
-      _filteredCards = _cards;
-    } else {
-      _filteredCards = _cards.where((card) {
+    var filtered = _cards;
+    
+    // Apply redeemed filter first
+    if (_hideRedeemed) {
+      filtered = filtered.where((card) => !card.isRedeemed).toList();
+    }
+    
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((card) {
         return card.businessName.toLowerCase().contains(_searchQuery.toLowerCase());
       }).toList();
     }
+    
+    _filteredCards = filtered;
   }
 
   void _onSearchChanged(String query) {
@@ -71,39 +102,6 @@ class _CustomerHomeState extends State<CustomerHome> {
       _searchQuery = query;
       _filterCards();
     });
-  }
-
-  Future<void> _addTestCard() async {
-    final uuid = const Uuid();
-    final testCard = models.Card(
-      id: uuid.v4(),
-      businessId: uuid.v4(),
-      businessName: 'Test Coffee Shop',
-      businessPublicKey: 'test-public-key',
-      stampsRequired: 7,
-      stampsCollected: 3,
-      brandColor: '#8B4513',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    await _cardRepo.insertCard(testCard);
-    
-    // Add transaction
-    final transaction = models.Transaction(
-      id: uuid.v4(),
-      cardId: testCard.id,
-      type: TransactionType.pickup,
-      timestamp: DateTime.now(),
-      businessName: testCard.businessName,
-    );
-    await _transactionRepo.insertTransaction(transaction);
-
-    await _loadCards();
-    
-    if (mounted) {
-      AppFeedback.success(context, 'Test card added!');
-    }
   }
 
   Future<void> _deleteCard(models.Card card) async {
@@ -200,6 +198,30 @@ class _CustomerHomeState extends State<CustomerHome> {
                   ),
                 ),
                 onChanged: _onSearchChanged,
+              ),
+            ),
+          
+          // Filter chips
+          if (_cards.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md)
+                  .copyWith(bottom: AppSpacing.sm),
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                children: [
+                  FilterChip(
+                    label: const Text('Hide Redeemed'),
+                    selected: _hideRedeemed,
+                    onSelected: (value) {
+                      Haptics.light();
+                      _setHideRedeemed(value);
+                    },
+                    avatar: Icon(
+                      _hideRedeemed ? Icons.visibility_off : Icons.visibility,
+                      size: 18,
+                    ),
+                  ),
+                ],
               ),
             ),
           

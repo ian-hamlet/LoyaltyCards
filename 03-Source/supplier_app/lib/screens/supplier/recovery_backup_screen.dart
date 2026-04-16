@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared/models/business.dart';
 import 'package:shared/models/supplier_config_backup.dart';
 import 'package:shared/widgets/feedback.dart';
+import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/backup_storage_service.dart';
 import '../../services/key_manager.dart';
@@ -62,77 +63,126 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   }
 
   Future<void> _generateBackup() async {
+    AppLogger.debug('🔄 Generating recovery backup for business: ${widget.business.name}', 'Backup');
     setState(() => _isGenerating = true);
 
     try {
       // Fetch private key from secure storage for backup inclusion
+      AppLogger.debug('Fetching private key from secure storage...', 'Backup');
       final privateKeyString = await _keyManager.getPrivateKeyString(widget.business.id);
       if (privateKeyString == null) {
+        AppLogger.error('Private key not found in secure storage for business: ${widget.business.id}', tag: 'Backup');
         throw Exception('Private key not found in secure storage');
       }
+      AppLogger.debug('Private key retrieved (${privateKeyString.length} chars)', 'Backup');
 
       // Create business object with privateKey populated for backup
       final businessWithKeys = widget.business.copyWith(
         privateKey: privateKeyString,
       );
 
+      AppLogger.debug('Creating recovery backup object...', 'Backup');
       final backup =
           await SupplierConfigBackup.createRecoveryBackup(businessWithKeys);
+      AppLogger.debug('Backup created, QR string length: ${backup.toQRString().length}', 'Backup');
+      
+      AppLogger.debug('Generating QR image bytes...', 'Backup');
       final qrBytes = await BackupStorageService.generateQRImageBytes(backup);
+      AppLogger.debug('QR image generated: ${qrBytes.length} bytes', 'Backup');
 
       setState(() {
         _backup = backup;
         _qrImageBytes = qrBytes;
         _isGenerating = false;
       });
-    } catch (e) {
+      
+      AppLogger.debug('✅ Backup generation complete', 'Backup');
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to generate backup: $e', tag: 'Backup');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       setState(() => _isGenerating = false);
       AppFeedback.error(context, 'Failed to generate backup: $e');
     }
   }
 
   Future<void> _printBackup() async {
-    if (_backup == null || _qrImageBytes == null) return;
+    AppLogger.debug('🖨️ Print Backup button tapped', 'Backup');
+    
+    if (_backup == null || _qrImageBytes == null) {
+      AppLogger.error('Print failed: backup or image bytes are null', tag: 'Backup');
+      AppFeedback.error(context, 'Backup data not ready');
+      return;
+    }
 
+    AppLogger.debug('Calling BackupStorageService.printBackup...', 'Backup');
+    
     try {
       final success = await BackupStorageService.printBackup(
         _backup!,
         _qrImageBytes!,
       );
 
+      AppLogger.debug('printBackup returned: $success', 'Backup');
+
       if (success) {
         setState(() => _completedMethods.add('print'));
+        AppLogger.debug('Print method completed successfully', 'Backup');
         AppFeedback.success(context, 'Print dialog opened');
       } else {
+        AppLogger.warning('printBackup returned false - no dialog shown', 'Backup');
         AppFeedback.error(context, 'Failed to open print dialog');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.error('Exception in _printBackup: $e', tag: 'Backup');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       AppFeedback.error(context, 'Print error: $e');
     }
   }
 
   Future<void> _saveToPhotos() async {
-    if (_backup == null || _qrImageBytes == null) return;
+    AppLogger.debug('📷 Save to Photos button tapped', 'Backup');
+    
+    if (_backup == null || _qrImageBytes == null) {
+      AppLogger.error('Save to Photos failed: backup or image bytes are null', tag: 'Backup');
+      AppLogger.debug('  backup null: ${_backup == null}, imageBytes null: ${_qrImageBytes == null}', 'Backup');
+      AppFeedback.error(context, 'Backup data not ready');
+      return;
+    }
 
+    AppLogger.debug('Image bytes size: ${_qrImageBytes!.length} bytes', 'Backup');
+    AppLogger.debug('Calling BackupStorageService.saveToPhotos...', 'Backup');
+    
     try {
       final success = await BackupStorageService.saveToPhotos(
         _backup!,
         _qrImageBytes!,
       );
 
+      AppLogger.debug('saveToPhotos returned: $success', 'Backup');
+
       if (success) {
         setState(() => _completedMethods.add('photos'));
+        AppLogger.debug('Photos method completed successfully', 'Backup');
         AppFeedback.success(context, 'Saved to Photos');
       } else {
-        AppFeedback.error(context, 'Failed to save to Photos');
+        AppLogger.warning('saveToPhotos returned false - check permissions or storage', 'Backup');
+        AppFeedback.error(context, 'Failed to save to Photos - check permissions');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.error('Exception in _saveToPhotos: $e', tag: 'Backup');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       AppFeedback.error(context, 'Save error: $e');
     }
   }
 
   Future<void> _shareViaEmail() async {
-    if (_backup == null || _qrImageBytes == null) return;
+    AppLogger.debug('📧 Email to Myself button tapped', 'Backup');
+    
+    if (_backup == null || _qrImageBytes == null) {
+      AppLogger.error('Share via email failed: backup or image bytes are null', tag: 'Backup');
+      AppFeedback.error(context, 'Backup data not ready');
+      return;
+    }
 
     try {
       // Get screen size for iPad share position
@@ -143,6 +193,10 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
         10,
         10,
       );
+
+      AppLogger.debug('Screen size: ${size.width}x${size.height}', 'Backup');
+      AppLogger.debug('Share position: $sharePosition', 'Backup');
+      AppLogger.debug('Calling BackupStorageService.shareViaEmail...', 'Backup');
 
       final success = await BackupStorageService.shareViaEmail(
         _backup!,
@@ -150,19 +204,31 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
         sharePositionOrigin: sharePosition,
       );
 
+      AppLogger.debug('shareViaEmail returned: $success', 'Backup');
+
       if (success) {
         setState(() => _completedMethods.add('email'));
+        AppLogger.debug('Email method completed successfully', 'Backup');
         AppFeedback.success(context, 'Share sheet opened');
       } else {
+        AppLogger.warning('shareViaEmail returned false', 'Backup');
         AppFeedback.error(context, 'Failed to share');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.error('Exception in _shareViaEmail: $e', tag: 'Backup');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       AppFeedback.error(context, 'Share error: $e');
     }
   }
 
   Future<void> _saveToFiles() async {
-    if (_backup == null || _qrImageBytes == null) return;
+    AppLogger.debug('📁 Save to Files button tapped', 'Backup');
+    
+    if (_backup == null || _qrImageBytes == null) {
+      AppLogger.error('Save to Files failed: backup or image bytes are null', tag: 'Backup');
+      AppFeedback.error(context, 'Backup data not ready');
+      return;
+    }
 
     try {
       // Get screen size for iPad share position
@@ -174,19 +240,28 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
         10,
       );
 
+      AppLogger.debug('Share position for Files: $sharePosition', 'Backup');
+      AppLogger.debug('Calling BackupStorageService.saveToFiles...', 'Backup');
+
       final success = await BackupStorageService.saveToFiles(
         _backup!,
         _qrImageBytes!,
         sharePositionOrigin: sharePosition,
       );
 
+      AppLogger.debug('saveToFiles returned: $success', 'Backup');
+
       if (success) {
         setState(() => _completedMethods.add('files'));
+        AppLogger.debug('Files method completed successfully', 'Backup');
         AppFeedback.success(context, 'Saved to Files');
       } else {
+        AppLogger.warning('saveToFiles returned false', 'Backup');
         AppFeedback.error(context, 'Failed to save to Files');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.error('Exception in _saveToFiles: $e', tag: 'Backup');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       AppFeedback.error(context, 'Save error: $e');
     }
   }

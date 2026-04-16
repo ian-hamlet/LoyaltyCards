@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:shared/shared.dart';
 
 /// Service to get exact device orientation from native iOS
 class DeviceOrientationService {
@@ -7,17 +8,17 @@ class DeviceOrientationService {
   /// Get the current device orientation from iOS
   /// Returns: 'portrait', 'portraitUpsideDown', 'landscapeLeft', 'landscapeRight', 'faceUp', 'faceDown', or 'unknown'
   static Future<String> getOrientation() async {
-    print('DeviceOrientationService: Starting getOrientation call');
+    AppLogger.debug('Getting device orientation', 'Orientation');
     try {
-      print('DeviceOrientationService: Invoking platform method');
+      AppLogger.debug('Invoking platform method', 'Orientation');
       final String result = await platform.invokeMethod('getOrientation');
-      print('DeviceOrientationService: Got result from platform: $result');
+      AppLogger.debug('Platform result: $result', 'Orientation');
       return result;
     } on PlatformException catch (e) {
-      print('DeviceOrientationService: PlatformException - ${e.code}: ${e.message}');
+      AppLogger.error('PlatformException - ${e.code}: ${e.message}');
       return 'unknown';
     } catch (e) {
-      print('DeviceOrientationService: Exception - $e');
+      AppLogger.error('Error getting orientation: $e');
       return 'unknown';
     }
   }

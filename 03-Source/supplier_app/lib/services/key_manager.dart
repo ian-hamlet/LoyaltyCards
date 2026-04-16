@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:pointycastle/export.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared/shared.dart';
 
 /// Service for managing cryptographic keys and signing operations
 /// Uses ECDSA (Elliptic Curve Digital Signature Algorithm) with secp256r1 curve
@@ -24,7 +25,7 @@ class KeyManager {
 
   /// Generate a new ECDSA key pair using secp256r1 (P-256) curve
   Future<AsymmetricKeyPair<PublicKey, PrivateKey>> generateKeyPair() async {
-    print('KeyManager: Generating ECDSA P-256 key pair...');
+    AppLogger.crypto('Generating ECDSA P-256 key pair');
     final keyParams = ECKeyGeneratorParameters(ECCurve_secp256r1());
     final random = FortunaRandom();
     
@@ -37,13 +38,13 @@ class KeyManager {
       ..init(ParametersWithRandom(keyParams, random));
 
     final keyPair = generator.generateKeyPair();
-    print('KeyManager: Key pair generated (P-256 curve)');
+    AppLogger.crypto('Key pair generated (P-256 curve)');
     return keyPair;
   }
 
   /// Store private key securely in device keychain/keystore
   Future<void> storePrivateKey(String businessId, ECPrivateKey privateKey) async {
-    print('KeyManager: Storing private key for business: $businessId');
+    AppLogger.crypto('Storing private key for business: $businessId');
     final keyBytes = _bigIntToBytes(privateKey.d!);
     final keyBase64 = base64Encode(keyBytes);
     
@@ -51,41 +52,58 @@ class KeyManager {
       key: '$_privateKeyPrefix$businessId',
       value: keyBase64,
     );
-    print('KeyManager: Private key stored securely in keychain');
+    AppLogger.crypto('Private key stored securely in keychain');
   }
 
   /// Store public key (can be stored less securely as it's meant to be shared)
   Future<void> storePublicKey(String businessId, ECPublicKey publicKey) async {
-    print('KeyManager: Storing public key for business: $businessId');
-    final encoded = _encodePublicKey(publicKey);
+    AppLogger.crypto('Storing public key for business: $businessId');
+    final encoded = encodePublicKey(publicKey);
     
     await _storage.write(
       key: '$_publicKeyPrefix$businessId',
       value: encoded,
     );
-    print('KeyManager: Public key stored (${encoded.length} chars)');
+    AppLogger.crypto('Public key stored (${encoded.length} chars)');
   }
 
   /// Retrieve private key from secure storage
   Future<ECPrivateKey?> getPrivateKey(String businessId) async {
-    final keyBase64 = await _storage.read(key: '$_privateKeyPrefix$businessId');
-    
-    if (keyBase64 == null) return null;
+    try {
+      final keyBase64 = await _storage.read(key: '$_privateKeyPrefix$businessId');
+      
+      if (keyBase64 == null) {
+        AppLogger.warning('No private key found for business: $businessId', 'Crypto');
+        return null;
+      }
 
-    final keyBytes = base64Decode(keyBase64);
-    final d = BigInt.parse(keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
-    
-    final params = ECCurve_secp256r1();
-    return ECPrivateKey(d, params);
+      final keyBytes = base64Decode(keyBase64);
+      final d = BigInt.parse(keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
+      
+      final params = ECCurve_secp256r1();
+      AppLogger.debug('Private key retrieved for business: $businessId', 'Crypto');
+      return ECPrivateKey(d, params);
+    } catch (e) {
+      AppLogger.error('Failed to retrieve private key for business $businessId: $e');
+      return null;
+    }
   }
 
   /// Retrieve public key from storage
   Future<ECPublicKey?> getPublicKey(String businessId) async {
-    final encoded = await _storage.read(key: '$_publicKeyPrefix$businessId');
-    
-    if (encoded == null) return null;
+    try {
+      final encoded = await _storage.read(key: '$_publicKeyPrefix$businessId');
+      
+      if (encoded == null) {
+        AppLogger.warning('No public key found for business: $businessId', 'Crypto');
+        return null;
+      }
 
-    return _decodePublicKey(encoded);
+      return _decodePublicKey(encoded);
+    } catch (e) {
+      AppLogger.error('Failed to retrieve public key for business $businessId: $e');
+      return null;
+    }
   }
 
   /// Retrieve public key as encoded string for sharing/transmission
@@ -101,63 +119,47 @@ class KeyManager {
   }
 
   /// Sign data with private key using ECDSA
-  Future<String> signData(String data, ECPrivateKey privateKey) async {
-    final signer = ECDSASigner(SHA256Digest());
-    final params = ParametersWithRandom(
-      PrivateKeyParameter<ECPrivateKey>(privateKey),
-      _getSecureRandom(),
-    );
-    
-    signer.init(true, params);
+  Future<String?> signData(String data, ECPrivateKey privateKey) async {
+    try {
+      final signer = ECDSASigner(SHA256Digest());
+      final params = ParametersWithRandom(
+        PrivateKeyParameter<ECPrivateKey>(privateKey),
+        _getSecureRandom(),
+      );
+      
+      signer.init(true, params);
 
-    final dataBytes = utf8.encode(data);
-    final signature = signer.generateSignature(Uint8List.fromList(dataBytes)) as ECSignature;
+      final dataBytes = utf8.encode(data);
+      final signature = signer.generateSignature(Uint8List.fromList(dataBytes)) as ECSignature;
 
-    // Encode signature as base64
-    final rBytes = _bigIntToBytes(signature.r);
-    final sBytes = _bigIntToBytes(signature.s);
-    
-    final combined = <int>[];
-    combined.addAll(_encodeLength(rBytes.length));
-    combined.addAll(rBytes);
-    combined.addAll(_encodeLength(sBytes.length));
-    combined.addAll(sBytes);
+      // Encode signature as base64
+      final rBytes = _bigIntToBytes(signature.r);
+      final sBytes = _bigIntToBytes(signature.s);
+      
+      final combined = <int>[];
+      combined.addAll(_encodeLength(rBytes.length));
+      combined.addAll(rBytes);
+      combined.addAll(_encodeLength(sBytes.length));
+      combined.addAll(sBytes);
 
-    return base64Encode(combined);
+      final signatureBase64 = base64Encode(combined);
+      AppLogger.debug('Data signed successfully', 'Crypto');
+      return signatureBase64;
+    } catch (e) {
+      AppLogger.error('Failed to sign data: $e');
+      return null;
+    }
   }
 
   /// Verify signature with public key
+  /// 
+  /// Delegates to shared CryptoUtils for consistency with customer app
   static bool verifySignature(String data, String signatureBase64, String publicKeyEncoded) {
-    try {
-      final publicKey = KeyManager()._decodePublicKey(publicKeyEncoded);
-      if (publicKey == null) return false;
-
-      final signer = ECDSASigner(SHA256Digest());
-      signer.init(false, PublicKeyParameter<ECPublicKey>(publicKey));
-
-      final dataBytes = utf8.encode(data);
-      final signatureBytes = base64Decode(signatureBase64);
-
-      // Decode signature
-      var offset = 0;
-      final rLength = _decodeLength(signatureBytes, offset);
-      offset += 4;
-      final rBytes = signatureBytes.sublist(offset, offset + rLength);
-      offset += rLength;
-      
-      final sLength = _decodeLength(signatureBytes, offset);
-      offset += 4;
-      final sBytes = signatureBytes.sublist(offset, offset + sLength);
-
-      final r = BigInt.parse(rBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
-      final s = BigInt.parse(sBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
-
-      final signature = ECSignature(r, s);
-
-      return signer.verifySignature(Uint8List.fromList(dataBytes), signature);
-    } catch (e) {
-      return false;
-    }
+    return CryptoUtils.verifySignature(
+      data: data,
+      signatureBase64: signatureBase64,
+      publicKeyEncoded: publicKeyEncoded,
+    );
   }
 
   /// Check if keys exist for a business
@@ -168,12 +170,18 @@ class KeyManager {
   }
 
   /// Decode private key from base64 string (for backup restore)
-  ECPrivateKey decodePrivateKey(String keyBase64) {
-    final keyBytes = base64Decode(keyBase64);
-    final d = BigInt.parse(keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
-    
-    final params = ECCurve_secp256r1();
-    return ECPrivateKey(d, params);
+  ECPrivateKey? decodePrivateKey(String keyBase64) {
+    try {
+      final keyBytes = base64Decode(keyBase64);
+      final d = BigInt.parse(keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
+      
+      final params = ECCurve_secp256r1();
+      AppLogger.debug('Private key decoded successfully', 'Crypto');
+      return ECPrivateKey(d, params);
+    } catch (e) {
+      AppLogger.error('Failed to decode private key: $e');
+      return null;
+    }
   }
 
   /// Decode public key from encoded string (for backup restore)
@@ -183,14 +191,14 @@ class KeyManager {
 
   /// Delete keys for a business
   Future<void> deleteKeys(String businessId) async {
-    print('KeyManager: Deleting cryptographic keys for business: $businessId');
+    AppLogger.crypto('Deleting cryptographic keys for business: $businessId');
     await _storage.delete(key: '$_privateKeyPrefix$businessId');
     await _storage.delete(key: '$_publicKeyPrefix$businessId');
-    print('KeyManager: Private and public keys deleted');
+    AppLogger.crypto('Private and public keys deleted');
   }
 
   /// Encode public key to base64 string for storage/transmission
-  String _encodePublicKey(ECPublicKey publicKey) {
+  String encodePublicKey(ECPublicKey publicKey) {
     final xBytes = _bigIntToBytes(publicKey.Q!.x!.toBigInteger()!);
     final yBytes = _bigIntToBytes(publicKey.Q!.y!.toBigInteger()!);
     
@@ -224,8 +232,10 @@ class KeyManager {
       final params = ECCurve_secp256r1();
       final q = params.curve.createPoint(x, y);
       
+      AppLogger.debug('Public key decoded successfully (supplier)', 'Crypto');
       return ECPublicKey(q, params);
     } catch (e) {
+      AppLogger.error('Failed to decode public key (supplier): $e');
       return null;
     }
   }

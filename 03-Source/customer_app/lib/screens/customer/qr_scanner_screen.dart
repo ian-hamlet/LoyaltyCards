@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:shared/models/card.dart' as models;
+import 'package:shared/models/transaction.dart' as models;
 import '../../services/token_validator.dart';
 import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
+import '../../services/transaction_repository.dart';
 import '../../services/rate_limiter.dart';
 import '../../services/database_helper.dart';
 import '../../services/key_manager.dart';
 import '../../services/device_orientation_service.dart';
+import 'package:uuid/uuid.dart';
 
 /// Scanner screen for adding new cards or receiving stamps
 class QRScannerScreen extends StatefulWidget {
@@ -117,6 +120,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final cardRepository = CardRepository(DatabaseHelper());
     await cardRepository.insertCard(card);
     
+    // Log card pickup transaction
+    final transactionRepo = TransactionRepository(DatabaseHelper());
+    final pickupTransaction = models.Transaction(
+      id: const Uuid().v4(),
+      cardId: cardId,
+      type: TransactionType.pickup,
+      timestamp: DateTime.now(),
+      businessName: token.businessName,
+      details: 'Card added to wallet',
+    );
+    await transactionRepo.insertTransaction(pickupTransaction);
+    AppLogger.database('Logged pickup transaction for card $cardId');
+    
     AppLogger.qr('Processing Card Issuance');
     AppLogger.business('Card ID: $cardId');
     AppLogger.business('Initial stamps to process: $initialStampCount');
@@ -164,6 +180,17 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
         await stampRepository.insertStamp(stamp);
         AppLogger.database('  Initial stamp #${initialStamp.stampNumber} saved to DB');
+        
+        // Log stamp transaction
+        final stampTransaction = models.Transaction(
+          id: const Uuid().v4(),
+          cardId: cardId,
+          type: TransactionType.stamp,
+          timestamp: DateTime.now(),
+          businessName: token.businessName,
+          details: 'Stamp #${initialStamp.stampNumber} earned',
+        );
+        await transactionRepo.insertTransaction(stampTransaction);
         
         // Next stamp's previous hash is this stamp's signature
         previousHash = initialStamp.signature;
@@ -328,6 +355,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     await stampRepo.insertStamp(stamp);
     AppLogger.database('Main stamp saved to DB');
     
+    // Log stamp transaction
+    final transactionRepo = TransactionRepository(DatabaseHelper());
+    final stampTransaction = models.Transaction(
+      id: const Uuid().v4(),
+      cardId: card.id,
+      type: TransactionType.stamp,
+      timestamp: DateTime.now(),
+      businessName: card.businessName,
+      details: 'Stamp #$stampNumber earned',
+    );
+    await transactionRepo.insertTransaction(stampTransaction);
+    
     // Process additional stamps if present
     int totalStampsAdded = 1;
     if (token.additionalStamps.isNotEmpty) {
@@ -378,6 +417,17 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         await stampRepo.insertStamp(additionalStampRecord);
         totalStampsAdded++;
         AppLogger.database('  Additional stamp saved to DB');
+        
+        // Log stamp transaction
+        final addlStampTransaction = models.Transaction(
+          id: const Uuid().v4(),
+          cardId: card.id,
+          type: TransactionType.stamp,
+          timestamp: DateTime.now(),
+          businessName: card.businessName,
+          details: 'Stamp #${additionalStamp.stampNumber} earned',
+        );
+        await transactionRepo.insertTransaction(addlStampTransaction);
         
         // Next stamp's previous hash is this stamp's signature
         currentPreviousHash = additionalStamp.signature;
@@ -663,6 +713,17 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Mark card as redeemed
     await repository.markCardAsRedeemed(card.id);
     AppLogger.database('Card marked as redeemed in database');
+    
+    // Log redemption transaction
+    final redemptionTransaction = models.Transaction(
+      id: const Uuid().v4(),
+      cardId: card.id,
+      type: TransactionType.redemption,
+      timestamp: DateTime.now(),
+      businessName: card.businessName,
+      details: 'Reward redeemed: ${card.stampsCollected} stamps (secure mode)',
+    );
+    await transactionRepo.insertTransaction(redemptionTransaction);
     
     // Check for existing card with available space before creating new card
     final existingCard = await repository.findCardWithSpace(card.businessId);

@@ -30,9 +30,9 @@
 
 ---
 
-## 🔨 Phase 1: Build Apps (10 minutes)
+## 🔨 Phase 1: Verify Version Numbers (5 minutes)
 
-### 1.1 Verify Version Numbers
+### 1.1 Check Version Consistency
 
 ```bash
 cd /Users/ianhamlet/development/LoyaltyCards/03-Source
@@ -50,9 +50,18 @@ version: 0.2.0+15
 version: 0.2.0+15
 ```
 
+✅ If all three match: Continue to Phase 2  
+❌ If any don't match: Update and commit before proceeding
+
 ---
 
-### 1.2 Build Customer App
+## 📦 Phase 2: Build IPA Files (15 minutes)
+
+**✨ This is the method that worked successfully for Build 9 deployment!**
+
+Flutter's `build ipa` command handles archiving, code signing, and IPA creation automatically.
+
+### 2.1 Build Customer App IPA
 
 ```bash
 cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app
@@ -63,18 +72,30 @@ flutter clean
 # Get dependencies
 flutter pub get
 
-# Build for iOS release
-flutter build ios --release
+# Build IPA for App Store distribution
+flutter build ipa --release
 ```
 
 **Expected output:**
-- ✓ Built build/ios/iphoneos/Runner.app
-- Size: ~19-20MB
-- No errors
+```
+Building App Store IPA...
+✓ Built Runner.app
+✓ Built IPA
+Built: build/ios/ipa/customer_app.ipa
+```
+
+**IPA Location:** `03-Source/customer_app/build/ios/ipa/customer_app.ipa`  
+**Size:** ~19-20MB
+
+**What this does:**
+1. Compiles Flutter app in release mode
+2. Runs Xcode archiving with automatic signing
+3. Exports archive to IPA format
+4. Ready for upload to App Store Connect
 
 ---
 
-### 1.3 Build Supplier App
+### 2.2 Build Supplier App IPA
 
 ```bash
 cd /Users/ianhamlet/development/LoyaltyCards/03-Source/supplier_app
@@ -85,172 +106,129 @@ flutter clean
 # Get dependencies
 flutter pub get
 
-# Build for iOS release
-flutter build ios --release
+# Build IPA for App Store distribution
+flutter build ipa --release
 ```
 
 **Expected output:**
-- ✓ Built build/ios/iphoneos/Runner.app
-- Size: ~21-22MB
-- No errors
-
----
-
-## 📦 Phase 2: Archive Apps Using Command Line (20 minutes)
-
-Since Xcode GUI archiving had issues during the first deployment, we'll use `xcodebuild` command-line tools.
-
-### 2.1 Archive Customer App
-
-```bash
-cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app/ios
-
-# Archive the app
-xcodebuild archive \
-  -workspace Runner.xcworkspace \
-  -scheme Runner \
-  -configuration Release \
-  -archivePath ~/Desktop/CustomerApp-Build15.xcarchive \
-  CODE_SIGN_STYLE=Automatic \
-  DEVELOPMENT_TEAM=YOUR_TEAM_ID
+```
+Building App Store IPA...
+✓ Built Runner.app
+✓ Built IPA
+Built: build/ios/ipa/supplier_app.ipa
 ```
 
-**Replace `YOUR_TEAM_ID`** with your Apple Developer Team ID (found in Apple Developer account settings)
-
-**Expected output:**
-- `** ARCHIVE SUCCEEDED **`
-- Archive created at: `~/Desktop/CustomerApp-Build15.xcarchive`
-
-**If this fails:**
-- Check that automatic signing worked during Build 9 deployment
-- Verify Team ID is correct
-- Ensure certificates haven't expired
+**IPA Location:** `03-Source/supplier_app/build/ios/ipa/supplier_app.ipa`  
+**Size:** ~21-22MB
 
 ---
 
-### 2.2 Archive Supplier App
+### 2.3 Verify IPA Files Exist
 
 ```bash
-cd /Users/ianhamlet/development/LoyaltyCards/03-Source/supplier_app/ios
+cd /Users/ianhamlet/development/LoyaltyCards/03-Source
 
-# Archive the app
-xcodebuild archive \
-  -workspace Runner.xcworkspace \
-  -scheme Runner \
-  -configuration Release \
-  -archivePath ~/Desktop/SupplierApp-Build15.xcarchive \
-  CODE_SIGN_STYLE=Automatic \
-  DEVELOPMENT_TEAM=YOUR_TEAM_ID
+# Check both IPAs were created
+ls -lh customer_app/build/ios/ipa/*.ipa
+ls -lh supplier_app/build/ios/ipa/*.ipa
 ```
 
 **Expected output:**
-- `** ARCHIVE SUCCEEDED **`
-- Archive created at: `~/Desktop/SupplierApp-Build15.xcarchive`
+```
+-rw-r--r--  1 user  staff    19M Apr 16 10:30 customer_app/build/ios/ipa/customer_app.ipa
+-rw-r--r--  1 user  staff    22M Apr 16 10:35 supplier_app/build/ios/ipa/supplier_app.ipa
+```
 
 ---
 
-## 📤 Phase 3: Export and Upload to App Store Connect (30 minutes)
+## 📤 Phase 3: Upload to App Store Connect (15 minutes)
 
-### 3.1 Export Customer App for App Store
+**✨ Use Transporter GUI - This worked perfectly for Build 9!**
+
+### 3.1 Open Transporter App
+
+Transporter is Apple's official IPA upload tool (pre-installed with Xcode).
 
 ```bash
-# Create export options plist
-cat > ~/Desktop/ExportOptions.plist << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>method</key>
-    <string>app-store</string>
-    <key>teamID</key>
-    <string>YOUR_TEAM_ID</string>
-    <key>uploadBitcode</key>
-    <false/>
-    <key>uploadSymbols</key>
-    <true/>
-    <key>signingStyle</key>
-    <string>automatic</string>
-</dict>
-</plist>
-EOF
-
-# Replace YOUR_TEAM_ID in the file
-# Then export the archive
-xcodebuild -exportArchive \
-  -archivePath ~/Desktop/CustomerApp-Build15.xcarchive \
-  -exportPath ~/Desktop/CustomerApp-Build15-IPA \
-  -exportOptionsPlist ~/Desktop/ExportOptions.plist
+# Open Transporter
+open -a Transporter
 ```
 
-**Expected output:**
-- `** EXPORT SUCCEEDED **`
-- IPA file created at: `~/Desktop/CustomerApp-Build15-IPA/Runner.ipa`
+Or find it in Applications folder: **Applications > Transporter.app**
 
 ---
 
-### 3.2 Export Supplier App for App Store
+### 3.2 Sign In to Transporter
 
-```bash
-xcodebuild -exportArchive \
-  -archivePath ~/Desktop/SupplierApp-Build15.xcarchive \
-  -exportPath ~/Desktop/SupplierApp-Build15-IPA \
-  -exportOptionsPlist ~/Desktop/ExportOptions.plist
-```
+1. Transporter opens
+2. Click **Sign In** in top-right
+3. Enter your **Apple ID** (Apple Developer account)
+4. Enter your **password**
+5. If prompted for 2FA, complete verification
 
-**Expected output:**
-- `** EXPORT SUCCEEDED **`
-- IPA file created at: `~/Desktop/SupplierApp-Build15-IPA/Runner.ipa`
-
----
-
-### 3.3 Upload Customer App to App Store Connect
-
-**Option A: Using xcrun altool (Recommended for command line)**
-
-```bash
-xcrun altool --upload-app \
-  --type ios \
-  --file ~/Desktop/CustomerApp-Build15-IPA/Runner.ipa \
-  --username "YOUR_APPLE_ID" \
-  --password "APP_SPECIFIC_PASSWORD"
-```
-
-**Option B: Using Transporter CLI**
-
-```bash
-xcrun iTMSTransporter -m upload \
-  -f ~/Desktop/CustomerApp-Build15-IPA/Runner.ipa \
-  -u "YOUR_APPLE_ID" \
-  -p "APP_SPECIFIC_PASSWORD"
-```
-
-**Option C: Using Transporter GUI App (Easiest)**
-
-1. Open Transporter app (pre-installed on macOS with Xcode)
-2. Sign in with Apple ID
-3. Drag and drop `~/Desktop/CustomerApp-Build15-IPA/Runner.ipa`
-4. Click **Deliver**
-
-**Expected output:**
-- "Package uploaded successfully"
-- Processing time: 5-15 minutes on Apple's servers
+**Expected result:**
+- Signed in successfully
+- Your name appears in top-right corner
 
 ---
 
-### 3.4 Upload Supplier App to App Store Connect
+### 3.3 Upload Customer App IPA
 
-Repeat the same upload process for Supplier app:
+**Drag-and-Drop Upload:**
 
-```bash
-# Option A: altool
-xcrun altool --upload-app \
-  --type ios \
-  --file ~/Desktop/SupplierApp-Build15-IPA/Runner.ipa \
-  --username "YOUR_APPLE_ID" \
-  --password "APP_SPECIFIC_PASSWORD"
-```
+1. In Finder, navigate to:
+   ```
+   /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app/build/ios/ipa/
+   ```
 
-Or use Transporter GUI for easier upload.
+2. Find `customer_app.ipa`
+
+3. **Drag the IPA file** into Transporter window
+
+4. Transporter shows upload details:
+   - App Name: **LoyaltyCards**
+   - Bundle ID: `com.ianhamlet.loyaltycards.customerApp`
+   - Version: **0.2.0**
+   - Build: **15**
+
+5. Click **Deliver** button
+
+6. Wait for upload (2-5 minutes):
+   - Progress bar shows upload status
+   - "Delivered" status appears when complete
+
+**Expected result:**
+- ✅ **Delivered** status with green checkmark
+- Timestamp shows delivery time
+
+---
+
+### 3.4 Upload Supplier App IPA
+
+**Repeat same process:**
+
+1. In Finder, navigate to:
+   ```
+   /Users/ianhamlet/development/LoyaltyCards/03-Source/supplier_app/build/ios/ipa/
+   ```
+
+2. Find `supplier_app.ipa`
+
+3. **Drag the IPA file** into Transporter window
+
+4. Transporter shows upload details:
+   - App Name: **LoyaltyCards Business**
+   - Bundle ID: `com.ianhamlet.loyaltycards.supplierApp`
+   - Version: **0.2.0**
+   - Build: **15**
+
+5. Click **Deliver** button
+
+6. Wait for upload (2-5 minutes)
+
+**Expected result:**
+- ✅ **Delivered** status with green checkmark
+- Both apps show "Delivered" in Transporter history
 
 ---
 
@@ -449,61 +427,116 @@ Please report any issues via TestFlight feedback or directly to development team
 
 ## ⚠️ Troubleshooting
 
-### "No such module" Error During Archive
+### "flutter build ipa" Fails with Code Signing Error
 
-**Symptom:** `xcodebuild archive` fails with "No such module 'shared'"
+**Symptom:** `flutter build ipa` fails with signing/provisioning errors
 
 **Solution:**
 ```bash
+# 1. Verify signing is configured in Xcode
 cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app
+open ios/Runner.xcworkspace
+
+# In Xcode:
+# - Select Runner target → Signing & Capabilities
+# - Verify "Automatically manage signing" is checked
+# - Verify correct Team is selected
+# - Close Xcode
+
+# 2. Clean and retry
 flutter clean
 flutter pub get
-flutter build ios --release
-# Then retry archive command
+flutter build ipa --release
 ```
 
 ---
 
-### "Code Signing Error" During Archive
+### "No such module 'shared'" Error During Build
 
-**Symptom:** Archive fails with signing errors
+**Symptom:** Build fails with "No such module 'shared'" error
 
 **Solution:**
-1. Open Xcode: `open ios/Runner.xcworkspace`
-2. Select Runner target → Signing & Capabilities
-3. Verify "Automatically manage signing" is checked
-4. Verify correct Team is selected
-5. Clean build folder: Xcode menu → Product → Clean Build Folder
-6. Close Xcode and retry command-line archive
+```bash
+cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app
+
+# Clean Flutter cache
+flutter clean
+
+# Get dependencies (this rebuilds Flutter modules)
+flutter pub get
+
+# Try build again
+flutter build ipa --release
+```
 
 ---
 
-### "Export Failed" with Provisioning Profile Error
+### IPA File Not Created (Build Succeeds But No IPA)
 
-**Symptom:** Export succeeds archive but fails to export IPA
+**Symptom:** `flutter build ipa` completes successfully but IPA file doesn't exist
 
 **Solution:**
-1. Check export options plist has correct Team ID
-2. Verify provisioning profile exists in Xcode
-3. Try exporting through Xcode GUI:
-   - Open Xcode
-   - Window → Organizer
-   - Select Archive
-   - Click "Distribute App" → App Store Connect
-   - Follow wizard
+```bash
+# Check if IPA was created in different location
+cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app
+find . -name "*.ipa" -type f
+
+# Expected location:
+# build/ios/ipa/customer_app.ipa
+
+# If not found, try building again with verbose output
+flutter build ipa --release --verbose
+```
 
 ---
 
-### Upload Fails with Authentication Error
+### Transporter Won't Sign In
 
-**Symptom:** `altool` upload fails with "authentication failed"
+**Symptom:** Transporter app fails to sign in with Apple ID
 
 **Solution:**
-1. Verify app-specific password is correct (not regular Apple ID password)
-2. Try using Transporter GUI app instead (more reliable)
-3. Check Apple ID has App Store Connect access:
-   - Go to https://appstoreconnect.apple.com
-   - Try logging in with same credentials
+1. Verify Apple ID credentials are correct
+2. Check if 2FA is required - complete verification
+3. Try signing out and back in to Transporter
+4. Verify Apple Developer account is active (not expired)
+5. Check at https://developer.apple.com
+
+---
+
+### Transporter Upload Fails or Gets Stuck
+
+**Symptom:** IPA upload fails or progress bar hangs in Transporter
+
+**Solution:**
+1. **Cancel upload** if stuck for >10 minutes
+2. Check internet connection
+3. Try uploading again (Transporter resumes uploads)
+4. Check IPA file size is reasonable (~20MB for Customer, ~22MB for Supplier)
+5. Verify IPA isn't corrupted:
+   ```bash
+   # Check file size
+   ls -lh build/ios/ipa/*.ipa
+   # Should be 15-25MB
+   ```
+
+---
+
+### Build Shows "Invalid Binary" in App Store Connect
+
+**Symptom:** Upload succeeds but build shows "Invalid Binary" after processing
+
+**Solution:**
+1. Check email from Apple for specific error details
+2. Common issues:
+   - Missing or invalid capabilities in app config
+   - Info.plist errors (permissions, etc.)
+   - Code signing certificate expired
+3. Fix the issue and rebuild:
+   ```bash
+   flutter clean
+   flutter build ipa --release
+   ```
+4. Upload again via Transporter
 
 ---
 
@@ -514,8 +547,8 @@ flutter build ios --release
 **Solution:**
 1. Wait up to 1 hour (sometimes Apple's servers are slow)
 2. Check for email from Apple (may indicate issues)
-3. Try uploading again (won't create duplicate if first succeeded)
-4. Check App Store Connect status: https://developer.apple.com/system-status/
+3. Check App Store Connect status: https://developer.apple.com/system-status/
+4. If stuck for >2 hours, contact Apple Developer Support
 
 ---
 
@@ -528,6 +561,24 @@ flutter build ios --release
 2. Check tester's email is correct in App Store Connect
 3. Ask tester to manually open TestFlight app (update shows there)
 4. Send manual notification via App Store Connect
+5. Verify tester has "Accepted" status (not "Invited")
+
+---
+
+### Version Number Mismatch After Upload
+
+**Symptom:** App Store Connect shows wrong build number
+
+**Solution:**
+This means pubspec.yaml version didn't match. You must:
+1. Update the version in pubspec.yaml
+2. Rebuild the IPA:
+   ```bash
+   flutter clean
+   flutter build ipa --release
+   ```
+3. Upload again via Transporter
+4. Old upload will be replaced automatically
 
 ---
 
@@ -538,30 +589,26 @@ Use this checklist to track deployment progress:
 ### Pre-Deployment
 - [ ] All version numbers verified at 0.2.0+15
 - [ ] Git branch is `develop` with latest commit
-- [ ] Both apps build successfully (flutter build ios)
-- [ ] No compilation errors or warnings
 - [ ] DEFECT_TRACKER shows TEST-008 as FIXED
+- [ ] No uncommitted changes in git
 
-### Archive Phase
-- [ ] Customer app archived successfully
-- [ ] Supplier app archived successfully
-- [ ] Archive files exist on Desktop (.xcarchive)
-
-### Export Phase
-- [ ] ExportOptions.plist created with correct Team ID
-- [ ] Customer app exported to IPA
-- [ ] Supplier app exported to IPA
-- [ ] IPA files exist on Desktop
+### Build IPA Phase
+- [ ] Customer app: `flutter build ipa --release` successful
+- [ ] Supplier app: `flutter build ipa --release` successful
+- [ ] Customer IPA exists: `customer_app/build/ios/ipa/customer_app.ipa`
+- [ ] Supplier IPA exists: `supplier_app/build/ios/ipa/supplier_app.ipa`
+- [ ] IPA sizes are reasonable (~19MB customer, ~22MB supplier)
 
 ### Upload Phase
-- [ ] Customer app uploaded to App Store Connect
-- [ ] Supplier app uploaded to App Store Connect
-- [ ] Upload success message received
+- [ ] Transporter app opened and signed in
+- [ ] Customer app uploaded via Transporter
+- [ ] Supplier app uploaded via Transporter
+- [ ] Both apps show "Delivered" status in Transporter
 - [ ] Apps show "Processing" status in App Store Connect
 
 ### TestFlight Configuration
-- [ ] Customer app processing completed
-- [ ] Supplier app processing completed
+- [ ] Customer app processing completed (Ready to Test)
+- [ ] Supplier app processing completed (Ready to Test)
 - [ ] Export compliance completed for both apps
 - [ ] Build 15 added to Internal Testing group (Customer)
 - [ ] Build 15 added to Internal Testing group (Supplier)
@@ -580,9 +627,9 @@ Use this checklist to track deployment progress:
 
 ### Post-Deployment
 - [ ] Update deployment notes with any issues encountered
-- [ ] Archive IPA files for records
-- [ ] Clean up Desktop (move archives to organized folder)
+- [ ] Archive IPA files for records (optional)
 - [ ] Document any TestFlight feedback received
+- [ ] Update deployment log below
 
 ---
 
@@ -597,26 +644,19 @@ Date: 2026-04-16
 Deployed By: [Your Name]
 Duration: [Total time from start to testers installing]
 
-## Build Phase
+## Build IPA Phase
 - Customer app build: ✅ Success / ❌ Failed
   - Time: ___ minutes
+  - IPA size: ___ MB
   - Issues: None / [describe issues]
   
 - Supplier app build: ✅ Success / ❌ Failed
   - Time: ___ minutes
-  - Issues: None / [describe issues]
-
-## Archive Phase
-- Customer archiving method: xcodebuild CLI / Xcode GUI
-  - Result: ✅ Success / ❌ Failed
-  - Issues: None / [describe issues]
-  
-- Supplier archiving method: xcodebuild CLI / Xcode GUI
-  - Result: ✅ Success / ❌ Failed
+  - IPA size: ___ MB
   - Issues: None / [describe issues]
 
 ## Upload Phase
-- Upload tool used: altool / Transporter CLI / Transporter GUI
+- Upload method: Transporter GUI / Transporter CLI
 - Customer upload: ✅ Success / ❌ Failed
   - Processing time: ___ minutes
   
@@ -665,11 +705,12 @@ Build 15 deployment is successful when:
 
 - **App Store Connect:** https://appstoreconnect.apple.com
 - **TestFlight Documentation:** https://developer.apple.com/testflight/
-- **xcodebuild Man Page:** `man xcodebuild` in Terminal
+- **Flutter Build IPA Docs:** https://docs.flutter.dev/deployment/ios
 - **Transporter App:** Pre-installed with Xcode (Applications folder)
 - **Privacy Policy:** https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
 - **Project Defect Tracker:** `/DEFECT_TRACKER.md`
 - **Version File:** `/03-Source/shared/lib/version.dart`
+- **Build 9 Deployment Guide:** `/TESTFLIGHT_DEPLOYMENT_GUIDE.md` (first deployment reference)
 
 ---
 
@@ -677,31 +718,35 @@ Build 15 deployment is successful when:
 
 ```bash
 # Verify versions
+## 🏁 Quick Reference Commands
+
+**Complete deployment in 4 commands:**
+
+```bash
+# 1. Verify versions are all 0.2.0+15
 cd /Users/ianhamlet/development/LoyaltyCards/03-Source
 grep "appVersion" shared/lib/version.dart
+grep "version:" customer_app/pubspec.yaml
+grep "version:" supplier_app/pubspec.yaml
 
-# Build Customer App
-cd customer_app && flutter clean && flutter pub get && flutter build ios --release
+# 2. Build Customer App IPA
+cd customer_app
+flutter clean && flutter pub get && flutter build ipa --release
+# IPA created at: build/ios/ipa/customer_app.ipa
 
-# Build Supplier App  
-cd ../supplier_app && flutter clean && flutter pub get && flutter build ios --release
+# 3. Build Supplier App IPA
+cd ../supplier_app
+flutter clean && flutter pub get && flutter build ipa --release
+# IPA created at: build/ios/ipa/supplier_app.ipa
 
-# Archive Customer App
-cd customer_app/ios && xcodebuild archive \
-  -workspace Runner.xcworkspace -scheme Runner -configuration Release \
-  -archivePath ~/Desktop/CustomerApp-Build15.xcarchive \
-  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=YOUR_TEAM_ID
-
-# Archive Supplier App
-cd ../../supplier_app/ios && xcodebuild archive \
-  -workspace Runner.xcworkspace -scheme Runner -configuration Release \
-  -archivePath ~/Desktop/SupplierApp-Build15.xcarchive \
-  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=YOUR_TEAM_ID
-
-# Upload with Transporter (easiest)
+# 4. Upload both IPAs via Transporter
 open -a Transporter
-# Then drag-drop IPA files
+# Then drag-drop both IPA files and click Deliver
 ```
+
+**IPA Locations:**
+- Customer: `/Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app/build/ios/ipa/customer_app.ipa`
+- Supplier: `/Users/ianhamlet/development/LoyaltyCards/03-Source/supplier_app/build/ios/ipa/supplier_app.ipa`
 
 ---
 

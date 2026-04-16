@@ -97,5 +97,24 @@
 /// - TEST-011: Fixed redeemed card filter label confusion
 /// - Changed filter label to be dynamic (shows action, not state)
 /// - Label now reads "Show Redeemed" when hiding, "Hide Redeemed" when showing
+/// 
+/// Build 17 Changes:
+/// - TEST-014: Fixed business import navigation allowing duplicate creation
+/// - Changed navigation from pushReplacement to pushAndRemoveUntil
+/// - Clears entire navigation stack after successful import/creation
+/// - Prevents back button from returning to onboarding screen
+/// - Blocks duplicate business creation after import completes
+/// - Applied to both import_business_screen and supplier_onboarding
+/// - TEST-015: Fixed camera infinite loop after import errors
+/// - Added camera stop() calls after successful import
+/// - Added camera stop() calls after import errors
+/// - Pre-flight check prevents scanning when business already exists
+/// - Clear error messages with "Go Back" button when blocked
+/// - Camera cleanup prevents infinite scan/reject loops
+/// - Bonus: Fixed memory leak in clone_device_screen.dart
+/// - Added mounted checks before all setState() calls in timer callbacks
+/// - Added mounted checks in async completion handlers
+/// - Prevents "setState() called after dispose()" errors
+/// - Proper timer cancellation and async operation cleanup
 
-const String appVersion = '0.2.0+16';
+const String appVersion = '0.2.0+17';

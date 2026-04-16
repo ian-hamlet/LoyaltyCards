@@ -653,6 +653,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Get the card to verify it matches
     final repository = CardRepository(DatabaseHelper());
+    final transactionRepo = TransactionRepository(DatabaseHelper());
     final card = await repository.getCardById(token.cardId);
 
     if (card == null) {

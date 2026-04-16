@@ -56,16 +56,18 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
 
       final cloneQR = await SupplierConfigBackup.createCloneQR(businessWithKeys);
 
-      setState(() {
-        _cloneQR = cloneQR;
-        _isGenerating = false;
-      });
-
-      // Start countdown timer
-      _startCountdown();
-    } catch (e) {
-      setState(() => _isGenerating = false);
       if (mounted) {
+        setState(() {
+          _cloneQR = cloneQR;
+          _isGenerating = false;
+        });
+
+        // Start countdown timer
+        _startCountdown();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isGenerating = false);
         AppFeedback.error(context, 'Failed to generate clone QR: $e');
       }
     }
@@ -86,10 +88,14 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
     final remaining = _cloneQR!.expiresAt!.difference(DateTime.now());
     
     if (remaining.isNegative) {
-      setState(() => _remainingTime = Duration.zero);
       _countdownTimer?.cancel();
+      if (mounted) {
+        setState(() => _remainingTime = Duration.zero);
+      }
     } else {
-      setState(() => _remainingTime = remaining);
+      if (mounted) {
+        setState(() => _remainingTime = remaining);
+      }
     }
   }
 

@@ -23,8 +23,34 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
   final KeyManager _keyManager = KeyManager();
   
   bool _isProcessing = false;
+  bool _scanCompleted = false; // Track if scan succeeded to prevent multiple scans
+  bool _businessAlreadyExists = false; // Track if business exists on init
   String? _errorMessage;
   int _manualRotationOffset = 0; // 0-3 for 0°, 90°, 180°, 270°
+
+  @override
+  void initState() {
+    super.initState();
+    _checkExistingBusiness();
+  }
+
+  /// Check if business already exists on this device
+  /// If exists, show error and prevent scanning
+  Future<void> _checkExistingBusiness() async {
+    try {
+      final existingBusiness = await _businessRepo.getBusiness();
+      if (existingBusiness != null) {
+        setState(() {
+          _businessAlreadyExists = true;
+          _errorMessage = 'Business already configured: ${existingBusiness.name}\n\n'
+              'To restore a different business, please delete the current one in Settings first.';
+        });
+        AppLogger.warning('Business already exists on device: ${existingBusiness.name}', 'Import');
+      }
+    } catch (e) {
+      AppLogger.error('Error checking for existing business: $e', tag: 'Import');
+    }
+  }
 
   @override
   void dispose() {
@@ -33,7 +59,11 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
   }
 
   Future<void> _handleQRCode(String qrData) async {
-    if (_isProcessing) return;
+    // Prevent processing if already completed or if business already exists
+    if (_isProcessing || _scanCompleted || _businessAlreadyExists) {
+      AppLogger.debug('Ignoring QR scan - already processed or business exists', 'Import');
+      return;
+    }
 
     setState(() {
       _isProcessing = true;
@@ -67,7 +97,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
         AppLogger.debug('Step 3: Recovery backup (no expiry)', 'Import');
       }
 
-      // Step 4: Check if business already exists
+      // Step 4: Check if business already exists (redundant check for safety)
       AppLogger.debug('Step 4: Checking for existing business', 'Import');
       final existingBusiness = await _businessRepo.getBusiness();
       if (existingBusiness != null) {
@@ -102,21 +132,43 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
 
       AppLogger.business('Business import complete: ${business.name}');
 
-      // Success!
+      // Mark scan as completed to prevent multiple scans
+      _scanCompleted = true;
+
+      // Success! Stop camera and navigate to home
       if (mounted) {
+        // Stop camera before navigation
+        try {
+          await _scannerController.stop();
+          AppLogger.debug('Camera stopped successfully', 'Import');
+        } catch (e) {
+          AppLogger.warning('Error stopping camera: $e', 'Import');
+        }
+
         Haptics.success();
         AppFeedback.success(context, 'Business restored: ${business.name}');
         
-        // Navigate to home
-        Navigator.of(context).pushReplacement(
+        // Navigate to home and clear all previous routes (including onboarding)
+        // This prevents back button from returning to business creation screen
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const SupplierHome()),
+          (route) => false, // Remove all previous routes
         );
       }
     } catch (e) {
-      AppLogger.error('Business import failed: $e');
+      AppLogger.error('Business import failed: $e', tag: 'Import');
+      
+      // Stop camera after error to prevent infinite loop
+      try {
+        await _scannerController.stop();
+        AppLogger.debug('Camera stopped after error', 'Import');
+      } catch (cameraError) {
+        AppLogger.warning('Error stopping camera after failure: $cameraError', 'Import');
+      }
       
       setState(() {
         _isProcessing = false;
+        _businessAlreadyExists = true; // Prevent further scanning attempts
         _errorMessage = e.toString().replaceFirst('Exception: ', '');
       });
 
@@ -138,7 +190,8 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
       body: Stack(
         children: [
           // QR Scanner with orientation handling
-          if (!_isProcessing)
+          // Only show camera if no business exists and scan not completed
+          if (!_isProcessing && !_businessAlreadyExists && !_scanCompleted)
             ClipRect(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -170,7 +223,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
             ),
 
           // Camera controls
-          if (!_isProcessing)
+          if (!_isProcessing && !_businessAlreadyExists && !_scanCompleted)
             Positioned(
               top: 80,
               right: 16,
@@ -240,7 +293,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
             ),
 
           // Scanning frame
-          if (!_isProcessing)
+          if (!_isProcessing && !_businessAlreadyExists && !_scanCompleted)
             Center(
               child: Container(
                 width: 250,
@@ -288,7 +341,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
 
           // Instructions banner (positioned below camera controls to avoid overlap)
           // Wrapped in IgnorePointer so it doesn't block camera control buttons
-          if (!_isProcessing)
+          if (!_isProcessing && !_businessAlreadyExists && !_scanCompleted)
             Positioned(
               bottom: 100,
               left: 0,
@@ -344,6 +397,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
             ),
 
           // Error message (if any)
+          // Show for both initial check errors and scan errors
           if (_errorMessage != null && !_isProcessing)
             Positioned(
               bottom: 100,
@@ -356,40 +410,57 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.red, width: 2),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline, color: Colors.white, size: 28),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Import Failed',
+                    Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.white, size: 28),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _businessAlreadyExists ? 'Cannot Import' : 'Import Failed',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            _errorMessage!,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
                       ),
                     ),
+                    if (_businessAlreadyExists) ...[
+                      SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.arrow_back, size: 20),
+                          label: Text('Go Back'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.red.shade900,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ),
 
-          // Cancel button
-          if (!_isProcessing)
+          // Cancel button (only show when not blocked by existing business error)
+          if (!_isProcessing && !_businessAlreadyExists)
             Positioned(
               bottom: 24,
               left: 0,

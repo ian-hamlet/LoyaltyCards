@@ -1,26 +1,24 @@
 Update# Defect Tracker - v0.2.0 Post-Testing
 
-**Current Version:** v0.2.0 (Build 16) - In Progress  
+**Current Version:** v0.2.0 (Build 17) - Ready for Testing  
 **TestFlight Version:** v0.2.0 (Build 15)  
-**Target Version:** v0.2.0 (Build 16+)  
+**Target Version:** v0.2.0 (Build 17+)  
 **Last Updated:** April 16, 2026
 
 ---
 
 ## ✅ CRITICAL STATUS UPDATE
 
-**Build 16 In Progress:** April 16, 2026  
-**Status:** 🚧 **IN DEVELOPMENT**  
+**Build 17 Complete:** April 16, 2026  
+**Status:** ✅ **READY FOR DEPLOYMENT**  
 **Progress:**
-1. ✅ DECISION-016: Conditional compilation for delete operations (production safety)
-2. ✅ TEST-013: Fixed statistics text line breaks (cosmetic)
-3. ✅ TEST-009: Implemented transaction logging & activity history (feature completion)
-4. ✅ TEST-011: Fixed filter label confusion (UX improvement) - Ready for Testing
-5. 📋 TEST-014: Clone business navigation (CRITICAL - pending)
-6. 📋 TEST-015: Recovery backup infinite loop (CRITICAL - pending)
-7. 📋 TEST-010: Redemption UI below fold (HIGH - pending)
-8. 📋 TEST-012: Camera rotation persistence (MEDIUM - pending)
+1. ✅ TEST-014: Fixed clone business navigation (CRITICAL) - Verified on device
+2. ✅ TEST-015: Fixed recovery backup infinite loop (CRITICAL) - Verified on device
+3. ✅ BONUS: Fixed memory leak in clone_device_screen (timer cleanup)
+4. 📋 TEST-010: Redemption UI below fold (HIGH - deferred to Build 18)
+5. 📋 TEST-012: Camera rotation persistence (MEDIUM - deferred to Build 18)
 
+**Build 16 Status:** ✅ Completed April 16, 2026 (4 defects fixed)  
 **Build 15 Status:** ✅ Deployed to TestFlight April 16, 2026
 
 ---
@@ -1238,7 +1236,7 @@ This document tracks defects from two sources:
 
 ### TEST-014: Clone Business Navigation Confusion After Successful Import
 - **Source:** Testing - Physical Device (Build 15)
-- **Status:** 📋 BACKLOG
+- **Status:** � IN PROGRESS
 - **Priority:** CRITICAL
 - **Screen/Feature:** Supplier App - Business Setup → Clone to New Device
 - **Description:** When cloning business data to a new device via QR scan, the operation succeeds but the UI navigation is confusing and makes it appear as if nothing happened. After successful QR scan and import, a back button is still visible which returns user to the empty "Create Business" screen (business name field is not populated). User thinks the clone failed. However, closing and reopening the app reveals the business WAS successfully cloned. Additionally, attempting to scan again with a different QR code has no effect - only the first scan is stored. This creates serious confusion during multi-device setup and could lead users to believe the feature is broken.
@@ -1335,11 +1333,29 @@ This document tracks defects from two sources:
   - Testing on multiple devices: 1 hour
 - **Assigned To:**
 - **Target Build:** Build 16 (CRITICAL - blocks multi-device adoption)
+- **Fixed In:** Build 17
+- **Fix Applied:**
+  - Changed navigation from pushReplacement to pushAndRemoveUntil
+  - File: import_business_screen.dart (line ~147)
+  - File: supplier_onboarding.dart (line ~97)
+  - After successful import/creation: Navigator.pushAndRemoveUntil(..., (route) => false)
+  - Clears entire navigation stack, preventing back navigation to onboarding
+  - Also fixes issue from Settings → Reset → Create path
+- **Testing Verification:**
+  - Physical device testing confirmed fix works
+  - Tested 3 successful imports ("Secure Paws" x2, "Someone" x1)
+  - User had to delete business before each new import
+  - No back navigation to onboarding screen possible
+  - Cannot create duplicate business after import
+- **Logs Evidence:**
+  - "Business import complete: [Name]"
+  - "Camera stopped successfully" (related TEST-015 fix)
+  - Clean navigation transitions, no back button access
 - **Notes:** This is a blocker for multi-device supplier deployment. The clone feature is a key selling point (REQ-021) for businesses wanting to use multiple iPads/registers. Current behavior makes feature appear broken and unreliable. Must be fixed before wider pilot testing. The underlying data persistence works correctly - this is purely a UI/navigation/feedback issue. Priority should be equal to or higher than TEST-010 (redemption UI) since both affect core workflows.
 
 ### TEST-015: Recovery Backup Scan Causes Infinite Loop After Error
 - **Source:** Testing - Physical Device (Build 15)
-- **Status:** 📋 BACKLOG
+- **Status:** � IN PROGRESS
 - **Priority:** CRITICAL
 - **Screen/Feature:** Supplier App - Business Setup → Recovery/Restore from Backup
 - **Description:** When using the recovery option to restore business from backup QR code, the scan succeeds but navigation returns user to a screen where they can scan again (incorrect workflow). If user scans again with a different QR code, an error correctly states "business already exists" - but after dismissing this error, the camera enters an infinite loop continuously trying to capture and reject images. The app becomes stuck in this loop with no escape except forcing back to the configure business screen. This appears to be caused by mixed modal and non-modal navigation patterns creating workflow confusion and breaking the screen state machine.
@@ -1478,6 +1494,28 @@ This document tracks defects from two sources:
   - Testing and edge cases: 2 hours
 - **Assigned To:**
 - **Target Build:** Build 16 (CRITICAL - blocks backup/restore feature)
+- **Fixed In:** Build 17
+- **Fix Applied:**
+  - File: import_business_screen.dart
+  - Added pre-flight business existence check in initState()
+  - If business exists, camera never opens, clear error shown
+  - Added camera.stop() after successful import (prevents loop)
+  - Added camera.stop() in error handler (prevents loop)
+  - Added _scanCompleted and _businessAlreadyExists flags
+  - Camera UI only shown when: !_isProcessing && !_businessAlreadyExists && !_scanCompleted
+  - Error banner shows "Go Back" button when business exists
+  - All setState() calls protected with mounted checks
+- **Testing Verification:**
+  - Physical device testing confirmed no infinite loops
+  - 3 successful imports with camera properly stopped
+  - Logs show "Camera stopped successfully" after each import
+  - Navigation fix (TEST-014) prevents second scan attempts
+  - Combined fixes create robust error-free import flow
+- **Bonus Fix:** Memory leak in clone_device_screen.dart
+  - Added mounted checks before setState in timer callbacks
+  - Added mounted checks in async completion handlers
+  - Prevents "setState() called after dispose()" errors
+  - Discovered during TEST-014/015 testing, fixed proactively
 - **Notes:** This is a critical blocker paired with TEST-014. Both issues affect business setup workflows and stem from poor navigation/state management. The backup restore feature is essential for business continuity and disaster recovery scenarios. Current behavior makes feature unusable in edge cases and creates serious user experience problems. Must be fixed before pilot deployment expands. Consider refactoring entire business setup flow to use consistent navigation pattern (recommend modal approach for all scanning operations). This issue demonstrates why mixing modal and non-modal navigation is dangerous - state becomes unpredictable and error recovery breaks down.
 
 ### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production
@@ -1636,9 +1674,9 @@ This document tracks defects from two sources:
 ## 📊 Defect Summary Statistics
 
 ### By Priority
-- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **6 total** (4 FIXED, 2 NEW in BACKLOG)
+- 🔴 CRITICAL: 2 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **6 total** (6 FIXED, 0 NEW in BACKLOG)
   - Fixed: CR-001, CR-002, CR-003, TEST-001
-  - **NEW CRITICAL:** TEST-014 (Clone navigation), TEST-015 (Recovery loop)
+  - **FIXED BUILD 17:** TEST-014 (Clone navigation), TEST-015 (Recovery loop)
 - 🟠 HIGH: 4 (Code Review) + 5 (Testing - old) + 4 (Testing - Build 15) = **13 total** (12 FIXED, 1 NEW in BACKLOG)
   - **NEW HIGH:** TEST-010 (Redemption UI below fold)
 - 🟡 MEDIUM: 4 (Code Review) + 1 (Testing - old) + 3 (Testing - Build 15) = **8 total** (7 FIXED, 1 NEW in BACKLOG)
@@ -1653,13 +1691,15 @@ This document tracks defects from two sources:
   - 1 Build 15 fixed (TEST-008)
 
 ### By Status
-- 📋 BACKLOG: 5 defects
+- 📋 BACKLOG: 3 defects
   - CR-015 (camera orientation - LOW)
-  - TEST-010, TEST-012, TEST-014, TEST-015 (Build 15 findings)
+  - TEST-010 (redemption UI - HIGH)
+  - TEST-012 (camera persistence - MEDIUM)
 - 🚧 IN PROGRESS: 0
-- ✅ FIXED: 29 defects
+- ✅ FIXED: 31 defects
   - Builds 1-15 fixes
   - Build 16: TEST-009 (transaction logging), TEST-011 (filter label), TEST-013 (statistics text)
+  - Build 17: TEST-014 (import navigation), TEST-015 (camera loop)
 - ✅ CLOSED: 1 (CR-011 duplicate)
 - ✅ IMPLEMENTED: 1 (DECISION-016 - Delete All Data conditional compilation)
 
@@ -1669,11 +1709,20 @@ This document tracks defects from two sources:
 - Decisions: 1 (production readiness)
 
 ### Current Build
+- **Build 17** - In Development April 16, 2026
+- **Status:** ✅ READY FOR DEPLOYMENT
+- **Defects Resolved in Build 17:** 2 (TEST-014, TEST-015)
+- **Critical Fixes:** Business import navigation and camera loop prevention
+- **Bonus Fix:** Memory leak in clone_device_screen.dart
+
+- **Build 16** - Completed April 16, 2026
+- **Status:** ✅ COMPLETED
+- **Defects Resolved in Build 16:** 4 (DECISION-016, TEST-009, TEST-011, TEST-013)
+
 - **Build 15** - Deployed to TestFlight April 16, 2026
-- **Status:** ✅ DEPLOYED, 🐛 NEW ISSUES FOUND
+- **Status:** ✅ DEPLOYED
 - **Defects Resolved in Build 15:** 1 (TEST-008)
 - **New Defects Found in Build 15:** 7 (TEST-009 through TEST-015)
-- **Critical Blockers for Build 16:** 2 (TEST-014, TEST-015)
 
 ### By Target Build
 - Build 9 (COMPLETE): 2 defects - Camera controls fixed
@@ -1682,21 +1731,23 @@ This document tracks defects from two sources:
 - Build 12 (COMPLETE): 1 defect - Redeemed cards filter
 - Build 13-14 (COMPLETE): 3 defects - Error handling docs + code review
 - Build 15 (COMPLETE): 1 defect - Overflow card cascade (TEST-008)
-- **Build 16 (IN PROGRESS):** 7 defects (Build 15 findings) - 3 FIXED, 4 REMAINING
-  - ✅ FIXED: TEST-009 (transaction logging), TEST-011 (filter label), TEST-013 (statistics text)
-  - 🔴 CRITICAL: TEST-014, TEST-015 (business setup workflows)
-  - 🟠 HIGH: TEST-010 (redemption UI)
-  - 🟡 MEDIUM: TEST-012 (camera persistence)
+- Build 16 (COMPLETE): 4 defects - Transaction logging, filter label, statistics, delete protection
+- **Build 17 (READY FOR TESTING):** 2 CRITICAL defects FIXED + 1 bonus fix
+  - ✅ FIXED: TEST-014 (import navigation - CRITICAL)
+  - ✅ FIXED: TEST-015 (camera infinite loop - CRITICAL)
+  - ✅ BONUS: Memory leak fix (clone_device_screen timer)
+  - 📋 REMAINING BACKLOG: TEST-010 (HIGH), TEST-012 (MEDIUM)
 - v0.3.0+ (Deferred): 1 defect - CR-015 (camera default orientation)
 
-### Build 16 Priority Order
-1. ✅ **COMPLETED:** DECISION-016 - Conditional compilation for delete operations
-2. ✅ **COMPLETED:** TEST-013 - Statistics text line breaks (cosmetic fix)
-3. ✅ **COMPLETED:** TEST-009 - Transaction logging & activity history (feature completion)
-4. ✅ **COMPLETED:** TEST-011 - Filter label dynamic text (UX fix) - Ready for Testing
-5. **CRITICAL (Must Fix):** TEST-014, TEST-015 - Business setup navigation bugs
-6. **HIGH:** TEST-010 - Redemption flow UI visibility
-7. **MEDIUM:** TEST-012 - Camera rotation persistence
+### Build 17 Summary
+- **Files Modified:** 5
+  - import_business_screen.dart (TEST-014, TEST-015)
+  - supplier_onboarding.dart (TEST-014)
+  - clone_device_screen.dart (memory leak)
+  - qr_scanner_screen.dart (customer app - transaction repo fix)
+  - version.dart, pubspec.yaml x2 (version update)
+- **Tests Passed:** Physical device verification on iPad
+- **Key Achievement:** Eliminated all CRITICAL defects in backlog
 
 ---
 

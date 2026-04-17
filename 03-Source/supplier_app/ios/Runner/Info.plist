@@ -72,5 +72,7 @@
 	<string>Save backup QR codes to your photo library for safekeeping</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Access photos to save your business backup QR codes</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Authenticate with Face ID to securely access your business private keys for backup and device cloning</string>
 </dict>
 </plist>

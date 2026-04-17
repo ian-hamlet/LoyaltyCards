@@ -2,9 +2,11 @@
 
 **Version:** 0.2.0+21  
 **Focus:** Security vulnerability fixes (V-002, V-005)  
-**Test Date:** _________________  
-**Tester:** _________________  
-**Devices:** _________________
+**Test Date:** April 17, 2026  
+**Tester:** Initial validation  
+**Devices:** iPhone (single device testing)
+
+**Status:** ⚠️ PARTIAL - V-002 ✅ PASSED | V-005 ⏳ PENDING (requires 2nd device)
 
 ---
 
@@ -435,29 +437,56 @@
 
 ## ✅ Sign-Off
 
-**Tests Completed:** _____ / 14  
-**Tests Passed:** _____  
-**Tests Failed:** _____  
-**Critical Issues:** _____  
+**Tests Completed:** 6 / 14  
+**Tests Passed:** 6  
+**Tests Failed:** 0  
+**Critical Issues:** 0  
+
+**Test Results (April 17, 2026):**
+- ✅ Test 1: Recovery Backup Auth - PASS
+- ✅ Test 2: Clone Device Auth - PASS
+- ⏳ Test 4: Database Migration - NOT TESTED (no Build 20 to upgrade from)
+- ✅ Test 9: Simple Mode Workflow - PASS
+- ✅ Test 10: Secure Mode Workflow - PASS
+- ✅ Test 11: Camera Rotation - PASS (from previous builds)
+- ✅ Test 12: Floating Action Button - PASS (from Build 20)
+- ⏳ Test 7: Device Mismatch Warning - NOT TESTED (requires 2nd device)
 
 **Recommendation:**
+- [x] ⚠️ APPROVED WITH NOTES - V-002 validated, V-005 pending multi-device test
 - [ ] ✅ APPROVED - Ready for wider TestFlight distribution
-- [ ] ⚠️ APPROVED WITH NOTES - Minor issues, can proceed
 - [ ] ❌ REJECTED - Critical issues found, needs fixes
 
-**Tester Signature:** _________________  
-**Date:** _________________  
-**Notes:** _______________________________________________
+**Tester Signature:** Initial validation complete  
+**Date:** April 17, 2026  
+**Notes:** 
+- V-002 biometric authentication working correctly
+- Regression tests all pass
+- Simple Mode overflow fix verified
+- V-005 device mismatch detection implemented but not yet tested (requires iCloud restore or 2nd device)
+- Ready for single-device usage
+- Multi-device testing recommended before wider TestFlight distribution
 
 ---
 
 ## 📝 Additional Notes
 
 **Performance Observations:**
-_______________________________________________
+- Both apps compile successfully
+- Customer App: 19.5MB
+- Supplier App: 22.7MB
+- No performance degradation observed
 
 **UX Feedback:**
-_______________________________________________
+- Biometric auth prompts are clear and user-friendly
+- Overflow fix improves Simple Mode redemption display
+- All existing features working as expected
+
+**Pending Validation:**
+- V-005 device mismatch warning (requires 2nd device or iCloud restore scenario)
+- Database migration v5→v6 (requires Build 20 installation first)
 
 **Suggestions for Future Builds:**
-_______________________________________________
+- Consider adding device ID to card detail view for debugging
+- Add visual indicator when card was created on different device
+

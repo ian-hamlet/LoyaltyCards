@@ -1123,15 +1123,16 @@ This document tracks defects from two sources:
     - App restarts
     - Different QR scanner screens (stamp, redemption, add card)
     - Days/weeks (until app data cleared)
-  - User only needs to set rotation ONCE per device
+  - User only needs to set rotation ONCE per app (applies to all QR screens in that app)
   - If user changes rotation, new preference is saved
-  - Separate preferences for Customer app vs Supplier app (different use cases)
+  - Customer app and Supplier app maintain separate rotation preferences (isolated storage)
 - **Actual Behavior:** 
-  - Camera always opens with same default orientation
-  - Manual rotation buttons must be used on EVERY scan
-  - No persistence of user preference
-  - User experience is repetitive and tedious
-  - Especially frustrating for users who always hold device same way
+  - ~~Camera always opens with same default orientation~~ (FIXED in Build 18)
+  - ~~Manual rotation buttons must be used on EVERY scan~~ (FIXED in Build 18)
+  - ~~No persistence of user preference~~ (FIXED in Build 18)
+  - ~~User experience is repetitive and tedious~~ (FIXED in Build 18)
+  - ~~Especially frustrating for users who always hold device same way~~ (FIXED in Build 18)
+  - **After Fix:** Rotation preference persists across all QR screens in app
 - **Impact:** 
   - Medium: Feature works but requires extra taps every time
   - Degrades user experience for frequent users
@@ -1139,6 +1140,7 @@ This document tracks defects from two sources:
   - Affects both Customer and Supplier apps
   - More noticeable on iPhone (portrait) than iPad (landscape works better)
   - Compounds CR-015 issue (wrong default + no persistence = poor UX)
+  - With fix: User sets rotation once per app, applies to all QR screens
 - **Technical Context:**
   - CR-015 attempts to detect device orientation automatically (difficult in Flutter)
   - Flutter camera abstractions make orientation detection unreliable
@@ -1149,7 +1151,7 @@ This document tracks defects from two sources:
 - **Proposed Solution (User Suggestion):**
   Instead of fighting Flutter abstractions to detect orientation automatically:
   1. Use SharedPreferences to store last rotation value (0°, 90°, 180°, 270°)
-  2. Key: `camera_rotation_preference_customer` or `camera_rotation_preference_supplier`
+  2. Key: `camera_rotation` (shared within each app)
   3. When camera screen opens:
      - Read saved preference
      - Apply rotation automatically via `_manualRotationOffset`
@@ -1158,14 +1160,16 @@ This document tracks defects from two sources:
      - Apply rotation as normal
      - Save new rotation value to SharedPreferences
   5. Preference persists until app data cleared
-  6. Works across all QR scanner screens in the app
+  6. Works across all QR scanner screens within the app
+  7. Apps isolated (Customer and Supplier maintain separate preferences)
 - **Advantages of This Approach:**
   - ✅ Sidesteps difficult device orientation detection
   - ✅ Simple implementation using existing rotation logic
   - ✅ User teaches app their preference (self-correcting)
   - ✅ Works reliably regardless of device type
   - ✅ No complex sensor reading or heuristics needed
-  - ✅ Preference is per-app (Customer vs Supplier can differ)
+  - ✅ Shared preference per app (Customer vs Supplier isolated)
+  - ✅ Consistent rotation across all QR screens within app
   - ✅ User in control of their preference
   - ✅ Fixes 99% of CR-015 use case without solving hard problem
 - **Implementation Details:**
@@ -1174,10 +1178,10 @@ This document tracks defects from two sources:
   - Load preference in `initState()` of QR scanner screens
   - Set `_manualRotationOffset` to loaded value before camera initializes
   - Update SharedPreferences in rotation button `onPressed` handlers
-  - Consider separate keys for different contexts:
-    - `camera_rotation_customer_stamp` (stamp scanning)
-    - `camera_rotation_customer_redeem` (redemption scanning)
-    - Or single global: `camera_rotation_customer` (simpler, recommended)
+  - Use single shared key per app (simpler, more intuitive):
+    - Customer app: `camera_rotation` (shared across all customer QR screens)
+    - Supplier app: `camera_rotation` (shared across all supplier QR screens)
+    - Apps isolated by bundle ID (no cross-app interference)
 - **Fix Required:** 
   - Add SharedPreferences persistence to QR scanner screens:
     - `customer_app/lib/screens/customer/qr_scanner_screen.dart`
@@ -1198,15 +1202,17 @@ This document tracks defects from two sources:
 - **Fix Applied:**
   - Added SharedPreferences dependency to supplier_app (already in customer_app)
   - Implemented rotation persistence in all 4 QR scanner screens
-  - Each screen has separate preference key for context-specific defaults:
-    * `camera_rotation_customer` - Customer app QR scanner
-    * `camera_rotation_supplier_import` - Supplier import/recovery
-    * `camera_rotation_supplier_stamp` - Supplier stamp issuance
-    * `camera_rotation_supplier_redeem` - Supplier redemption
+  - Each app uses a single shared rotation preference key:
+    * Customer app: All QR scanner screens share `camera_rotation` preference
+    * Supplier app: All QR scanner screens share `camera_rotation` preference
+    * Apps are isolated (separate bundle IDs = separate SharedPreferences storage)
+  - Simplified approach: One rotation setting per app (not per-context)
+  - Rationale: Users typically hold device consistently across all scanning tasks
   - Added `_loadRotationPreference()` method in initState()
   - Added `_saveRotationPreference(int rotation)` helper method
   - Rotation buttons now save preference after changing rotation
   - Preference automatically loaded and applied on screen init
+  - Default rotation: `1` (90°) if no saved preference exists
   - Files modified:
     * customer_app/lib/screens/customer/qr_scanner_screen.dart
     * supplier_app/lib/screens/supplier/import_business_screen.dart
@@ -1215,13 +1221,15 @@ This document tracks defects from two sources:
   - User's rotation choice persists across:
     * App restarts
     * Different scan sessions
+    * All QR scanner screens within the app
     * Until app data cleared or user changes preference
 - **Testing Required:**
   - Test on iPhone: Set rotation, exit, reopen - verify preference applied
   - Test on iPad: Same verification
-  - Test different contexts have separate preferences
-  - Test rotation change updates preference immediately
-- **Notes:** This is a pragmatic solution to CR-015's camera orientation problem. Instead of trying to solve the hard problem (automatic device orientation detection in Flutter), we let the user teach the app their preference once, then remember it. This approach is user-centric, simple to implement, and works reliably across all devices. The manual rotation buttons already work perfectly - we're just adding memory to the system. Recommend implementing this BEFORE attempting more complex auto-detection logic. Users will appreciate not having to rotate camera every single time. This should be prioritized higher than CR-015's LOW priority since it's actually implementable and solves the real-world pain point.
+  - Test rotation preference applies to ALL QR screens within app
+  - Test rotation change in one screen updates preference for all screens
+  - Test Customer and Supplier apps maintain separate preferences
+- **Notes:** This is a pragmatic solution to CR-015's camera orientation problem. Instead of trying to solve the hard problem (automatic device orientation detection in Flutter), we let the user teach the app their preference once, then remember it. This approach is user-centric, simple to implement, and works reliably across all devices. The manual rotation buttons already work perfectly - we're just adding memory to the system. The single shared preference per app is cleaner UX than context-specific preferences, as users typically hold their device consistently. Recommend implementing this BEFORE attempting more complex auto-detection logic. Users will appreciate not having to rotate camera every single time. This should be prioritized higher than CR-015's LOW priority since it's actually implementable and solves the real-world pain point.
 
 ### TEST-013: Statistics Info Text Displays Literal "\n" Instead of Line Breaks
 - **Source:** Testing - Physical Device (Build 15)

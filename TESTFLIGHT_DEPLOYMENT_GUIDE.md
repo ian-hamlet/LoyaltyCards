@@ -68,58 +68,91 @@ open Runner.xcworkspace
 
 ---
 
-### 1.4 Archive Customer App
+### 1.4 Build Customer App IPA (Using Flutter)
 
-1. In Xcode menu → **Product** → **Destination** → **Any iOS Device (arm64)**
-   - Make sure "Any iOS Device" is selected, NOT a simulator
-   
-2. In Xcode menu → **Product** → **Archive**
-   - This takes 2-3 minutes
-   - You'll see build progress in top bar
-   - Archive window opens automatically when done
+**⚠️ IMPORTANT: Use Flutter CLI, NOT Xcode Archive**
+
+Flutter apps must be built using `flutter build ipa` command. Xcode's Product → Archive doesn't properly handle Flutter's build system.
+
+**In Terminal:**
+
+```bash
+cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app
+
+# Clean previous builds
+flutter clean
+flutter pub get
+
+# Build iOS release IPA (3-5 minutes)
+flutter build ipa --release
+```
+
+**Build Process:**
+- `flutter clean` removes old build artifacts (~5 seconds)
+- `flutter pub get` downloads dependencies (~30 seconds)
+- `flutter build ipa --release` creates IPA (~3-5 minutes)
+- Progress shown in terminal
 
 **Expected Result:**
-- "Archives" window opens
-- Shows "LoyaltyCards" with today's date and version "0.2.0 (0)"
+- Build completes successfully
+- IPA created at: `build/ios/ipa/customer_app.ipa`
+- File size: ~19-20 MB
+- Terminal shows: "✓ Built build/ios/ipa/customer_app.ipa"
 
-**⚠️ If Archive fails:**
-- Check that "Any iOS Device" is selected (not simulator)
-- Check Signing section has no red errors
-- Check Team is selected
+**⚠️ If Build Fails:**
+- Check Xcode signing is configured (Step 1.3)
+- Run `pod install` in `ios/` directory
+- Check for Flutter/Xcode version compatibility
+- Review error messages carefully
+
+**Verify Build:**
+```bash
+# Check IPA exists
+ls -lh build/ios/ipa/customer_app.ipa
+
+# Verify version (should show 0.2.0 and build 21)
+unzip -p build/ios/ipa/customer_app.ipa \
+  Payload/Runner.app/Info.plist | \
+  grep -A1 CFBundleShortVersionString
+```
 
 ---
 
-### 1.5 Distribute Customer App to App Store Connect
+### 1.5 Upload Customer App to App Store Connect
 
-**IN THE ARCHIVES WINDOW:**
+**Option A: Transporter App (Recommended - Easiest)**
 
-1. Select your archive (should be highlighted)
-2. Click **Distribute App** button (right side)
-3. Choose distribution method:
-   - Select **App Store Connect**
-   - Click **Next**
+1. Download **Transporter** from Mac App Store (if not installed)
+2. Open Transporter app
+3. Sign in with your Apple ID (same as Xcode)
+4. Drag and drop `customer_app.ipa` into Transporter window
+   - Location: `03-Source/customer_app/build/ios/ipa/customer_app.ipa`
+5. Click **Deliver** button
+6. Wait for upload to complete (2-5 minutes)
+7. Check for success message
 
-4. Upload method:
-   - Select **Upload**
-   - Click **Next**
+**Option B: Xcode Organizer**
 
-5. Distribution options (use defaults):
-   - ✅ Include bitcode for iOS content: OFF (not needed)
-   - ✅ Upload your app's symbols: ON (recommended)
-   - Click **Next**
+1. Open Xcode
+2. Menu: **Window** → **Organizer**
+3. Click **Archives** tab (top)
+4. Drag `customer_app.ipa` file into Archives window
+5. Select the archive
+6. Click **Distribute App**
+7. Select **App Store Connect** → **Next**
+8. Select **Upload** → **Next**
+9. **Automatically manage signing** → **Next**
+10. Review and click **Upload**
 
-6. Automatically manage signing:
-   - ✅ **Automatically manage signing** (checked)
-   - Click **Next**
+**Option C: Command Line (Advanced)**
 
-7. Review Runner.ipa content:
-   - Review the summary
-   - Click **Upload**
-
-8. Wait for upload (2-5 minutes):
-   - Progress bar shows upload status
-   - "Upload Successful" message appears
-   - Click **Done**
+```bash
+xcrun altool --upload-app \
+  --type ios \
+  --file build/ios/ipa/customer_app.ipa \
+  --username YOUR_APPLE_ID@EMAIL.COM \
+  --password YOUR_APP_SPECIFIC_PASSWORD
+```
 
 **Expected Result:**
 - Upload completes successfully
@@ -162,32 +195,54 @@ open Runner.xcworkspace
 
 ---
 
-### 2.3 Archive Supplier App
+### 2.3 Build Supplier App IPA (Using Flutter)
 
-**SAME AS CUSTOMER APP:**
+**SAME FLUTTER BUILD PROCESS AS CUSTOMER APP:**
 
-1. **Product** → **Destination** → **Any iOS Device (arm64)**
-2. **Product** → **Archive**
-3. Wait 2-3 minutes
-4. Archives window opens
+**In Terminal:**
+
+```bash
+cd /Users/ianhamlet/development/LoyaltyCards/03-Source/supplier_app
+
+# Clean previous builds
+flutter clean
+flutter pub get
+
+# Build iOS release IPA (3-5 minutes)
+flutter build ipa --release
+```
 
 **Expected Result:**
-- Shows "LoyaltyCards Business" archive with version "0.2.0 (0)"
+- IPA created at: `build/ios/ipa/supplier_app.ipa`
+- File size: ~22-23 MB
+- Terminal shows: "✓ Built build/ios/ipa/supplier_app.ipa"
+
+**Verify Build:**
+```bash
+ls -lh build/ios/ipa/supplier_app.ipa
+```
 
 ---
 
-### 2.4 Distribute Supplier App
+### 2.4 Upload Supplier App to App Store Connect
 
-**REPEAT SAME PROCESS AS CUSTOMER APP:**
+**REPEAT SAME UPLOAD PROCESS AS CUSTOMER APP:**
 
-1. Select archive
-2. **Distribute App**
-3. **App Store Connect** → **Next**
-4. **Upload** → **Next**
-5. Accept defaults → **Next**
-6. **Automatically manage signing** → **Next**
-7. Review → **Upload**
-8. Wait for success → **Done**
+**Using Transporter (Recommended):**
+1. Open Transporter app
+2. Drag `supplier_app.ipa` into window
+   - Location: `03-Source/supplier_app/build/ios/ipa/supplier_app.ipa`
+3. Click **Deliver**
+4. Wait for success
+
+**Using Xcode Organizer:**
+1. Window → Organizer → Archives
+2. Drag `supplier_app.ipa` into Archives
+3. Distribute App → App Store Connect → Upload
+
+**Expected Result:**
+- Upload completes successfully
+- Both apps now appear in App Store Connect
 
 ---
 
@@ -387,6 +442,27 @@ Requires customers to have LoyaltyCards app installed.
 
 ## Quick Reference
 
+**Flutter Build Commands:**
+```bash
+# Customer App
+cd 03-Source/customer_app
+flutter clean && flutter pub get
+flutter build ipa --release
+# Output: build/ios/ipa/customer_app.ipa (~19-20 MB)
+
+# Supplier App
+cd 03-Source/supplier_app
+flutter clean && flutter pub get
+flutter build ipa --release
+# Output: build/ios/ipa/supplier_app.ipa (~22-23 MB)
+```
+
+**Upload with Transporter:**
+1. Open Transporter app from Mac App Store
+2. Drag IPAs into window
+3. Click Deliver
+4. Wait 10-15 minutes for processing
+
 **Privacy Policy URL:**
 ```
 https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
@@ -401,7 +477,7 @@ ian.hamlet@dotConnected.com
 - Customer: `com.ianhamlet.loyaltycards.customerApp`
 - Supplier: `com.ianhamlet.loyaltycards.supplierApp`
 
-**Version:** v0.2.0 (Build 0)
+**Version:** v0.2.0 (Current: Build 21)
 
 **GitHub:** https://github.com/ian-hamlet/LoyaltyCards
 

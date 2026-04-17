@@ -236,20 +236,24 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                               ),
                               const SizedBox(height: 20),
                               
-                              // Stamp Grid
-                              _buildStampGrid(brandColor),
+                              // Stamp Grid - Compact display for complete/redeemed cards (TEST-010)
+                              if (_card!.isComplete || _card!.isRedeemed)
+                                _buildCompactStampDisplay()
+                              else
+                                _buildStampGrid(brandColor),
                               
-                              const SizedBox(height: 12),
-                              
-                              // Progress Text
-                              Text(
-                                '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                              // Progress Text - only show when not complete/redeemed
+                              if (!_card!.isComplete && !_card!.isRedeemed) ...[
+                                const SizedBox(height: 12),
+                                Text(
+                                  '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                         ),
@@ -568,7 +572,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                 )
               else
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8), // Reduced from 16 (TEST-010 - Compact QR Layout)
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -577,12 +581,12 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   child: QrImageView(
                     data: _generateCardQR(),
                     version: QrVersions.auto,
-                    size: QRCodeSize.calculate(context),
+                    size: QRCodeSize.calculate(context) * 0.95, // 95% size (TEST-010 - Compact QR Layout)
                     backgroundColor: Colors.white,
                   ),
                 ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 6), // Reduced from 12 (TEST-010 - Compact QR Layout)
 
               // Action Buttons (Secure Mode)
               Padding(
@@ -651,6 +655,55 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             const SizedBox(height: 32),
           ],
         ),
+      ),
+      // Floating Action Button - Always visible "Scan Confirmation" for redemption (TEST-010)
+      floatingActionButton: (_card!.mode == OperationMode.secure && _card!.isComplete && !_card!.isRedeemed)
+        ? FloatingActionButton.extended(
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const QRScannerScreen(
+                    mode: QRScanMode.receiveStamp,
+                  ),
+                ),
+              );
+              
+              if (result != null && mounted) {
+                AppFeedback.info(context, result);
+                await _loadCardData();
+              }
+            },
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Scan Confirmation'),
+            backgroundColor: Colors.green[600],
+          )
+        : null,
+    );
+  }
+
+  // Compact stamp display for complete/redeemed cards (TEST-010 - Smart Collapse)
+  Widget _buildCompactStampDisplay() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

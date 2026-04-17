@@ -165,5 +165,14 @@
 /// - Applied vertical bar to customer QR display redemption screen
 ///   * Green "COMPLETE" bar on left during redemption flow
 ///   * Consistent visual language across all card state displays
+/// 
+/// Build 20 Changes:
+/// - TEST-010 Redemption UI Improvements (Secure Mode)
+///   * Floating Action Button: "Scan Confirmation" always visible (no scrolling)
+///   * Compact QR layout: Reduced padding (16→8px) and size (95%) saves ~70px vertical space
+///   * Smart collapse: Complete/Redeemed cards show compact stamp display instead of full grid
+///   * Saves ~120-140px total vertical space on redemption screens
+///   * Ensures "Scan Redemption Token" button visible on all iPhone sizes
+///   * Better UX: Clear next step always visible, no hidden UI below fold
 
-const String appVersion = '0.2.0+19';
+const String appVersion = '0.2.0+20';

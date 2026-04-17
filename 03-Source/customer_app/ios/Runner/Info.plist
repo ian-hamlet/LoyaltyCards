@@ -68,5 +68,7 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Scan QR codes to add and use loyalty cards</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Authenticate with Face ID to protect access to your loyalty cards</string>
 </dict>
 </plist>

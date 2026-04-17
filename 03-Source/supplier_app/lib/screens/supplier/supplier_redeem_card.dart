@@ -554,9 +554,9 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         
         // V-005: Check for device mismatch
         if (token.hasDeviceMismatch()) {
-          AppLogger.security('Device mismatch detected!');
-          AppLogger.security('Card device: ${token.cardDeviceId}');
-          AppLogger.security('Current device: ${token.currentDeviceId}');
+          AppLogger.warning('Device mismatch detected!', 'Security');
+          AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
+          AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
           _showDeviceMismatchWarning(context, token);
           return;
         }
@@ -734,11 +734,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     
     if (result == true) {
       // User chose to proceed despite mismatch
-      AppLogger.security('Supplier chose to proceed with device mismatch');
+      AppLogger.warning('Supplier chose to proceed with device mismatch', 'Security');
       _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
     } else {
       // User cancelled
-      AppLogger.security('Supplier cancelled redemption due to device mismatch');
+      AppLogger.warning('Supplier cancelled redemption due to device mismatch', 'Security');
     }
   }
 

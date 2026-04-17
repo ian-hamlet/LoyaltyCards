@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared/shared.dart';
 
@@ -36,7 +38,9 @@ class DeviceService {
       }
 
       // Hash and truncate for privacy (12 chars is enough for collision avoidance)
-      final hash = CryptoUtils.sha256(identifier);
+      final bytes = utf8.encode(identifier);
+      final digest = sha256.convert(bytes);
+      final hash = digest.toString();
       _cachedDeviceId = hash.substring(0, 12);
       
       AppLogger.debug('Device ID: $_cachedDeviceId');
@@ -45,7 +49,9 @@ class DeviceService {
       AppLogger.error('Error getting device ID: $e');
       // Fallback to timestamp-based ID
       final fallbackId = 'fallback-${DateTime.now().millisecondsSinceEpoch}';
-      final hash = CryptoUtils.sha256(fallbackId);
+      final bytes = utf8.encode(fallbackId);
+      final digest = sha256.convert(bytes);
+      final hash = digest.toString();
       _cachedDeviceId = hash.substring(0, 12);
       return _cachedDeviceId!;
     }

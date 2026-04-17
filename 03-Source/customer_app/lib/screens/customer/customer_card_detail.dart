@@ -29,6 +29,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   models.Card? _card;
   List<Stamp> _stamps = [];
   bool _isLoading = true;
+  String? _currentDeviceId; // V-005: Cache device ID for QR generation
 
   @override
   void initState() {
@@ -38,6 +39,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
 
   Future<void> _loadCardData() async {
     setState(() => _isLoading = true);
+    
+    // V-005: Get device ID for redemption QR (fetch once, cache in state)
+    _currentDeviceId = await DeviceService.getDeviceId();
     try {
       final card = await _cardRepo.getCardById(widget.cardId);
       final stamps = await _stampRepo.getStampsByCard(widget.cardId);
@@ -79,9 +83,6 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       
       final signatures = _stamps.map((s) => s.signature).toList();
       
-      // V-005: Include device IDs for multi-device duplication detection
-      final currentDeviceId = await DeviceService.getDeviceId();
-      
       final qrData = {
         'type': 'redemption_request',
         'cardId': _card!.id,
@@ -90,7 +91,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         'stampSignatures': signatures,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'cardDeviceId': _card!.deviceId, // V-005: Device where card was created
-        'currentDeviceId': currentDeviceId, // V-005: Device showing redemption QR
+        'currentDeviceId': _currentDeviceId, // V-005: Device showing redemption QR (cached)
       };
       
       return jsonEncode(qrData);

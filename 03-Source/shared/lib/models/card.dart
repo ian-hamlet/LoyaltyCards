@@ -15,6 +15,7 @@ class Card {
   final DateTime updatedAt;
   final bool isRedeemed; // Track if card has been redeemed (prevents double redemption)
   final DateTime? redeemedAt; // Timestamp when card was redeemed (null if not redeemed)
+  final String? deviceId; // Device ID where card was created (V-005 multi-device detection)
 
   Card({
     required this.id,
@@ -30,6 +31,7 @@ class Card {
     required this.updatedAt,
     this.isRedeemed = false,
     this.redeemedAt,
+    this.deviceId,
   });
 
   /// Check if card is complete (all stamps collected)
@@ -54,6 +56,7 @@ class Card {
       'updated_at': updatedAt.millisecondsSinceEpoch,
       'redeemed_at': redeemedAt?.millisecondsSinceEpoch,
       'is_redeemed': isRedeemed ? 1 : 0,
+      'device_id': deviceId,
     };
   }
 
@@ -75,6 +78,7 @@ class Card {
           ? DateTime.fromMillisecondsSinceEpoch(json['redeemed_at'] as int)
           : null,
       isRedeemed: (json['is_redeemed'] as int?) == 1,
+      deviceId: json['device_id'] as String?,
     );
   }
 

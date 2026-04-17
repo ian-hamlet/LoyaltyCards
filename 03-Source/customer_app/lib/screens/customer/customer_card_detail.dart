@@ -8,6 +8,7 @@ import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
+import '../../services/device_service.dart';
 import 'qr_display_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'package:uuid/uuid.dart';
@@ -78,6 +79,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       
       final signatures = _stamps.map((s) => s.signature).toList();
       
+      // V-005: Include device IDs for multi-device duplication detection
+      final currentDeviceId = await DeviceService.getDeviceId();
+      
       final qrData = {
         'type': 'redemption_request',
         'cardId': _card!.id,
@@ -85,6 +89,8 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         'stampsCollected': _card!.stampsCollected,
         'stampSignatures': signatures,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'cardDeviceId': _card!.deviceId, // V-005: Device where card was created
+        'currentDeviceId': currentDeviceId, // V-005: Device showing redemption QR
       };
       
       return jsonEncode(qrData);

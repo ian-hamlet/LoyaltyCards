@@ -7,6 +7,7 @@ import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/backup_storage_service.dart';
 import '../../services/key_manager.dart';
+import '../../services/biometric_auth_service.dart';
 import 'package:intl/intl.dart';
 
 /// Screen for creating and exporting supplier configuration backups
@@ -53,13 +54,49 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   SupplierConfigBackup? _backup;
   Uint8List? _qrImageBytes;
   bool _isGenerating = false;
+  bool _authenticationRequired = true;
   final Set<String> _completedMethods = {};
   final KeyManager _keyManager = KeyManager();
+  final BiometricAuthService _biometricAuth = BiometricAuthService();
 
   @override
   void initState() {
     super.initState();
-    _generateBackup();
+    _authenticateAndGenerate();
+  }
+
+  /// Require biometric/passcode authentication before showing backup QR
+  /// This protects the private key from unauthorized access
+  Future<void> _authenticateAndGenerate() async {
+    AppLogger.debug('🔐 Requesting authentication for backup QR generation...', 'Backup');
+    
+    final authMethodName = await _biometricAuth.getAuthMethodName();
+    
+    final bool isAuthenticated = await _biometricAuth.authenticate(
+      reason: 'Authenticate to view recovery backup QR code containing your private key',
+    );
+
+    if (!isAuthenticated) {
+      AppLogger.warning('Authentication failed or cancelled - backup not generated', 'Backup');
+      if (mounted) {
+        setState(() {
+          _authenticationRequired = true;
+          _isGenerating = false;
+        });
+        
+        // Show message and navigate back
+        AppFeedback.warning(context, 'Authentication required to view backup QR code');
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+
+    AppLogger.debug('✅ Authentication successful - generating backup', 'Backup');
+    setState(() {
+      _authenticationRequired = false;
+    });
+    
+    await _generateBackup();
   }
 
   Future<void> _generateBackup() async {

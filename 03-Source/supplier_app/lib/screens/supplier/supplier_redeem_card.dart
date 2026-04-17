@@ -552,6 +552,15 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         AppLogger.qr('Stamps collected: ${token.stampsCollected}');
         AppLogger.qr('Signatures to verify: ${token.stampSignatures.length}');
         
+        // V-005: Check for device mismatch
+        if (token.hasDeviceMismatch()) {
+          AppLogger.warning('Device mismatch detected!', 'Security');
+          AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
+          AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
+          _showDeviceMismatchWarning(context, token);
+          return;
+        }
+        
         _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
         return;
       } else if (json['type'] == 'card_stamp_request') {
@@ -665,6 +674,72 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     });
     
     AppFeedback.error(context, message);
+  }
+  
+  /// V-005: Show warning when card is being redeemed on a different device
+  void _showDeviceMismatchWarning(BuildContext context, RedemptionRequestToken token) async {
+    setState(() {
+      _isProcessing = false;
+    });
+    
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning, color: Colors.orange, size: 28),
+              SizedBox(width: 12),
+              Text('Device Mismatch'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'This card is being redeemed on a different device than where it was created.',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Text('Possible reasons:'),
+              const SizedBox(height: 8),
+              const Text('• Customer got a new phone'),
+              const Text('• Customer restored from backup'),
+              const Text('• Card was cloned/duplicated (fraud)'),
+              const SizedBox(height: 16),
+              const Text(
+                'Verify the customer\'s identity and check stamp history before proceeding.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
+              child: const Text('Proceed Anyway'),
+            ),
+          ],
+        );
+      },
+    );
+    
+    if (result == true) {
+      // User chose to proceed despite mismatch
+      AppLogger.warning('Supplier chose to proceed with device mismatch', 'Security');
+      _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+    } else {
+      // User cancelled
+      AppLogger.warning('Supplier cancelled redemption due to device mismatch', 'Security');
+    }
   }
 
   @override

@@ -2,7 +2,7 @@ name: supplier_app
 description: "LoyaltyCards Business App - Issue and manage loyalty cards"
 publish_to: 'none'
 
-version: 0.2.0+20
+version: 0.2.0+21
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -30,6 +30,9 @@ dependencies:
   
   # Secure Storage
   flutter_secure_storage: ^10.0.0
+  
+  # Biometric Authentication (Face ID / Touch ID / Passcode)
+  local_auth: ^2.3.0
   
   # Utilities
   uuid: ^4.3.0

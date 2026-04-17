@@ -11,6 +11,7 @@ import '../../services/rate_limiter.dart';
 import '../../services/database_helper.dart';
 import '../../services/key_manager.dart';
 import '../../services/device_orientation_service.dart';
+import '../../services/device_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -149,6 +150,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     
     final initialStampCount = token.initialStamps.length;
     
+    // Get device ID for multi-device tracking (V-005)
+    final deviceId = await DeviceService.getDeviceId();
+    
     final card = models.Card(
       id: cardId,
       businessId: token.businessId,
@@ -161,6 +165,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       mode: token.mode, // Store the operation mode from token
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      deviceId: deviceId, // V-005: Track device where card was created
     );
 
     // Save card to database (duplicate check already performed above)
@@ -222,6 +227,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           timestamp: DateTime.fromMillisecondsSinceEpoch(initialStamp.timestamp),
           signature: initialStamp.signature,
           previousHash: previousHash.isEmpty ? null : previousHash,
+          deviceId: deviceId, // V-005: Track device where stamp was collected
         );
 
         await stampRepository.insertStamp(stamp);
@@ -262,6 +268,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Future<void> _handleStampToken(QRToken token) async {
+    // Get device ID for multi-device tracking (V-005)
+    final deviceId = await DeviceService.getDeviceId();
+    
     // Handle redemption tokens
     if (token is RedemptionToken) {
       await _handleRedemptionToken(token);
@@ -396,6 +405,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       timestamp: stampTimestamp,
       signature: token.signature,
       previousHash: stampPreviousHash.isEmpty ? null : stampPreviousHash,
+      deviceId: deviceId, // V-005: Track device where stamp was collected
     );
 
     await stampRepo.insertStamp(stamp);
@@ -458,6 +468,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           timestamp: DateTime.fromMillisecondsSinceEpoch(additionalStamp.timestamp),
           signature: additionalStamp.signature,
           previousHash: currentPreviousHash.isEmpty ? null : currentPreviousHash,
+          deviceId: deviceId, // V-005: Track device where stamp was collected
         );
 
         await stampRepo.insertStamp(additionalStampRecord);
@@ -546,6 +557,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             timestamp: oldStamp.timestamp,
             signature: oldStamp.signature,
             previousHash: i == 0 ? previousHash : stampsToMove[i - 1].signature,
+            deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
           );
           
           await stampRepo.insertStamp(newStamp);
@@ -595,6 +607,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               timestamp: oldStamp.timestamp,
               signature: oldStamp.signature,
               previousHash: i == 0 ? null : remainingStamps[i - 1].signature,
+              deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
             );
             
             await stampRepo.insertStamp(newStamp);
@@ -662,6 +675,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             timestamp: oldStamp.timestamp,
             signature: oldStamp.signature,
             previousHash: i == 0 ? null : stampsToMove[i - 1].signature,
+            deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
           );
           
           await stampRepo.insertStamp(newStamp);

@@ -174,5 +174,19 @@
 ///   * Saves ~120-140px total vertical space on redemption screens
 ///   * Ensures "Scan Redemption Token" button visible on all iPhone sizes
 ///   * Better UX: Clear next step always visible, no hidden UI below fold
+/// 
+/// Build 21 Changes:
+/// - V-002 Security Enhancement: Private Key Protection
+///   * Added biometric authentication (Face ID/Touch ID/Passcode) requirement
+///   * Recovery backup QR generation now requires authentication
+///   * Clone device QR generation now requires authentication
+///   * Prevents unauthorized access to private keys if device left unlocked
+///   * Added BiometricAuthService for unified authentication handling
+///   * Added local_auth package dependency
+/// - Documentation: Created SECURITY_MODEL.md
+///   * Clarifies Simple Mode is trust-based by design (V-001)
+///   * Documents intentional security model and mitigations
+///   * Explains dual-mode architecture and use cases
+///   * Provides mode selection guidance for businesses
 
-const String appVersion = '0.2.0+20';
+const String appVersion = '0.2.0+21';

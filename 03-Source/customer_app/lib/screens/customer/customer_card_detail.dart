@@ -353,7 +353,6 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                 // Redeemed state for simple mode with vertical bar
                 Container(
                   margin: const EdgeInsets.all(16),
-                  height: 280,
                   child: Stack(
                     children: [
                       // Main redeemed content

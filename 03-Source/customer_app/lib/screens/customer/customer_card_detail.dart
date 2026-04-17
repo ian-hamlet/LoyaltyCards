@@ -138,16 +138,10 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Card Visual
+            // Card Visual with integrated vertical status bar
             Container(
               margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [brandColor, brandColor.withValues(alpha: 0.7)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -157,94 +151,112 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  // Business Logo/Icon
-                  Icon(
-                    BusinessIcons.getIcon(_card!.logoIndex),
-                    size: 48,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Business Name
-                  Text(
-                    _card!.businessName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Stamp Grid
-                  _buildStampGrid(brandColor),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Progress Text
-                  Text(
-                    '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [brandColor, brandColor.withValues(alpha: 0.7)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
                   ),
-
-                  // Completion/Redemption Badge
-                  if (_card!.isRedeemed) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[700],
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'REDEEMED',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                  child: Row(
+                    children: [
+                      // Vertical status bar (integrated inside card with padding)
+                      if (_card!.isRedeemed || _card!.isComplete)
+                        Container(
+                          width: 40,
+                          padding: const EdgeInsets.symmetric(vertical: 32),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: _card!.isRedeemed
+                                    ? [Colors.grey.shade700, Colors.grey.shade600]
+                                    : [Colors.green.shade600, Colors.green.shade500],
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12), // Horizontal space around rotated text
+                                child: RotatedBox(
+                                  quarterTurns: 3,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _card!.isRedeemed ? Icons.check_circle : Icons.celebration,
+                                        color: Colors.white,
+                                        size: _card!.isRedeemed ? 16 : 18,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _card!.isRedeemed ? 'REDEEMED' : 'COMPLETE',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: _card!.isRedeemed ? 14 : 16,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ] else if (_card!.isComplete) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.celebration, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'CARD COMPLETE!',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        ),
+                      
+                      // Main card content
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              // Business Logo/Icon
+                              Icon(
+                                BusinessIcons.getIcon(_card!.logoIndex),
+                                size: 48,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(height: 12),
+                              
+                              // Business Name
+                              Text(
+                                _card!.businessName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 20),
+                              
+                              // Stamp Grid
+                              _buildStampGrid(brandColor),
+                              
+                              const SizedBox(height: 12),
+                              
+                              // Progress Text
+                              Text(
+                                '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
 
@@ -327,74 +339,142 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   ),
                 ),
               ] else ...[
-                // Redeemed state for simple mode
+                // Redeemed state for simple mode with vertical bar
                 Container(
                   margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    color: Colors.green[50],
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.green[200]!, width: 2),
-                  ),
-                  child: Column(
+                  height: 280,
+                  child: Stack(
                     children: [
-                      Icon(Icons.check_circle, size: 80, color: Colors.green[600]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Card Redeemed!',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green[800],
+                      // Main redeemed content
+                      Container(
+                        margin: const EdgeInsets.only(left: 40),
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          ),
+                          border: Border.all(color: Colors.green[200]!, width: 2),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_circle, size: 64, color: Colors.green[600]),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Card Redeemed!',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            if (_card!.redeemedAt != null) ...[
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.access_time, size: 16, color: Colors.green[700]),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '${_card!.redeemedAt!.hour}:${_card!.redeemedAt!.minute.toString().padLeft(2, '0')}',
+                                          style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.calendar_today, size: 16, color: Colors.green[700]),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '${_card!.redeemedAt!.day}/${_card!.redeemedAt!.month}/${_card!.redeemedAt!.year}',
+                                          style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                            Text(
+                              'This card has been redeemed and can be deleted.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[800],
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      if (_card!.redeemedAt != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(10),
+                      // Vertical status bar
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 40,
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.access_time, size: 16, color: Colors.green[700]),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${_card!.redeemedAt!.hour}:${_card!.redeemedAt!.minute.toString().padLeft(2, '0')}',
-                                    style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.calendar_today, size: 16, color: Colors.green[700]),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${_card!.redeemedAt!.day}/${_card!.redeemedAt!.month}/${_card!.redeemedAt!.year}',
-                                    style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
-                                  ),
-                                ],
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.grey.shade700,
+                                Colors.grey.shade600,
+                              ],
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.4),
+                                blurRadius: 8,
+                                offset: const Offset(2, 0),
                               ),
                             ],
                           ),
+                          child: Center(
+                            child: RotatedBox(
+                              quarterTurns: 3,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    'REDEEMED',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                      ],
-                      Text(
-                        'This card has been redeemed and can be deleted.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[800],
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -402,16 +482,17 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               ],
             ] else ...[
               // SECURE MODE: Show customer QR code
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                child: Text(
-                  _card!.isComplete 
-                      ? 'Show this QR code to redeem your reward'
-                      : 'Show this QR code to collect stamps',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                  textAlign: TextAlign.center,
+              if (!_card!.isRedeemed)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  child: Text(
+                    _card!.isComplete 
+                        ? 'Show this QR code to redeem your card and get your reward'
+                        : 'Show this QR code to collect stamps',
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
 
               // QR Code or Redeemed Message
               if (_card!.isRedeemed)

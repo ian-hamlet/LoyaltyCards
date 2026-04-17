@@ -244,6 +244,372 @@ if (token.hasDeviceMismatch()) {
 
 ---
 
+#### V-005 Technical Implementation Details
+
+**How Device Tracking Works:**
+
+**1. Device Identification Service**
+
+File: `customer_app/lib/services/device_service.dart`
+
+```dart
+class DeviceService {
+  static Future<String> getDeviceId() async {
+    // iOS: Uses identifierForVendor (unique per vendor)
+    // - Persists across app reinstalls
+    // - Changes if all vendor apps deleted, then reinstalled
+    // - Same across iCloud restore to new device
+    
+    // Android: Uses androidId (unique per device + app)
+    
+    String identifier;
+    if (Platform.isIOS) {
+      final iosInfo = await _deviceInfo.iosInfo;
+      identifier = iosInfo.identifierForVendor ?? 'unknown-ios-...';
+    } else if (Platform.isAndroid) {
+      final androidInfo = await _deviceInfo.androidInfo;
+      identifier = androidInfo.id;
+    }
+    
+    // Hash and truncate for privacy (12 chars is enough)
+    final bytes = utf8.encode(identifier);
+    final digest = sha256.convert(bytes);
+    return digest.toString().substring(0, 12);
+    // Example result: "a3b5c7d9e1f2"
+  }
+}
+```
+
+**Key Properties:**
+- ✅ Stable: Persists across app reinstalls
+- ⚠️ Changes on: Complete app deletion → reinstall → first launch
+- ✅ Survives: iCloud backup → restore to new device (iOS gets new ID on new hardware)
+- 🔒 Privacy: Hashed to 12 chars (collision-resistant, not reversible)
+- ⚡ Cached: Only calculated once per app session
+
+**2. Device ID Capture - Card Creation**
+
+File: `customer_app/lib/screens/customer/qr_scanner_screen.dart`
+
+When customer scans "Issue Card" QR from supplier:
+
+```dart
+// Get device ID for multi-device tracking (V-005)
+final deviceId = await DeviceService.getDeviceId();
+
+final card = models.Card(
+  id: cardId,
+  businessId: token.businessId,
+  businessName: token.businessName,
+  // ... other fields ...
+  deviceId: deviceId, // V-005: Track device where card created
+);
+
+await cardRepository.insertCard(card);
+```
+
+Database schema:
+```sql
+CREATE TABLE cards (
+  id TEXT PRIMARY KEY,
+  business_id TEXT NOT NULL,
+  -- ... other columns ...
+  device_id TEXT,  -- Added in v6 migration (Build 21)
+  -- ...
+);
+```
+
+**3. Device ID Capture - Stamp Collection**
+
+File: `customer_app/lib/screens/customer/qr_scanner_screen.dart`
+
+When customer scans "Add Stamp" QR from supplier:
+
+```dart
+// Get device ID for multi-device tracking (V-005)
+final deviceId = await DeviceService.getDeviceId();
+
+final stamp = Stamp(
+  id: stampId,
+  cardId: card.id,
+  stampNumber: stampNumber,
+  timestamp: stampTimestamp,
+  signature: token.signature,
+  previousHash: stampPreviousHash,
+  deviceId: deviceId, // V-005: Track device where stamp collected
+);
+
+await stampRepo.insertStamp(stamp);
+```
+
+Database schema:
+```sql
+CREATE TABLE stamps (
+  id TEXT PRIMARY KEY,
+  card_id TEXT NOT NULL,
+  stamp_number INTEGER NOT NULL,
+  -- ... other columns ...
+  device_id TEXT,  -- Added in v6 migration (Build 21)
+  FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
+);
+```
+
+**4. Device ID Transmission - Redemption QR**
+
+File: `customer_app/lib/screens/customer/customer_card_detail.dart`
+
+When customer shows completed card to supplier for redemption:
+
+```dart
+String _generateCardQR() {
+  if (_card!.isComplete) {
+    final qrData = {
+      'type': 'redemption_request',
+      'cardId': _card!.id,
+      'businessId': _card!.businessId,
+      'stampsCollected': _card!.stampsCollected,
+      'stampSignatures': signatures,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      
+      // V-005: Device mismatch detection
+      'cardDeviceId': _card!.deviceId,      // Where card created
+      'currentDeviceId': _currentDeviceId,  // Where QR shown now
+    };
+    return jsonEncode(qrData);
+  }
+}
+```
+
+QR Code JSON example:
+```json
+{
+  "type": "redemption_request",
+  "cardId": "abc-123-def",
+  "businessId": "xyz-789",
+  "stampsCollected": 10,
+  "stampSignatures": ["sig1", "sig2", ...],
+  "timestamp": 1713369600000,
+  "cardDeviceId": "a3b5c7d9e1f2",   // Original device
+  "currentDeviceId": "x9y8z7w6v5u4"  // Current device (different!)
+}
+```
+
+**5. Device Mismatch Detection - Supplier Side**
+
+File: `supplier_app/lib/screens/supplier/supplier_redeem_card.dart`
+
+When supplier scans customer's redemption QR:
+
+```dart
+// Parse redemption token from QR
+final token = RedemptionRequestToken.fromJson(json);
+
+// V-005: Check for device mismatch
+if (token.hasDeviceMismatch()) {
+  AppLogger.warning('Device mismatch detected!', 'Security');
+  AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
+  AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
+  
+  _showDeviceMismatchWarning(context, token);
+  return; // Pause redemption for supplier review
+}
+
+// No mismatch, proceed normally
+_showSecureModeRedemptionConfirmation(context, token.cardId, ...);
+```
+
+File: `shared/lib/models/qr_tokens.dart`
+
+```dart
+class RedemptionRequestToken extends QRToken {
+  final String? cardDeviceId;    // Where card was created
+  final String? currentDeviceId;  // Where QR shown now
+  
+  /// Check if there's a device mismatch (V-005)
+  bool hasDeviceMismatch() {
+    // If either ID is null, can't determine mismatch (old cards)
+    if (cardDeviceId == null || currentDeviceId == null) {
+      return false; // Backward compatible with pre-Build 21 cards
+    }
+    
+    // If both present, check if they differ
+    return cardDeviceId != currentDeviceId;
+  }
+}
+```
+
+**6. Warning Dialog - Supplier Decision**
+
+File: `supplier_app/lib/screens/supplier/supplier_redeem_card.dart`
+
+```dart
+void _showDeviceMismatchWarning(BuildContext context, 
+                                 RedemptionRequestToken token) async {
+  final result = await showDialog<bool>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning, color: Colors.orange, size: 28),
+            SizedBox(width: 12),
+            Text('Device Mismatch'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This card is being redeemed on a different device '
+              'than where it was created.',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            const Text('Possible reasons:'),
+            const Text('• Customer got a new phone'),
+            const Text('• Customer restored from backup'),
+            const Text('• Card was cloned/duplicated (fraud)'),
+            const SizedBox(height: 16),
+            const Text(
+              'Verify the customer\'s identity and check stamp '
+              'history before proceeding.',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+            ),
+            child: const Text('Proceed Anyway'),
+          ),
+        ],
+      );
+    },
+  );
+  
+  if (result == true) {
+    // Supplier chose to proceed despite mismatch
+    AppLogger.warning('Supplier chose to proceed with mismatch', 'Security');
+    _showSecureModeRedemptionConfirmation(context, token.cardId, ...);
+  } else {
+    // Supplier cancelled
+    AppLogger.warning('Supplier cancelled due to mismatch', 'Security');
+  }
+}
+```
+
+**7. Database Migration (Build 20 → Build 21)**
+
+File: `customer_app/lib/services/database_helper.dart`
+
+```dart
+static const int _databaseVersion = 6; // Bumped from 5
+
+Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  if (oldVersion < 6) {
+    // V-005: Add device tracking columns
+    await db.execute('ALTER TABLE cards ADD COLUMN device_id TEXT');
+    await db.execute('ALTER TABLE stamps ADD COLUMN device_id TEXT');
+    
+    AppLogger.database('Database upgraded to v6 - Added device_id columns');
+  }
+}
+```
+
+**Impact:**
+- Existing cards (pre-Build 21): `device_id = NULL` (no mismatch detection)
+- New cards (Build 21+): `device_id` populated automatically
+- Graceful degradation: Old cards work normally, new cards have protection
+
+**8. Scenario Analysis**
+
+| Scenario | cardDeviceId | currentDeviceId | Mismatch? | Supplier Sees |
+|----------|--------------|-----------------|-----------|---------------|
+| **Normal usage** | `a3b5c7` | `a3b5c7` | ❌ No | Redeems normally |
+| **New iPhone** | `a3b5c7` | `x9y8z7` | ✅ Yes | ⚠️ Warning dialog |
+| **iCloud restore** | `a3b5c7` | `x9y8z7` | ✅ Yes | ⚠️ Warning dialog |
+| **Card cloning (fraud)** | `a3b5c7` | `x9y8z7` | ✅ Yes | ⚠️ Warning dialog |
+| **Old card (pre-v21)** | `null` | `null` | ❌ No | Redeems normally |
+| **Old → new device** | `null` | `x9y8z7` | ❌ No | Redeems normally |
+
+**9. Why Stamping Is Not Blocked**
+
+Device mismatch is NOT checked during stamp collection because:
+
+1. **Legitimate use:** Customer might use multiple devices (iPhone + iPad)
+2. **iCloud restore:** Card syncs to new phone, should still collect stamps
+3. **Low fraud impact:** Collecting stamps has lower fraud risk than redemption
+4. **User experience:** Blocking stamps would frustrate legitimate users
+5. **Detection focus:** High-value event (redemption) is where detection matters
+
+**Stamps still track device IDs for forensics:**
+- Every stamp records which device collected it
+- Supplier can review stamp history if suspicious
+- Pattern analysis possible (e.g., 10 stamps from Device A, redemption from Device B)
+- Device ID data available for investigation
+
+**10. Security Trade-offs**
+
+**✅ Detects:**
+- Device cloning/duplication (fraud)
+- iCloud restore to different device (legitimate)
+- New phone upgrades (legitimate)
+- Multiple device usage (legitimate)
+
+**⚠️ Legitimate False Positives:**
+- Customer upgrades phone → Warning shown (supplier verifies and proceeds)
+- Customer restores backup → Warning shown (supplier accepts)
+- Family shares devices → Warning shown (rare scenario)
+
+**Design Decision:**
+- **Inform, don't block** - Supplier makes final judgment call
+- **Orange warning** (not red error) - Indicates caution, not prevention
+- **Business discretion** - Supplier knows their regular customers
+- **Transparency** - Customer can explain "I got a new phone"
+
+**11. Testing Requirements**
+
+**Single Device Testing (Partial):**
+- ✅ Card creation captures device ID
+- ✅ Stamps capture device IDs
+- ✅ No mismatch warning on same device redemption
+- ✅ Database migration works
+
+**Multi-Device Testing (Requires 2 devices):**
+- ⏳ Create card on Device A (iPhone)
+- ⏳ Restore to Device B (iPad) or use second device
+- ⏳ Redeem on Device B
+- ⏳ Verify mismatch warning appears
+- ⏳ Test "Proceed Anyway" flow
+- ⏳ Test "Cancel" flow
+
+**12. Implementation Summary**
+
+**V-005 Device Mismatch Detection:**
+1. ✅ Device IDs captured at card creation
+2. ✅ Device IDs captured with every stamp  
+3. ✅ Both IDs transmitted in redemption QR
+4. ✅ Mismatch detected on supplier scan
+5. ✅ Supplier warned with clear dialog
+6. ✅ Supplier chooses to proceed or cancel
+7. ✅ Stamping NOT blocked (usability)
+8. ✅ Backward compatible (old cards work)
+9. ✅ Database migration (v5→v6) successful
+10. ✅ Graceful degradation (null = no check)
+
+**Goal:** Detect potential fraud without disrupting legitimate users who upgrade phones or restore from backup. The system provides visibility to suppliers while preserving user experience.
+
+---
+
 ### V-006: Device Storage Limits
 
 **Severity:** LOW  

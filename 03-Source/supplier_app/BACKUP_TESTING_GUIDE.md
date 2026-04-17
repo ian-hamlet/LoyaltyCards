@@ -1,8 +1,31 @@
 # Supplier Backup & Recovery Testing Guide
 
-**Build:** 78  
+**Build:** 21+  
 **Feature:** REQ-021 Supplier Configuration Backup/Recovery  
-**Date:** April 13, 2026
+**Security:** V-002 Biometric Authentication for Private Keys  
+**Date:** April 17, 2026
+
+---
+
+## 🔐 Security Update (Build 21+)
+
+**⚠️ BIOMETRIC AUTHENTICATION NOW REQUIRED**
+
+Starting with Build 21, accessing backup and clone QR codes requires Face ID/Touch ID/Passcode authentication. This protects your business private keys from unauthorized access.
+
+**What's Protected:**
+- ✅ Recovery Backup QR generation (Settings → Create Recovery Backup)
+- ✅ Clone Device QR generation (Settings → Clone to Another Device)
+
+**What's NOT Protected:**
+- Regular business operations (issue cards, add stamps, redeem)
+- Viewing settings
+- Statistics
+
+**User Experience:**
+- Tap "Create Recovery Backup" → Face ID prompt appears
+- Authenticate successfully → Backup screen loads with QR
+- Cancel/fail authentication → Returns to Settings, no QR shown
 
 ---
 
@@ -10,7 +33,15 @@
 
 The backup feature requires specific iOS permissions for certain storage methods:
 
-### 1. **Save to Photos** - Permission Required ✋
+### 1. **Face ID/Touch ID** - Required for Backup Access (Build 21+) ⚠️
+- **Permission:** `NSFaceIDUsageDescription`
+- **When Prompt Appears:** First time accessing backup or clone screens
+- **Prompt Message:** "Authenticate with Face ID to securely access your business private keys for backup and device cloning"
+- **User Choice:** Authenticate or Cancel
+- **If Cancelled:** Cannot access backup/clone features
+- **Fallback:** Passcode always available if biometrics fail
+
+### 2. **Save to Photos** - Permission Required ✋
 - **Permission:** `NSPhotoLibraryAddUsageDescription`
 - **Access Level:** "Add Photos Only" (write-only, no read access needed)
 - **When Prompt Appears:** First time user taps "Save to Photos"
@@ -58,6 +89,54 @@ _Note: Integration with onboarding flow is planned but not yet implemented._
 ---
 
 ## 📋 Testing Checklist
+
+### Test 0: Biometric Authentication (Build 21+) ⚠️ REQUIRED FIRST
+
+**Steps:**
+1. Go to Settings → Create Recovery Backup
+2. **Expected:** Face ID/Touch ID prompt appears immediately
+3. **Prompt text:** "Authenticate with Face ID to securely access your business private keys for backup and device cloning"
+4. Tap **Cancel** button (or let prompt time out)
+5. **Expected:** Returns to Settings screen, no QR shown
+6. Go to Settings → Create Recovery Backup again
+7. This time, **authenticate successfully**
+8. **Expected:** Backup screen loads with QR code
+
+**Expected Results:**
+- ✅ Authentication prompt appears before QR screen
+- ✅ Prompt message mentions "private keys"
+- ✅ Cancelling returns to Settings (no QR access)
+- ✅ Successful auth shows backup QR screen
+- ✅ Passcode fallback available if Face ID fails
+
+**Notes:**
+- First time: iOS may also show permission prompt for Face ID usage
+- Subsequent times: Only biometric auth prompt (permission already granted)
+- If device has no Face ID/Touch ID: Passcode prompt appears instead
+- Authentication required EVERY time (not cached)
+
+**✅ Pass / ❌ Fail**  
+**Notes:** _______________________________
+
+---
+
+### Test 0b: Clone Device Authentication (Build 21+)
+
+**Steps:**
+1. Go to Settings → Clone to Another Device
+2. **Expected:** Face ID/Touch ID prompt appears
+3. Authenticate successfully
+4. **Expected:** Clone QR appears with 5-minute timer
+
+**Expected Results:**
+- ✅ Authentication required before clone QR
+- ✅ Same security protection as backup
+- ✅ Timer starts only after successful auth
+
+**✅ Pass / ❌ Fail**  
+**Notes:** _______________________________
+
+---
 
 ### Test 1: Create Recovery Backup
 

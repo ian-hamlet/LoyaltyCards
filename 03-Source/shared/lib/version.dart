@@ -143,5 +143,27 @@
 ///   * More descriptive of app purpose
 ///   * Business name already prominent on dashboard
 ///   * Consistent with professional business app design
+/// 
+/// Build 19 Changes:
+/// - UX Improvements: Vertical status bars for card states
+///   * Added vertical "COMPLETE" and "REDEEMED" bars to stamp counting card
+///   * Integrated inside card with proper padding (32px vertical, 12px text)
+///   * Rounded corners (8px) for professional appearance
+///   * Consistent styling prevents future color change complexity
+///   * Saves ~40-50px vertical space (removed horizontal lozenges)
+/// - Added countdown timers to all time-limited QR codes in supplier app
+///   * supplier_issue_card.dart: 5-minute countdown for card issuance QR
+///   * supplier_stamp_card.dart: 2-minute countdown for stamp QR
+///   * Consistent "Expires in: MM:SS" format across all screens
+///   * Red color warning when time running low
+/// - Clarified redemption instructions in customer app
+///   * Updated: "Show this QR code to get your confirmation code and redeem your reward"
+///   * Makes confirmation code step explicit in the process
+/// - Fixed contextual instruction display for redeemed cards
+///   * Instructions hidden when card already redeemed
+///   * Prevents confusing "redeem your reward" on already-redeemed cards
+/// - Applied vertical bar to customer QR display redemption screen
+///   * Green "COMPLETE" bar on left during redemption flow
+///   * Consistent visual language across all card state displays
 
-const String appVersion = '0.2.0+18';
+const String appVersion = '0.2.0+19';

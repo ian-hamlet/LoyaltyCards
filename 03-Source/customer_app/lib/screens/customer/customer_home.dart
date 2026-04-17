@@ -210,7 +210,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                 spacing: AppSpacing.sm,
                 children: [
                   FilterChip(
-                    label: Text(_hideRedeemed ? 'Show Redeemed' : 'Hide Redeemed'),
+                    label: Text(_hideRedeemed ? 'Hiding Redeemed Cards' : 'Showing Redeemed Cards'),
                     selected: _hideRedeemed,
                     onSelected: (value) {
                       Haptics.light();

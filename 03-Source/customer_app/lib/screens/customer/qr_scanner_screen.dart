@@ -134,6 +134,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Use card ID from token if present (for multi-stamp consistency)
     // Otherwise generate new one (backward compatibility)
     final cardId = token.cardId ?? '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+    
+    // Check if this specific card already exists (prevents duplicate scans of same QR)
+    final cardRepository = CardRepository(DatabaseHelper());
+    final existingCard = await cardRepository.getCardById(cardId);
+    
+    if (existingCard != null) {
+      // This exact card has already been scanned
+      if (mounted) {
+        Navigator.pop(context, 'Card has already been scanned: ${token.businessName}');
+      }
+      return;
+    }
+    
     final initialStampCount = token.initialStamps.length;
     
     final card = models.Card(
@@ -150,8 +163,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       updatedAt: DateTime.now(),
     );
 
-    // Save card to database
-    final cardRepository = CardRepository(DatabaseHelper());
+    // Save card to database (duplicate check already performed above)
     await cardRepository.insertCard(card);
     
     // Log card pickup transaction

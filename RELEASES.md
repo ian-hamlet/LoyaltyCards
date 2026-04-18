@@ -41,7 +41,8 @@ Examples:
 ### v0.2.0-build15 (TestFlight Stable)
 - **Date:** April 16, 2026
 - **Platform:** TestFlight (Internal Testing)
-- **Commit:** [To be tagged]
+- **Commit:** 26ab1c9
+- **Branch:** releases/v0.2.0+15
 - **Status:** ✅ Current TestFlight Build
 - **Features:**
   - Regression testing complete

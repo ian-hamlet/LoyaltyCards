@@ -11,8 +11,10 @@ void main() {
     // Real signature format (base64 encoded)
     const validSignatureFormat = 'MEQCIE1234567890TestSignature1234567890AiEA1234567890TestSignature1234567890';
     
-    test('accepts signature with valid format', () {
-      // Note: KeyManager delegates to CryptoUtils.verifySignature
+    test('EXPECTED ERROR: accepts signature with valid format', () {
+      // NOTE: This test intentionally uses malformed test data to verify
+      // error handling. The ⛔ error messages you see are EXPECTED.
+      // KeyManager delegates to CryptoUtils.verifySignature
       // Without real keypair, we test the delegation and error handling
       final result = KeyManager.verifySignature(
         testData,
@@ -24,7 +26,8 @@ void main() {
       expect(result, isFalse);
     });
 
-    test('rejects completely invalid signature gracefully', () {
+    test('EXPECTED ERROR: rejects completely invalid signature gracefully', () {
+      // This test intentionally uses invalid data to verify graceful error handling
       const invalidSignature = 'not-a-valid-signature';
 
       // Should return false, not throw
@@ -37,7 +40,8 @@ void main() {
       expect(result, false);
     });
 
-    test('rejects empty signature', () {
+    test('EXPECTED ERROR: rejects empty signature', () {
+      // This test intentionally uses invalid data to verify graceful error handling
       const emptySignature = '';
 
       final result = KeyManager.verifySignature(
@@ -49,7 +53,8 @@ void main() {
       expect(result, false);
     });
 
-    test('handles empty data without throwing', () {
+    test('EXPECTED ERROR: handles empty data without throwing', () {
+      // This test intentionally uses invalid data to verify graceful error handling
       const emptyData = '';
 
       // Should not throw, should return boolean result
@@ -59,7 +64,8 @@ void main() {
       );
     });
 
-    test('handles empty public key', () {
+    test('EXPECTED ERROR: handles empty public key', () {
+      // This test intentionally uses invalid data to verify graceful error handling
       const emptyPublicKey = '';
 
       final result = KeyManager.verifySignature(
@@ -72,7 +78,8 @@ void main() {
       expect(result, false);
     });
 
-    test('signature verification is deterministic', () {
+    test('EXPECTED ERROR: signature verification is deterministic', () {
+      // This test uses malformed test data but verifies consistent behavior
       // Verify the same signature multiple times
       final results = <bool>[];
       for (int i = 0; i < 5; i++) {
@@ -102,8 +109,9 @@ void main() {
   });
 
   group('KeyManager - Integration with CryptoUtils', () {
-    test('delegates to CryptoUtils.verifySignature', () {
-      // This test ensures KeyManager is using CryptoUtils correctly
+    test('EXPECTED ERROR: delegates to CryptoUtils.verifySignature', () {
+      // This test uses malformed test data to verify delegation behavior
+      // The ⛔ error messages are EXPECTED - we're testing error handling
       const testData = 'integration-test-data';
       const testPublicKey = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEtest';
       const testSignature = 'MEQCIEtest1234567890';
@@ -126,7 +134,8 @@ void main() {
       expect(keyManagerResult, cryptoUtilsResult);
     });
 
-    test('returns false for mismatched signature/data/key combinations', () {
+    test('EXPECTED ERROR: returns false for mismatched signature/data/key combinations', () {
+      // This test uses malformed test data to verify error handling
       const data = 'test-data';
       const publicKey = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEtest';
       const signature = 'MEQCIEtest';

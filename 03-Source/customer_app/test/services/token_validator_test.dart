@@ -29,7 +29,7 @@ void main() {
       expect(result.error, contains('expired'));
     });
 
-    test('skips timestamp check for simple mode tokens', () async {
+    test('EXPECTED ERROR: skips timestamp check for simple mode tokens', () async {
       // Create very old token (1 hour old)
       final now = DateTime.now().millisecondsSinceEpoch;
       final timestamp = now - (60 * 60 * 1000);
@@ -146,7 +146,8 @@ void main() {
       expect(result.error, contains('expired'));
     });
 
-    test('skips timestamp check for simple mode stamps', () async {
+    test('EXPECTED ERROR: skips timestamp check for simple mode stamps', () async {
+      // This test uses malformed test data. The ⛔ error about signature is EXPECTED.
       final now = DateTime.now().millisecondsSinceEpoch;
       final oldTimestamp = now - (60 * 60 * 1000); // 1 hour old
 
@@ -174,7 +175,8 @@ void main() {
       }
     });
 
-    test('validates first stamp with empty previous hash', () async {
+    test('EXPECTED ERROR: validates first stamp with empty previous hash', () async {
+      // This test uses malformed test data. The ⛔ error about signature is EXPECTED.
       final now = DateTime.now().millisecondsSinceEpoch;
 
       final token = StampToken(

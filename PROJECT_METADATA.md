@@ -3,51 +3,66 @@
 ## Project Information
 - **Working Name**: LoyaltyCards
 - **Project Type**: Mobile Application Development (Two-App System)
-- **Status**: Implementation Ready - Phase 0 Starting
+- **Status**: v0.2.0 in TestFlight - Build 21
 - **Created**: 2026-03-30
-- **Last Updated**: 2026-04-03
-- **Repository**: Local Git [To be pushed to GitHub]
+- **Last Updated**: 2026-04-18
+- **Repository**: GitHub (ian-hamlet/LoyaltyCards)
 
 ## Development Approach
 - **Methodology**: AI-Driven Development
 - **Primary Tools**: GitHub Copilot, AI Assistants
 - **Version Control**: Git/GitHub
+- **Testing**: Automated unit tests (165 tests, 100% passing)
 
 ## Key Stakeholders
-[To be defined]
+Pilot testing with select businesses
 
 ## Project Timeline
-- **Phase 0**: Project Foundation (1 day) - Starting
-- **Phase 1**: Customer App - Data Layer (2-3 days)
-- **Phase 2**: Supplier App - Crypto & Security (3-4 days)
-- **Phase 3**: Customer App - QR & P2P (2-3 days)
-- **Phase 4**: Supplier App - Operations (2-3 days)
-- **Phase 5**: Multi-Device Support (1-2 days)
-- **Phase 6**: Polish & Deployment (3-4 days)
-- **Total Estimated Duration**: 14-22 working days
+
+**Actual Progress (as of 2026-04-18):**
+- ✅ **Phase 0:** Project Foundation (1 day) - Complete
+- ✅ **Phase 1:** Customer App - Data Layer (2 days) - Complete
+- ✅ **Phase 2:** Supplier App - Crypto & Security (3 days) - Complete
+- ✅ **Phase 3:** Customer App - QR & P2P (2 days) - Complete
+- ✅ **Phase 4:** Supplier App - Operations (2 days) - Complete
+- ✅ **Phase 5:** UX Polish (2 days) - Complete
+- ✅ **Phase 6:** Dual-Mode System (1 day) - Complete
+- ✅ **Phase 7:** Retrospective Testing (1 day) - Complete
+- 🔄 **Phase 8-10:** Final deployment preparation
+
+**Total Duration:** 14 days (matching original estimate)
 
 **Detailed Plan**: See [PROJECT_DEVELOPMENT_PLAN.md](00-Planning/PROJECT_DEVELOPMENT_PLAN.md)
 
 ## Technology Stack
 
 ### Confirmed Technologies
-- **Framework**: Flutter (Dart) - Cross-platform mobile development
+- **Framework**: Flutter 3.3.0+ (Dart) - Cross-platform mobile development
 - **Architecture**: Peer-to-peer (P2P) with local storage, no backend required
 - **Database**: SQLite (local device storage)
 - **Cryptography**: ECDSA P-256 (pointycastle library)
 - **Data Exchange**: QR codes (primary), NFC (future enhancement)
 - **Secure Storage**: iOS Keychain / Android KeyStore (via flutter_secure_storage)
 - **Platforms**: iOS (iPhone, iPad), Android (future)
+- **Testing**: flutter_test, mockito, build_runner
 
 ### Key Dependencies
 ```yaml
+# Production
 sqflite: ^2.3.0              # Local database
-flutter_secure_storage: ^9.0.0  # Secure key storage
-pointycastle: ^3.7.3         # Cryptography
-mobile_scanner: ^5.0.0       # QR scanning
+flutter_secure_storage: ^9.2.2  # Secure key storage
+pointycastle: ^4.0.0         # Cryptography (updated)
+mobile_scanner: ^5.2.3       # QR scanning (updated)
 qr_flutter: ^4.1.0           # QR generation
 crypto: ^3.0.3               # Hashing
 uuid: ^4.3.0                 # ID generation
+local_auth: ^2.3.0           # Biometric authentication
+
+# Testing
+mockito: ^5.4.0              # Mocking framework
+build_runner: ^2.4.0         # Code generation
+test: ^1.24.0                # Testing framework
+sqflite_common_ffi: ^2.3.0   # Desktop testing
 ```
 
 ### Development Environment

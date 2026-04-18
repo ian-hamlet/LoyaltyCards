@@ -8,6 +8,10 @@ import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/biometric_auth_service.dart';
 
+/// Feature flag: Show dangerous delete button during testing phase
+/// Set to false before production App Store release
+const bool _enableDeleteInRelease = true;
+
 class CustomerSettings extends StatefulWidget {
   const CustomerSettings({super.key});
 
@@ -20,6 +24,10 @@ class _CustomerSettingsState extends State<CustomerSettings> {
   final StampRepository _stampRepo = StampRepository(DatabaseHelper());
   final TransactionRepository _transactionRepo = TransactionRepository(DatabaseHelper());
   final BiometricAuthService _biometricAuth = BiometricAuthService();
+  
+  /// Check if dangerous delete button should be shown
+  /// True in debug mode OR if explicitly enabled for TestFlight testing
+  bool get _showDeleteButton => kDebugMode || _enableDeleteInRelease;
   
   int _cardCount = 0;
   int _stampCount = 0;
@@ -419,8 +427,8 @@ class _CustomerSettingsState extends State<CustomerSettings> {
 
                 const Divider(height: 32),
 
-                // Danger Zone - Only visible in debug/TestFlight builds
-                if (kDebugMode) ...[                  const Padding(
+                // Danger Zone - TestFlight/Debug only (controlled by feature flag)
+                if (_showDeleteButton) ...[                  const Padding(
                     padding: EdgeInsets.all(16),
                     child: Text(
                       'Danger Zone',

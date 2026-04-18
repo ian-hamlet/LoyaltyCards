@@ -198,5 +198,25 @@
 ///   * Created TESTING_STRATEGY.md documentation
 ///   * Code cleanup: Removed unused code and debug logging
 ///   * Updated all project documentation to v0.2.1
+/// 
+/// Build 23 Changes:
+/// - TestFlight Feature Flags (Requested by tester feedback)
+///   * Re-enabled "Danger Zone" buttons in TestFlight builds
+///   * Customer: Delete All Data button now visible (was kDebugMode only)
+///   * Supplier: Reset Business Configuration now visible (was kDebugMode only)
+///   * Added feature flags: _enableDeleteInRelease and _enableResetInRelease
+///   * Both flags set to true for TestFlight testing phase
+///   * Before App Store release: Set both flags to false to hide in production
+///   * Allows testers to reset/delete data during TestFlight testing
+/// - Note: Build 22 tests not included in this release (shared package untested)
 
-const String appVersion = '0.2.1+22';
+/// IMPORTANT: Version Number Management
+/// =====================================
+/// When updating version for new build, you MUST update THREE files:
+/// 1. 03-Source/customer_app/pubspec.yaml (line 5: version: X.Y.Z+BUILD)
+/// 2. 03-Source/supplier_app/pubspec.yaml (line 5: version: X.Y.Z+BUILD)
+/// 3. 03-Source/shared/lib/version.dart (this file, appVersion constant below)
+///
+/// All three MUST match exactly or builds will show inconsistent version numbers.
+/// Build number (+BUILD) must increment for every TestFlight upload.
+const String appVersion = '0.2.1+23';

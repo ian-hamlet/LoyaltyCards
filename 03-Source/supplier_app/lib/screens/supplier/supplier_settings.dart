@@ -7,6 +7,10 @@ import 'supplier_onboarding.dart';
 import 'recovery_backup_screen.dart';
 import 'clone_device_screen.dart';
 
+/// Feature flag: Show dangerous reset button during testing phase
+/// Set to false before production App Store release
+const bool _enableResetInRelease = true;
+
 class SupplierSettings extends StatefulWidget {
   final Business business;
 
@@ -19,6 +23,10 @@ class SupplierSettings extends StatefulWidget {
 class _SupplierSettingsState extends State<SupplierSettings> {
   final BusinessRepository _businessRepo = BusinessRepository();
   final KeyManager _keyManager = KeyManager();
+
+  /// Check if dangerous reset button should be shown
+  /// True in debug mode OR if explicitly enabled for TestFlight testing
+  bool get _showResetButton => kDebugMode || _enableResetInRelease;
 
   Future<void> _confirmAndResetBusiness() async {
     final confirmed = await showDialog<bool>(
@@ -228,8 +236,9 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ),
           const Divider(height: 32),
 
-          // Danger Zone - Only visible in debug/TestFlight builds
-          if (kDebugMode) ...[            const Padding(
+          // Danger Zone - TestFlight/Debug only (controlled by feature flag)
+          if (_showResetButton) ...[
+            const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
                 'Danger Zone',

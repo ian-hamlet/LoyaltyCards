@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
@@ -23,11 +24,19 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   String? _errorMessage;
   int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
   final Set<String> _loggedCardIds = {}; // Track logged card IDs to prevent duplicates
+  Timer? _countdownTimer;
+  Duration? _remainingTime;
 
   @override
   void initState() {
     super.initState();
     _loadBusinessAndGenerateToken();
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadBusinessAndGenerateToken() async {
@@ -66,6 +75,11 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         _token = token;
         _isLoading = false;
       });
+
+      // Start countdown timer for secure mode
+      if (business.mode == OperationMode.secure) {
+        _startCountdown();
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error generating token: $e';
@@ -288,12 +302,16 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                     Text(
                                       _business!.mode == OperationMode.simple
                                           ? 'Reusable QR (no expiry)'
-                                          : 'Valid 5 min (expires ${_getExpiryTime()})',
+                                          : (_remainingTime != null
+                                              ? 'Expires in: ${_formatDuration(_remainingTime!)}'
+                                              : 'Valid 5 min (expires ${_getExpiryTime()})'),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: _business!.mode == OperationMode.simple
                                             ? Colors.blue[900]
-                                            : Colors.orange[900],
+                                            : (_remainingTime != null && _remainingTime!.inMinutes < 2
+                                                ? Colors.red[900]
+                                                : Colors.orange[900]),
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -318,6 +336,40 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   ),
                 ),
     );
+  }
+
+  void _startCountdown() {
+    if (_token == null || _business?.mode != OperationMode.secure) return;
+
+    _updateRemainingTime();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _updateRemainingTime();
+    });
+  }
+
+  void _updateRemainingTime() {
+    if (_token == null) return;
+
+    final expiryTime = DateTime.fromMillisecondsSinceEpoch(_token!.timestamp)
+        .add(const Duration(minutes: 5));
+    final remaining = expiryTime.difference(DateTime.now());
+    
+    if (remaining.isNegative) {
+      _countdownTimer?.cancel();
+      if (mounted) {
+        setState(() => _remainingTime = Duration.zero);
+      }
+    } else {
+      if (mounted) {
+        setState(() => _remainingTime = remaining);
+      }
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   String _getExpiryTime() {

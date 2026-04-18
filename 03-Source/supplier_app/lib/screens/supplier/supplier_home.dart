@@ -83,7 +83,7 @@ class _SupplierHomeState extends State<SupplierHome> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${_business!.name} $appVersion'),
+        title: const Text('Customer Loyalty Cards'),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),
@@ -294,8 +294,8 @@ class _SupplierHomeState extends State<SupplierHome> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Issued: Number of new cards you created for customers\\n'
-                              'Stamped: Unique customer cards you have stamped directly\\n'
+                              'Issued: Number of new cards you created for customers\n'
+                              'Stamped: Unique customer cards you have stamped directly\n'
                               'Redeemed: Number of completed cards that have been redeemed',
                               style: TextStyle(
                                 fontSize: 12,

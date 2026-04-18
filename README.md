@@ -1,77 +1,146 @@
 # LoyaltyCards Application
 
+**Status:** v0.2.1 (Build 23) - Deployed to TestFlight  
+**Last Updated:** 2026-04-18  
+**Test Coverage:** 165 automated tests (100% passing)
+
 ## Project Overview
-This project is in the prototyping phase for a loyalty cards management application. The final name and specifications are being developed.
+
+A peer-to-peer (P2P) digital loyalty card system that operates without a backend server. Customers collect stamps via QR codes, and suppliers issue stamps using cryptographic signatures. No personal data collection, no internet required after initial setup.
+
+**Two Apps:**
+- **Customer App** - Collect and manage loyalty cards
+- **Supplier App** - Issue cards and add stamps to customer cards
+
+**Key Features:**
+- ✅ Dual-mode operation (Secure with ECDSA crypto, Simple without)
+- ✅ QR code-based P2P data exchange
+- ✅ Face ID / Touch ID authentication
+- ✅ Offline-capable (no backend required)
+- ✅ Encrypted backup/restore
+- ✅ Zero personal data collection
+
+## Quick Start
+
+### Running the Apps
+
+```bash
+# Customer App
+cd 03-Source/customer_app
+flutter run
+
+# Supplier App
+cd 03-Source/supplier_app
+flutter run
+```
+
+### Running Tests
+
+```bash
+# All 165 tests
+cd 03-Source/shared && flutter test       # 115 tests
+cd 03-Source/customer_app && flutter test  # 33 tests
+cd 03-Source/supplier_app && flutter test  # 17 tests
+```
+
+See [TESTING_STRATEGY.md](TESTING_STRATEGY.md) for comprehensive testing documentation.
+
+## Documentation
+
+### User Documentation
+- [USER_GUIDE.md](07-Documentation/USER_GUIDE.md) - End-user guide
+- [ABOUT_LOYALTYCARDS.md](07-Documentation/ABOUT_LOYALTYCARDS.md) - About the app
+
+### Development Documentation
+- [TESTING_STRATEGY.md](TESTING_STRATEGY.md) - Testing approach and coverage
+- [CODE_REVIEW_v0.2.0.md](CODE_REVIEW_v0.2.0.md) - Code quality review
+- [SECURITY_MODEL.md](SECURITY_MODEL.md) - Security architecture
+- [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) - Database design
+- [03-Source/README.md](03-Source/README.md) - Source code structure
+
+### Planning & Process
+- [CURRENT_STATUS.md](00-Planning/CURRENT_STATUS.md) - Current development status
+- [PROJECT_METADATA.md](PROJECT_METADATA.md) - Project information
+- [RELEASES.md](RELEASES.md) - Release notes and changelog
 
 ## Project Structure
 
-### 00-Planning
-Contains all planning artifacts including requirements, user stories, and specifications.
-- **Requirements**: Business and functional requirements documents
-- **UserStories**: User stories and acceptance criteria
-- **Specifications**: Detailed technical specifications
+### Core Directories
 
-### 01-Design
-Design documents and artifacts for the application.
-- **Architecture**: System architecture diagrams and decisions
-- **Database**: Database schemas, ERDs, and design documents
-- **UI-UX**: User interface mockups and user experience flows
-- **API**: API specifications and endpoint documentation
+```
+LoyaltyCards/
+├── 00-Planning/              # Requirements, user stories, project management
+│   ├── Requirements/         # Business and functional requirements
+│   ├── UserStories/          # User stories and acceptance criteria
+│   └── *.md                  # Planning documents
+│
+├── 01-Design/                # Architecture and design documents
+│   └── Architecture/         # System architecture decisions
+│
+├── 02-AI-Prompts/            # AI-driven development artifacts
+│   └── *.md                  # Prompts and development standards
+│
+├── 03-Source/                # Source code (see 03-Source/README.md)
+│   ├── shared/               # Shared Dart package (115 tests)
+│   ├── customer_app/         # Customer Flutter app (33 tests)
+│   ├── supplier_app/         # Supplier Flutter app (17 tests)
+│   └── loyalty_cards_prototype/  # Original prototype
+│
+└── 07-Documentation/         # User guides and technical docs
+    ├── USER_GUIDE.md
+    └── Installation/
+```
 
-### 02-AI-Prompts
-AI-driven development artifacts including prompts and conversation logs.
-- **Requirements**: Prompts used for requirements generation
-- **Design**: Prompts used for design document creation
-- **Code**: Prompts used for code generation
-- **ChatLogs**: Complete conversation logs with AI assistants
+### Key Documents at Root
 
-### 03-Source
-Source code for the application components.
-- **Backend**: Server-side application code
-- **Frontend**: Client-side application code
-- **Database**: Database scripts, stored procedures, and migrations
-- **Shared**: Shared libraries and utilities
+- **TESTING_STRATEGY.md** - Comprehensive testing approach
+- **CODE_REVIEW_v0.2.0.md** - Code quality assessment
+- **SECURITY_MODEL.md** - Security architecture
+- **DATABASE_SCHEMA.md** - Data persistence design
+- **PRIVACY_POLICY.md** - Privacy policy
+- **RELEASES.md** - Version history and release notes
 
-### 04-Tests
-Test suites and test artifacts.
-- **Unit**: Unit tests for individual components
-- **Integration**: Integration tests for component interaction
-- **E2E**: End-to-end tests for complete workflows
+## Current Status
 
-### 05-Build
-Build configuration and scripts.
-- **Scripts**: Build automation scripts
-- **Config**: Build configuration files
+**Version:** v0.2.1 (Build 23)  
+**Phase:** TestFlight Testing  
+**Next:** Production feature flag review
 
-### 06-Deployment
-Deployment configurations and infrastructure as code.
-- **Docker**: Docker configurations and compose files
-- **Cloud**: Cloud deployment scripts and configurations
+### Completed Work
+- ✅ Dual-mode system (Secure + Simple)
+- ✅ Full P2P QR workflow
+- ✅ Face ID / Touch ID authentication
+- ✅ Backup/restore with encryption
+- ✅ 165 automated unit tests (100% passing)
+- ✅ TestFlight deployment (Build 23 with tester feature flags)
 
-### 07-Documentation
-Project documentation.
-- **Technical**: Technical documentation for developers
-- **User**: User guides and manuals
+### Test Coverage
+- **Shared Package:** 80%+ (models, QR tokens, utilities)
+- **Customer App:** 70%+ (services, validation, rate limiting)
+- **Supplier KeyManager:** 95%+ (CRITICAL - cryptographic operations)
 
-### 08-Assets
-Project assets and resources.
-- **Images**: Application images and graphics
-- **Icons**: Application icons
+## Technology Stack
+
+- **Framework:** Flutter 3.3.0+
+- **Language:** Dart
+- **Database:** SQLite (sqflite)
+- **Cryptography:** ECDSA P-256 (pointycastle)
+- **QR Codes:** mobile_scanner, qr_flutter
+- **Secure Storage:** flutter_secure_storage
+- **Biometrics:** local_auth
+- **Testing:** flutter_test, mockito
+
+## Development Approach
+
+This project uses AI-driven development with comprehensive documentation of the process:
+- All AI prompts documented in `02-AI-Prompts/`
+- Development standards in `02-AI-Prompts/DEVELOPMENT_STANDARDS.md`
+- Lessons learned in `LESSONS_LEARNED.md`
 
 ## Getting Started
 
-This project is currently in the planning and specification phase. Begin by:
-1. Defining requirements in `00-Planning/Requirements/`
-2. Creating user stories in `00-Planning/UserStories/`
-3. Documenting AI prompts in `02-AI-Prompts/`
-4. Developing design artifacts in `01-Design/`
-
-## Development Status
-
-🔴 **Phase**: Initial Planning and Specification
-
-## Notes
-
-- All AI-driven development should document prompts in `02-AI-Prompts/`
-- Keep chat logs for reference and reproducibility
-- Update this README as the project evolves
+1. **Clone the repository**
+2. **Install Flutter** (see [03-Source/FLUTTER_SETUP_GUIDE.md](03-Source/FLUTTER_SETUP_GUIDE.md))
+3. **Run the apps** (see Quick Start above)
+4. **Run tests** to verify everything works
+5. **Read the docs** in `07-Documentation/`

@@ -6,6 +6,7 @@ class Stamp {
   final DateTime timestamp;
   final String signature; // Cryptographic signature from supplier
   final String? previousHash; // Hash of previous stamp for blockchain-like verification
+  final String? deviceId; // Device ID where stamp was collected (V-005 multi-device detection)
 
   Stamp({
     required this.id,
@@ -14,6 +15,7 @@ class Stamp {
     required this.timestamp,
     required this.signature,
     this.previousHash,
+    this.deviceId,
   });
 
   /// Convert to JSON for persistence
@@ -25,6 +27,7 @@ class Stamp {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'signature': signature,
       'previous_hash': previousHash,
+      'device_id': deviceId,
     };
   }
 
@@ -37,6 +40,7 @@ class Stamp {
       timestamp: DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int),
       signature: json['signature'] as String,
       previousHash: json['previous_hash'] as String?,
+      deviceId: json['device_id'] as String?,
     );
   }
 
@@ -48,6 +52,7 @@ class Stamp {
     DateTime? timestamp,
     String? signature,
     String? previousHash,
+    String? deviceId,
   }) {
     return Stamp(
       id: id ?? this.id,
@@ -56,6 +61,7 @@ class Stamp {
       timestamp: timestamp ?? this.timestamp,
       signature: signature ?? this.signature,
       previousHash: previousHash ?? this.previousHash,
+      deviceId: deviceId ?? this.deviceId,
     );
   }
 

@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:shared/models/card.dart' as models;
+import 'package:shared/models/transaction.dart' as models;
 import '../../services/token_validator.dart';
 import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
+import '../../services/transaction_repository.dart';
 import '../../services/rate_limiter.dart';
 import '../../services/database_helper.dart';
 import '../../services/key_manager.dart';
 import '../../services/device_orientation_service.dart';
+import '../../services/device_service.dart';
+import 'package:uuid/uuid.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Scanner screen for adding new cards or receiving stamps
 class QRScannerScreen extends StatefulWidget {
@@ -30,10 +35,43 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
   @override
+  void initState() {
+    super.initState();
+    _loadRotationPreference();
+  }
+
+  @override
   void dispose() {
     _controller.stop();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Load saved camera rotation preference from SharedPreferences
+  Future<void> _loadRotationPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedRotation = prefs.getInt('camera_rotation') ?? 1;
+      if (mounted) {
+        setState(() {
+          _manualRotationOffset = savedRotation;
+        });
+        AppLogger.debug('Loaded camera rotation preference: $savedRotation (${savedRotation * 90}°)', 'Camera');
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to load camera rotation preference: $e', 'Camera');
+    }
+  }
+
+  /// Save camera rotation preference to SharedPreferences
+  Future<void> _saveRotationPreference(int rotation) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('camera_rotation', rotation);
+      AppLogger.debug('Saved camera rotation preference: $rotation (${rotation * 90}°)', 'Camera');
+    } catch (e) {
+      AppLogger.warning('Failed to save camera rotation preference: $e', 'Camera');
+    }
   }
 
   Future<void> _handleQRCode(String qrData) async {
@@ -97,7 +135,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Use card ID from token if present (for multi-stamp consistency)
     // Otherwise generate new one (backward compatibility)
     final cardId = token.cardId ?? '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+    
+    // Check if this specific card already exists (prevents duplicate scans of same QR)
+    final cardRepository = CardRepository(DatabaseHelper());
+    final existingCard = await cardRepository.getCardById(cardId);
+    
+    if (existingCard != null) {
+      // This exact card has already been scanned
+      if (mounted) {
+        Navigator.pop(context, 'Card has already been scanned: ${token.businessName}');
+      }
+      return;
+    }
+    
     final initialStampCount = token.initialStamps.length;
+    
+    // Get device ID for multi-device tracking (V-005)
+    final deviceId = await DeviceService.getDeviceId();
     
     final card = models.Card(
       id: cardId,
@@ -111,11 +165,24 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       mode: token.mode, // Store the operation mode from token
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      deviceId: deviceId, // V-005: Track device where card was created
     );
 
-    // Save card to database
-    final cardRepository = CardRepository(DatabaseHelper());
+    // Save card to database (duplicate check already performed above)
     await cardRepository.insertCard(card);
+    
+    // Log card pickup transaction
+    final transactionRepo = TransactionRepository(DatabaseHelper());
+    final pickupTransaction = models.Transaction(
+      id: const Uuid().v4(),
+      cardId: cardId,
+      type: TransactionType.pickup,
+      timestamp: DateTime.now(),
+      businessName: token.businessName,
+      details: 'Card added to wallet',
+    );
+    await transactionRepo.insertTransaction(pickupTransaction);
+    AppLogger.database('Logged pickup transaction for card $cardId');
     
     AppLogger.qr('Processing Card Issuance');
     AppLogger.business('Card ID: $cardId');
@@ -160,10 +227,22 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           timestamp: DateTime.fromMillisecondsSinceEpoch(initialStamp.timestamp),
           signature: initialStamp.signature,
           previousHash: previousHash.isEmpty ? null : previousHash,
+          deviceId: deviceId, // V-005: Track device where stamp was collected
         );
 
         await stampRepository.insertStamp(stamp);
         AppLogger.database('  Initial stamp #${initialStamp.stampNumber} saved to DB');
+        
+        // Log stamp transaction
+        final stampTransaction = models.Transaction(
+          id: const Uuid().v4(),
+          cardId: cardId,
+          type: TransactionType.stamp,
+          timestamp: DateTime.now(),
+          businessName: token.businessName,
+          details: 'Stamp #${initialStamp.stampNumber} earned',
+        );
+        await transactionRepo.insertTransaction(stampTransaction);
         
         // Next stamp's previous hash is this stamp's signature
         previousHash = initialStamp.signature;
@@ -189,6 +268,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Future<void> _handleStampToken(QRToken token) async {
+    // Get device ID for multi-device tracking (V-005)
+    final deviceId = await DeviceService.getDeviceId();
+    
     // Handle redemption tokens
     if (token is RedemptionToken) {
       await _handleRedemptionToken(token);
@@ -323,10 +405,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       timestamp: stampTimestamp,
       signature: token.signature,
       previousHash: stampPreviousHash.isEmpty ? null : stampPreviousHash,
+      deviceId: deviceId, // V-005: Track device where stamp was collected
     );
 
     await stampRepo.insertStamp(stamp);
     AppLogger.database('Main stamp saved to DB');
+    
+    // Log stamp transaction
+    final transactionRepo = TransactionRepository(DatabaseHelper());
+    final stampTransaction = models.Transaction(
+      id: const Uuid().v4(),
+      cardId: card.id,
+      type: TransactionType.stamp,
+      timestamp: DateTime.now(),
+      businessName: card.businessName,
+      details: 'Stamp #$stampNumber earned',
+    );
+    await transactionRepo.insertTransaction(stampTransaction);
     
     // Process additional stamps if present
     int totalStampsAdded = 1;
@@ -373,11 +468,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           timestamp: DateTime.fromMillisecondsSinceEpoch(additionalStamp.timestamp),
           signature: additionalStamp.signature,
           previousHash: currentPreviousHash.isEmpty ? null : currentPreviousHash,
+          deviceId: deviceId, // V-005: Track device where stamp was collected
         );
 
         await stampRepo.insertStamp(additionalStampRecord);
         totalStampsAdded++;
         AppLogger.database('  Additional stamp saved to DB');
+        
+        // Log stamp transaction
+        final addlStampTransaction = models.Transaction(
+          id: const Uuid().v4(),
+          cardId: card.id,
+          type: TransactionType.stamp,
+          timestamp: DateTime.now(),
+          businessName: card.businessName,
+          details: 'Stamp #${additionalStamp.stampNumber} earned',
+        );
+        await transactionRepo.insertTransaction(addlStampTransaction);
         
         // Next stamp's previous hash is this stamp's signature
         currentPreviousHash = additionalStamp.signature;
@@ -450,6 +557,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             timestamp: oldStamp.timestamp,
             signature: oldStamp.signature,
             previousHash: i == 0 ? previousHash : stampsToMove[i - 1].signature,
+            deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
           );
           
           await stampRepo.insertStamp(newStamp);
@@ -499,6 +607,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               timestamp: oldStamp.timestamp,
               signature: oldStamp.signature,
               previousHash: i == 0 ? null : remainingStamps[i - 1].signature,
+              deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
             );
             
             await stampRepo.insertStamp(newStamp);
@@ -566,6 +675,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             timestamp: oldStamp.timestamp,
             signature: oldStamp.signature,
             previousHash: i == 0 ? null : stampsToMove[i - 1].signature,
+            deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
           );
           
           await stampRepo.insertStamp(newStamp);
@@ -603,6 +713,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Get the card to verify it matches
     final repository = CardRepository(DatabaseHelper());
+    final transactionRepo = TransactionRepository(DatabaseHelper());
     final card = await repository.getCardById(token.cardId);
 
     if (card == null) {
@@ -663,6 +774,17 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Mark card as redeemed
     await repository.markCardAsRedeemed(card.id);
     AppLogger.database('Card marked as redeemed in database');
+    
+    // Log redemption transaction
+    final redemptionTransaction = models.Transaction(
+      id: const Uuid().v4(),
+      cardId: card.id,
+      type: TransactionType.redemption,
+      timestamp: DateTime.now(),
+      businessName: card.businessName,
+      details: 'Reward redeemed: ${card.stampsCollected} stamps (secure mode)',
+    );
+    await transactionRepo.insertTransaction(redemptionTransaction);
     
     // Check for existing card with available space before creating new card
     final existingCard = await repository.findCardWithSpace(card.businessId);
@@ -782,9 +904,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -801,9 +925,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,

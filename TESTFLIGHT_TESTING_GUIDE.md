@@ -1,9 +1,15 @@
 # LoyaltyCards v0.2.0 - TestFlight Testing Guide
 
-**Version:** 0.2.0 (Build 4)  
-**Date:** April 14, 2026  
+**Version:** 0.2.0 (Build 21)  
+**Date:** April 17, 2026  
 **Platform:** iOS (TestFlight Internal Testing)  
 **Tester:** Internal Pilot
+
+**Build 21 Focus:**
+- ✅ Biometric authentication for backup/clone (V-002)
+- ✅ Device mismatch detection (V-005)
+- ✅ Optional app lock for customer app
+- ✅ Simple Mode overflow fix
 
 ---
 
@@ -13,8 +19,9 @@
 **Supplier App:** LoyaltyCards Business
 
 **Devices Required:**
-- Minimum: 1 iPhone or iPad (can test with one device)
-- Recommended: 2 devices (e.g., iPhone + iPad for full multi-device testing)
+- Minimum: 1 iPhone or iPad (can test basic features with one device)
+- Recommended: 2 devices (e.g., iPhone + iPad for multi-device testing)
+- **New (Build 21):** 2nd device needed for device mismatch testing
 
 ---
 
@@ -22,22 +29,34 @@
 
 ✅ TestFlight app installed  
 ✅ Both apps downloaded from TestFlight  
+✅ Build 21+ installed  
 ✅ Ready to test
 
 ---
 
 ## Testing Checklist Overview
 
+**Core Features:**
 - [ ] **Test 1:** Create Business (Supplier)
 - [ ] **Test 2:** Issue Loyalty Card (Supplier → Customer)
 - [ ] **Test 3:** Collect Stamps (Customer)
 - [ ] **Test 4:** Redeem Reward (Customer)
 - [ ] **Test 5:** Search & Organization (Customer)
-- [ ] **Test 6:** Backup to Photos (Supplier)
-- [ ] **Test 7:** Restore from Backup (Supplier)
-- [ ] **Test 8:** Clone to Second Device (Supplier)
-- [ ] **Test 9:** Secure Mode Comparison (Both)
-- [ ] **Test 10:** Edge Cases & Stress Testing
+
+**Build 21 Security Features:** ⚠️ NEW
+- [ ] **Test 6a:** Biometric Auth - Backup QR (Supplier)
+- [ ] **Test 6b:** Biometric Auth - Clone QR (Supplier)
+- [ ] **Test 6c:** Customer App Lock (Customer - Optional)
+- [ ] **Test 7:** Device Mismatch Warning (2 devices needed)
+
+**Backup & Recovery:**
+- [ ] **Test 8:** Backup to Photos (Supplier)
+- [ ] **Test 9:** Restore from Backup (Supplier)
+- [ ] **Test 10:** Clone to Second Device (Supplier)
+
+**Advanced:**
+- [ ] **Test 11:** Secure Mode Comparison (Both)
+- [ ] **Test 12:** Edge Cases & Stress Testing
 
 ---
 
@@ -160,9 +179,154 @@
 
 ---
 
-## Priority 2: Backup & Recovery Tests (Day 2)
+## Priority 2: Build 21 Security Features (NEW)
 
-### Test 5: Search & Organization
+### Test 6a: Biometric Authentication - Recovery Backup
+
+**App:** LoyaltyCards Business (Supplier)  
+**Device:** iPad/iPhone with Face ID or Touch ID  
+**Build:** 21+
+
+**Steps:**
+1. Open **LoyaltyCards Business** app
+2. Go to **Settings** (gear icon)
+3. Tap **"Create Recovery Backup"**
+4. **Expected:** Face ID/Touch ID prompt appears immediately
+5. **Cancel** the authentication (press Cancel button)
+6. **Expected:** Returns to Settings, no QR shown
+7. Tap **"Create Recovery Backup"** again
+8. This time **authenticate successfully** (Face ID/Touch ID)
+9. **Expected:** Backup screen loads with QR code
+
+**Expected Results:**
+- ✅ Authentication prompt appears before QR
+- ✅ Prompt message: "Authenticate with Face ID to securely access your business private keys"
+- ✅ Cancelling returns to Settings (no access)
+- ✅ Successful auth shows backup QR
+- ✅ Passcode fallback works if biometrics fail
+
+**✅ Pass / ❌ Fail**  
+**Notes:**
+
+---
+
+### Test 6b: Biometric Authentication - Clone Device
+
+**App:** LoyaltyCards Business (Supplier)  
+**Device:** iPad/iPhone with Face ID or Touch ID  
+**Prerequisites:** Business configured  
+**Build:** 21+
+
+**Steps:**
+1. Go to **Settings** (gear icon)
+2. Tap **"Clone to Another Device"**
+3. **Expected:** Face ID/Touch ID prompt appears
+4. Authenticate successfully
+5. **Expected:** Clone QR appears with 5-minute countdown timer
+
+**Expected Results:**
+- ✅ Authentication required before clone QR
+- ✅ Same security protection as backup
+- ✅ Timer starts only after auth success
+- ✅ QR shows 5:00 → 4:59 → ... countdown
+
+**✅ Pass / ❌ Fail**  
+**Notes:**
+
+---
+
+### Test 6c: Customer App Lock (Optional Feature)
+
+**App:** LoyaltyCards (Customer)  
+**Device:** iPhone with Face ID or Touch ID  
+**Build:** 21+
+
+**Steps:**
+
+**Part 1: Enable App Lock**
+1. Open **LoyaltyCards** customer app
+2. Go to **Settings**
+3. Find **"Security"** section
+4. Toggle **"Lock App with Face ID"** to ON
+5. **Expected:** Face ID prompt appears to verify it works
+6. Authenticate successfully
+7. **Expected:** Toggle stays ON, success message appears
+
+**Part 2: Test App Lock**
+8. Force quit the app (swipe up from app switcher)
+9. Reopen **LoyaltyCards** app
+10. **Expected:** Face ID prompt appears immediately
+11. Authenticate successfully
+12. **Expected:** App opens to card list
+
+**Part 3: Test Lock Failure**
+13. Force quit app again
+14. Reopen **LoyaltyCards** app
+15. **Cancel** Face ID prompt (or wait for timeout)
+16. **Expected:** Locked screen appears with lock icon
+17. Tap **"Authenticate"** button
+18. Authenticate successfully
+19. **Expected:** Card list appears
+
+**Part 4: Disable App Lock**
+20. Go to Settings (while authenticated)
+21. Toggle **"Lock App with Face ID"** to OFF
+22. Force quit and reopen app
+23. **Expected:** App opens directly (no Face ID prompt)
+
+**Expected Results:**
+- ✅ Toggle enables/disables feature
+- ✅ Face ID required on every app launch when ON
+- ✅ Failed auth shows locked screen with retry
+- ✅ Disabled = normal app access
+- ✅ Setting persists across app restarts
+- ✅ Default state is OFF (opt-in)
+
+**✅ Pass / ❌ Fail**  
+**Notes:**
+
+---
+
+### Test 7: Device Mismatch Warning (2 Devices Required)
+
+**Apps:** Supplier + Customer  
+**Devices:** iPhone (Device A) + iPad (Device B)  
+**Build:** 21+  
+**Prerequisites:** Business configured on supplier device
+
+**Setup:**
+1. On **Device A** (iPhone), open **Customer App**
+2. Scan QR to get loyalty card from supplier
+3. Add 5 stamps to complete the card
+4. **Backup Device A to iCloud** or use second customer app install
+
+**Test Scenario 1: iCloud Restore Simulation**
+_(Cannot easily test without actual restore, so skip to Scenario 2)_
+
+**Test Scenario 2: Different Device ID**
+1. On **Device B** (iPad), install **Customer App** (fresh install)
+2. Use backup/restore or manually note card ID from Device A
+3. _(This scenario requires manual database manipulation - skip for now)_
+
+**Alternative: Device Mismatch UI Test**
+1. On **Supplier App**, go to **Redeem Card** screen
+2. Scan a customer redemption QR
+3. **Expected (if mismatch):** Orange warning dialog appears:
+   - Title: "Device Mismatch Detected"
+   - Icon: Orange warning triangle
+   - Message explains: new phone, backup, or fraud
+   - Buttons: "Cancel" or "Proceed Anyway"
+
+**Note:** Full test requires actual multi-device scenario or iCloud restore. UI implementation validated in code review.
+
+**✅ Pass / ❌ Fail (Partial - UI verified)**  
+**Notes:**
+
+---
+
+## Priority 3: Backup & Recovery Tests
+
+### Test 8: Search & Organization
 
 **App:** LoyaltyCards (Customer)  
 **Device:** iPhone
@@ -184,7 +348,38 @@
 
 ---
 
-### Test 6: Backup Business to Photos
+### Test 9: Backup Business to Photos
+
+**App:** LoyaltyCards Business (Supplier)  
+**Device:** iPad
+
+**Steps:**
+1. Open **LoyaltyCards Business** app
+2. Go to **Settings** (gear icon)
+3. Find **"Backup & Recovery"** section
+4. Tap **"Create Recovery Backup"**
+5. **Authenticate with Face ID/Touch ID** (Build 21+)
+6. Choose **"Save to Photos"**
+7. Grant photo library permission if prompted
+8. Wait for confirmation
+
+**Verify:**
+1. Open **Photos** app
+2. Check recent photos
+3. QR code image should be saved
+
+**Expected Results:**
+- Biometric auth required first (Build 21+)
+- QR code successfully saved to Photos
+- Image is clear and scannable
+- Contains business configuration data
+
+**✅ Pass / ❌ Fail**  
+**Notes:**
+
+---
+
+### Test 10: Restore from Backup
 
 **App:** LoyaltyCards Business (Supplier)  
 **Device:** iPad
@@ -213,11 +408,11 @@
 
 ---
 
-### Test 7: Restore from Backup
+### Test 10: Restore from Backup
 
 **App:** LoyaltyCards Business (Supplier)  
 **Device:** iPad  
-**Prerequisites:** Test 6 complete (backup QR saved)
+**Prerequisites:** Test 9 complete (backup QR saved)
 
 **⚠️ WARNING:** This will delete current business. Only proceed if comfortable.
 
@@ -244,13 +439,14 @@
 
 ---
 
-## Priority 3: Advanced Tests (Day 3)
+## Priority 4: Advanced Tests (Day 3)
 
-### Test 8: Clone to Second Device
+### Test 11: Clone to Second Device
 
 **App:** LoyaltyCards Business (Supplier)  
 **Devices:** 2 devices with supplier app installed  
 **Prerequisites:** Business created on Device 1
+**Build 21+:** Biometric authentication required
 
 **Steps:**
 
@@ -258,8 +454,9 @@
 1. Open LoyaltyCards Business
 2. Go to **Settings**
 3. Tap **"Clone to Another Device"**
-4. QR code appears with **5-minute countdown timer**
-5. Keep this QR visible
+4. **Authenticate with Face ID/Touch ID** (Build 21+)
+5. QR code appears with **5-minute countdown timer**
+6. Keep this QR visible
 
 **On Device 2 (New - iPhone):**
 1. Open LoyaltyCards Business app
@@ -291,7 +488,7 @@
 
 ---
 
-### Test 9: Secure Mode Comparison
+### Test 12: Secure Mode Comparison
 
 **App:** LoyaltyCards Business (Supplier)  
 **Device:** Any
@@ -335,7 +532,7 @@
 
 ---
 
-### Test 10: Edge Cases & Stress Testing
+### Test 13: Edge Cases & Stress Testing
 
 **Various scenarios to test:**
 
@@ -392,6 +589,31 @@
 5. No sync needed - everything already local
 
 **✅ Pass / ❌ Fail**
+
+---
+
+#### G. Camera Rotation Persistence
+1. Open any QR scanner screen (customer or supplier)
+2. If camera view is sideways/upside down, tap rotation button (90° or 180°)
+3. Scan a QR code successfully
+4. Close the camera screen
+5. Open the SAME camera screen again
+6. **Expected:** Camera opens with your preferred rotation already applied
+7. Now open a DIFFERENT camera screen (e.g., stamp issuance if you just tested card issuance)
+8. **Expected:** Your rotation preference applies to ALL cameras
+9. Close and reopen the app completely
+10. Open any camera screen
+11. **Expected:** Rotation preference persists across app restarts
+
+**Testing Notes:**
+- Camera rotation preference is shared across ALL QR scanners in both apps
+- Setting applies to: Customer scanner, Supplier import, Supplier stamp, Supplier redeem
+- Preference saved automatically when rotation button tapped
+- Default rotation: 90° (may vary by screen)
+- Test on both iPhone (portrait) and iPad (landscape) if available
+
+**✅ Pass / ❌ Fail**  
+**Notes:**
 
 ---
 

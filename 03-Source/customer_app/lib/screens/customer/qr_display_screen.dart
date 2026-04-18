@@ -101,9 +101,11 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
         ? 'Request Stamp'
         : 'Redeem Reward';
 
-    final instruction = widget.mode == QRDisplayMode.stampRequest
-        ? 'Show this QR code to ${widget.card.businessName} to receive a stamp'
-        : 'Show this QR code to redeem your reward';
+    final instruction = widget.card.isRedeemed
+        ? 'Card has been redeemed'
+        : widget.mode == QRDisplayMode.stampRequest
+            ? 'Show this QR code to ${widget.card.businessName} to receive a stamp'
+            : 'Show this QR code to redeem your card and get your reward';
 
     return Scaffold(
       appBar: AppBar(
@@ -154,40 +156,41 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                     ),
                   ),
                 )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Business name
-                      Text(
-                        widget.card.businessName,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                        textAlign: TextAlign.center,
+              : Stack(
+                  children: [
+                    // Main content
+                    SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(
+                        widget.mode == QRDisplayMode.redemption ? 48 : 24, // Extra left padding for vertical bar
+                        24,
+                        24,
+                        24,
                       ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Business name
+                          Text(
+                            widget.card.businessName,
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
 
-                      const SizedBox(height: 8),
+                          const SizedBox(height: 8),
 
-                      // Stamp count
-                      if (widget.mode == QRDisplayMode.stampRequest)
-                        Text(
-                          'Current stamps: ${widget.card.stampsCollected} / ${widget.card.stampsRequired}',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                        )
-                      else
-                        Text(
-                          'Card Complete! 🎉',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
+                          // Stamp count (only for stamp request mode)
+                          if (widget.mode == QRDisplayMode.stampRequest)
+                            Text(
+                              'Current stamps: ${widget.card.stampsCollected} / ${widget.card.stampsRequired}',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                            ),
+                          // For redemption mode, no extra text here - status shown in vertical bar
 
-                      const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
                       // QR Code
                       Container(
@@ -263,6 +266,61 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                       ),
                     ],
                   ),
+                ),
+                    
+                    // Vertical status bar for redemption mode
+                    if (widget.mode == QRDisplayMode.redemption)
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 40,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.green.shade600,
+                                Colors.green.shade500,
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(2, 0),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: RotatedBox(
+                              quarterTurns: 3, // Rotate 270° (counter-clockwise)
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.celebration,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    'COMPLETE',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
     );
   }

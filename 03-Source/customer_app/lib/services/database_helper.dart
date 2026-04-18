@@ -55,7 +55,8 @@ class DatabaseHelper {
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         is_redeemed INTEGER NOT NULL DEFAULT 0,
-        redeemed_at INTEGER
+        redeemed_at INTEGER,
+        device_id TEXT
       )
     ''');
 
@@ -68,6 +69,7 @@ class DatabaseHelper {
         timestamp INTEGER NOT NULL,
         signature TEXT NOT NULL,
         previous_hash TEXT,
+        device_id TEXT,
         FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
       )
     ''');
@@ -141,6 +143,18 @@ class DatabaseHelper {
         ALTER TABLE cards ADD COLUMN redeemed_at INTEGER
       ''');
       AppLogger.database('Migration complete: redeemed_at column added');
+    }
+    
+    // Migration from v5 to v6: Add device_id columns (V-005 Multi-Device Duplication Detection)
+    if (oldVersion < 6) {
+      AppLogger.database('Migration v5 → v6: Adding device_id columns for multi-device tracking');
+      await db.execute('''
+        ALTER TABLE cards ADD COLUMN device_id TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE stamps ADD COLUMN device_id TEXT
+      ''');
+      AppLogger.database('Migration complete: device_id columns added');
     }
   }
 

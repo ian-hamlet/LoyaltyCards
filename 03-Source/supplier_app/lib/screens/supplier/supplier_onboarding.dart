@@ -95,9 +95,11 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
 
       if (mounted) {
         Haptics.success();
-        // Navigate to home screen
-        Navigator.of(context).pushReplacement(
+        // Navigate to home screen and clear all previous routes
+        // Prevents back button from returning to onboarding/settings
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const SupplierHome()),
+          (route) => false, // Remove all previous routes
         );
       }
     } catch (e) {

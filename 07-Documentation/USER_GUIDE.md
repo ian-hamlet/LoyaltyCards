@@ -2,8 +2,8 @@
 
 **Quick Start Guide for Businesses & Customers**
 
-Version 0.1.0 (Build 83)  
-Last Updated: April 13, 2026
+Version 0.2.0 (Build 21)  
+Last Updated: April 17, 2026
 
 ---
 
@@ -32,6 +32,20 @@ Last Updated: April 13, 2026
    - New card created automatically
 
 **That's it! No account, no email, no personal info needed.**
+
+---
+
+### 🔐 Security & Privacy (Optional)
+
+**App Lock with Face ID/Touch ID:**
+- Go to Settings → Security
+- Toggle "Lock App with Face ID" (or Touch ID)
+- **Default: OFF** (opt-in for privacy-conscious users)
+- When enabled: Face ID required every time you open app
+- Protects your loyalty cards from casual viewing
+- Passcode fallback always available
+
+**Note:** This is optional. Most users leave it OFF for convenience.
 
 ---
 
@@ -99,11 +113,21 @@ Last Updated: April 13, 2026
 
 ### Troubleshooting (Customer)
 
+**"Camera orientation is wrong/sideways"**
+- Use the rotation buttons on the camera screen:
+  - **90°** button: Rotate camera view 90 degrees clockwise
+  - **180°** button: Flip camera view upside down
+- **Your rotation preference is saved automatically**
+- Next time you open any camera, your preferred rotation is applied
+- Different devices may need different rotations (iPad vs iPhone)
+- Tip: Set rotation once, app remembers it forever
+
 **"Can't scan QR code"**
 - Ensure camera permission is granted
 - Good lighting helps
 - Hold phone steady for 1 second
 - Try moving closer/farther
+- If camera view is sideways, use rotation buttons (see above)
 
 **"Stamp not added"**
 - Simple mode: Wait 1 hour (rate limited)
@@ -115,6 +139,15 @@ Last Updated: April 13, 2026
 - If phone is lost, cards are lost (like physical cards)
 - No personal data exposed
 - Reinstall app and start fresh
+
+**"Device mismatch warning when redeeming"**
+- Appears if card was created on different device
+- Common causes:
+  - Restored from iCloud backup
+  - Moved to new phone
+  - Rarely: potential fraud attempt
+- Supplier will see warning and can choose to proceed or investigate
+- Legitimate users: just explain you got a new phone
 
 **"Card not redeeming"**
 - Ensure card is complete (all stamps)
@@ -183,6 +216,8 @@ Last Updated: April 13, 2026
 
 4. **🔥 CRITICAL: Create Backup** (5 minutes)
    - Tap Settings → Create Recovery Backup
+   - **🔐 Face ID/Touch ID prompt will appear** (Build 21+)
+   - Authenticate to view backup QR (protects private keys)
    - **Use at least 2 backup methods:**
      1. 🖨️ **Print** (HIGHLY RECOMMENDED)
         - Opens print dialog
@@ -364,7 +399,9 @@ Last Updated: April 13, 2026
 
 **How It Works:**
 1. **Device A** (already configured): Settings → Clone to Another Device
-2. Clone QR code appears with **5-minute countdown timer**
+2. **🔐 Face ID/Touch ID prompt appears** (Build 21+)
+3. Authenticate to generate clone QR (protects private keys)
+4. Clone QR code appears with **5-minute countdown timer**
 3. **Device B** (new/unconfigured): Open app → Tap "Clone from Another Device"
 4. Scan QR code from Device A
 5. Device B now has identical business configuration
@@ -408,8 +445,9 @@ Last Updated: April 13, 2026
 1. Open Supplier app
 2. Tap Settings (⚙️)
 3. Tap "Clone to Another Device"
-4. QR code appears with countdown
-5. Keep screen active while scanning
+4. **Authenticate with Face ID/Touch ID/Passcode** (Build 21+)
+5. QR code appears with countdown
+6. Keep screen active while scanning
 
 **On Device B (Target):**
 1. Open Supplier app (should show onboarding)
@@ -443,6 +481,16 @@ Last Updated: April 13, 2026
 
 ### Troubleshooting (Business)
 
+**"Camera orientation is wrong/sideways"**
+- Use the rotation buttons on camera screens:
+  - **90°** button: Rotate camera view 90 degrees clockwise
+  - **180°** button: Flip camera view upside down
+- **Your rotation preference is saved automatically**
+- Rotation persists across all QR scanner screens
+- Works for: Business import/recovery, stamp issuance, redemption
+- Set once per device, app remembers forever
+- Note: Different devices (iPad vs iPhone) may need different settings
+
 **"Customer says stamp didn't work"**
 - Simple mode: They may have scanned within 1 hour (rate limited)
 - Secure mode: QR may have expired, generate new one
@@ -462,6 +510,17 @@ Last Updated: April 13, 2026
 - Secure mode only: Signature validation failed
 - Card may be from old business configuration
 - Issue new card to customer
+
+**"Device mismatch warning when redeeming card"** (Build 21+)
+- Warning appears if card was created on different customer device
+- Common legitimate causes:
+  - Customer got new phone
+  - Customer restored from iCloud backup
+  - Customer has multiple devices
+- Rare cause: potential fraud attempt
+- **Your choice:** Tap "Proceed Anyway" (most cases) or "Cancel" (suspicious)
+- Orange warning icon indicates informational, not critical
+- Use business judgment based on customer
 
 **"Want to change mode"**
 - Not currently possible without reset
@@ -498,6 +557,7 @@ Last Updated: April 13, 2026
 - Check progress regularly
 - Redeem promptly when complete
 - Keep app updated
+- Use camera rotation buttons if view is sideways (preference saves automatically)
 
 ❌ **DON'T:**
 - Try to scan same QR repeatedly (rate limited)

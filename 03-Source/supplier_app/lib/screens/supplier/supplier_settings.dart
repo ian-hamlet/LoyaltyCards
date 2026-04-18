@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
@@ -5,6 +6,10 @@ import '../../services/key_manager.dart';
 import 'supplier_onboarding.dart';
 import 'recovery_backup_screen.dart';
 import 'clone_device_screen.dart';
+
+/// Feature flag: Show dangerous reset button during testing phase
+/// Set to false before production App Store release
+const bool _enableResetInRelease = true;
 
 class SupplierSettings extends StatefulWidget {
   final Business business;
@@ -18,6 +23,10 @@ class SupplierSettings extends StatefulWidget {
 class _SupplierSettingsState extends State<SupplierSettings> {
   final BusinessRepository _businessRepo = BusinessRepository();
   final KeyManager _keyManager = KeyManager();
+
+  /// Check if dangerous reset button should be shown
+  /// True in debug mode OR if explicitly enabled for TestFlight testing
+  bool get _showResetButton => kDebugMode || _enableResetInRelease;
 
   Future<void> _confirmAndResetBusiness() async {
     final confirmed = await showDialog<bool>(
@@ -227,35 +236,38 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ),
           const Divider(height: 32),
 
-          // Danger Zone
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Danger Zone',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
+          // Danger Zone - TestFlight/Debug only (controlled by feature flag)
+          if (_showResetButton) ...[
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Danger Zone',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
               ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.warning, color: Colors.red),
-            title: const Text(
-              'Reset Business Configuration',
-              style: TextStyle(color: Colors.red),
+            ListTile(
+              leading: const Icon(Icons.warning, color: Colors.red),
+              title: const Text(
+                'Reset Business Configuration',
+                style: TextStyle(color: Colors.red),
+              ),
+              subtitle: const Text(
+                'Delete business and start over with new name',
+                style: TextStyle(fontSize: 12),
+              ),
+              onTap: () {
+                Haptics.medium();
+                _confirmAndResetBusiness();
+              },
             ),
-            subtitle: const Text(
-              'Delete business and start over with new name',
-              style: TextStyle(fontSize: 12),
-            ),
-            onTap: () {
-              Haptics.medium();
-              _confirmAndResetBusiness();
-            },
-          ),
+            const SizedBox(height: 32),
+          ],
 
-          const SizedBox(height: 32),
+          const Divider(height: 32),
 
           // Tips Section
           Container(

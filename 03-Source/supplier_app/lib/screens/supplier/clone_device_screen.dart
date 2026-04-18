@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:shared/models/business.dart';
 import 'package:shared/models/supplier_config_backup.dart';
 import 'package:shared/widgets/feedback.dart';
+import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/key_manager.dart';
+import '../../services/biometric_auth_service.dart';
 
 /// Screen for generating clone QR code to set up business on additional devices
 /// Clone QR expires in 24 hours and allows another device to get full business config
@@ -23,20 +25,56 @@ class CloneDeviceScreen extends StatefulWidget {
 class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
   SupplierConfigBackup? _cloneQR;
   bool _isGenerating = false;
+  bool _authenticationRequired = true;
   Timer? _countdownTimer;
   Duration? _remainingTime;
   final KeyManager _keyManager = KeyManager();
+  final BiometricAuthService _biometricAuth = BiometricAuthService();
 
   @override
   void initState() {
     super.initState();
-    _generateCloneQR();
+    _authenticateAndGenerate();
   }
 
   @override
   void dispose() {
     _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  /// Require biometric/passcode authentication before showing clone QR
+  /// This protects the private key from unauthorized access
+  Future<void> _authenticateAndGenerate() async {
+    AppLogger.debug('🔐 Requesting authentication for clone QR generation...', 'Clone');
+    
+    final authMethodName = await _biometricAuth.getAuthMethodName();
+    
+    final bool isAuthenticated = await _biometricAuth.authenticate(
+      reason: 'Authenticate to generate device clone QR code containing your private key',
+    );
+
+    if (!isAuthenticated) {
+      AppLogger.warning('Authentication failed or cancelled - clone QR not generated', 'Clone');
+      if (mounted) {
+        setState(() {
+          _authenticationRequired = true;
+          _isGenerating = false;
+        });
+        
+        // Show message and navigate back
+        AppFeedback.warning(context, 'Authentication required to generate clone QR code');
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+
+    AppLogger.debug('✅ Authentication successful - generating clone QR', 'Clone');
+    setState(() {
+      _authenticationRequired = false;
+    });
+    
+    await _generateCloneQR();
   }
 
   Future<void> _generateCloneQR() async {
@@ -56,16 +94,18 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
 
       final cloneQR = await SupplierConfigBackup.createCloneQR(businessWithKeys);
 
-      setState(() {
-        _cloneQR = cloneQR;
-        _isGenerating = false;
-      });
-
-      // Start countdown timer
-      _startCountdown();
-    } catch (e) {
-      setState(() => _isGenerating = false);
       if (mounted) {
+        setState(() {
+          _cloneQR = cloneQR;
+          _isGenerating = false;
+        });
+
+        // Start countdown timer
+        _startCountdown();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isGenerating = false);
         AppFeedback.error(context, 'Failed to generate clone QR: $e');
       }
     }
@@ -86,10 +126,14 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
     final remaining = _cloneQR!.expiresAt!.difference(DateTime.now());
     
     if (remaining.isNegative) {
-      setState(() => _remainingTime = Duration.zero);
       _countdownTimer?.cancel();
+      if (mounted) {
+        setState(() => _remainingTime = Duration.zero);
+      }
     } else {
-      setState(() => _remainingTime = remaining);
+      if (mounted) {
+        setState(() => _remainingTime = remaining);
+      }
     }
   }
 

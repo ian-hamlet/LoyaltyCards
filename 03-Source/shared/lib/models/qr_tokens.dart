@@ -331,6 +331,8 @@ class RedemptionRequestToken extends QRToken {
   final String businessId;
   final int stampsCollected;
   final List<String> stampSignatures;
+  final String? cardDeviceId; // V-005: Device where card was created
+  final String? currentDeviceId; // V-005: Device showing redemption QR
 
   RedemptionRequestToken({
     required this.cardId,
@@ -338,6 +340,8 @@ class RedemptionRequestToken extends QRToken {
     required this.stampsCollected,
     required this.stampSignatures,
     required int timestamp,
+    this.cardDeviceId,
+    this.currentDeviceId,
   }) : super(type: 'redemption_request', timestamp: timestamp);
 
   factory RedemptionRequestToken.fromJson(Map<String, dynamic> json) {
@@ -349,6 +353,8 @@ class RedemptionRequestToken extends QRToken {
           .map((e) => e as String)
           .toList(),
       timestamp: json['timestamp'] as int,
+      cardDeviceId: json['cardDeviceId'] as String?,
+      currentDeviceId: json['currentDeviceId'] as String?,
     );
   }
 
@@ -361,6 +367,8 @@ class RedemptionRequestToken extends QRToken {
       'stampsCollected': stampsCollected,
       'stampSignatures': stampSignatures,
       'timestamp': timestamp,
+      'cardDeviceId': cardDeviceId,
+      'currentDeviceId': currentDeviceId,
     };
   }
 
@@ -377,6 +385,17 @@ class RedemptionRequestToken extends QRToken {
     }
     return true;
   }
+  
+  /// Check if there's a device mismatch (V-005)
+  /// Returns true if device IDs are present but don't match
+  bool hasDeviceMismatch() {
+    // If either ID is null, we can't determine mismatch (old cards)
+    if (cardDeviceId == null || currentDeviceId == null) {
+      return false;
+    }
+    // If both present, check if they differ
+    return cardDeviceId != currentDeviceId;
+  }
 }
 
 /// Token for supplier to confirm redemption to customer (prevents double redemption)
@@ -385,6 +404,8 @@ class RedemptionToken extends QRToken {
   final String businessId;
   final int stampsRedeemed;
   final String signature; // Supplier signs: cardId:stampsRedeemed:timestamp
+  final String? cardDeviceId; // V-005: Device where card was created (null for old cards)
+  final String? currentDeviceId; // V-005: Device showing redemption QR
 
   RedemptionToken({
     required this.cardId,
@@ -392,6 +413,8 @@ class RedemptionToken extends QRToken {
     required this.stampsRedeemed,
     required this.signature,
     required int timestamp,
+    this.cardDeviceId,
+    this.currentDeviceId,
   }) : super(type: 'redemption_token', timestamp: timestamp);
 
   factory RedemptionToken.fromJson(Map<String, dynamic> json) {
@@ -401,6 +424,8 @@ class RedemptionToken extends QRToken {
       stampsRedeemed: json['stampsRedeemed'] as int,
       signature: json['signature'] as String,
       timestamp: json['timestamp'] as int,
+      cardDeviceId: json['cardDeviceId'] as String?,
+      currentDeviceId: json['currentDeviceId'] as String?,
     );
   }
 
@@ -413,6 +438,8 @@ class RedemptionToken extends QRToken {
       'stampsRedeemed': stampsRedeemed,
       'signature': signature,
       'timestamp': timestamp,
+      'cardDeviceId': cardDeviceId,
+      'currentDeviceId': currentDeviceId,
     };
   }
 

@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
 import '../../services/device_orientation_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SupplierRedeemCard extends StatefulWidget {
   const SupplierRedeemCard({super.key});
@@ -31,6 +32,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   void initState() {
     super.initState();
     _loadBusiness();
+    _loadRotationPreference();
   }
 
   Future<void> _loadBusiness() async {
@@ -42,6 +44,33 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  /// Load saved camera rotation preference from SharedPreferences
+  Future<void> _loadRotationPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedRotation = prefs.getInt('camera_rotation') ?? 1;
+      if (mounted) {
+        setState(() {
+          _manualRotationOffset = savedRotation;
+        });
+        AppLogger.debug('Loaded camera rotation preference: $savedRotation (${savedRotation * 90}°)', 'Camera');
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to load camera rotation preference: $e', 'Camera');
+    }
+  }
+
+  /// Save camera rotation preference to SharedPreferences
+  Future<void> _saveRotationPreference(int rotation) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('camera_rotation', rotation);
+      AppLogger.debug('Saved camera rotation preference: $rotation (${rotation * 90}°)', 'Camera');
+    } catch (e) {
+      AppLogger.warning('Failed to save camera rotation preference: $e', 'Camera');
     }
   }
 
@@ -258,9 +287,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 1) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -277,9 +308,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   mini: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
                   onPressed: () {
+                    final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
-                      _manualRotationOffset = (_manualRotationOffset + 2) % 4;
+                      _manualRotationOffset = newRotation;
                     });
+                    _saveRotationPreference(newRotation);
                   },
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -519,6 +552,15 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         AppLogger.qr('Stamps collected: ${token.stampsCollected}');
         AppLogger.qr('Signatures to verify: ${token.stampSignatures.length}');
         
+        // V-005: Check for device mismatch
+        if (token.hasDeviceMismatch()) {
+          AppLogger.warning('Device mismatch detected!', 'Security');
+          AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
+          AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
+          _showDeviceMismatchWarning(context, token);
+          return;
+        }
+        
         _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
         return;
       } else if (json['type'] == 'card_stamp_request') {
@@ -632,6 +674,72 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     });
     
     AppFeedback.error(context, message);
+  }
+  
+  /// V-005: Show warning when card is being redeemed on a different device
+  void _showDeviceMismatchWarning(BuildContext context, RedemptionRequestToken token) async {
+    setState(() {
+      _isProcessing = false;
+    });
+    
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning, color: Colors.orange, size: 28),
+              SizedBox(width: 12),
+              Text('Device Mismatch'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'This card is being redeemed on a different device than where it was created.',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Text('Possible reasons:'),
+              const SizedBox(height: 8),
+              const Text('• Customer got a new phone'),
+              const Text('• Customer restored from backup'),
+              const Text('• Card was cloned/duplicated (fraud)'),
+              const SizedBox(height: 16),
+              const Text(
+                'Verify the customer\'s identity and check stamp history before proceeding.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
+              child: const Text('Proceed Anyway'),
+            ),
+          ],
+        );
+      },
+    );
+    
+    if (result == true) {
+      // User chose to proceed despite mismatch
+      AppLogger.warning('Supplier chose to proceed with device mismatch', 'Security');
+      _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+    } else {
+      // User cancelled
+      AppLogger.warning('Supplier cancelled redemption due to device mismatch', 'Security');
+    }
   }
 
   @override

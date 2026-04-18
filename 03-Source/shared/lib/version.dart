@@ -188,5 +188,15 @@
 ///   * Documents intentional security model and mitigations
 ///   * Explains dual-mode architecture and use cases
 ///   * Provides mode selection guidance for businesses
+/// 
+/// Build 22 Changes:
+/// - Internal Quality Improvements (No user-facing changes)
+///   * Added comprehensive testing infrastructure (165 automated tests)
+///   * Shared package: 115 tests (models, QR tokens, utilities)
+///   * Customer app: 33 tests (services, validation, rate limiting)
+///   * Supplier app: 17 tests (cryptographic operations - 95%+ coverage)
+///   * Created TESTING_STRATEGY.md documentation
+///   * Code cleanup: Removed unused code and debug logging
+///   * Updated all project documentation to v0.2.1
 
-const String appVersion = '0.2.0+21';
+const String appVersion = '0.2.1+22';

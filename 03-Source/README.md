@@ -75,7 +75,7 @@ cd supplier_app && flutter test
 
 ## Development Status
 
-- ✅ **v0.2.0 (Build 21)** - Dual-mode system deployed to TestFlight
+- ✅ **v0.2.1 (Build 23)** - TestFlight with feature flags for tester reset/delete
   - Secure mode: Full ECDSA cryptography with stamp chain validation
   - Simple mode: QR-based workflow without cryptography
   - Face ID/Touch ID authentication

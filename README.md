@@ -1,6 +1,6 @@
 # LoyaltyCards Application
 
-**Status:** v0.2.0 (Build 21) - Deployed to TestFlight  
+**Status:** v0.2.1 (Build 23) - Deployed to TestFlight  
 **Last Updated:** 2026-04-18  
 **Test Coverage:** 165 automated tests (100% passing)
 
@@ -102,9 +102,9 @@ LoyaltyCards/
 
 ## Current Status
 
-**Version:** v0.2.0 (Build 21)  
-**Phase:** Retrospective Testing Complete  
-**Next:** Merge feature/retrospective-testing to develop
+**Version:** v0.2.1 (Build 23)  
+**Phase:** TestFlight Testing  
+**Next:** Production feature flag review
 
 ### Completed Work
 - ✅ Dual-mode system (Secure + Simple)
@@ -112,7 +112,7 @@ LoyaltyCards/
 - ✅ Face ID / Touch ID authentication
 - ✅ Backup/restore with encryption
 - ✅ 165 automated unit tests (100% passing)
-- ✅ TestFlight deployment (Build 21)
+- ✅ TestFlight deployment (Build 23 with tester feature flags)
 
 ### Test Coverage
 - **Shared Package:** 80%+ (models, QR tokens, utilities)

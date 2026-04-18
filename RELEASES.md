@@ -17,10 +17,37 @@ Examples:
 
 ## Current Releases
 
-### v0.2.0-build21 (Security Enhancements - In Development)
+### v0.2.1-build23 (TestFlight - Current)
 - **Date:** April 18, 2026
-- **Platform:** Development (feature/security-vulnerability-fixes → develop)
+- **Platform:** TestFlight (Internal Testing)
 - **Branch:** develop
+- **Version:** 0.2.1+23
+- **Focus:** Feature flags for TestFlight testing
+- **Changes:**
+  - Re-enabled "Danger Zone" buttons for TestFlight testers
+  - Customer: Delete All Data now visible (feature flag)
+  - Supplier: Reset Business Configuration now visible (feature flag)
+  - Added version management documentation
+- **Note:** Before App Store release, disable feature flags
+
+### v0.2.1-build22 (Testing Infrastructure)
+- **Date:** April 18, 2026
+- **Platform:** Development only (not deployed to TestFlight)
+- **Branch:** develop
+- **Version:** 0.2.1+22
+- **Focus:** Internal quality improvements
+- **Changes:**
+  - Added 165 automated unit tests (115 shared, 33 customer, 17 supplier)
+  - Created TESTING_STRATEGY.md documentation
+  - Code cleanup: Removed unused code and debug logging
+  - Updated all project documentation
+- **Note:** Shared package tests not included in app builds
+
+### v0.2.0-build21 (Security Enhancements)
+- **Date:** April 13, 2026
+- **Platform:** TestFlight (Superseded by Build 23)
+- **Branch:** develop
+- **Version:** 0.2.0+21
 - **Focus:** Security vulnerability fixes (V-002, V-005)
 - **New Features:**
   - Biometric authentication for private key access (Face ID/Touch ID)

@@ -50,6 +50,7 @@ void main() {
       final token = StampToken(
         id: 'stamp-1',
         cardId: 'card-123',
+        businessId: 'business-123',
         stampNumber: 1,
         previousHash: '',
         signature: 'test-signature',
@@ -71,6 +72,7 @@ void main() {
         businessId: 'business-123',
         currentStamps: 3,
         publicKey: 'test-public-key',
+        lastStampHash: '',
         timestamp: 1234567890000,
       );
 
@@ -189,6 +191,7 @@ void main() {
       final validToken = StampToken(
         id: 'stamp-1',
         cardId: 'card-123',
+        businessId: 'business-123',
         stampNumber: 1,
         previousHash: '',
         signature: 'test-signature',
@@ -202,6 +205,7 @@ void main() {
       final invalidToken = StampToken(
         id: 'stamp-1',
         cardId: 'card-123',
+        businessId: 'business-123',
         stampNumber: 0,
         previousHash: '',
         signature: 'test-signature',
@@ -261,6 +265,7 @@ void main() {
       final token = StampToken(
         id: 'stamp-1',
         cardId: 'card-123',
+        businessId: 'business-123',
         stampNumber: 5,
         previousHash: 'prev-hash-123',
         signature: 'test-signature',

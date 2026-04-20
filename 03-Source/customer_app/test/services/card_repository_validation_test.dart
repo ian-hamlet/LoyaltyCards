@@ -2,25 +2,60 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:customer_app/services/card_repository.dart';
 import 'package:customer_app/services/database_helper.dart';
 import 'package:shared/shared.dart';
-import 'package:shared/fixtures/test_fixtures.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  // Initialize sqflite for testing
+  TestWidgetsFlutterBinding.ensureInitialized();
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+
   late CardRepository repository;
   late DatabaseHelper dbHelper;
 
   setUp(() async {
-    // Use in-memory database for tests
     dbHelper = DatabaseHelper();
     repository = CardRepository(dbHelper);
   });
 
-  tearDown(() async {
+  tearDown() async {
     await dbHelper.clearAllData();
-  });
+  }
+
+  /// Helper function to create test cards
+  Card createTestCard({
+    String? id,
+    String? businessId,
+    String? businessName,
+    String? publicKey,
+    int? stampsRequired,
+    int? stampsCollected,
+    String? brandColor,
+    int? logoIndex,
+    OperationMode? mode,
+    String? deviceId,
+  }) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    return Card(
+      id: id ?? 'test-card-$now',
+      businessId: businessId ?? 'business-1',
+      businessName: businessName ?? 'Test Business',
+      businessPublicKey: publicKey ?? 'test-public-key',
+      stampsRequired: stampsRequired ?? 10,
+      stampsCollected: stampsCollected ?? 0,
+      brandColor: brandColor ?? '#FF0000',
+      logoIndex: logoIndex ?? 0,
+      mode: mode ?? OperationMode.secure,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      isRedeemed: false,
+      deviceId: deviceId,
+    );
+  }
 
   group('CardRepository Validation Tests', () {
     test('insertCard throws when card ID is empty', () async {
-      final invalidCard = TestFixtures.createCard(id: '');
+      final invalidCard = createTestCard(id: '');
       
       expect(
         () => repository.insertCard(invalidCard),
@@ -31,7 +66,7 @@ void main() {
     });
     
     test('insertCard throws when business ID is empty', () async {
-      final invalidCard = TestFixtures.createCard(businessId: '');
+      final invalidCard = createTestCard(businessId: '');
       
       expect(
         () => repository.insertCard(invalidCard),
@@ -42,7 +77,7 @@ void main() {
     });
     
     test('insertCard throws when business name is empty', () async {
-      final invalidCard = TestFixtures.createCard(businessName: '');
+      final invalidCard = createTestCard(businessName: '');
       
       expect(
         () => repository.insertCard(invalidCard),
@@ -53,7 +88,7 @@ void main() {
     });
     
     test('insertCard throws when stamps required is zero', () async {
-      final invalidCard = TestFixtures.createCard(stampsRequired: 0);
+      final invalidCard = createTestCard(stampsRequired: 0);
       
       expect(
         () => repository.insertCard(invalidCard),
@@ -64,7 +99,7 @@ void main() {
     });
     
     test('insertCard throws when stamps required is negative', () async {
-      final invalidCard = TestFixtures.createCard(stampsRequired: -5);
+      final invalidCard = createTestCard(stampsRequired: -5);
       
       expect(
         () => repository.insertCard(invalidCard),
@@ -75,7 +110,7 @@ void main() {
     });
     
     test('insertCard throws when stamps required exceeds 100', () async {
-      final invalidCard = TestFixtures.createCard(stampsRequired: 150);
+      final invalidCard = createTestCard(stampsRequired: 150);
       
       expect(
         () => repository.insertCard(invalidCard),
@@ -86,7 +121,7 @@ void main() {
     });
     
     test('insertCard throws when stamps collected is negative', () async {
-      final invalidCard = TestFixtures.createCard(
+      final invalidCard = createTestCard(
         stampsRequired: 10,
         stampsCollected: -3,
       );
@@ -100,7 +135,7 @@ void main() {
     });
     
     test('insertCard throws when stamps collected exceeds required', () async {
-      final invalidCard = TestFixtures.createCard(
+      final invalidCard = createTestCard(
         stampsRequired: 10,
         stampsCollected: 15,
       );
@@ -114,12 +149,10 @@ void main() {
     });
     
     test('insertCard succeeds with valid card', () async {
-      final validCard = TestFixtures.createCard();
+      final validCard = createTestCard();
       
-      // Should not throw
       await repository.insertCard(validCard);
       
-      // Verify it was actually inserted
       final retrieved = await repository.getCardById(validCard.id);
       expect(retrieved, isNotNull);
       expect(retrieved!.id, validCard.id);
@@ -127,7 +160,7 @@ void main() {
     });
     
     test('updateCard throws when validation fails', () async {
-      final invalidCard = TestFixtures.createCard(stampsRequired: -1);
+      final invalidCard = createTestCard(stampsRequired: -1);
       
       expect(
         () => repository.updateCard(invalidCard),
@@ -136,15 +169,12 @@ void main() {
     });
     
     test('updateCard succeeds with valid card', () async {
-      // Insert a card first
-      final card = TestFixtures.createCard(stampsCollected: 3);
+      final card = createTestCard(stampsCollected: 3);
       await repository.insertCard(card);
       
-      // Update it
       final updatedCard = card.copyWith(stampsCollected: 5);
       await repository.updateCard(updatedCard);
       
-      // Verify update
       final retrieved = await repository.getCardById(card.id);
       expect(retrieved!.stampsCollected, 5);
     });
@@ -152,12 +182,11 @@ void main() {
 
   group('CardRepository Edge Cases', () {
     test('validation accepts card at exact limits', () async {
-      final card = TestFixtures.createCard(
-        stampsRequired: 100, // Maximum
-        stampsCollected: 100, // Equal to required (at limit)
+      final card = createTestCard(
+        stampsRequired: 100,
+        stampsCollected: 100,
       );
       
-      // Should not throw
       await repository.insertCard(card);
       
       final retrieved = await repository.getCardById(card.id);
@@ -165,12 +194,11 @@ void main() {
     });
     
     test('validation accepts minimum valid values', () async {
-      final card = TestFixtures.createCard(
-        stampsRequired: 1, // Minimum valid
-        stampsCollected: 0, // Minimum valid
+      final card = createTestCard(
+        stampsRequired: 1,
+        stampsCollected: 0,
       );
       
-      // Should not throw
       await repository.insertCard(card);
       
       final retrieved = await repository.getCardById(card.id);

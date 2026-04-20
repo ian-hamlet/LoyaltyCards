@@ -77,13 +77,14 @@ class CardRepository {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     } on DatabaseException catch (e) {
-      if (e.isUniqueConstraintError()) {
+      // Check error message since DatabaseException doesn't have type-checking methods
+      if (e.toString().contains('UNIQUE constraint')) {
         throw DatabaseConstraintException(
           'Card with ID ${card.id} already exists',
           cause: e,
         );
       }
-      if (e.isForeignKeyConstraintError()) {
+      if (e.toString().contains('FOREIGN KEY constraint')) {
         throw DatabaseConstraintException(
           'Business not found: ${card.businessId}',
           cause: e,
@@ -108,7 +109,8 @@ class CardRepository {
         whereArgs: [card.id],
       );
     } on DatabaseException catch (e) {
-      if (e.isForeignKeyConstraintError()) {
+      // Check error message since DatabaseException doesn't have type-checking methods
+      if (e.toString().contains('FOREIGN KEY constraint')) {
         throw DatabaseConstraintException(
           'Business not found: ${card.businessId}',
           cause: e,

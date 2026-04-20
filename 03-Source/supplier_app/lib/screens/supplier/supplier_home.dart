@@ -209,10 +209,10 @@ class _SupplierHomeState extends State<SupplierHome> {
                     ? Icons.qr_code_2 
                     : Icons.qr_code_scanner,
                 title: _business!.mode == OperationMode.simple 
-                    ? 'Generate QR Code' 
+                    ? 'Generate QR Code Stamp Tokens' 
                     : AppStrings.supplierStampCard,
                 subtitle: _business!.mode == OperationMode.simple 
-                    ? 'Create printable/saveable stamp QR codes' 
+                    ? 'Create stamp QR codes - show directly on screen or print/save for later' 
                     : 'Scan customer card to add stamp',
                 color: BrandColors.info,
                 onTap: () {

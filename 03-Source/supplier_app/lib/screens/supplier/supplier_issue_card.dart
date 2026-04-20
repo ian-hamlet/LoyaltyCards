@@ -6,6 +6,7 @@ import '../../services/qr_token_generator.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import '../../services/supplier_database_helper.dart';
+import '../../services/backup_storage_service.dart';
 
 class SupplierIssueCard extends StatefulWidget {
   const SupplierIssueCard({super.key});
@@ -328,6 +329,64 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                   ],
                                 ),
                               ),
+                              
+                              // Save/Print buttons for simple mode
+                              if (_business!.mode == OperationMode.simple) ...[
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: _saveToPhotos,
+                                        icon: const Icon(Icons.photo_library),
+                                        label: const Text('Save'),
+                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: _printToken,
+                                        icon: const Icon(Icons.print),
+                                        label: const Text('Print'),
+                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                
+                                const SizedBox(height: 20),
+                                
+                                // Instructions
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: BrandColors.infoContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                                  ),
+                                  child: const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(Icons.lightbulb_outline, color: BrandColors.info, size: 20),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'How to Use',
+                                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        '1. Show this QR code to customers directly from your device\n2. Or print and display it in your business\n3. Customer scans to add your loyalty card\n4. This QR code is reusable for all new customers',
+                                        style: TextStyle(fontSize: 12, color: BrandColors.textPrimary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -336,6 +395,58 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   ),
                 ),
     );
+  }
+
+  // Save issue card QR to photos
+  Future<void> _saveToPhotos() async {
+    if (_business == null || _token == null) return;
+    
+    try {
+      final success = await BackupStorageService.saveIssueCardToPhotos(
+        qrData: _token!.toQRString(),
+        businessName: _business!.name,
+        initialStamps: _initialStampCount,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Saved to Photos');
+        } else {
+          AppFeedback.error(context, 'Failed to save');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error saving issue card to photos: $e', tag: 'IssueCard');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  // Print issue card QR
+  Future<void> _printToken() async {
+    if (_business == null || _token == null) return;
+    
+    try {
+      final success = await BackupStorageService.printIssueCard(
+        qrData: _token!.toQRString(),
+        businessName: _business!.name,
+        initialStamps: _initialStampCount,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Print dialog opened');
+        } else {
+          AppFeedback.error(context, 'Failed to print');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error printing issue card: $e', tag: 'IssueCard');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
   }
 
   void _startCountdown() {

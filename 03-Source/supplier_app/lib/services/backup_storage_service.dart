@@ -893,4 +893,324 @@ For best results:
 
     return pdf;
   }
+
+  // ============================================================================
+  // ISSUE CARD QR CODE METHODS (Simple Mode)
+  // ============================================================================
+
+  /// Generate file name for Simple Mode issue card QR codes
+  /// Format: LoyaltyCards-IssueCard-{InitialStamps}-{BusinessName}-{Date}.{ext}
+  /// Example: LoyaltyCards-IssueCard-2Stamps-CoffeeShop-2026-04-21.png
+  static String _generateIssueCardFileName({
+    required String businessName,
+    required int initialStamps,
+    required DateTime date,
+    required String extension,
+  }) {
+    final timestamp = DateFormat('yyyy-MM-dd').format(date);
+    final sanitizedBusinessName = businessName.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '-');
+    final stampLabel = initialStamps == 0 ? 'NoStamps' : (initialStamps == 1 ? '1Stamp' : '${initialStamps}Stamps');
+    
+    return 'LoyaltyCards-IssueCard-$stampLabel-$sanitizedBusinessName-$timestamp.$extension';
+  }
+
+  /// Generate QR code image WITH visual annotations for Simple Mode issue cards
+  /// Includes business name and initial stamp count on the image
+  static Future<Uint8List> generateIssueCardQRImageBytes({
+    required String qrData,
+    required String businessName,
+    required int initialStamps,
+    double size = 800.0,
+  }) async {
+    // Generate QR code
+    final qrValidationResult = QrValidator.validate(
+      data: qrData,
+      version: QrVersions.auto,
+      errorCorrectionLevel: QrErrorCorrectLevel.M,
+    );
+
+    if (qrValidationResult.status != QrValidationStatus.valid) {
+      throw Exception('Failed to generate QR code: ${qrValidationResult.error}');
+    }
+
+    final qrCode = qrValidationResult.qrCode!;
+    
+    // Create canvas with extra space for annotations
+    final totalWidth = size;
+    final totalHeight = size + 200; // Extra space for text
+    
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+    
+    // Fill white background
+    final paint = Paint()..color = const Color(0xFFFFFFFF);
+    canvas.drawRect(Rect.fromLTWH(0, 0, totalWidth, totalHeight), paint);
+    
+    // Draw QR code in center (with margin)
+    const margin = 60.0;
+    final qrSize = size - (margin * 2);
+    final qrPainter = QrPainter.withQr(
+      qr: qrCode,
+      color: const Color(0xFF000000),
+      gapless: true,
+      embeddedImageStyle: null,
+      embeddedImage: null,
+    );
+    
+    canvas.save();
+    canvas.translate(margin, margin + 80); // Offset for top text
+    qrPainter.paint(canvas, Size(qrSize, qrSize));
+    canvas.restore();
+    
+    // Draw text annotations
+    final textPainter = TextPainter(
+      textDirection: ui.TextDirection.ltr,
+    );
+    
+    // Business name (top)
+    textPainter.text = TextSpan(
+      text: businessName,
+      style: const TextStyle(
+        color: Color(0xFF000000),
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset((totalWidth - textPainter.width) / 2, 20),
+    );
+    
+    // "SCAN TO ADD CARD" (bottom - large and prominent)
+    textPainter.text = const TextSpan(
+      text: 'SCAN TO ADD CARD',
+      style: TextStyle(
+        color: Color(0xFF000000),
+        fontSize: 42,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset((totalWidth - textPainter.width) / 2, size + 20),
+    );
+    
+    // Initial stamps info (bottom - below main text)
+    if (initialStamps > 0) {
+      final stampText = initialStamps == 1 ? 'Starts with 1 stamp' : 'Starts with $initialStamps stamps';
+      textPainter.text = TextSpan(
+        text: stampText,
+        style: const TextStyle(
+          color: Color(0xFF666666),
+          fontSize: 24,
+        ),
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset((totalWidth - textPainter.width) / 2, size + 90),
+      );
+    }
+    
+    // Convert to image
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(totalWidth.toInt(), totalHeight.toInt());
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    
+    return byteData!.buffer.asUint8List();
+  }
+
+  /// Save Simple Mode issue card QR to photo gallery
+  static Future<bool> saveIssueCardToPhotos({
+    required String qrData,
+    required String businessName,
+    required int initialStamps,
+  }) async {
+    try {
+      AppLogger.debug('=== saveIssueCardToPhotos START ===', 'BackupService');
+      
+      final qrImageBytes = await generateIssueCardQRImageBytes(
+        qrData: qrData,
+        businessName: businessName,
+        initialStamps: initialStamps,
+      );
+      
+      final fileName = _generateIssueCardFileName(
+        businessName: businessName,
+        initialStamps: initialStamps,
+        date: DateTime.now(),
+        extension: 'png',
+      );
+      
+      AppLogger.debug('Generated filename: $fileName', 'BackupService');
+      AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
+
+      final result = await Future.value(ImageGallerySaver.saveImage(
+        qrImageBytes,
+        quality: 100,
+        name: fileName,
+        isReturnImagePathOfIOS: true,
+      )).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          AppLogger.error(
+            'Issue card photo save timeout - operation uncertain',
+            tag: 'BackupService',
+          );
+          throw TimeoutException('Photo save timeout after 10 seconds');
+        },
+      );
+
+      final success = result is Map && result['isSuccess'] == true;
+      AppLogger.debug('=== saveIssueCardToPhotos END (success: $success) ===', 'BackupService');
+      return success;
+    } on TimeoutException catch (e) {
+      AppLogger.error(
+        'Issue card photo save timeout: $e',
+        tag: 'BackupService',
+      );
+      return false;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error saving issue card to photos: $e', tag: 'BackupService');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
+      return false;
+    }
+  }
+
+  /// Print Simple Mode issue card QR
+  static Future<bool> printIssueCard({
+    required String qrData,
+    required String businessName,
+    required int initialStamps,
+  }) async {
+    try {
+      AppLogger.debug('=== printIssueCard START ===', 'BackupService');
+      
+      final qrImageBytes = await generateIssueCardQRImageBytes(
+        qrData: qrData,
+        businessName: businessName,
+        initialStamps: initialStamps,
+      );
+      
+      final pdf = await _generateIssueCardPDF(
+        qrImageBytes: qrImageBytes,
+        businessName: businessName,
+        initialStamps: initialStamps,
+      );
+      
+      final fileName = _generateIssueCardFileName(
+        businessName: businessName,
+        initialStamps: initialStamps,
+        date: DateTime.now(),
+        extension: 'pdf',
+      );
+      
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: fileName,
+      );
+
+      AppLogger.debug('=== printIssueCard END (success: true) ===', 'BackupService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error printing issue card: $e', tag: 'BackupService');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
+      return false;
+    }
+  }
+
+  /// Generate PDF for Simple Mode issue card
+  static Future<pw.Document> _generateIssueCardPDF({
+    required Uint8List qrImageBytes,
+    required String businessName,
+    required int initialStamps,
+  }) async {
+    final pdf = pw.Document();
+    final qrImage = pw.MemoryImage(qrImageBytes);
+    
+    final stampInfo = initialStamps == 0
+        ? 'New card with no initial stamps'
+        : (initialStamps == 1 ? 'Card starts with 1 stamp' : 'Card starts with $initialStamps stamps');
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                // Title
+                pw.Text(
+                  businessName,
+                  style: pw.TextStyle(
+                    fontSize: 28,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                
+                pw.SizedBox(height: 20),
+                
+                // QR Code with annotations (already includes text)
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(20),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.grey400),
+                    color: PdfColors.white,
+                  ),
+                  child: pw.Image(qrImage, width: 400, height: 480),
+                ),
+                
+                pw.SizedBox(height: 30),
+                
+                // Instructions
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(20),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.blue),
+                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                    color: PdfColors.blue50,
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Loyalty Card Issue QR',
+                        style: pw.TextStyle(
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 10),
+                      pw.Text(
+                        stampInfo,
+                        style: const pw.TextStyle(fontSize: 14),
+                      ),
+                      pw.SizedBox(height: 10),
+                      pw.Text(
+                        'Instructions:',
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 5),
+                      pw.Text(
+                        '1. Display this QR code to customers\n2. Customer scans to add loyalty card to their device\n3. Card can be scanned multiple times (reusable)\n4. Keep this QR code accessible for new customers',
+                        style: const pw.TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    return pdf;
+  }
 }

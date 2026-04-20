@@ -333,6 +333,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       AppLogger.warning('Rate limit hit - returning to card screen', 'RateLimit');
       
       if (mounted) {
+        // Clear any existing snackbars to prevent stacking
+        ScaffoldMessenger.of(context).clearSnackBars();
+        
         // Show error feedback
         AppFeedback.error(
           context,

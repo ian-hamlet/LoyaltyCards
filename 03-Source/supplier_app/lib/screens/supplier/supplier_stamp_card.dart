@@ -38,7 +38,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   // REQ-022: Enhanced Simple Mode token configuration
   int _stampCount = 1; // Number of stamps (1 to stampsRequired)
   DateTime? _expiryDate; // Optional expiry date
-  String _expiryOption = 'none'; // none, daily, weekly, custom
+  String _expiryOption = 'none'; // none, daily, weekly, monthly, custom
+  bool _configExpanded = false; // Track Token Configuration expansion state
 
   @override
   void initState() {
@@ -508,167 +509,199 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
               // REQ-022: Token Configuration Card
               Card(
                 elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: Theme(
+                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    initiallyExpanded: _configExpanded,
+                    onExpansionChanged: (expanded) {
+                      setState(() => _configExpanded = expanded);
+                    },
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    title: const Text(
+                      'Token Configuration',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${_stampCount == 1 ? '1 stamp' : '$_stampCount stamps'} • ${_expiryDate != null ? 'Expires ${_expiryDate!.day}/${_expiryDate!.month}' : 'No expiry'}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
                     children: [
-                      const Text(
-                        'Token Configuration',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      
-                      // Stamp Denomination Selector
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Stamp Value',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 8),
-                          Tooltip(
-                            message: 'Number of stamps this QR code grants when scanned',
-                            child: Icon(Icons.info_outline, size: 18, color: Colors.grey[600]),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            onPressed: _stampCount > 1
-                                ? () {
-                                    Haptics.light();
-                                    setState(() => _stampCount--);
-                                  }
-                                : null,
-                            icon: const Icon(Icons.remove_circle),
-                          ),
-                          Text(
-                            _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                          // Description
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'Configure the stamp value and optional expiry for this token. Changes are applied when you generate a new QR code.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: BrandColors.textSecondary,
+                              ),
                             ),
                           ),
-                          IconButton(
-                            onPressed: _stampCount < _business!.stampsRequired
-                                ? () {
-                                    Haptics.light();
-                                    setState(() => _stampCount++);
-                                  }
-                                : null,
-                            icon: const Icon(Icons.add_circle),
-                          ),
-                        ],
-                      ),
-                      Slider(
-                        value: _stampCount.toDouble(),
-                        min: 1,
-                        max: _business!.stampsRequired.toDouble(),
-                        divisions: _business!.stampsRequired - 1,
-                        label: _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
-                        onChanged: (value) {
-                          setState(() => _stampCount = value.toInt());
-                        },
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      const Divider(),
-                      const SizedBox(height: 20),
-                      
-                      // Expiry Date Selector
-                      Row(
-                        children: [
-                          const Text(
-                            'Expiry Policy',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(width: 8),
-                          Tooltip(
-                            message: 'Optional expiry date for this token',
-                            child: Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: _expiryOption,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'none', child: Text('No Expiry')),
-                          DropdownMenuItem(value: 'daily', child: Text('Daily (Midnight)')),
-                          DropdownMenuItem(value: 'weekly', child: Text('Weekly (Monday)')),
-                          DropdownMenuItem(value: 'monthly', child: Text('Monthly (1st of Month)')),
-                          DropdownMenuItem(value: 'custom', child: Text('Custom Date...')),
-                        ],
-                        onChanged: (value) async {
-                          if (value == 'custom') {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now().add(const Duration(days: 7)),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(const Duration(days: 365)),
-                            );
-                            if (picked != null) {
-                              setState(() {
-                                _expiryOption = value!;
-                                _expiryDate = DateTime(picked.year, picked.month, picked.day, 23, 59, 59);
-                              });
-                            }
-                          } else {
-                            setState(() {
-                              _expiryOption = value!;
-                              if (value == 'none') {
-                                _expiryDate = null;
-                              } else if (value == 'daily') {
-                                final tomorrow = DateTime.now().add(const Duration(days: 1));
-                                _expiryDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0);
-                              } else if (value == 'weekly') {
-                                final now = DateTime.now();
-                                // Calculate days until next Monday (1 = Monday)
-                                final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
-                                final nextMonday = now.add(Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday));
-                                _expiryDate = DateTime(nextMonday.year, nextMonday.month, nextMonday.day, 0, 0, 0);
-                              } else if (value == 'monthly') {
-                                final now = DateTime.now();
-                                // Calculate first day of next month
-                                final nextMonth = now.month == 12 ? 1 : now.month + 1;
-                                final nextYear = now.month == 12 ? now.year + 1 : now.year;
-                                _expiryDate = DateTime(nextYear, nextMonth, 1, 0, 0, 0);
-                              }
-                            });
-                          }
-                        },
-                      ),
-                      if (_expiryDate != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: BrandColors.infoContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
+                          const SizedBox(height: 20),
+                          
+                          // Stamp Denomination Selector
+                          Row(
                             children: [
-                              const Icon(Icons.schedule, size: 16, color: BrandColors.info),
+                              const Text(
+                                'Stamp Value',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
                               const SizedBox(width: 8),
-                              Text(
-                                'Expires: ${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year} ${_expiryDate!.hour}:${_expiryDate!.minute.toString().padLeft(2, '0')}',
-                                style: const TextStyle(fontSize: 12, color: BrandColors.textPrimary),
+                              Tooltip(
+                                message: 'Number of stamps this QR code grants when scanned',
+                                child: Icon(Icons.info_outline, size: 18, color: Colors.grey[600]),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                onPressed: _stampCount > 1
+                                    ? () {
+                                        Haptics.light();
+                                        setState(() => _stampCount--);
+                                      }
+                                    : null,
+                                icon: const Icon(Icons.remove_circle),
+                              ),
+                              Text(
+                                _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: _stampCount < _business!.stampsRequired
+                                    ? () {
+                                        Haptics.light();
+                                        setState(() => _stampCount++);
+                                      }
+                                    : null,
+                                icon: const Icon(Icons.add_circle),
+                              ),
+                            ],
+                          ),
+                          Slider(
+                            value: _stampCount.toDouble(),
+                            min: 1,
+                            max: _business!.stampsRequired.toDouble(),
+                            divisions: _business!.stampsRequired - 1,
+                            label: _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
+                            onChanged: (value) {
+                              setState(() => _stampCount = value.toInt());
+                            },
+                          ),
+                          
+                          const SizedBox(height: 20),
+                          const Divider(),
+                          const SizedBox(height: 20),
+                          
+                          // Expiry Date Selector
+                          Row(
+                            children: [
+                              const Text(
+                                'Expiry Policy',
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(width: 8),
+                              Tooltip(
+                                message: 'Optional expiry date for this token',
+                                child: Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            value: _expiryOption,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            items: const [
+                              DropdownMenuItem(value: 'none', child: Text('No Expiry')),
+                              DropdownMenuItem(value: 'daily', child: Text('Daily (Midnight)')),
+                              DropdownMenuItem(value: 'weekly', child: Text('Weekly (Monday)')),
+                              DropdownMenuItem(value: 'monthly', child: Text('Monthly (1st of Month)')),
+                              DropdownMenuItem(value: 'custom', child: Text('Custom Date...')),
+                            ],
+                            onChanged: (value) async {
+                              if (value == 'custom') {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now().add(const Duration(days: 7)),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    _expiryOption = value!;
+                                    _expiryDate = DateTime(picked.year, picked.month, picked.day, 23, 59, 59);
+                                  });
+                                }
+                              } else {
+                                setState(() {
+                                  _expiryOption = value!;
+                                  if (value == 'none') {
+                                    _expiryDate = null;
+                                  } else if (value == 'daily') {
+                                    final tomorrow = DateTime.now().add(const Duration(days: 1));
+                                    _expiryDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0);
+                                  } else if (value == 'weekly') {
+                                    final now = DateTime.now();
+                                    // Calculate days until next Monday (1 = Monday)
+                                    final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
+                                    final nextMonday = now.add(Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday));
+                                    _expiryDate = DateTime(nextMonday.year, nextMonday.month, nextMonday.day, 0, 0, 0);
+                                  } else if (value == 'monthly') {
+                                    final now = DateTime.now();
+                                    // Calculate first day of next month
+                                    final nextMonth = now.month == 12 ? 1 : now.month + 1;
+                                    final nextYear = now.month == 12 ? now.year + 1 : now.year;
+                                    _expiryDate = DateTime(nextYear, nextMonth, 1, 0, 0, 0);
+                                  }
+                                });
+                              }
+                            },
+                          ),
+                          if (_expiryDate != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: BrandColors.infoContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.schedule, size: 16, color: BrandColors.info),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Expires: ${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year} ${_expiryDate!.hour}:${_expiryDate!.minute.toString().padLeft(2, '0')}',
+                                    style: const TextStyle(fontSize: 12, color: BrandColors.textPrimary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                 ),

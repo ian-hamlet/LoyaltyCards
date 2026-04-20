@@ -573,7 +573,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                         min: 1,
                         max: _business!.stampsRequired.toDouble(),
                         divisions: _business!.stampsRequired - 1,
-                        label: '$_stampCount',
+                        label: _stampCount == 1 ? '1 Stamp' : '$_stampCount Stamps',
                         onChanged: (value) {
                           setState(() => _stampCount = value.toInt());
                         },
@@ -608,6 +608,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                           DropdownMenuItem(value: 'none', child: Text('No Expiry')),
                           DropdownMenuItem(value: 'daily', child: Text('Daily (Midnight)')),
                           DropdownMenuItem(value: 'weekly', child: Text('Weekly (Sunday)')),
+                          DropdownMenuItem(value: 'monthly', child: Text('Monthly (1st of Month)')),
                           DropdownMenuItem(value: 'custom', child: Text('Custom Date...')),
                         ],
                         onChanged: (value) async {
@@ -637,6 +638,12 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                 final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
                                 final nextSunday = now.add(Duration(days: daysUntilSunday == 0 ? 7 : daysUntilSunday));
                                 _expiryDate = DateTime(nextSunday.year, nextSunday.month, nextSunday.day, 23, 59, 59);
+                              } else if (value == 'monthly') {
+                                final now = DateTime.now();
+                                // Calculate first day of next month
+                                final nextMonth = now.month == 12 ? 1 : now.month + 1;
+                                final nextYear = now.month == 12 ? now.year + 1 : now.year;
+                                _expiryDate = DateTime(nextYear, nextMonth, 1, 0, 0, 0);
                               }
                             });
                           }

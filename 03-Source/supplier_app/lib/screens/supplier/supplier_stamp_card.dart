@@ -496,7 +496,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     if (_business!.mode == OperationMode.simple) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Generate Stamp Token'),
+          title: const Text('Generate Stamp QR Code'),
           backgroundColor: const Color(0xFF2C3E50),
           foregroundColor: Colors.white,
         ),

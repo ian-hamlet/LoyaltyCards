@@ -203,11 +203,17 @@ class _SupplierHomeState extends State<SupplierHome> {
 
               const SizedBox(height: 12),
 
-              // Stamp Card Button
+              // Stamp Card Button (mode-aware)
               _ActionCard(
-                icon: Icons.qr_code_scanner,
-                title: AppStrings.supplierStampCard,
-                subtitle: 'Scan customer card to add stamp',
+                icon: _business!.mode == OperationMode.simple 
+                    ? Icons.qr_code_2 
+                    : Icons.qr_code_scanner,
+                title: _business!.mode == OperationMode.simple 
+                    ? 'Generate QR Code' 
+                    : AppStrings.supplierStampCard,
+                subtitle: _business!.mode == OperationMode.simple 
+                    ? 'Create printable/saveable stamp QR codes' 
+                    : 'Scan customer card to add stamp',
                 color: BrandColors.info,
                 onTap: () {
                   Navigator.push(

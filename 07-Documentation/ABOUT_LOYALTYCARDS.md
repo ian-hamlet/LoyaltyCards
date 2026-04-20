@@ -2,8 +2,8 @@
 
 **A Privacy-First Digital Loyalty Card System**
 
-Version 0.2.0 (Build 18)  
-Last Updated: April 16, 2026
+Version 0.2.0 (Build 21)  
+Last Updated: April 20, 2026
 
 ---
 

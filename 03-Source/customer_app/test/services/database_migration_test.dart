@@ -15,8 +15,8 @@ void main() {
     late String testDbPath;
 
     setUp() async {
-      // Small delay to ensure previous test file cleanup is complete
-      await Future.delayed(const Duration(milliseconds: 100));
+      // Delay to ensure previous test file cleanup is complete
+      await Future.delayed(const Duration(milliseconds: 200));
       
       dbHelper = DatabaseHelper();
       final databasesPath = await getDatabasesPath();

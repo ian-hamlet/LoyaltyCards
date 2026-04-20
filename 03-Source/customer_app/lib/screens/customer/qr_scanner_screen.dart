@@ -397,9 +397,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       }
       
       // Validate stamp count
-      if (token.stampCount > card.stampsRequired) {
+      if (token.stampCount > card!.stampsRequired) {
         setState(() {
-          _errorMessage = 'Invalid stamp count: ${token.stampCount} exceeds ${card.stampsRequired}';
+          _errorMessage = 'Invalid stamp count: ${token.stampCount} exceeds ${card!.stampsRequired}';
           _isProcessing = false;
         });
         return;

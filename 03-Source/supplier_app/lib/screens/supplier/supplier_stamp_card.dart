@@ -827,13 +827,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         ),
       );
     }
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-      );
-    }
 
     // Secure mode: Show camera scanner
     return Scaffold(

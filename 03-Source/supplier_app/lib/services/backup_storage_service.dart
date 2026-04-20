@@ -49,12 +49,12 @@ class BackupStorageService {
       // CR-1.2: Use timeout with explicit error handling
       // Previously: timeout returned success (false positive risk)
       // Now: timeout throws exception (fails gracefully)
-      final result = await ImageGallerySaver.saveImage(
+      final result = await Future.value(ImageGallerySaver.saveImage(
         qrImageBytes,
         quality: 100,
         name: fileName,
         isReturnImagePathOfIOS: true,
-      ).timeout(
+      )).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           AppLogger.error(
@@ -516,7 +516,7 @@ The QR code image is attached to this email.
     
     // Draw text annotations
     final textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
+      textDirection: ui.TextDirection.ltr,
     );
     
     // Business name (top)
@@ -603,12 +603,12 @@ The QR code image is attached to this email.
       AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
 
       // CR-1.2: Use timeout with explicit error handling
-      final result = await ImageGallerySaver.saveImage(
+      final result = await Future.value(ImageGallerySaver.saveImage(
         qrImageBytes,
         quality: 100,
         name: fileName,
         isReturnImagePathOfIOS: true,
-      ).timeout(
+      )).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           AppLogger.error(

@@ -7,8 +7,8 @@ import 'database_helper.dart';
 /// 
 /// ERROR HANDLING PATTERN:
 /// All mutation methods (insert, update, delete) return Future<void>:
-/// - Throws exceptions on failure (database errors, constraint violations)
-/// - Uses assert() for input validation in debug mode
+/// - Throws CardValidationException on invalid input (works in ALL builds)
+/// - Throws DatabaseConstraintException on database constraint violations
 /// - Caller must catch and handle exceptions at UI boundary
 /// - Database operations are critical - failures indicate serious problems
 /// 
@@ -18,8 +18,8 @@ import 'database_helper.dart';
 /// - Throws exceptions for database errors only
 /// 
 /// VALIDATION:
-/// - Input validation via assert() statements (debug mode only)
-/// - Production: Database constraints enforce data integrity
+/// - Runtime validation via _validateCard() helper (works in production builds)
+/// - Database constraints provide additional safety layer
 /// - Examples: Non-empty IDs, positive stamp counts, valid ranges
 class CardRepository {
   final DatabaseHelper _dbHelper;
@@ -65,43 +65,57 @@ class CardRepository {
 
   /// Insert a new card
   Future<void> insertCard(models.Card card) async {
-    // Input validation
-    assert(card.id.isNotEmpty, 'Card ID must not be empty');
-    assert(card.businessId.isNotEmpty, 'Business ID must not be empty');
-    assert(card.businessName.isNotEmpty, 'Business name must not be empty');
-    assert(card.stampsRequired > 0, 'Stamps required must be positive');
-    assert(card.stampsRequired <= 100, 'Stamps required must be <= 100');
-    assert(card.stampsCollected >= 0, 'Stamps collected must be non-negative');
-    assert(card.stampsCollected <= card.stampsRequired, 
-      'Stamps collected cannot exceed stamps required');
+    // Runtime validation (works in ALL build modes)
+    _validateCard(card);
     
     final db = await _dbHelper.database;
-    await db.insert(
-      'cards',
-      card.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    
+    try {
+      await db.insert(
+        'cards',
+        card.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } on DatabaseException catch (e) {
+      if (e.isUniqueConstraintError()) {
+        throw DatabaseConstraintException(
+          'Card with ID ${card.id} already exists',
+          cause: e,
+        );
+      }
+      if (e.isForeignKeyConstraintError()) {
+        throw DatabaseConstraintException(
+          'Business not found: ${card.businessId}',
+          cause: e,
+        );
+      }
+      rethrow;
+    }
   }
 
   /// Update an existing card
   Future<void> updateCard(models.Card card) async {
-    // Input validation
-    assert(card.id.isNotEmpty, 'Card ID must not be empty');
-    assert(card.businessId.isNotEmpty, 'Business ID must not be empty');
-    assert(card.businessName.isNotEmpty, 'Business name must not be empty');
-    assert(card.stampsRequired > 0, 'Stamps required must be positive');
-    assert(card.stampsRequired <= 100, 'Stamps required must be <= 100');
-    assert(card.stampsCollected >= 0, 'Stamps collected must be non-negative');
-    assert(card.stampsCollected <= card.stampsRequired, 
-      'Stamps collected cannot exceed stamps required');
+    // Runtime validation (works in ALL build modes)
+    _validateCard(card);
     
     final db = await _dbHelper.database;
-    await db.update(
-      'cards',
-      card.toJson(),
-      where: 'id = ?',
-      whereArgs: [card.id],
-    );
+    
+    try {
+      await db.update(
+        'cards',
+        card.toJson(),
+        where: 'id = ?',
+        whereArgs: [card.id],
+      );
+    } on DatabaseException catch (e) {
+      if (e.isForeignKeyConstraintError()) {
+        throw DatabaseConstraintException(
+          'Business not found: ${card.businessId}',
+          cause: e,
+        );
+      }
+      rethrow;
+    }
   }
 
   /// Update stamp count for a card
@@ -215,5 +229,46 @@ class CardRepository {
     AppLogger.database('Selected card with most stamps: ${selectedCard.id} (${selectedCard.stampsCollected}/${selectedCard.stampsRequired})');
     
     return selectedCard;
+  }
+
+  /// Validate card data before insert/update
+  /// Throws CardValidationException if invalid
+  /// Works in ALL build modes (debug/release/profile)
+  void _validateCard(models.Card card) {
+    if (card.id.isEmpty) {
+      throw CardValidationException('Card ID must not be empty');
+    }
+    
+    if (card.businessId.isEmpty) {
+      throw CardValidationException('Business ID must not be empty');
+    }
+    
+    if (card.businessName.isEmpty) {
+      throw CardValidationException('Business name must not be empty');
+    }
+    
+    if (card.stampsRequired <= 0) {
+      throw CardValidationException(
+        'Stamps required must be positive, got: ${card.stampsRequired}'
+      );
+    }
+    
+    if (card.stampsRequired > 100) {
+      throw CardValidationException(
+        'Stamps required must be <= 100, got: ${card.stampsRequired}'
+      );
+    }
+    
+    if (card.stampsCollected < 0) {
+      throw CardValidationException(
+        'Stamps collected must be non-negative, got: ${card.stampsCollected}'
+      );
+    }
+    
+    if (card.stampsCollected > card.stampsRequired) {
+      throw CardValidationException(
+        'Stamps collected (${card.stampsCollected}) cannot exceed required (${card.stampsRequired})'
+      );
+    }
   }
 }

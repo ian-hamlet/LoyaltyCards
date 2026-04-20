@@ -23,6 +23,9 @@ export 'utils/error_handling.dart';
 export 'utils/signature_format.dart';
 export 'utils/error_handler.dart';
 
+// Export exceptions
+export 'exceptions/repository_exceptions.dart';
+
 // Export widgets
 export 'widgets/feedback.dart';
 export 'widgets/loading_overlay.dart';

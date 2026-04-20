@@ -103,6 +103,23 @@ class DatabaseHelper {
     await db.execute('''
       CREATE INDEX idx_transactions_card_id ON transactions (card_id)
     ''');
+    
+    // Performance indexes for common queries (v0.3.0+)
+    await db.execute('''
+      CREATE INDEX idx_cards_business_id ON cards (business_id)
+    ''');
+    
+    await db.execute('''
+      CREATE INDEX idx_cards_device_id ON cards (device_id)
+    ''');
+    
+    await db.execute('''
+      CREATE INDEX idx_cards_is_redeemed ON cards (is_redeemed)
+    ''');
+    
+    await db.execute('''
+      CREATE INDEX idx_cards_created_at ON cards (created_at DESC)
+    ''');
   }
 
   /// Handle database upgrades
@@ -155,6 +172,30 @@ class DatabaseHelper {
         ALTER TABLE stamps ADD COLUMN device_id TEXT
       ''');
       AppLogger.database('Migration complete: device_id columns added');
+    }
+    
+    // Migration from v6 to v7: Add performance indexes
+    if (oldVersion < 7) {
+      AppLogger.database('Migration v6 → v7: Adding performance indexes');
+      try {
+        // Add indexes for common queries
+        await db.execute('''
+          CREATE INDEX IF NOT EXISTS idx_cards_business_id ON cards (business_id)
+        ''');
+        await db.execute('''
+          CREATE INDEX IF NOT EXISTS idx_cards_device_id ON cards (device_id)
+        ''');
+        await db.execute('''
+          CREATE INDEX IF NOT EXISTS idx_cards_is_redeemed ON cards (is_redeemed)
+        ''');
+        await db.execute('''
+          CREATE INDEX IF NOT EXISTS idx_cards_created_at ON cards (created_at DESC)
+        ''');
+        AppLogger.database('Migration complete: Performance indexes added');
+      } catch (e) {
+        AppLogger.error('Failed to add indexes (non-critical): $e');
+        // Don't fail migration if indexes already exist or can't be created
+      }
     }
   }
 

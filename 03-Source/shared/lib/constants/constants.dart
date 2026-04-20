@@ -20,7 +20,7 @@ class AppConstants {
   
   // Database
   static const String databaseName = 'loyalty_cards.db';
-  static const int databaseVersion = 6; // Customer app schema version
+  static const int databaseVersion = 7; // Customer app schema version (v0.3.0+: Added performance indexes)
   static const int supplierDatabaseVersion = 4; // Supplier app schema version
   
   // QR Code Settings

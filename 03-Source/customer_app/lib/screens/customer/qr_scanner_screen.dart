@@ -317,12 +317,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
-    // Check rate limiting
+    // Check rate limiting (REQ-022: Use token's scanInterval if present)
     final rateLimiter = RateLimiter(DatabaseHelper());
     final rateLimit = await rateLimiter.canReceiveStamp(
       cardId: card.id,
       businessId: card.businessId,
       mode: card.mode,
+      scanInterval: token.scanInterval, // REQ-022: Supplier-specific rate limit
     );
 
     if (!rateLimit.canProceed) {
@@ -368,6 +369,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         businessPublicKey: card.businessPublicKey,
         expectedPreviousHash: expectedPrevHash,
         mode: card.mode,
+        stampsRequired: card.stampsRequired, // REQ-022
       );
 
       if (!validation.isValid) {
@@ -378,8 +380,29 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         return;
       }
     } else {
-      // Simple mode: Trust-based, no cryptographic validation
-      AppLogger.debug('Simple mode: Skipping cryptographic validation');
+      // REQ-022: Simple mode - validate expiry date and stamp count (skip crypto)
+      AppLogger.debug('Simple mode: Validating expiry and stamp count only', 'Token');
+      
+      // Check expiry date if present
+      if (token.expiryDate != null) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        if (now > token.expiryDate!) {
+          setState(() {
+            _errorMessage = 'This stamp token has expired';
+            _isProcessing = false;
+          });
+          return;
+        }
+      }
+      
+      // Validate stamp count
+      if (token.stampCount > card.stampsRequired) {
+        setState(() {
+          _errorMessage = 'Invalid stamp count: ${token.stampCount} exceeds ${card.stampsRequired}';
+          _isProcessing = false;
+        });
+        return;
+      }
     }
 
     // Add stamp to card
@@ -434,8 +457,46 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
     await transactionRepo.insertTransaction(stampTransaction);
     
-    // Process additional stamps if present
+    // REQ-022: Process multi-denomination stamps (Simple Mode)
     int totalStampsAdded = 1;
+    if (token.stampCount > 1) {
+      AppLogger.qr('REQ-022: Processing ${token.stampCount - 1} additional stamps from multi-denomination token');
+      
+      for (int i = 2; i <= token.stampCount; i++) {
+        final additionalStampNumber = stamps.length + i;
+        final additionalStampId = '${card.id}_stamp_$additionalStampNumber';
+        
+        AppLogger.debug('Adding denomination stamp $i of ${token.stampCount}', 'Stamp');
+        
+        final additionalStamp = Stamp(
+          id: additionalStampId,
+          cardId: card.id,
+          stampNumber: additionalStampNumber,
+          timestamp: DateTime.now().add(Duration(milliseconds: i)), // Slight offset
+          signature: token.signature, // Same signature for all in simple mode
+          previousHash: null, // Simple mode doesn't use hash chains
+          deviceId: deviceId,
+        );
+        
+        await stampRepo.insertStamp(additionalStamp);
+        totalStampsAdded++;
+        AppLogger.database('  Multi-denomination stamp $i saved to DB');
+        
+        // Log stamp transaction
+        final addlStampTransaction = models.Transaction(
+          id: const Uuid().v4(),
+          cardId: card.id,
+          type: TransactionType.stamp,
+          timestamp: DateTime.now(),
+          businessName: card.businessName,
+          details: 'Stamp #$additionalStampNumber earned (multi-denomination)',
+        );
+        await transactionRepo.insertTransaction(addlStampTransaction);
+      }
+      AppLogger.qr('REQ-022: All ${token.stampCount} stamps processed');
+    }
+    
+    // Process additional stamps if present (Secure Mode)
     if (token.additionalStamps.isNotEmpty) {
       AppLogger.qr('Processing ${token.additionalStamps.length} Additional Stamps ===');
       String currentPreviousHash = token.signature; // First additional stamp uses main stamp's signature

@@ -165,5 +165,158 @@ void main() {
         }
       });
     });
+
+    group('REQ-022: Scan Interval Support', () {
+      test('creates business with default scan interval', () {
+        final business = Business(
+          id: 'test-123',
+          name: 'Test Business',
+          publicKey: 'key',
+          privateKey: 'private',
+          stampsRequired: 10,
+          brandColor: '#FF5733',
+          createdAt: DateTime.now(),
+        );
+
+        expect(business.scanInterval, 30000); // Default 30 seconds in ms
+      });
+
+      test('creates business with custom scan interval', () {
+        final business = Business(
+          id: 'test-123',
+          name: 'Test Business',
+          publicKey: 'key',
+          privateKey: 'private',
+          stampsRequired: 10,
+          brandColor: '#FF5733',
+          createdAt: DateTime.now(),
+          scanInterval: 60000, // 60 seconds
+        );
+
+        expect(business.scanInterval, 60000);
+      });
+
+      test('toJson converts scan interval to seconds', () {
+        final business = Business(
+          id: 'test-123',
+          name: 'Test Business',
+          publicKey: 'key',
+          privateKey: 'private',
+          stampsRequired: 10,
+          brandColor: '#FF5733',
+          createdAt: DateTime.now(),
+          scanInterval: 45000, // 45 seconds in ms
+        );
+
+        final json = business.toJson();
+        expect(json['scan_interval_seconds'], 45); // Stored as seconds
+      });
+
+      test('fromJson converts seconds back to milliseconds', () {
+        final json = {
+          'id': 'test-123',
+          'name': 'Test Business',
+          'public_key': 'key',
+          'private_key': 'private',
+          'stamps_required': 10,
+          'brand_color': '#FF5733',
+          'created_at': DateTime.now().millisecondsSinceEpoch,
+          'scan_interval_seconds': 20, // 20 seconds
+        };
+
+        final business = Business.fromJson(json);
+        expect(business.scanInterval, 20000); // Converted to ms
+      });
+
+      test('fromJson handles missing scan_interval_seconds (backward compatibility)', () {
+        final json = {
+          'id': 'test-123',
+          'name': 'Test Business',
+          'public_key': 'key',
+          'private_key': 'private',
+          'stamps_required': 10,
+          'brand_color': '#FF5733',
+          'created_at': DateTime.now().millisecondsSinceEpoch,
+          // No scan_interval_seconds
+        };
+
+        final business = Business.fromJson(json);
+        expect(business.scanInterval, 30000); // Default 30 seconds
+      });
+
+      test('copyWith updates scan interval', () {
+        final original = Business(
+          id: 'test-123',
+          name: 'Test Business',
+          publicKey: 'key',
+          privateKey: 'private',
+          stampsRequired: 10,
+          brandColor: '#FF5733',
+          createdAt: DateTime.now(),
+          scanInterval: 30000,
+        );
+
+        final updated = original.copyWith(scanInterval: 15000);
+        
+        expect(updated.scanInterval, 15000);
+        expect(original.scanInterval, 30000); // Original unchanged
+      });
+
+      test('roundtrip preserves scan interval', () {
+        final original = Business(
+          id: 'test-123',
+          name: 'Test Business',
+          publicKey: 'key',
+          privateKey: 'private',
+          stampsRequired: 10,
+          brandColor: '#FF5733',
+          createdAt: DateTime.now(),
+          scanInterval: 55000, // 55 seconds
+        );
+
+        final json = original.toJson(includePrivateKey: true);
+        final decoded = Business.fromJson(json);
+
+        expect(decoded.scanInterval, 55000);
+      });
+
+      test('handles minimum scan interval (5 seconds)', () {
+        final business = Business(
+          id: 'test-123',
+          name: 'Test Business',
+          publicKey: 'key',
+          privateKey: 'private',
+          stampsRequired: 10,
+          brandColor: '#FF5733',
+          createdAt: DateTime.now(),
+          scanInterval: 5000,
+        );
+
+        expect(business.scanInterval, 5000);
+        
+        final json = business.toJson();
+        final decoded = Business.fromJson(json);
+        expect(decoded.scanInterval, 5000);
+      });
+
+      test('handles maximum scan interval (60 seconds)', () {
+        final business = Business(
+          id: 'test-123',
+          name: 'Test Business',
+          publicKey: 'key',
+          privateKey: 'private',
+          stampsRequired: 10,
+          brandColor: '#FF5733',
+          createdAt: DateTime.now(),
+          scanInterval: 60000,
+        );
+
+        expect(business.scanInterval, 60000);
+        
+        final json = business.toJson();
+        final decoded = Business.fromJson(json);
+        expect(decoded.scanInterval, 60000);
+      });
+    });
   });
 }

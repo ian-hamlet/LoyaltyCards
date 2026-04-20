@@ -1,14 +1,24 @@
 # REQ-022: Enhanced Simple Mode - Multi-Denomination Stamps
 
-**Status:** Draft  
+**Status:** ✅ Implemented - Ready for Device Testing  
 **Priority:** High  
 **Target Version:** v0.3.0  
 **Created:** 2026-04-20  
+**Implemented:** 2026-04-20  
 **Related:** REQ-004, REQ-006
+
+**Implementation Summary:**
+- **Code Complete:** All features implemented
+- **Test Coverage:** 180 unit tests passing (131 shared + 49 customer)
+- **Files Modified:** 12 files across shared/supplier/customer packages
+- **Database:** Supplier DB upgraded to v5 (scan_interval_seconds)
+- **Backward Compatible:** Old tokens continue to work
+- **Documentation:** Comprehensive implementation guide created
+- **Next Steps:** Simulator testing → Physical device testing → TestFlight
 
 ## Overview
 
-Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per scan) with cashier-controlled QR codes. This addresses the abuse vector of counter-mounted QR codes while maintaining Simple Mode's ease of use and eliminating the need for customers to scan multiple times for multi-item purchases.
+Enhance Simple Mode to support flexible multi-denomination stamps (any value from 1 up to the card's required stamp count) with cashier-controlled QR codes. This addresses the abuse vector of counter-mounted QR codes while maintaining Simple Mode's ease of use and eliminating the need for customers to scan multiple times for multi-item purchases.
 
 ## Business Case
 
@@ -45,7 +55,7 @@ Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per 
 **REQ-022.2:** Multi-Stamp Selection
 - Extend Simple Mode "Add Stamp" screen with denomination selector
 - UI similar to Secure Mode's multiple stamp interface
-- Options: 1 stamp, 2 stamps, 3 stamps
+- Options: 1 stamp up to business's required stamp count (e.g., 1-10 for 10-stamp card)
 - Default: 1 stamp
 - Single button tap awards selected number of stamps
 - Not expected to be frequently used (most usage via printable tokens)
@@ -58,10 +68,14 @@ Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per 
 - Located in Supplier Protected Area (biometric/passcode secured)
 - Generate QR codes for offline customer scanning
 - Configurable options:
-  - Denomination: 1, 2, or 3 stamps (checkboxes or dropdown)
+  - Denomination: 1 stamp up to business's required stamp count (dropdown or slider)
+    - Example: For 10-stamp card, can generate 1-10 stamp denominations
+    - Common use: Generate set of 1, 2, 5, 10 stamp tokens for flexibility
   - Expiry Date: Optional (None, Daily, Weekly, Custom date)
 - Generate one or more QR codes per session
 - Each QR code is uniquely generated (includes timestamp)
+
+**Purpose:** Allows supplier to create appropriate denominations for their business model (e.g., coffee shop might use 1/2 stamps, restaurant might use 5/10 stamps)
 
 **REQ-022.4:** QR Code Output Options
 - Save to device photos/gallery
@@ -74,11 +88,12 @@ Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per 
 - QR code image includes text annotation
 - Annotation shows: 
   - Business name
-  - Stamp count: "**2 STAMPS**" (large, bold)
+  - Stamp count: "**5 STAMPS**" (large, bold, dynamic based on selection)
   - Expiry date if applicable: "Expires: 2026-04-25"
 - Designed for printing and laminating
-- Clear visual distinction between denominations
+- Clear visual distinction between denominations (larger numbers for higher counts)
 - Professional appearance suitable for customer-facing use
+- Scalable design supports any stamp count (1 to business max)
 
 **REQ-022.6:** Token Data Structure
 ```json
@@ -87,11 +102,13 @@ Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per 
   "businessName": "Coffee Shop",
   "mode": "simple",
   "timestamp": 1234567890,
-  "stampCount": 2,           // NEW: 1-3 stamps
+  "stampCount": 2,           // NEW: 1 to stampsRequired (e.g., 1-10)
   "expiryDate": 1234567890,  // NEW: Optional (null if no expiry)
   "scanInterval": 30         // NEW: Supplier's configured rate limit
 }
 ```
+
+**Note:** `stampCount` is validated against business's `stampsRequired` setting. Tokens with `stampCount > stampsRequired` are rejected to prevent configuration errors.
 
 ### 4. Customer App - Token Processing
 
@@ -132,19 +149,29 @@ Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per 
 
 ### Supplier Setup (One-Time)
 1. Navigate to Protected Area → Token Management
-2. Select denominations to generate (e.g., 1, 2, 3 stamps)
+2. Select denominations to generate based on business needs:
+   - Coffee shop (10-stamp card): Generate 1, 2, 5 stamp tokens
+   - Restaurant (20-stamp card): Generate 5, 10, 20 stamp tokens
+   - Convenience store (8-stamp card): Generate 1, 2, 4, 8 stamp tokens
 3. Set expiry policy (e.g., "Weekly" or "No expiry")
 4. Generate QR codes
 5. Save as PDF, print, laminate
 6. Place laminated cards in till/cash drawer
 
-### Transaction Flow
+### Transaction Flow Example 1 (Coffee Shop)
 1. Customer: "2 lattes please"
 2. Cashier: Rings up purchase, retrieves "2 STAMPS" card from till
 3. Customer: Scans QR code once
 4. App: Awards 2 stamps, shows confirmation
 5. Cashier: Returns card to till
 6. Total exposure: 5-10 seconds
+
+### Transaction Flow Example 2 (Restaurant)
+1. Customer: "Table for 4, dinner"
+2. Cashier: After payment, retrieves "5 STAMPS" card from till
+3. Customer: Scans QR code once
+4. App: Awards 5 stamps toward their 20-stamp card
+5. Cashier: Returns card to till
 
 ### Regeneration Flow (Expired Tokens)
 1. Customer scans expired token
@@ -170,21 +197,25 @@ Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per 
 - No customer DB changes needed (stamps stored individually as before)
 
 ### Testing Requirements
-- Multi-stamp overflow edge cases (2 stamps when card needs 1 to complete)
+- Multi-stamp overflow edge cases (e.g., 5 stamps when card needs 2 to complete)
 - Expiry date validation (boundary conditions)
 - Rate limit enforcement with supplier-specific intervals
-- QR code generation and annotation rendering
+- QR code generation and annotation rendering for various stamp counts (1-20)
 - Print/email/save workflows
+- Validation: Reject tokens with stampCount > business stampsRequired
+- Edge case: Single stamp token still works (backward compatibility)
 
 ## Success Criteria
 
 1. Supplier can configure customer scan interval (5-60s)
-2. Supplier can generate multi-denomination QR codes with expiry dates
+2. Supplier can generate QR codes for any denomination (1 to stampsRequired)
 3. QR codes clearly show stamp count on printed output
 4. Customer app awards correct number of stamps per scan
 5. Expired tokens rejected with friendly error message
-6. Rate limits apply per-supplier configuration
-7. Existing Simple Mode cards continue to work (backward compatible)
+6. Tokens with invalid stamp counts (> stampsRequired) rejected with error
+7. Rate limits apply per-supplier configuration
+8. Existing Simple Mode cards continue to work (backward compatible)
+9. Denomination selector UI adapts to business's stamp requirement
 
 ## Future Enhancements (Out of Scope)
 
@@ -205,3 +236,7 @@ Enhance Simple Mode to support multi-denomination stamps (1, 2, or 3 stamps per 
 - Shifts trust boundary from customer to employee (better security model)
 - 30-second rate limit feels generous because legitimate use requires cashier cooperation
 - Printable tokens are primary use case; manual denomination screen is fallback
+- Flexible denomination support allows businesses to tailor stamps to their transaction patterns:
+  - High-value businesses (restaurants): Larger denominations (5, 10 stamps)
+  - High-frequency businesses (coffee shops): Smaller denominations (1, 2 stamps)
+- Token validation prevents configuration errors (e.g., generating 15-stamp token for 10-stamp card)

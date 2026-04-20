@@ -9,6 +9,7 @@ import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import '../../services/supplier_database_helper.dart';
 import '../../services/device_orientation_service.dart';
+import '../../services/backup_storage_service.dart'; // REQ-022
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SupplierStampCard extends StatefulWidget {
@@ -33,6 +34,11 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
   Timer? _countdownTimer;
   Duration? _remainingTime;
+  
+  // REQ-022: Enhanced Simple Mode token configuration
+  int _stampCount = 1; // Number of stamps (1 to stampsRequired)
+  DateTime? _expiryDate; // Optional expiry date
+  String _expiryOption = 'none'; // none, daily, weekly, custom
 
   @override
   void initState() {
@@ -345,6 +351,18 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     });
 
     try {
+      // REQ-022: Validate stamp count
+      if (_stampCount < 1 || _stampCount > _business!.stampsRequired) {
+        throw Exception('Invalid stamp count: must be 1-${_business!.stampsRequired}');
+      }
+      
+      // Calculate expiry timestamp if applicable
+      int? expiryTimestamp;
+      if (_expiryDate != null) {
+        expiryTimestamp = _expiryDate!.millisecondsSinceEpoch;
+        AppLogger.debug('Token expiry set to: ${_expiryDate}', 'StampToken');
+      }
+      
       // For simple mode, generate a generic stamp token
       // It's reusable and doesn't require customer card info
       final stampToken = await _tokenGenerator.generateStampToken(
@@ -353,6 +371,9 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         stampNumber: 1, // Generic stamp number
         previousHash: '', // No hash chain in simple mode
         additionalStampCount: 0,
+        stampCount: _stampCount, // REQ-022: Multi-denomination support
+        expiryDate: expiryTimestamp, // REQ-022: Optional expiry
+        scanInterval: _business!.scanInterval, // REQ-022: Supplier-specific rate limit
       );
 
       if (mounted) {
@@ -360,12 +381,99 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
           _stampToken = stampToken;
           _isProcessing = false;
         });
+        AppLogger.debug('Generated $_stampCount-stamp token for ${_business!.name}', 'StampToken');
       }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error generating stamp: $e';
         _isProcessing = false;
       });
+      AppLogger.error('Failed to generate simple mode token: $e', tag: 'StampToken');
+    }
+  }
+
+  // REQ-022: Save token QR to photo gallery
+  Future<void> _saveToPhotos() async {
+    if (_business == null || _stampToken == null) return;
+    
+    try {
+      final success = await BackupStorageService.saveSimpleTokenToPhotos(
+        qrData: _stampToken!.toQRString(),
+        businessName: _business!.name,
+        stampCount: _stampCount,
+        expiryDate: _expiryDate,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Saved to Photos');
+        } else {
+          AppFeedback.error(context, 'Failed to save');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error saving token to photos: $e', tag: 'StampToken');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  // REQ-022: Print token QR
+  Future<void> _printToken() async {
+    if (_business == null || _stampToken == null) return;
+    
+    try {
+      final success = await BackupStorageService.printSimpleToken(
+        qrData: _stampToken!.toQRString(),
+        businessName: _business!.name,
+        stampCount: _stampCount,
+        expiryDate: _expiryDate,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Print dialog opened');
+        } else {
+          AppFeedback.error(context, 'Failed to print');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error printing token: $e', tag: 'StampToken');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  // REQ-022: Email token QR
+  Future<void> _emailToken() async {
+    if (_business == null || _stampToken == null) return;
+    
+    try {
+      final size = MediaQuery.of(context).size;
+      final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
+      
+      final success = await BackupStorageService.shareSimpleTokenViaEmail(
+        qrData: _stampToken!.toQRString(),
+        businessName: _business!.name,
+        stampCount: _stampCount,
+        expiryDate: _expiryDate,
+        sharePositionOrigin: sharePosition,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Share sheet opened');
+        } else {
+          AppFeedback.error(context, 'Failed to share');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error sharing token: $e', tag: 'StampToken');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
     }
   }
 
@@ -388,144 +496,337 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     if (_business!.mode == OperationMode.simple) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Stamp Card'),
+          title: const Text('Generate Stamp Token'),
           backgroundColor: const Color(0xFF2C3E50),
           foregroundColor: Colors.white,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _generateSimpleModeStampQR,
-              tooltip: 'Regenerate QR',
-            ),
-          ],
         ),
-        body: _stampToken == null
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // QR Code Display
-                    Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            // Success/Ready icon
-                            const Icon(
-                              Icons.check_circle,
-                              size: 60,
-                              color: Colors.green,
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            Text(
-                              _business!.name,
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
-                            
-                            const SizedBox(height: 8),
-                            
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.all_inclusive, size: 16, color: Colors.blue[700]),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Reusable Stamp QR',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.blue[900],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            
-                            const SizedBox(height: 16),
-                            
-                            // QR Code
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey[300]!),
-                              ),
-                              child: QrImageView(
-                                data: _stampToken!.toQRString(),
-                                version: QrVersions.auto,
-                                size: QRCodeSize.calculate(context),
-                                backgroundColor: Colors.white,
-                              ),
-                            ),
-                          ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // REQ-022: Token Configuration Card
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Token Configuration',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Customer instruction
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: BrandColors.infoContainer,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: BrandColors.info.withOpacity(0.3)),
-                      ),
-                      child: const Row(
+                      const SizedBox(height: 20),
+                      
+                      // Stamp Denomination Selector
+                      Row(
                         children: [
-                          Icon(Icons.qr_code_scanner, color: BrandColors.info, size: 24),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Now ask customer to scan this code and get their stamp',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: BrandColors.textPrimary,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
+                          const Text(
+                            'Stamp Value',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 8),
+                          Tooltip(
+                            message: 'Number of stamps this QR code grants when scanned',
+                            child: Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
                           ),
                         ],
                       ),
-                    ),
-                    
-                    // Error message
-                    if (_errorMessage != null) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.red.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              color: Colors.red.shade700,
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            onPressed: _stampCount > 1
+                                ? () {
+                                    Haptics.light();
+                                    setState(() => _stampCount--);
+                                  }
+                                : null,
+                            icon: const Icon(Icons.remove_circle),
+                          ),
+                          Text(
+                            _stampCount == 1 ? '1 Stamp' : '$_stampCount Stamps',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: BrandColors.textPrimary,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _errorMessage!,
-                                style: TextStyle(
-                                  color: Colors.red.shade900,
-                                  fontSize: 14,
-                                ),
+                          ),
+                          IconButton(
+                            onPressed: _stampCount < _business!.stampsRequired
+                                ? () {
+                                    Haptics.light();
+                                    setState(() => _stampCount++);
+                                  }
+                                : null,
+                            icon: const Icon(Icons.add_circle),
+                          ),
+                        ],
+                      ),
+                      Slider(
+                        value: _stampCount.toDouble(),
+                        min: 1,
+                        max: _business!.stampsRequired.toDouble(),
+                        divisions: _business!.stampsRequired - 1,
+                        label: '$_stampCount',
+                        onChanged: (value) {
+                          setState(() => _stampCount = value.toInt());
+                        },
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      const Divider(),
+                      const SizedBox(height: 20),
+                      
+                      // Expiry Date Selector
+                      Row(
+                        children: [
+                          const Text(
+                            'Expiry Policy',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 8),
+                          Tooltip(
+                            message: 'Optional expiry date for this token',
+                            child: Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        value: _expiryOption,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'none', child: Text('No Expiry')),
+                          DropdownMenuItem(value: 'daily', child: Text('Daily (Midnight)')),
+                          DropdownMenuItem(value: 'weekly', child: Text('Weekly (Sunday)')),
+                          DropdownMenuItem(value: 'custom', child: Text('Custom Date...')),
+                        ],
+                        onChanged: (value) async {
+                          if (value == 'custom') {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now().add(const Duration(days: 7)),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                _expiryOption = value!;
+                                _expiryDate = DateTime(picked.year, picked.month, picked.day, 23, 59, 59);
+                              });
+                            }
+                          } else {
+                            setState(() {
+                              _expiryOption = value!;
+                              if (value == 'none') {
+                                _expiryDate = null;
+                              } else if (value == 'daily') {
+                                final tomorrow = DateTime.now().add(const Duration(days: 1));
+                                _expiryDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0);
+                              } else if (value == 'weekly') {
+                                final now = DateTime.now();
+                                final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
+                                final nextSunday = now.add(Duration(days: daysUntilSunday == 0 ? 7 : daysUntilSunday));
+                                _expiryDate = DateTime(nextSunday.year, nextSunday.month, nextSunday.day, 23, 59, 59);
+                              }
+                            });
+                          }
+                        },
+                      ),
+                      if (_expiryDate != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: BrandColors.infoContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.schedule, size: 16, color: BrandColors.info),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Expires: ${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year} ${_expiryDate!.hour}:${_expiryDate!.minute.toString().padLeft(2, '0')}',
+                                style: const TextStyle(fontSize: 12, color: BrandColors.textPrimary),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Generate Button
+              if (_stampToken == null || _isProcessing)
+                ElevatedButton(
+                  onPressed: _isProcessing ? null : _generateSimpleModeStampQR,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2C3E50),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isProcessing
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('Generate QR Code', style: TextStyle(fontSize: 16)),
+                ),
+              
+              // QR Code Display (after generation)
+              if (_stampToken != null && !_isProcessing) ...[
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.check_circle, size: 60, color: Colors.green),
+                        const SizedBox(height: 16),
+                        Text(
+                          _business!.name,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _stampCount == 1 ? '1 STAMP' : '$_stampCount STAMPS',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: BrandColors.info,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: QrImageView(
+                            data: _stampToken!.toQRString(),
+                            version: QrVersions.auto,
+                            size: QRCodeSize.calculate(context),
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Action Buttons (REQ-022)
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _saveToPhotos,
+                        icon: const Icon(Icons.photo_library),
+                        label: const Text('Save'),
+                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _printToken,
+                        icon: const Icon(Icons.print),
+                        label: const Text('Print'),
+                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _emailToken,
+                  icon: const Icon(Icons.email),
+                  label: const Text('Email to Myself'),
+                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Instructions
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: BrandColors.infoContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.lightbulb_outline, color: BrandColors.info, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'How to Use',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '1. Print and laminate this QR code\n2. Keep in till or cash drawer\n3. Show to customer after purchase\n4. Customer scans to receive stamps',
+                        style: TextStyle(fontSize: 12, color: BrandColors.textPrimary),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              
+              // Error message
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red.shade700),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(color: Colors.red.shade900, fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
                       ),
                     ],
                   ],

@@ -50,7 +50,8 @@ class SupplierDatabaseHelper {
         brand_color TEXT NOT NULL,
         logo_index INTEGER NOT NULL DEFAULT 0,
         mode TEXT NOT NULL DEFAULT 'secure',
-        created_at INTEGER NOT NULL
+        created_at INTEGER NOT NULL,
+        scan_interval_seconds INTEGER NOT NULL DEFAULT 30
       )
     ''');
 
@@ -149,6 +150,15 @@ class SupplierDatabaseHelper {
         ALTER TABLE business ADD COLUMN mode TEXT NOT NULL DEFAULT 'secure'
       ''');
       AppLogger.database('Migration complete: mode column added (default: secure)');
+    }
+    
+    // Migration from v4 to v5: Add scan_interval_seconds column (REQ-022)
+    if (oldVersion < 5) {
+      AppLogger.database('Migration v4 → v5: Adding scan_interval_seconds column to business table');
+      await db.execute('''
+        ALTER TABLE business ADD COLUMN scan_interval_seconds INTEGER NOT NULL DEFAULT 30
+      ''');
+      AppLogger.database('Migration complete: scan_interval_seconds column added (default: 30s)');
     }
   }
 

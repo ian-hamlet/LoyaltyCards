@@ -265,6 +265,11 @@ class StampToken extends QRToken {
   final String previousHash;
   final String signature;
   final List<AdditionalStamp> additionalStamps; // For multi-stamp operations
+  
+  // REQ-022: Enhanced Simple Mode fields
+  final int stampCount; // Number of stamps this token grants (1-N)
+  final int? expiryDate; // Optional expiry timestamp (null = no expiry)
+  final int? scanInterval; // Supplier's configured rate limit in ms (null = use default)
 
   StampToken({
     required this.id,
@@ -275,6 +280,9 @@ class StampToken extends QRToken {
     required this.signature,
     required int timestamp,
     this.additionalStamps = const [],
+    this.stampCount = 1, // Default: 1 stamp (backward compatible)
+    this.expiryDate, // Optional expiry
+    this.scanInterval, // Optional rate limit override
   }) : super(type: 'stamp_token', timestamp: timestamp);
 
   factory StampToken.fromJson(Map<String, dynamic> json) {
@@ -290,12 +298,15 @@ class StampToken extends QRToken {
       additionalStamps: additionalStampsJson
           .map((s) => AdditionalStamp.fromJson(s as Map<String, dynamic>))
           .toList(),
+      stampCount: json['stampCount'] as int? ?? 1, // REQ-022: Default 1 for backward compatibility
+      expiryDate: json['expiryDate'] as int?, // REQ-022: Optional expiry
+      scanInterval: json['scanInterval'] as int?, // REQ-022: Optional rate limit
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
-    return {
+    final json = {
       'type': type,
       'id': id,
       'cardId': cardId,
@@ -305,7 +316,21 @@ class StampToken extends QRToken {
       'previousHash': previousHash,
       'signature': signature,
       'additionalStamps': additionalStamps.map((s) => s.toJson()).toList(),
+      'stampCount': stampCount, // REQ-022
     };
+    
+    // Only include optional fields if they have values
+    // Use local variables to allow null-safety promotion
+    final expiry = expiryDate;
+    if (expiry != null) {
+      json['expiryDate'] = expiry;
+    }
+    final interval = scanInterval;
+    if (interval != null) {
+      json['scanInterval'] = interval;
+    }
+    
+    return json;
   }
 
   /// Data string used for signature verification

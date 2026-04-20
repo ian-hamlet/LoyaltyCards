@@ -279,4 +279,155 @@ void main() {
       expect(signatureData, contains('prev-hash-123'));
     });
   });
+
+  group('REQ-022: Enhanced Simple Mode - StampToken', () {
+    test('StampToken - multi-denomination support (stampCount)', () {
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        stampCount: 5, // Multi-denomination
+      );
+
+      expect(token.stampCount, 5);
+      
+      final json = token.toJson();
+      expect(json['stampCount'], 5);
+
+      final decoded = StampToken.fromJson(json);
+      expect(decoded.stampCount, 5);
+    });
+
+    test('StampToken - backward compatibility (stampCount defaults to 1)', () {
+      final jsonWithoutStampCount = {
+        'type': 'stamp_token',
+        'id': 'stamp-1',
+        'cardId': 'card-123',
+        'businessId': 'business-123',
+        'stampNumber': 1,
+        'previousHash': '',
+        'signature': 'test-signature',
+        'timestamp': 1234567890000,
+        'additionalStamps': [],
+      };
+
+      final token = StampToken.fromJson(jsonWithoutStampCount);
+      expect(token.stampCount, 1); // Default value
+    });
+
+    test('StampToken - with expiry date', () {
+      final expiryTimestamp = DateTime(2026, 4, 30).millisecondsSinceEpoch;
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        expiryDate: expiryTimestamp,
+      );
+
+      expect(token.expiryDate, expiryTimestamp);
+      
+      final json = token.toJson();
+      expect(json['expiryDate'], expiryTimestamp);
+
+      final decoded = StampToken.fromJson(json);
+      expect(decoded.expiryDate, expiryTimestamp);
+    });
+
+    test('StampToken - without expiry date (null)', () {
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        expiryDate: null, // No expiry
+      );
+
+      expect(token.expiryDate, isNull);
+      
+      final json = token.toJson();
+      expect(json.containsKey('expiryDate'), false); // Should not include null fields
+    });
+
+    test('StampToken - with scan interval', () {
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        scanInterval: 30000, // 30 seconds
+      );
+
+      expect(token.scanInterval, 30000);
+      
+      final json = token.toJson();
+      expect(json['scanInterval'], 30000);
+
+      final decoded = StampToken.fromJson(json);
+      expect(decoded.scanInterval, 30000);
+    });
+
+    test('StampToken - full REQ-022 token (all fields)', () {
+      final expiryTimestamp = DateTime(2026, 4, 30).millisecondsSinceEpoch;
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        stampCount: 3,
+        expiryDate: expiryTimestamp,
+        scanInterval: 30000,
+      );
+
+      expect(token.stampCount, 3);
+      expect(token.expiryDate, expiryTimestamp);
+      expect(token.scanInterval, 30000);
+
+      final qrString = token.toQRString();
+      final decoded = QRToken.fromQRString(qrString) as StampToken;
+      
+      expect(decoded.stampCount, 3);
+      expect(decoded.expiryDate, expiryTimestamp);
+      expect(decoded.scanInterval, 30000);
+    });
+
+    test('StampToken - toQRString/fromQRString roundtrip preserves REQ-022 fields', () {
+      final original = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        stampCount: 10,
+        expiryDate: 1714435200000,
+        scanInterval: 60000,
+      );
+
+      final qrString = original.toQRString();
+      final decoded = QRToken.fromQRString(qrString) as StampToken;
+
+      expect(decoded.id, original.id);
+      expect(decoded.stampCount, original.stampCount);
+      expect(decoded.expiryDate, original.expiryDate);
+      expect(decoded.scanInterval, original.scanInterval);
+    });
+  });
 }

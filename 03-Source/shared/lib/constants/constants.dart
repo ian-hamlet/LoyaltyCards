@@ -37,6 +37,11 @@ class AppConstants {
   static const int stampRateLimitMs = 5000; // 5 seconds between stamps (prevents duplicate scans)
   static const int issueIntervalMs = 30000; // 30 seconds between card issuances (supplier rate limit)
   static const int stampExpiryMs = 120000; // 2 minutes stamp token validity (timestamp tolerance)
+  
+  // REQ-022: Simple Mode Enhanced Rate Limits
+  static const int simpleModeDefaultScanIntervalMs = 30000; // 30 seconds default for simple mode (configurable per supplier)
+  static const int simpleModeMinScanIntervalMs = 5000; // 5 seconds minimum (prevents abuse)
+  static const int simpleModeMaxScanIntervalMs = 60000; // 60 seconds maximum (usability)
 }
 
 /// Typography scale for consistent text sizing

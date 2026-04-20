@@ -87,11 +87,17 @@ class TokenValidator {
   /// 
   /// For simple mode: Skips timestamp validation (tokens are reusable)
   /// For secure mode: Enforces 2-minute expiry
+  /// 
+  /// REQ-022: Enhanced validation for multi-denomination stamps:
+  /// - Validates stampCount against stampsRequired
+  /// - Checks optional expiry date
+  /// - Extracts scanInterval for rate limiting
   static Future<ValidationResult> validateStampToken({
     required StampToken token,
     required String businessPublicKey,
     required String expectedPreviousHash,
     required OperationMode mode,
+    int? stampsRequired, // REQ-022: Required for stampCount validation
   }) async {
     // Check basic structure
     if (!token.isValid()) {
@@ -99,6 +105,31 @@ class TokenValidator {
         isValid: false,
         error: 'Invalid token structure',
       );
+    }
+
+    // REQ-022: Validate stampCount against business configuration
+    if (stampsRequired != null && token.stampCount > stampsRequired) {
+      AppLogger.warning(
+        'StampCount validation failed - Token: ${token.stampCount}, Required: $stampsRequired',
+        'Token'
+      );
+      return ValidationResult(
+        isValid: false,
+        error: 'Invalid stamp count: ${token.stampCount} exceeds card requirement of $stampsRequired',
+      );
+    }
+
+    // REQ-022: Check expiry date if present
+    if (token.expiryDate != null) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      if (now > token.expiryDate!) {
+        final expiredAt = DateTime.fromMillisecondsSinceEpoch(token.expiryDate!);
+        AppLogger.debug('Token expired at: $expiredAt', 'Token');
+        return ValidationResult(
+          isValid: false,
+          error: 'Token expired',
+        );
+      }
     }
 
     // Simple mode: Skip timestamp check (tokens are reusable/static)

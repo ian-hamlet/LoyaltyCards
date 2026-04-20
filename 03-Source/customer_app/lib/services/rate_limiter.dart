@@ -19,6 +19,7 @@ class RateLimiter {
   /// Check if a card can receive a new stamp
   /// 
   /// Rate limit: 5 seconds between stamps (prevents duplicate scans and abuse)
+  /// REQ-022: Can be overridden by token's scanInterval for supplier-specific rate limits
   /// 
   /// Simple Mode: Critical anti-abuse measure since QR codes don't change.
   ///              When rate-limited, scanner immediately returns to card screen
@@ -32,6 +33,7 @@ class RateLimiter {
     required String cardId,
     required String businessId,
     required OperationMode mode,
+    int? scanInterval, // REQ-022: Optional supplier-specific rate limit in ms
   }) async {
     final db = await _dbHelper.database;
 
@@ -54,8 +56,11 @@ class RateLimiter {
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastStamp = now - lastStampTime;
 
-    // Rate limit: prevents accidental duplicate scans and abuse
-    final rateLimitMs = AppConstants.stampRateLimitMs;
+    // REQ-022: Use token's scanInterval if provided, otherwise use default
+    // This allows suppliers to configure their own rate limits (e.g., 30s for simple mode)
+    final rateLimitMs = scanInterval ?? AppConstants.stampRateLimitMs;
+    
+    AppLogger.debug('Rate limit check: timeSince=${timeSinceLastStamp}ms, limit=${rateLimitMs}ms', 'RateLimit');
 
     if (timeSinceLastStamp < rateLimitMs) {
       final remainingMs = rateLimitMs - timeSinceLastStamp;

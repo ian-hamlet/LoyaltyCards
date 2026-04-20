@@ -768,7 +768,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 OutlinedButton.icon(
                   onPressed: _shareToken,
                   icon: const Icon(Icons.share),
-                  label: const Text('Share'),
+                  label: const Text('Share QR Code'),
                   style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
                 ),
                 

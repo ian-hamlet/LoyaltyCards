@@ -20,6 +20,8 @@ export 'utils/qr_code_size.dart';
 export 'utils/crypto_utils.dart';
 export 'utils/app_logger.dart';
 export 'utils/error_handling.dart';
+export 'utils/signature_format.dart';
+export 'utils/error_handler.dart';
 
 // Export widgets
 export 'widgets/feedback.dart';

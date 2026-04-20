@@ -25,8 +25,13 @@ class StampSigner {
     final timestamp = DateTime.now();
     final stampId = _uuid.v4();
 
-    // Create data to sign (deterministic format)
-    final dataToSign = '$cardId:$stampNumber:${timestamp.millisecondsSinceEpoch}:${previousHash ?? ""}';
+    // Create data to sign using canonical format (CR-2.4)
+    final dataToSign = SignatureFormat.stampData(
+      cardId: cardId,
+      stampNumber: stampNumber,
+      timestampMs: timestamp.millisecondsSinceEpoch,
+      previousHash: previousHash,
+    );
     
     // Sign the data
     final signature = await _keyManager.signData(dataToSign, privateKey);
@@ -57,7 +62,13 @@ class StampSigner {
   /// 
   /// Returns detailed verification result for better debugging
   Future<VerificationResult> verifyStamp(Stamp stamp, String publicKey) async {
-    final dataToSign = '${stamp.cardId}:${stamp.stampNumber}:${stamp.timestamp.millisecondsSinceEpoch}:${stamp.previousHash ?? ""}';
+    // Use canonical signature format (CR-2.4)
+    final dataToSign = SignatureFormat.stampData(
+      cardId: stamp.cardId,
+      stampNumber: stamp.stampNumber,
+      timestampMs: stamp.timestamp.millisecondsSinceEpoch,
+      previousHash: stamp.previousHash,
+    );
     return KeyManager.verifySignature(dataToSign, stamp.signature, publicKey);
   }
 

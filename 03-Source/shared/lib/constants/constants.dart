@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:flutter/material.dart' show Colors;
+import '../utils/app_logger.dart';
 
 /// Application-wide constants
 class AppConstants {
@@ -128,11 +130,32 @@ class BrandColors {
   ];
   
   /// Convert hex string to Color
-  static Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
+  /// 
+  /// Returns [fallback] color if hex string is invalid.
+  /// Default fallback is grey (Colors.grey).
+  /// 
+  /// Example:
+  /// ```dart
+  /// final color = AppColors.fromHex('#FF5722'); // Deep Orange
+  /// final safe = AppColors.fromHex('invalid', fallback: Colors.blue);
+  /// ```
+  static Color fromHex(String hexString, {Color fallback = Colors.grey}) {
+    try {
+      final buffer = StringBuffer();
+      if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+      buffer.write(hexString.replaceFirst('#', ''));
+      
+      final value = int.tryParse(buffer.toString(), radix: 16);
+      if (value == null) {
+        AppLogger.warning('Invalid hex color: $hexString, using fallback');
+        return fallback;
+      }
+      
+      return Color(value);
+    } catch (e) {
+      AppLogger.error('Color parse error for $hexString: $e');
+      return fallback;
+    }
   }
   
   /// Convert Color to hex string

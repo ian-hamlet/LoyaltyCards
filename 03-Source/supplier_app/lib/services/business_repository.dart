@@ -18,39 +18,71 @@ class BusinessRepository {
 
   /// Insert business configuration
   Future<void> insertBusiness(models.Business business) async {
-    // Input validation
-    assert(business.id.isNotEmpty, 'Business ID must not be empty');
-    assert(business.name.isNotEmpty, 'Business name must not be empty');
-    assert(business.publicKey.isNotEmpty, 'Public key must not be empty');
-    assert(business.stampsRequired > 0, 'Stamps required must be positive');
-    assert(business.stampsRequired <= 100, 'Stamps required must be <= 100');
+    // Runtime validation (works in production builds)
+    if (business.id.isEmpty) {
+      throw ArgumentError('Business ID must not be empty');
+    }
+    if (business.name.isEmpty) {
+      throw ArgumentError('Business name must not be empty');
+    }
+    if (business.publicKey.isEmpty) {
+      throw ArgumentError('Public key must not be empty');
+    }
+    if (business.stampsRequired <= 0) {
+      throw ArgumentError('Stamps required must be positive, got: ${business.stampsRequired}');
+    }
+    if (business.stampsRequired > 100) {
+      throw ArgumentError('Stamps required must be <= 100, got: ${business.stampsRequired}');
+    }
     
     AppLogger.database('Inserting business "${business.name}" (ID: ${business.id})');
     final db = await _dbHelper.database;
-    await db.insert(
-      'business',
-      business.toJson(includePrivateKey: false), // Don't store private key in DB
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    AppLogger.database('Business inserted successfully');
+    
+    try {
+      await db.insert(
+        'business',
+        business.toJson(includePrivateKey: false), // Don't store private key in DB
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      AppLogger.database('Business inserted successfully');
+    } on DatabaseException catch (e) {
+      AppLogger.error('Failed to insert business: $e');
+      rethrow;
+    }
   }
 
   /// Update business configuration
   Future<void> updateBusiness(models.Business business) async {
-    // Input validation
-    assert(business.id.isNotEmpty, 'Business ID must not be empty');
-    assert(business.name.isNotEmpty, 'Business name must not be empty');
-    assert(business.publicKey.isNotEmpty, 'Public key must not be empty');
-    assert(business.stampsRequired > 0, 'Stamps required must be positive');
-    assert(business.stampsRequired <= 100, 'Stamps required must be <= 100');
+    // Runtime validation (works in production builds)
+    if (business.id.isEmpty) {
+      throw ArgumentError('Business ID must not be empty');
+    }
+    if (business.name.isEmpty) {
+      throw ArgumentError('Business name must not be empty');
+    }
+    if (business.publicKey.isEmpty) {
+      throw ArgumentError('Public key must not be empty');
+    }
+    if (business.stampsRequired <= 0) {
+      throw ArgumentError('Stamps required must be positive, got: ${business.stampsRequired}');
+    }
+    if (business.stampsRequired > 100) {
+      throw ArgumentError('Stamps required must be <= 100, got: ${business.stampsRequired}');
+    }
     
     final db = await _dbHelper.database;
-    await db.update(
-      'business',
-      business.toJson(includePrivateKey: false),
-      where: 'id = ?',
-      whereArgs: [business.id],
-    );
+    
+    try {
+      await db.update(
+        'business',
+        business.toJson(includePrivateKey: false),
+        where: 'id = ?',
+        whereArgs: [business.id],
+      );
+    } on DatabaseException catch (e) {
+      AppLogger.error('Failed to update business: $e');
+      rethrow;
+    }
   }
 
   /// Check if business is configured

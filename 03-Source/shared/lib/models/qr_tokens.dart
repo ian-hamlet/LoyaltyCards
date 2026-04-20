@@ -60,10 +60,27 @@ class InitialStamp {
   });
 
   factory InitialStamp.fromJson(Map<String, dynamic> json) {
+    final stampNumber = json['stampNumber'] as int;
+    final timestamp = json['timestamp'] as int;
+    
+    // Validation: stamp number must be positive
+    if (stampNumber < 1) {
+      throw FormatException('Invalid stamp number: $stampNumber (must be >= 1)');
+    }
+    
+    // Validation: timestamp should not be in the far future (allow 5 min clock skew)
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final maxFutureMs = 5 * 60 * 1000; // 5 minutes
+    if (timestamp > now + maxFutureMs) {
+      throw FormatException(
+        'Timestamp in future: $timestamp (current: $now, max allowed: ${now + maxFutureMs})'
+      );
+    }
+    
     return InitialStamp(
-      stampNumber: json['stampNumber'] as int,
+      stampNumber: stampNumber,
       signature: json['signature'] as String,
-      timestamp: json['timestamp'] as int,
+      timestamp: timestamp,
     );
   }
 
@@ -144,12 +161,12 @@ class CardIssueToken extends QRToken {
   }
 
   /// Data string used for signature verification
+  /// 
+  /// Always includes cardId (empty string if null) for consistency.
+  /// Format: businessId:businessName:publicKey:stampsRequired:brandColor:cardId:timestamp
   String getSignatureData() {
-    // Include cardId only if present (backward compatibility)
-    if (cardId != null) {
-      return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardId:$timestamp';
-    }
-    return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$timestamp';
+    final cardIdValue = cardId ?? '';
+    return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardIdValue:$timestamp';
   }
 
   /// Validate token structure
@@ -478,7 +495,8 @@ class RedemptionToken extends QRToken {
     if (cardId.isEmpty || businessId.isEmpty || signature.isEmpty) {
       return false;
     }
-    if (stampsRedeemed < 1) {
+    // Stamps redeemed must be positive (> 0, not >= 1 for clarity)
+    if (stampsRedeemed <= 0) {
       return false;
     }
     return true;

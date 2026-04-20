@@ -21,7 +21,7 @@ class AppConstants {
   // Database
   static const String databaseName = 'loyalty_cards.db';
   static const int databaseVersion = 7; // Customer app schema version (v0.3.0+: Added performance indexes)
-  static const int supplierDatabaseVersion = 4; // Supplier app schema version
+  static const int supplierDatabaseVersion = 5; // Supplier app schema version (v5: Added scan_interval_seconds)
   
   // QR Code Settings
   static const double qrCodePadding = 16.0;

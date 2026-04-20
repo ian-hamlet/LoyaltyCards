@@ -303,82 +303,67 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 
                 // REQ-022: Scan Interval Configuration (Simple Mode only)
                 if (_selectedMode == OperationMode.simple) ...[
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      const Text(
+                        'Customer Scan Cooldown',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Tooltip(
+                        message: 'Prevents customers from scanning the same QR code multiple times in quick succession (5-60 seconds)',
+                        child: Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: BrandColors.infoContainer,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: BrandColors.info.withOpacity(0.3)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.timer, size: 20, color: BrandColors.info),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Customer Scan Cooldown',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: BrandColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Tooltip(
-                              message: 'Prevents customers from scanning the same QR code multiple times in quick succession',
-                              child: Icon(
-                                Icons.info_outline,
-                                size: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: _scanIntervalSeconds > 5
+                            ? () {
+                                Haptics.light();
+                                setState(() => _scanIntervalSeconds -= 5);
+                              }
+                            : null,
+                        icon: const Icon(Icons.remove_circle),
+                      ),
+                      Text(
+                        '$_scanIntervalSeconds seconds',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '$_scanIntervalSeconds seconds',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: BrandColors.textPrimary,
-                              ),
-                            ),
-                            Text(
-                              _scanIntervalSeconds >= 30 ? 'Recommended' : _scanIntervalSeconds >= 15 ? 'Moderate' : 'Fast',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _scanIntervalSeconds >= 30 ? BrandColors.success : BrandColors.textSecondary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Slider(
-                          value: _scanIntervalSeconds.toDouble(),
-                          min: 5,
-                          max: 60,
-                          divisions: 11,
-                          label: '${_scanIntervalSeconds}s',
-                          onChanged: (value) {
-                            setState(() => _scanIntervalSeconds = value.toInt());
-                          },
-                        ),
-                        const Text(
-                          'Higher values prevent abuse but may frustrate legitimate customers with multiple items.',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: BrandColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        onPressed: _scanIntervalSeconds < 60
+                            ? () {
+                                Haptics.light();
+                                setState(() => _scanIntervalSeconds += 5);
+                              }
+                            : null,
+                        icon: const Icon(Icons.add_circle),
+                      ),
+                    ],
+                  ),
+                  Slider(
+                    value: _scanIntervalSeconds.toDouble(),
+                    min: 5,
+                    max: 60,
+                    divisions: 11,
+                    label: '${_scanIntervalSeconds}s',
+                    onChanged: (value) {
+                      setState(() => _scanIntervalSeconds = value.toInt());
+                    },
                   ),
                 ],
                 

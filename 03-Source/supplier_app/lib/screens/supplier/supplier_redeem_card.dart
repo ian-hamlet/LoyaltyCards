@@ -103,30 +103,30 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
               // Info Card
               Card(
                 elevation: 1,
-                color: Colors.green[50],
+                color: BrandColors.successContainer,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.green[700], size: 24),
+                      const Icon(Icons.info_outline, color: BrandColors.success, size: 24),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Simple Mode - Manual Redemption',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.green[900],
+                                color: BrandColors.textPrimary,
                                 fontSize: 14,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
+                            const Text(
                               'Honor-based system - verify customer has completed card',
                               style: TextStyle(
-                                color: Colors.green[800],
+                                color: BrandColors.textSecondary,
                                 fontSize: 13,
                               ),
                             ),
@@ -185,16 +185,16 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
               // Instructions
               Container(
                 padding: const EdgeInsets.all(16),
-                color: Colors.green[50],
-                child: Row(
+                color: BrandColors.successContainer,
+                child: const Row(
                   children: [
-                    const Icon(Icons.card_giftcard, color: Colors.green),
-                    const SizedBox(width: 12),
+                    Icon(Icons.card_giftcard, color: BrandColors.success),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Scan customer\'s completed card to redeem reward',
                         style: TextStyle(
-                          color: Colors.green[900],
+                          color: BrandColors.textPrimary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -802,21 +802,21 @@ class _RedemptionTokenScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green[50],
+                  color: BrandColors.successContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green[200]!),
+                  border: Border.all(color: BrandColors.success.withOpacity(0.3)),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    Icon(Icons.qr_code_scanner, color: Colors.green[700], size: 24),
-                    const SizedBox(width: 12),
+                    Icon(Icons.qr_code_scanner, color: BrandColors.success, size: 24),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Now ask customer to scan this redemption code to complete the transaction',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.green[900],
+                          color: BrandColors.textPrimary,
                         ),
                         textAlign: TextAlign.center,
                       ),

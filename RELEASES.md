@@ -17,7 +17,45 @@ Examples:
 
 ## Current Releases
 
-### v0.2.1-build23 (TestFlight - Current)
+### v0.3.0+1 (In Development - REQ-022)
+- **Date:** April 20, 2026
+- **Platform:** Development/Testing
+- **Branch:** develop
+- **Version:** 0.3.0+1
+- **Focus:** REQ-022 - Enhanced Simple Mode with Multi-Denomination Stamps
+- **Major Changes:**
+  - **Flexible Stamp Denominations:** Any value from 1 to stampsRequired
+  - **Expiry Policies:** None, Daily, Weekly, or Custom date
+  - **Supplier-Specific Scan Intervals:** Configurable 5-60 seconds
+  - **Token Generation UI:** Replaced single-stamp QR with denomination selector
+  - **Annotated QR Images:** Clear visual labels (stamp count, expiry, business name)
+  - **Multi-Stamp Processing:** Single scan can award multiple stamps
+  - **Enhanced Distribution:** Save to Photos, Print, Email workflows
+- **Technical Implementation:**
+  - StampToken model: Added stampCount, expiryDate, scanInterval fields
+  - Business model: Added configurable scanInterval (stored as seconds)
+  - Database: Supplier DB upgraded to v5 (scan_interval_seconds column)
+  - Customer app: Enhanced TokenValidator, RateLimiter with dynamic intervals
+  - Supplier app: Redesigned Simple Mode stamp screen
+  - Backward compatible: Old tokens continue to work (stampCount defaults to 1)
+- **Test Coverage:**
+  - Shared package: 131 tests (includes 18 new REQ-022 tests)
+  - Customer app: 49 tests (includes 18 new REQ-022 tests)
+  - All edge cases covered: expiry, stampCount validation, overflow, rate limits
+- **Files Modified:**
+  - Shared: 4 files (models, constants, tests)
+  - Supplier app: 5 files (UI, database, services)
+  - Customer app: 3 files (validation, rate limiting, scanning)
+- **Documentation:**
+  - REQ-022_IMPLEMENTATION_SUMMARY.md (comprehensive implementation guide)
+  - Enhanced test files with REQ-022 test groups
+- **Status:** ✅ Code complete, all tests passing
+- **Next Steps:**
+  - Simulator testing (token generation, multi-stamp scanning)
+  - Physical device testing (printer output, QR scanning reliability)
+  - TestFlight deployment after device validation
+
+### v0.2.1-build23 (TestFlight - Previous)
 - **Date:** April 18, 2026
 - **Platform:** TestFlight (Internal Testing)
 - **Branch:** develop

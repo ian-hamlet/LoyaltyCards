@@ -209,6 +209,27 @@
 ///   * Before App Store release: Set both flags to false to hide in production
 ///   * Allows testers to reset/delete data during TestFlight testing
 /// - Note: Build 22 tests not included in this release (shared package untested)
+/// 
+/// Version 0.3.0 - REQ-022: Enhanced Simple Mode
+/// 
+/// Build 1 Changes:
+/// - REQ-022: Enhanced Simple Mode - Multi-Denomination Stamps
+///   * Flexible Denominations: Any value from 1 to stampsRequired per token
+///   * Token Generation UI: Denomination selector (slider + buttons)
+///   * Expiry Policies: None, Daily, Weekly, or Custom date options
+///   * Supplier-Specific Scan Intervals: Configurable 5-60 seconds
+///   * Annotated QR Images: Business name, stamp count, expiry date labels
+///   * Multi-Stamp Processing: Single scan awards multiple stamps
+///   * Distribution Methods: Save to Photos, Print, Email, Save to Files
+///   * Token Validation: Rejects expired tokens and invalid stamp counts
+///   * Dynamic Rate Limiting: Per-supplier intervals applied from token
+///   * Backward Compatible: Old single-stamp tokens continue to work
+/// - Database: Supplier DB upgraded to v5 (scan_interval_seconds column)
+/// - Models: StampToken with stampCount, expiryDate, scanInterval fields
+/// - Test Coverage: 180 unit tests passing (131 shared + 49 customer)
+/// - Files Modified: 12 files across shared/supplier/customer packages
+/// - Documentation: REQ-022_IMPLEMENTATION_SUMMARY.md created
+/// - Status: Code complete, ready for device testing
 
 /// IMPORTANT: Version Number Management
 /// =====================================
@@ -219,4 +240,4 @@
 ///
 /// All three MUST match exactly or builds will show inconsistent version numbers.
 /// Build number (+BUILD) must increment for every TestFlight upload.
-const String appVersion = '0.2.1+23';
+const String appVersion = '0.3.0+1';

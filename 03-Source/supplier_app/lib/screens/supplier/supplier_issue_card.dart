@@ -6,6 +6,7 @@ import '../../services/qr_token_generator.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import '../../services/supplier_database_helper.dart';
+import '../../services/backup_storage_service.dart';
 
 class SupplierIssueCard extends StatefulWidget {
   const SupplierIssueCard({super.key});
@@ -22,10 +23,11 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   CardIssueToken? _token;
   bool _isLoading = true;
   String? _errorMessage;
-  int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
+  int _initialStampCount = 0; // Number of stamps to pre-apply (0-stampsRequired)
   final Set<String> _loggedCardIds = {}; // Track logged card IDs to prevent duplicates
   Timer? _countdownTimer;
   Duration? _remainingTime;
+  bool _configExpanded = false; // Track Quick Start configuration expansion state
 
   @override
   void initState() {
@@ -137,84 +139,145 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Initial Stamp Count Selector (Compact)
+                      // Initial Stamp Count Selector (Collapsible)
                       Card(
                         elevation: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.bolt, color: Colors.amber[700], size: 20),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Quick Start Stamps',
-                                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              
-                              // Stamp count selector buttons (compact)
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
-                                children: List.generate(8, (index) {
-                                  final count = index;
-                                  final isSelected = _initialStampCount == count;
-                                  return ChoiceChip(
-                                    label: Text(count == 0 ? 'None' : '$count', style: const TextStyle(fontSize: 13)),
-                                    selected: isSelected,
-                                    onSelected: (selected) {
-                                      if (selected && _initialStampCount != count) {
-                                        setState(() {
-                                          _initialStampCount = count;
-                                        });
-                                        _loadBusinessAndGenerateToken();
-                                      }
-                                    },
-                                    selectedColor: Colors.blue[600],
-                                    labelStyle: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.black87,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                                    visualDensity: VisualDensity.compact,
-                                  );
-                                }),
-                              ),
-                              
-                              if (_initialStampCount > 0) ...[
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[50],
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.blue[200]!),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.check_circle, color: Colors.blue[700], size: 20),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'Card will start with $_initialStampCount stamp${_initialStampCount > 1 ? 's' : ''} already applied',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.blue[900],
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                        child: Theme(
+                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                          child: ExpansionTile(
+                            initiallyExpanded: _configExpanded,
+                            onExpansionChanged: (expanded) {
+                              setState(() => _configExpanded = expanded);
+                            },
+                            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            title: Row(
+                              children: [
+                                Icon(Icons.bolt, color: Colors.amber[700], size: 20),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Quick Start Stamps',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
+                            ),
+                            subtitle: Text(
+                              _initialStampCount == 0 
+                                  ? 'No stamps pre-applied' 
+                                  : (_initialStampCount == 1 ? '1 stamp pre-applied' : '$_initialStampCount stamps pre-applied'),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Description
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[50],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      'Pre-apply stamps to new cards. Useful for welcome bonuses or promotions. Set to 0 for standard card issuance.',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: BrandColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  
+                                  // Slider with +/- buttons
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconButton(
+                                        onPressed: _initialStampCount > 0
+                                            ? () {
+                                                Haptics.light();
+                                                setState(() {
+                                                  _initialStampCount--;
+                                                });
+                                                _loadBusinessAndGenerateToken();
+                                              }
+                                            : null,
+                                        icon: const Icon(Icons.remove_circle),
+                                      ),
+                                      Text(
+                                        _initialStampCount == 0 
+                                            ? 'No stamps' 
+                                            : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: _initialStampCount < _business!.stampsRequired
+                                            ? () {
+                                                Haptics.light();
+                                                setState(() {
+                                                  _initialStampCount++;
+                                                });
+                                                _loadBusinessAndGenerateToken();
+                                              }
+                                            : null,
+                                        icon: const Icon(Icons.add_circle),
+                                      ),
+                                    ],
+                                  ),
+                                  Slider(
+                                    value: _initialStampCount.toDouble(),
+                                    min: 0,
+                                    max: _business!.stampsRequired.toDouble(),
+                                    divisions: _business!.stampsRequired,
+                                    label: _initialStampCount == 0 
+                                        ? 'None' 
+                                        : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _initialStampCount = value.toInt();
+                                      });
+                                      _loadBusinessAndGenerateToken();
+                                    },
+                                  ),
+                                  
+                                  if (_initialStampCount > 0) ...[
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: BrandColors.infoContainer,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.check_circle, color: BrandColors.info, size: 20),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              'Card will start with $_initialStampCount stamp${_initialStampCount > 1 ? 's' : ''} already applied',
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                color: BrandColors.textPrimary,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ],
                           ),
                         ),
@@ -328,6 +391,74 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                   ],
                                 ),
                               ),
+                              
+                              // Save/Print buttons for simple mode
+                              if (_business!.mode == OperationMode.simple) ...[
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: _saveToPhotos,
+                                        icon: const Icon(Icons.photo_library),
+                                        label: const Text('Save'),
+                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: _printToken,
+                                        icon: const Icon(Icons.print),
+                                        label: const Text('Print'),
+                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _shareToken,
+                                    icon: const Icon(Icons.share),
+                                    label: const Text('Share QR Code'),
+                                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 20),
+                                
+                                // Instructions
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: BrandColors.infoContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                                  ),
+                                  child: const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(Icons.lightbulb_outline, color: BrandColors.info, size: 20),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'How to Use',
+                                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        '1. Show this QR code to customers directly from your device\n2. Or print and display it in your business\n3. Customer scans to add your loyalty card\n4. This QR code is reusable for all new customers',
+                                        style: TextStyle(fontSize: 12, color: BrandColors.textPrimary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -336,6 +467,88 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   ),
                 ),
     );
+  }
+
+  // Save issue card QR to photos
+  Future<void> _saveToPhotos() async {
+    if (_business == null || _token == null) return;
+    
+    try {
+      final success = await BackupStorageService.saveIssueCardToPhotos(
+        qrData: _token!.toQRString(),
+        businessName: _business!.name,
+        initialStamps: _initialStampCount,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Saved to Photos');
+        } else {
+          AppFeedback.error(context, 'Failed to save');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error saving issue card to photos: $e', tag: 'IssueCard');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  // Print issue card QR
+  Future<void> _printToken() async {
+    if (_business == null || _token == null) return;
+    
+    try {
+      final success = await BackupStorageService.printIssueCard(
+        qrData: _token!.toQRString(),
+        businessName: _business!.name,
+        initialStamps: _initialStampCount,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Print dialog opened');
+        } else {
+          AppFeedback.error(context, 'Failed to print');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error printing issue card: $e', tag: 'IssueCard');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  // Share issue card QR via native share sheet
+  Future<void> _shareToken() async {
+    if (_business == null || _token == null) return;
+    
+    try {
+      final size = MediaQuery.of(context).size;
+      final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
+      
+      final success = await BackupStorageService.shareIssueCard(
+        qrData: _token!.toQRString(),
+        businessName: _business!.name,
+        initialStamps: _initialStampCount,
+        sharePositionOrigin: sharePosition,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Share sheet opened');
+        } else {
+          AppFeedback.error(context, 'Failed to share');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error sharing issue card: $e', tag: 'IssueCard');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
   }
 
   void _startCountdown() {

@@ -8,6 +8,7 @@ export 'models/transaction.dart';
 export 'models/qr_tokens.dart';
 export 'models/operation_mode.dart';
 export 'models/supplier_config_backup.dart';
+export 'models/verification_result.dart';
 
 // Export constants
 export 'constants/constants.dart';
@@ -19,6 +20,11 @@ export 'utils/qr_code_size.dart';
 export 'utils/crypto_utils.dart';
 export 'utils/app_logger.dart';
 export 'utils/error_handling.dart';
+export 'utils/signature_format.dart';
+export 'utils/error_handler.dart';
+
+// Export exceptions
+export 'exceptions/repository_exceptions.dart';
 
 // Export widgets
 export 'widgets/feedback.dart';

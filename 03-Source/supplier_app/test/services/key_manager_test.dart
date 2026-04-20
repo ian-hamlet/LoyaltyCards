@@ -107,14 +107,14 @@ void main() {
         keyPair.publicKey as ECPublicKey,
       );
 
-      // Verify using CryptoUtils
-      final isValid = CryptoUtils.verifySignature(
+      // Verify using CryptoUtils (CR-1.4)
+      final result = CryptoUtils.verifySignature(
         data: testData,
         signatureBase64: signature!,
         publicKeyEncoded: publicKeyEncoded,
       );
 
-      expect(isValid, true);
+      expect(result.isValid, true);
     });
 
     test('signature verification fails with wrong data', () async {
@@ -131,14 +131,14 @@ void main() {
         keyPair.publicKey as ECPublicKey,
       );
 
-      // Verify with wrong data should fail
-      final isValid = CryptoUtils.verifySignature(
+      // Verify with wrong data should fail (CR-1.4)
+      final result = CryptoUtils.verifySignature(
         data: wrongData,
         signatureBase64: signature!,
         publicKeyEncoded: publicKeyEncoded,
       );
 
-      expect(isValid, false);
+      expect(result.isValid, false);
     });
 
     test('signature verification fails with wrong public key', () async {
@@ -155,14 +155,14 @@ void main() {
         keyPair2.publicKey as ECPublicKey,
       );
 
-      // Verify with wrong public key should fail
-      final isValid = CryptoUtils.verifySignature(
+      // Verify with wrong public key should fail (CR-1.4)
+      final result = CryptoUtils.verifySignature(
         data: testData,
         signatureBase64: signature!,
         publicKeyEncoded: wrongPublicKey,
       );
 
-      expect(isValid, false);
+      expect(result.isValid, false);
     });
 
     test('signs empty string without error', () async {
@@ -177,18 +177,18 @@ void main() {
       expect(signature, isNotNull);
       expect(signature, isNotEmpty);
 
-      // Should be verifiable
+      // Should be verifiable (CR-1.4)
       final publicKeyEncoded = keyManager.encodePublicKey(
         keyPair.publicKey as ECPublicKey,
       );
 
-      final isValid = CryptoUtils.verifySignature(
+      final result = CryptoUtils.verifySignature(
         data: emptyData,
         signatureBase64: signature!,
         publicKeyEncoded: publicKeyEncoded,
       );
 
-      expect(isValid, true);
+      expect(result.isValid, true);
     });
 
     test('signing is deterministic for same data and key', () async {
@@ -205,25 +205,25 @@ void main() {
       );
 
       // ECDSA signatures include randomness, so they will be different
-      // But both should verify correctly
+      // But both should verify correctly (CR-1.4)
       final publicKeyEncoded = keyManager.encodePublicKey(
         keyPair.publicKey as ECPublicKey,
       );
 
-      final isValid1 = CryptoUtils.verifySignature(
+      final result1 = CryptoUtils.verifySignature(
         data: testData,
         signatureBase64: sig1!,
         publicKeyEncoded: publicKeyEncoded,
       );
 
-      final isValid2 = CryptoUtils.verifySignature(
+      final result2 = CryptoUtils.verifySignature(
         data: testData,
         signatureBase64: sig2!,
         publicKeyEncoded: publicKeyEncoded,
       );
 
-      expect(isValid1, true);
-      expect(isValid2, true);
+      expect(result1.isValid, true);
+      expect(result2.isValid, true);
     });
 
     test('signature format is base64 encoded', () async {
@@ -253,18 +253,18 @@ void main() {
       expect(signature, isNotNull);
       expect(signature!.length, greaterThan(60));
 
-      // Verify it
+      // Verify it (CR-1.4)
       final publicKeyEncoded = keyManager.encodePublicKey(
         keyPair.publicKey as ECPublicKey,
       );
 
-      final isValid = CryptoUtils.verifySignature(
+      final result = CryptoUtils.verifySignature(
         data: complexData,
         signatureBase64: signature,
         publicKeyEncoded: publicKeyEncoded,
       );
 
-      expect(isValid, true);
+      expect(result.isValid, true);
     });
   });
 
@@ -286,14 +286,14 @@ void main() {
         
         expect(signature, isNotNull);
 
-        // Verify signature
-        final isValid = CryptoUtils.verifySignature(
+        // Verify signature (CR-1.4)
+        final result = CryptoUtils.verifySignature(
           data: stampData,
           signatureBase64: signature!,
           publicKeyEncoded: publicKeyEncoded,
         );
 
-        expect(isValid, true, reason: 'Stamp $i should verify correctly');
+        expect(result.isValid, true, reason: 'Stamp $i should verify correctly');
 
         // Update previous hash for next stamp (simplified)
         previousHash = 'hash-$i';

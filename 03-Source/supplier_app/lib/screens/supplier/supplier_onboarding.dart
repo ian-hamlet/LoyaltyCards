@@ -26,6 +26,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   String _selectedColor = BrandColors.cardColorOptions.first;
   int _selectedLogoIndex = 0;
   OperationMode _selectedMode = OperationMode.secure; // Default to secure
+  int _scanIntervalSeconds = 30; // REQ-022: Default 30 seconds for simple mode
   bool _isCreating = false;
 
   @override
@@ -85,6 +86,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
         logoIndex: _selectedLogoIndex,
         mode: _selectedMode,
         createdAt: DateTime.now(),
+        scanInterval: _scanIntervalSeconds * 1000, // REQ-022: Convert seconds to ms
       );
 
       // Save to database
@@ -298,6 +300,72 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     setState(() => _selectedMode = value!);
                   },
                 ),
+                
+                // REQ-022: Scan Interval Configuration (Simple Mode only)
+                if (_selectedMode == OperationMode.simple) ...[
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      const Text(
+                        'Customer Scan Cooldown',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Tooltip(
+                        message: 'Prevents customers from scanning the same QR code multiple times in quick succession (5-60 seconds)',
+                        child: Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: _scanIntervalSeconds > 5
+                            ? () {
+                                Haptics.light();
+                                setState(() => _scanIntervalSeconds -= 5);
+                              }
+                            : null,
+                        icon: const Icon(Icons.remove_circle),
+                      ),
+                      Text(
+                        '$_scanIntervalSeconds seconds',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _scanIntervalSeconds < 60
+                            ? () {
+                                Haptics.light();
+                                setState(() => _scanIntervalSeconds += 5);
+                              }
+                            : null,
+                        icon: const Icon(Icons.add_circle),
+                      ),
+                    ],
+                  ),
+                  Slider(
+                    value: _scanIntervalSeconds.toDouble(),
+                    min: 5,
+                    max: 60,
+                    divisions: 11,
+                    label: '${_scanIntervalSeconds}s',
+                    onChanged: (value) {
+                      setState(() => _scanIntervalSeconds = value.toInt());
+                    },
+                  ),
+                ],
                 
                 const SizedBox(height: 24),
                 

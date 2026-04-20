@@ -60,10 +60,27 @@ class InitialStamp {
   });
 
   factory InitialStamp.fromJson(Map<String, dynamic> json) {
+    final stampNumber = json['stampNumber'] as int;
+    final timestamp = json['timestamp'] as int;
+    
+    // Validation: stamp number must be positive
+    if (stampNumber < 1) {
+      throw FormatException('Invalid stamp number: $stampNumber (must be >= 1)');
+    }
+    
+    // Validation: timestamp should not be in the far future (allow 5 min clock skew)
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final maxFutureMs = 5 * 60 * 1000; // 5 minutes
+    if (timestamp > now + maxFutureMs) {
+      throw FormatException(
+        'Timestamp in future: $timestamp (current: $now, max allowed: ${now + maxFutureMs})'
+      );
+    }
+    
     return InitialStamp(
-      stampNumber: json['stampNumber'] as int,
+      stampNumber: stampNumber,
       signature: json['signature'] as String,
-      timestamp: json['timestamp'] as int,
+      timestamp: timestamp,
     );
   }
 
@@ -144,12 +161,12 @@ class CardIssueToken extends QRToken {
   }
 
   /// Data string used for signature verification
+  /// 
+  /// Always includes cardId (empty string if null) for consistency.
+  /// Format: businessId:businessName:publicKey:stampsRequired:brandColor:cardId:timestamp
   String getSignatureData() {
-    // Include cardId only if present (backward compatibility)
-    if (cardId != null) {
-      return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardId:$timestamp';
-    }
-    return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$timestamp';
+    final cardIdValue = cardId ?? '';
+    return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardIdValue:$timestamp';
   }
 
   /// Validate token structure
@@ -265,6 +282,11 @@ class StampToken extends QRToken {
   final String previousHash;
   final String signature;
   final List<AdditionalStamp> additionalStamps; // For multi-stamp operations
+  
+  // REQ-022: Enhanced Simple Mode fields
+  final int stampCount; // Number of stamps this token grants (1-N)
+  final int? expiryDate; // Optional expiry timestamp (null = no expiry)
+  final int? scanInterval; // Supplier's configured rate limit in ms (null = use default)
 
   StampToken({
     required this.id,
@@ -275,6 +297,9 @@ class StampToken extends QRToken {
     required this.signature,
     required int timestamp,
     this.additionalStamps = const [],
+    this.stampCount = 1, // Default: 1 stamp (backward compatible)
+    this.expiryDate, // Optional expiry
+    this.scanInterval, // Optional rate limit override
   }) : super(type: 'stamp_token', timestamp: timestamp);
 
   factory StampToken.fromJson(Map<String, dynamic> json) {
@@ -290,12 +315,15 @@ class StampToken extends QRToken {
       additionalStamps: additionalStampsJson
           .map((s) => AdditionalStamp.fromJson(s as Map<String, dynamic>))
           .toList(),
+      stampCount: json['stampCount'] as int? ?? 1, // REQ-022: Default 1 for backward compatibility
+      expiryDate: json['expiryDate'] as int?, // REQ-022: Optional expiry
+      scanInterval: json['scanInterval'] as int?, // REQ-022: Optional rate limit
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
-    return {
+    final json = {
       'type': type,
       'id': id,
       'cardId': cardId,
@@ -305,7 +333,21 @@ class StampToken extends QRToken {
       'previousHash': previousHash,
       'signature': signature,
       'additionalStamps': additionalStamps.map((s) => s.toJson()).toList(),
+      'stampCount': stampCount, // REQ-022
     };
+    
+    // Only include optional fields if they have values
+    // Use local variables to allow null-safety promotion
+    final expiry = expiryDate;
+    if (expiry != null) {
+      json['expiryDate'] = expiry;
+    }
+    final interval = scanInterval;
+    if (interval != null) {
+      json['scanInterval'] = interval;
+    }
+    
+    return json;
   }
 
   /// Data string used for signature verification
@@ -453,7 +495,8 @@ class RedemptionToken extends QRToken {
     if (cardId.isEmpty || businessId.isEmpty || signature.isEmpty) {
       return false;
     }
-    if (stampsRedeemed < 1) {
+    // Stamps redeemed must be positive (> 0, not >= 1 for clarity)
+    if (stampsRedeemed <= 0) {
       return false;
     }
     return true;

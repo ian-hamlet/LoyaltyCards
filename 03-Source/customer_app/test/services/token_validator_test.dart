@@ -342,4 +342,265 @@ void main() {
       expect(result.error, 'Test error message');
     });
   });
+
+  group('REQ-022: Enhanced Simple Mode - StampToken Validation', () {
+    const testCardId = 'test-card-123';
+    const testBusinessId = 'test-biz-123';
+    const previousHash = 'previous-hash';
+
+    test('rejects token with stampCount exceeding stampsRequired', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        stampCount: 15, // Exceeds card's requirement
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+        stampsRequired: 10, // Card requires 10 stamps
+      );
+
+      expect(result.isValid, false);
+      expect(result.error, contains('Invalid stamp count'));
+      expect(result.error, contains('15'));
+      expect(result.error, contains('10'));
+    });
+
+    test('accepts token with valid stampCount', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        stampCount: 5, // Valid: 5 <= 10
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+        stampsRequired: 10,
+      );
+
+      // Will fail on signature, but not on stampCount
+      if (result.error != null) {
+        expect(result.error, isNot(contains('stamp count')));
+      }
+    });
+
+    test('accepts token with stampCount equal to stampsRequired', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        stampCount: 10, // Exactly matches requirement
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+        stampsRequired: 10,
+      );
+
+      // Will fail on signature, but not on stampCount
+      if (result.error != null) {
+        expect(result.error, isNot(contains('stamp count')));
+      }
+    });
+
+    test('rejects expired token (expiryDate in past)', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final pastExpiry = now - (24 * 60 * 60 * 1000); // 1 day ago
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        expiryDate: pastExpiry,
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+      );
+
+      expect(result.isValid, false);
+      expect(result.error, contains('expired'));
+    });
+
+    test('accepts token with future expiry date', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final futureExpiry = now + (7 * 24 * 60 * 60 * 1000); // 1 week from now
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        expiryDate: futureExpiry,
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+      );
+
+      // Will fail on signature, but not on expiry
+      if (result.error != null) {
+        expect(result.error, isNot(contains('expired')));
+      }
+    });
+
+    test('accepts token with no expiry date', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        expiryDate: null, // No expiry
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+      );
+
+      // Will fail on signature, but not on expiry
+      if (result.error != null) {
+        expect(result.error, isNot(contains('expired')));
+      }
+    });
+
+    test('validates stampCount before expiryDate', () async {
+      // Both invalid - should fail on stampCount first
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final pastExpiry = now - (24 * 60 * 60 * 1000);
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        stampCount: 20, // Invalid
+        expiryDate: pastExpiry, // Also invalid
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+        stampsRequired: 10,
+      );
+
+      expect(result.isValid, false);
+      expect(result.error, contains('stamp count')); // Fails on stampCount first
+    });
+
+    test('backward compatibility: accepts token without REQ-022 fields', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      // Old-style token (defaults: stampCount=1, no expiry, no scanInterval)
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+      );
+
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+        stampsRequired: 10,
+      );
+
+      // Should not fail on REQ-022 fields (stampCount defaults to 1)
+      if (result.error != null) {
+        expect(result.error, isNot(contains('stamp count')));
+        expect(result.error, isNot(contains('expired')));
+      }
+    });
+
+    test('scanInterval field is extracted but not validated', () async {
+      // scanInterval is informational only, used by RateLimiter
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: testCardId,
+        businessId: testBusinessId,
+        stampNumber: 1,
+        previousHash: previousHash,
+        signature: testSignature,
+        timestamp: now,
+        scanInterval: 45000, // 45 seconds
+      );
+
+      expect(token.scanInterval, 45000);
+
+      // scanInterval should not affect validation
+      final result = await TokenValidator.validateStampToken(
+        token: token,
+        businessPublicKey: testPublicKey,
+        expectedPreviousHash: previousHash,
+        mode: OperationMode.simple,
+      );
+
+      // Will fail on signature, but scanInterval doesn't affect validation
+      if (result.error != null) {
+        expect(result.error, isNot(contains('scan')));
+        expect(result.error, isNot(contains('interval')));
+      }
+    });
+  });
 }

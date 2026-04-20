@@ -273,21 +273,21 @@ class _SupplierHomeState extends State<SupplierHome> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.blue[50],
+                          color: BrandColors.infoContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                Icon(Icons.info_outline, color: Colors.blue[700], size: 16),
-                                const SizedBox(width: 8),
+                                Icon(Icons.info_outline, color: BrandColors.info, size: 16),
+                                SizedBox(width: 8),
                                 Text(
                                   'Statistics',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue[900],
+                                    color: BrandColors.textPrimary,
                                   ),
                                 ),
                               ],

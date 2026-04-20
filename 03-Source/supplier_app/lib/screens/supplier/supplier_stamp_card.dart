@@ -475,21 +475,21 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.blue[50],
+                        color: BrandColors.infoContainer,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.blue[200]!),
+                        border: Border.all(color: BrandColors.info.withOpacity(0.3)),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
-                          Icon(Icons.qr_code_scanner, color: Colors.blue[700], size: 24),
-                          const SizedBox(width: 12),
+                          Icon(Icons.qr_code_scanner, color: BrandColors.info, size: 24),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               'Now ask customer to scan this code and get their stamp',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.blue[900],
+                                color: BrandColors.textPrimary,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -548,16 +548,16 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
               // Instructions
               Container(
                 padding: const EdgeInsets.all(16),
-                color: Colors.blue[50],
-                child: Row(
+                color: BrandColors.infoContainer,
+                child: const Row(
                   children: [
-                    const Icon(Icons.qr_code_scanner, color: Colors.blue),
-                    const SizedBox(width: 12),
+                    Icon(Icons.qr_code_scanner, color: BrandColors.info),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Ask customer to show their card QR code',
                         style: TextStyle(
-                          color: Colors.blue[900],
+                          color: BrandColors.textPrimary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -884,21 +884,21 @@ class _StampTokenScreenState extends State<_StampTokenScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: BrandColors.infoContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue[200]!),
+                  border: Border.all(color: BrandColors.info.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.qr_code_scanner, color: Colors.blue[700], size: 24),
+                    const Icon(Icons.qr_code_scanner, color: BrandColors.info, size: 24),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Now ask customer to scan this code and get their ${widget.stampCount > 1 ? "${widget.stampCount} stamps" : "stamp"}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.blue[900],
+                          color: BrandColors.textPrimary,
                         ),
                         textAlign: TextAlign.center,
                       ),

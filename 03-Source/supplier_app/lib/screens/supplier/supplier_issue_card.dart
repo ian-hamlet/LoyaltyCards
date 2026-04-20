@@ -193,20 +193,20 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue[50],
+                                    color: BrandColors.infoContainer,
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.blue[200]!),
+                                    border: Border.all(color: BrandColors.info.withOpacity(0.3)),
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.check_circle, color: Colors.blue[700], size: 20),
+                                      const Icon(Icons.check_circle, color: BrandColors.info, size: 20),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           'Card will start with $_initialStampCount stamp${_initialStampCount > 1 ? 's' : ''} already applied',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 13,
-                                            color: Colors.blue[900],
+                                            color: BrandColors.textPrimary,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),

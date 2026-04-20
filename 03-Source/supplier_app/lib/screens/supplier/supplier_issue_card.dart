@@ -23,10 +23,11 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   CardIssueToken? _token;
   bool _isLoading = true;
   String? _errorMessage;
-  int _initialStampCount = 0; // Number of stamps to pre-apply (0-7)
+  int _initialStampCount = 0; // Number of stamps to pre-apply (0-stampsRequired)
   final Set<String> _loggedCardIds = {}; // Track logged card IDs to prevent duplicates
   Timer? _countdownTimer;
   Duration? _remainingTime;
+  bool _configExpanded = false; // Track Quick Start configuration expansion state
 
   @override
   void initState() {
@@ -138,116 +139,145 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Initial Stamp Count Selector (Slider)
+                      // Initial Stamp Count Selector (Collapsible)
                       Card(
                         elevation: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.bolt, color: Colors.amber[700], size: 20),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    'Quick Start Stamps',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Tooltip(
-                                    message: 'Pre-apply stamps when issuing new cards (0-${_business!.stampsRequired})',
-                                    child: Icon(Icons.info_outline, size: 18, color: Colors.grey[600]),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              // Slider with +/- buttons
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(
-                                    onPressed: _initialStampCount > 0
-                                        ? () {
-                                            Haptics.light();
-                                            setState(() {
-                                              _initialStampCount--;
-                                            });
-                                            _loadBusinessAndGenerateToken();
-                                          }
-                                        : null,
-                                    icon: const Icon(Icons.remove_circle),
-                                  ),
-                                  Text(
-                                    _initialStampCount == 0 
-                                        ? 'No stamps' 
-                                        : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: _initialStampCount < _business!.stampsRequired
-                                        ? () {
-                                            Haptics.light();
-                                            setState(() {
-                                              _initialStampCount++;
-                                            });
-                                            _loadBusinessAndGenerateToken();
-                                          }
-                                        : null,
-                                    icon: const Icon(Icons.add_circle),
-                                  ),
-                                ],
-                              ),
-                              Slider(
-                                value: _initialStampCount.toDouble(),
-                                min: 0,
-                                max: _business!.stampsRequired.toDouble(),
-                                divisions: _business!.stampsRequired,
-                                label: _initialStampCount == 0 
-                                    ? 'None' 
-                                    : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _initialStampCount = value.toInt();
-                                  });
-                                  _loadBusinessAndGenerateToken();
-                                },
-                              ),
-                              
-                              if (_initialStampCount > 0) ...[
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: BrandColors.infoContainer,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: BrandColors.info.withOpacity(0.3)),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.check_circle, color: BrandColors.info, size: 20),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'Card will start with $_initialStampCount stamp${_initialStampCount > 1 ? 's' : ''} already applied',
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            color: BrandColors.textPrimary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                        child: Theme(
+                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                          child: ExpansionTile(
+                            initiallyExpanded: _configExpanded,
+                            onExpansionChanged: (expanded) {
+                              setState(() => _configExpanded = expanded);
+                            },
+                            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            title: Row(
+                              children: [
+                                Icon(Icons.bolt, color: Colors.amber[700], size: 20),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Quick Start Stamps',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
+                            ),
+                            subtitle: Text(
+                              _initialStampCount == 0 
+                                  ? 'No stamps pre-applied' 
+                                  : (_initialStampCount == 1 ? '1 stamp pre-applied' : '$_initialStampCount stamps pre-applied'),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Description
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[50],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      'Pre-apply stamps to new cards. Useful for welcome bonuses or promotions. Set to 0 for standard card issuance.',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: BrandColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  
+                                  // Slider with +/- buttons
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconButton(
+                                        onPressed: _initialStampCount > 0
+                                            ? () {
+                                                Haptics.light();
+                                                setState(() {
+                                                  _initialStampCount--;
+                                                });
+                                                _loadBusinessAndGenerateToken();
+                                              }
+                                            : null,
+                                        icon: const Icon(Icons.remove_circle),
+                                      ),
+                                      Text(
+                                        _initialStampCount == 0 
+                                            ? 'No stamps' 
+                                            : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: _initialStampCount < _business!.stampsRequired
+                                            ? () {
+                                                Haptics.light();
+                                                setState(() {
+                                                  _initialStampCount++;
+                                                });
+                                                _loadBusinessAndGenerateToken();
+                                              }
+                                            : null,
+                                        icon: const Icon(Icons.add_circle),
+                                      ),
+                                    ],
+                                  ),
+                                  Slider(
+                                    value: _initialStampCount.toDouble(),
+                                    min: 0,
+                                    max: _business!.stampsRequired.toDouble(),
+                                    divisions: _business!.stampsRequired,
+                                    label: _initialStampCount == 0 
+                                        ? 'None' 
+                                        : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _initialStampCount = value.toInt();
+                                      });
+                                      _loadBusinessAndGenerateToken();
+                                    },
+                                  ),
+                                  
+                                  if (_initialStampCount > 0) ...[
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: BrandColors.infoContainer,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.check_circle, color: BrandColors.info, size: 20),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              'Card will start with $_initialStampCount stamp${_initialStampCount > 1 ? 's' : ''} already applied',
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                color: BrandColors.textPrimary,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ],
                           ),
                         ),

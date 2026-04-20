@@ -607,7 +607,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                         items: const [
                           DropdownMenuItem(value: 'none', child: Text('No Expiry')),
                           DropdownMenuItem(value: 'daily', child: Text('Daily (Midnight)')),
-                          DropdownMenuItem(value: 'weekly', child: Text('Weekly (Sunday)')),
+                          DropdownMenuItem(value: 'weekly', child: Text('Weekly (Monday)')),
                           DropdownMenuItem(value: 'monthly', child: Text('Monthly (1st of Month)')),
                           DropdownMenuItem(value: 'custom', child: Text('Custom Date...')),
                         ],
@@ -635,9 +635,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                 _expiryDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0);
                               } else if (value == 'weekly') {
                                 final now = DateTime.now();
-                                final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
-                                final nextSunday = now.add(Duration(days: daysUntilSunday == 0 ? 7 : daysUntilSunday));
-                                _expiryDate = DateTime(nextSunday.year, nextSunday.month, nextSunday.day, 23, 59, 59);
+                                // Calculate days until next Monday (1 = Monday)
+                                final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
+                                final nextMonday = now.add(Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday));
+                                _expiryDate = DateTime(nextMonday.year, nextMonday.month, nextMonday.day, 0, 0, 0);
                               } else if (value == 'monthly') {
                                 final now = DateTime.now();
                                 // Calculate first day of next month

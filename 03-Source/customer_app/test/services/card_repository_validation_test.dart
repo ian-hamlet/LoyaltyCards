@@ -14,6 +14,9 @@ void main() {
   late DatabaseHelper dbHelper;
 
   setUp(() async {
+    // Delay to ensure previous test file cleanup is complete
+    await Future.delayed(const Duration(milliseconds: 200));
+    
     dbHelper = DatabaseHelper();
     repository = CardRepository(dbHelper);
   });

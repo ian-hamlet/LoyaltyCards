@@ -527,16 +527,16 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                         children: [
                           const Text(
                             'Stamp Value',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 8),
                           Tooltip(
                             message: 'Number of stamps this QR code grants when scanned',
-                            child: Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
+                            child: Icon(Icons.info_outline, size: 18, color: Colors.grey[600]),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -550,11 +550,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                             icon: const Icon(Icons.remove_circle),
                           ),
                           Text(
-                            _stampCount == 1 ? '1 Stamp' : '$_stampCount Stamps',
+                            _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
                             style: const TextStyle(
-                              fontSize: 22,
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: BrandColors.textPrimary,
                             ),
                           ),
                           IconButton(
@@ -573,7 +572,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                         min: 1,
                         max: _business!.stampsRequired.toDouble(),
                         divisions: _business!.stampsRequired - 1,
-                        label: _stampCount == 1 ? '1 Stamp' : '$_stampCount Stamps',
+                        label: _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
                         onChanged: (value) {
                           setState(() => _stampCount = value.toInt());
                         },

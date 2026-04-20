@@ -326,10 +326,21 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
 
     if (!rateLimit.canProceed) {
-      setState(() {
-        _errorMessage = rateLimit.message ?? 'Rate limit exceeded';
-        _isProcessing = false;
-      });
+      // Rate limit hit - immediately return to card screen to prevent abuse
+      // This prevents customers from waiting on camera screen and scanning again after timeout
+      AppLogger.warning('Rate limit hit - returning to card screen', 'RateLimit');
+      
+      if (mounted) {
+        // Show error feedback
+        AppFeedback.error(
+          context,
+          rateLimit.message ?? 'Please wait before scanning again',
+        );
+        
+        // Immediately pop back to card screen
+        // Don't stay on camera - prevents easy re-scanning after timeout
+        Navigator.pop(context, null);
+      }
       return;
     }
 

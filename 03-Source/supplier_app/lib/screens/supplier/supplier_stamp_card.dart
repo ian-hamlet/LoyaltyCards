@@ -446,8 +446,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     }
   }
 
-  // REQ-022: Email token QR
-  Future<void> _emailToken() async {
+  // REQ-022: Share token QR via native share sheet
+  Future<void> _shareToken() async {
     if (_business == null || _stampToken == null) return;
     
     try {
@@ -766,9 +766,9 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: _emailToken,
-                  icon: const Icon(Icons.email),
-                  label: const Text('Email to Myself'),
+                  onPressed: _shareToken,
+                  icon: const Icon(Icons.share),
+                  label: const Text('Share'),
                   style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
                 ),
                 

@@ -386,6 +386,13 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 12),
+                                OutlinedButton.icon(
+                                  onPressed: _shareToken,
+                                  icon: const Icon(Icons.share),
+                                  label: const Text('Share'),
+                                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                                ),
                                 
                                 const SizedBox(height: 20),
                                 
@@ -475,6 +482,36 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       }
     } catch (e) {
       AppLogger.error('Error printing issue card: $e', tag: 'IssueCard');
+      if (mounted) {
+        AppFeedback.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  // Share issue card QR via native share sheet
+  Future<void> _shareToken() async {
+    if (_business == null || _token == null) return;
+    
+    try {
+      final size = MediaQuery.of(context).size;
+      final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
+      
+      final success = await BackupStorageService.shareIssueCard(
+        qrData: _token!.toQRString(),
+        businessName: _business!.name,
+        initialStamps: _initialStampCount,
+        sharePositionOrigin: sharePosition,
+      );
+      
+      if (mounted) {
+        if (success) {
+          AppFeedback.success(context, 'Share sheet opened');
+        } else {
+          AppFeedback.error(context, 'Failed to share');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error sharing issue card: $e', tag: 'IssueCard');
       if (mounted) {
         AppFeedback.error(context, 'Error: $e');
       }

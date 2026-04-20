@@ -1213,4 +1213,69 @@ For best results:
 
     return pdf;
   }
+
+  /// Share Simple Mode issue card via native share sheet
+  static Future<bool> shareIssueCard({
+    required String qrData,
+    required String businessName,
+    required int initialStamps,
+    Rect? sharePositionOrigin,
+  }) async {
+    try {
+      AppLogger.debug('=== shareIssueCard START ===', 'BackupService');
+      
+      final qrImageBytes = await generateIssueCardQRImageBytes(
+        qrData: qrData,
+        businessName: businessName,
+        initialStamps: initialStamps,
+      );
+      
+      final tempDir = await getTemporaryDirectory();
+      final fileName = _generateIssueCardFileName(
+        businessName: businessName,
+        initialStamps: initialStamps,
+        date: DateTime.now(),
+        extension: 'png',
+      );
+      final filePath = '${tempDir.path}/$fileName';
+      
+      final file = File(filePath);
+      await file.writeAsBytes(qrImageBytes);
+
+      final stampInfo = initialStamps == 0
+          ? 'New card with no initial stamps'
+          : (initialStamps == 1 ? 'Card starts with 1 stamp' : 'Card starts with $initialStamps stamps');
+      
+      final subject = 'LoyaltyCards Issue Card - $businessName';
+      
+      final body = '''
+Loyalty Card Issue QR for $businessName
+
+$stampInfo
+
+Display this QR code to customers so they can add your loyalty card to their device.
+
+This QR code is reusable and can be scanned by multiple customers.
+
+For best results:
+1. Display on a screen or print and laminate
+2. Place where customers can easily scan
+3. Keep accessible for new customers
+''';
+
+      final result = await Share.shareXFiles(
+        [XFile(filePath)],
+        subject: subject,
+        text: body,
+        sharePositionOrigin: sharePositionOrigin,
+      );
+
+      AppLogger.debug('=== shareIssueCard END (success: true) ===', 'BackupService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error sharing issue card: $e', tag: 'BackupService');
+      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
+      return false;
+    }
+  }
 }

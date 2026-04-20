@@ -22,19 +22,20 @@ class TokenValidator {
     // Simple mode: Skip timestamp check (tokens are reusable/static)
     if (token.mode == OperationMode.simple) {
       AppLogger.debug('Simple mode: Skipping timestamp validation (reusable token)', 'Token');
-      // Still verify signature for simple mode
+      // Still verify signature for simple mode (CR-1.4)
       try {
         final signatureData = token.getSignatureData();
-        final isSignatureValid = KeyManager.verifySignature(
+        final verificationResult = KeyManager.verifySignature(
           signatureData,
           token.signature,
           token.publicKey,
         );
 
-        if (!isSignatureValid) {
+        if (!verificationResult.isValid) {
+          AppLogger.error('Simple mode signature verification failed: ${verificationResult.failureReason}', tag: 'Token');
           return ValidationResult(
             isValid: false,
-            error: 'Invalid signature',
+            error: 'Invalid signature: ${verificationResult.failureReason}',
           );
         }
 
@@ -57,19 +58,20 @@ class TokenValidator {
       );
     }
 
-    // Verify signature
+    // Verify signature (CR-1.4)
     try {
       final signatureData = token.getSignatureData();
-      final isSignatureValid = KeyManager.verifySignature(
+      final verificationResult = KeyManager.verifySignature(
         signatureData,
         token.signature,
         token.publicKey,
       );
 
-      if (!isSignatureValid) {
+      if (!verificationResult.isValid) {
+        AppLogger.error('Secure mode signature verification failed: ${verificationResult.failureReason}', tag: 'Token');
         return ValidationResult(
           isValid: false,
-          error: 'Invalid signature',
+          error: 'Invalid signature: ${verificationResult.failureReason}',
         );
       }
 
@@ -163,19 +165,20 @@ class TokenValidator {
       );
     }
 
-    // Verify signature
+    // Verify signature (CR-1.4)
     try {
       final signatureData = token.getSignatureData();
-      final isSignatureValid = KeyManager.verifySignature(
+      final verificationResult = KeyManager.verifySignature(
         signatureData,
         token.signature,
         businessPublicKey,
       );
 
-      if (!isSignatureValid) {
+      if (!verificationResult.isValid) {
+        AppLogger.error('Stamp token signature verification failed: ${verificationResult.failureReason}', tag: 'Token');
         return ValidationResult(
           isValid: false,
-          error: 'Invalid signature',
+          error: 'Invalid signature: ${verificationResult.failureReason}',
         );
       }
 
@@ -259,16 +262,17 @@ class TokenValidator {
       final expectedPrevHash = i > 0 ? stamps[i - 1].signature : '';
       
       final signatureData = '${token.cardId}:${i + 1}:${stamp.timestamp}:$expectedPrevHash';
-      final isValid = KeyManager.verifySignature(
+      final verificationResult = KeyManager.verifySignature(
         signatureData,
         stamp.signature,
         businessPublicKey,
       );
 
-      if (!isValid) {
+      if (!verificationResult.isValid) {
+        AppLogger.error('Redemption stamp ${i + 1} signature verification failed: ${verificationResult.failureReason}', tag: 'Token');
         return ValidationResult(
           isValid: false,
-          error: 'Invalid signature on stamp ${i + 1}',
+          error: 'Invalid signature on stamp ${i + 1}: ${verificationResult.failureReason}',
         );
       }
     }

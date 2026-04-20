@@ -197,18 +197,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.qr('Processing initial stamp #${initialStamp.stampNumber}');
         AppLogger.qr('  Card ID for stamp: $cardId');
         
-        // Verify stamp signature (skip in simple mode)
+        // Verify stamp signature (skip in simple mode) (CR-1.4)
         if (token.mode == OperationMode.secure) {
           final signatureData = '$cardId:${initialStamp.stampNumber}:${initialStamp.timestamp}:$previousHash';
-          final isValid = KeyManager.verifySignature(
+          final verificationResult = KeyManager.verifySignature(
             signatureData,
             initialStamp.signature,
             token.publicKey,
           );
 
-          if (!isValid) {
+          if (!verificationResult.isValid) {
+            AppLogger.error('Initial stamp signature verification failed: ${verificationResult.failureReason}');
             setState(() {
-              _errorMessage = 'Invalid stamp signature at stamp #${initialStamp.stampNumber}';
+              _errorMessage = 'Invalid stamp signature: ${verificationResult.failureReason}';
               _isProcessing = false;
             });
             // Rollback: delete the card
@@ -508,19 +509,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.qr('  previousHash: "$prevHashPreview"');
         AppLogger.qr('  signature: "$addlSigPreview"');
         
-        // Verify stamp signature (skip in simple mode)
+        // Verify stamp signature (skip in simple mode) (CR-1.4)
         if (card.mode == OperationMode.secure) {
           final signatureData = '${card.id}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
-          final isValid = KeyManager.verifySignature(
+          final verificationResult = KeyManager.verifySignature(
             signatureData,
             additionalStamp.signature,
             card.businessPublicKey,
           );
 
-          if (!isValid) {
-            AppLogger.error('Additional stamp signature verification FAILED');
+          if (!verificationResult.isValid) {
+            AppLogger.error('Additional stamp signature verification failed: ${verificationResult.failureReason}');
             setState(() {
-              _errorMessage = 'Invalid stamp signature at stamp #${additionalStamp.stampNumber}';
+              _errorMessage = 'Invalid stamp signature: ${verificationResult.failureReason}';
               _isProcessing = false;
             });
             // Note: We've already added some stamps. In production, you might want
@@ -824,18 +825,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
-    // Verify the redemption token signature
+    // Verify the redemption token signature (CR-1.4)
     final signatureData = token.getSignatureData();
-    final isValid = KeyManager.verifySignature(
+    final verificationResult = KeyManager.verifySignature(
       signatureData,
       token.signature,
       card.businessPublicKey,
     );
 
-    if (!isValid) {
-      AppLogger.error('Redemption token signature verification FAILED');
+    if (!verificationResult.isValid) {
+      AppLogger.error('Redemption token signature verification failed: ${verificationResult.failureReason}');
       setState(() {
-        _errorMessage = 'Invalid redemption token signature';
+        _errorMessage = 'Invalid redemption signature: ${verificationResult.failureReason}';
         _isProcessing = false;
       });
       return;

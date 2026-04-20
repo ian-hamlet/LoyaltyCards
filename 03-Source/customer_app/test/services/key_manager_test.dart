@@ -14,7 +14,7 @@ void main() {
     test('EXPECTED ERROR: accepts signature with valid format', () {
       // NOTE: This test intentionally uses malformed test data to verify
       // error handling. The ⛔ error messages you see are EXPECTED.
-      // KeyManager delegates to CryptoUtils.verifySignature
+      // KeyManager delegates to CryptoUtils.verifySignature (CR-1.4)
       // Without real keypair, we test the delegation and error handling
       final result = KeyManager.verifySignature(
         testData,
@@ -23,21 +23,21 @@ void main() {
       );
 
       // Will return false (invalid signature) but should not throw
-      expect(result, isFalse);
+      expect(result.isValid, isFalse);
     });
 
     test('EXPECTED ERROR: rejects completely invalid signature gracefully', () {
       // This test intentionally uses invalid data to verify graceful error handling
       const invalidSignature = 'not-a-valid-signature';
 
-      // Should return false, not throw
+      // Should return false, not throw (CR-1.4)
       final result = KeyManager.verifySignature(
         testData,
         invalidSignature,
         testPublicKey,
       );
 
-      expect(result, false);
+      expect(result.isValid, false);
     });
 
     test('EXPECTED ERROR: rejects empty signature', () {
@@ -50,7 +50,7 @@ void main() {
         testPublicKey,
       );
 
-      expect(result, false);
+      expect(result.isValid, false);
     });
 
     test('EXPECTED ERROR: handles empty data without throwing', () {
@@ -74,12 +74,12 @@ void main() {
         emptyPublicKey,
       );
 
-      // Should return false for empty public key
-      expect(result, false);
+      // Should return false for empty public key (CR-1.4)
+      expect(result.isValid, false);
     });
 
     test('EXPECTED ERROR: signature verification is deterministic', () {
-      // This test uses malformed test data but verifies consistent behavior
+      // This test uses malformed test data but verifies consistent behavior (CR-1.4)
       // Verify the same signature multiple times
       final results = <bool>[];
       for (int i = 0; i < 5; i++) {
@@ -88,7 +88,7 @@ void main() {
           validSignatureFormat,
           testPublicKey,
         );
-        results.add(result);
+        results.add(result.isValid);
       }
 
       // All results should be identical (deterministic)
@@ -102,15 +102,15 @@ void main() {
       final result1 = KeyManager.verifySignature(data1, validSignatureFormat, testPublicKey);
       final result2 = KeyManager.verifySignature(data2, validSignatureFormat, testPublicKey);
 
-      // Results should be consistent for same inputs
-      expect(result1, result1);
-      expect(result2, result2);
+      // Results should be consistent for same inputs (CR-1.4)
+      expect(result1.isValid, result1.isValid);
+      expect(result2.isValid, result2.isValid);
     });
   });
 
   group('KeyManager - Integration with CryptoUtils', () {
     test('EXPECTED ERROR: delegates to CryptoUtils.verifySignature', () {
-      // This test uses malformed test data to verify delegation behavior
+      // This test uses malformed test data to verify delegation behavior (CR-1.4)
       // The ⛔ error messages are EXPECTED - we're testing error handling
       const testData = 'integration-test-data';
       const testPublicKey = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEtest';
@@ -131,11 +131,11 @@ void main() {
       );
 
       // Both should give same result
-      expect(keyManagerResult, cryptoUtilsResult);
+      expect(keyManagerResult.isValid, cryptoUtilsResult.isValid);
     });
 
     test('EXPECTED ERROR: returns false for mismatched signature/data/key combinations', () {
-      // This test uses malformed test data to verify error handling
+      // This test uses malformed test data to verify error handling (CR-1.4)
       const data = 'test-data';
       const publicKey = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEtest';
       const signature = 'MEQCIEtest';
@@ -143,7 +143,7 @@ void main() {
       final result = KeyManager.verifySignature(data, signature, publicKey);
 
       // Invalid combination should return false
-      expect(result, false);
+      expect(result.isValid, false);
     });
   });
 }

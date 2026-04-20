@@ -150,8 +150,9 @@ class KeyManager {
 
   /// Verify signature with public key
   /// 
+  /// CR-1.4: Returns VerificationResult with detailed failure reasons
   /// Delegates to shared CryptoUtils for consistency with customer app
-  static bool verifySignature(String data, String signatureBase64, String publicKeyEncoded) {
+  static VerificationResult verifySignature(String data, String signatureBase64, String publicKeyEncoded) {
     return CryptoUtils.verifySignature(
       data: data,
       signatureBase64: signatureBase64,

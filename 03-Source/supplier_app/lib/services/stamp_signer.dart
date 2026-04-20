@@ -53,8 +53,10 @@ class StampSigner {
     return digest.toString();
   }
 
-  /// Verify a stamp's signature
-  Future<bool> verifyStamp(Stamp stamp, String publicKey) async {
+  /// Verify a stamp's signature (CR-1.4)
+  /// 
+  /// Returns detailed verification result for better debugging
+  Future<VerificationResult> verifyStamp(Stamp stamp, String publicKey) async {
     final dataToSign = '${stamp.cardId}:${stamp.stampNumber}:${stamp.timestamp.millisecondsSinceEpoch}:${stamp.previousHash ?? ""}';
     return KeyManager.verifySignature(dataToSign, stamp.signature, publicKey);
   }
@@ -70,13 +72,17 @@ class StampSigner {
     String? expectedPreviousHash;
 
     for (final stamp in sortedStamps) {
-      // Verify signature
-      final isValid = await verifyStamp(stamp, publicKey);
-      if (!isValid) return false;
+      // Verify signature (CR-1.4)
+      final verificationResult = await verifyStamp(stamp, publicKey);
+      if (!verificationResult.isValid) {
+        AppLogger.error('Stamp ${stamp.stampNumber} verification failed: ${verificationResult.failureReason}');
+        return false;
+      }
 
       // Verify chain integrity (except for first stamp)
       if (expectedPreviousHash != null) {
         if (stamp.previousHash != expectedPreviousHash) {
+          AppLogger.error('Stamp ${stamp.stampNumber} chain broken: expected hash $expectedPreviousHash, got ${stamp.previousHash}');
           return false;
         }
       }

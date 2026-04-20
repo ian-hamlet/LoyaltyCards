@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:pointycastle/export.dart';
+import '../models/verification_result.dart';
 import 'app_logger.dart';
 
 /// Shared cryptographic utilities for signature verification
@@ -8,13 +9,12 @@ import 'app_logger.dart';
 /// Used by both Customer and Supplier apps to verify ECDSA signatures
 /// using secp256r1 (P-256) curve with SHA256 hashing.
 /// 
-/// ERROR HANDLING PATTERN:
-/// All methods return bool (synchronous validation):
-/// - Returns true if data is valid
-/// - Returns false if data is invalid or verification fails
-/// - Does NOT throw exceptions (failures are expected - invalid QR codes are normal)
-/// - Does NOT log failures (validation failures are not errors)
-/// - Silent failures prevent console spam from scanning invalid QR codes
+/// ERROR HANDLING PATTERN (CR-1.4):
+/// Signature verification returns VerificationResult with detailed failure reasons:
+/// - Returns VerificationResult.success() if signature is valid
+/// - Returns VerificationResult.failure(reason) with specific failure reason
+/// - Enables production debugging and better error messages
+/// - Does NOT throw exceptions (validation failures are expected)
 /// 
 /// Use cases:
 /// - QR code signature verification
@@ -23,13 +23,15 @@ import 'app_logger.dart';
 class CryptoUtils {
   /// Verify ECDSA signature using secp256r1 (P-256) curve with SHA256
   /// 
+  /// CR-1.4: Returns detailed verification result instead of boolean
+  /// 
   /// Parameters:
   /// - [data]: The original data that was signed (will be UTF-8 encoded)
   /// - [signatureBase64]: Base64-encoded signature bytes
   /// - [publicKeyEncoded]: Base64-encoded public key (custom encoding format)
   /// 
-  /// Returns true if signature is valid, false otherwise
-  static bool verifySignature({
+  /// Returns VerificationResult with success/failure and detailed reason
+  static VerificationResult verifySignature({
     required String data,
     required String signatureBase64,
     required String publicKeyEncoded,
@@ -37,7 +39,22 @@ class CryptoUtils {
     try {
       // Decode the public key
       final publicKey = _decodePublicKey(publicKeyEncoded);
-      if (publicKey == null) return false;
+      if (publicKey == null) {
+        AppLogger.error('Failed to decode public key for signature verification');
+        return VerificationResult.failure('invalid_public_key');
+      }
+
+      // Decode signature from base64
+      final signatureBytes = base64Decode(signatureBase64);
+      
+      // Validate signature length (should be 64 bytes for P-256: 32 bytes r + 32 bytes s)
+      // Note: Custom encoding uses 4-byte length headers, so actual size varies
+      if (signatureBytes.length < 8) {
+        AppLogger.error('Signature too short: ${signatureBytes.length} bytes');
+        return VerificationResult.failure(
+          'invalid_signature_length: ${signatureBytes.length}'
+        );
+      }
 
       // Initialize ECDSA verifier with SHA256
       final signer = ECDSASigner(SHA256Digest());
@@ -45,19 +62,43 @@ class CryptoUtils {
 
       // Encode data as UTF-8 bytes
       final dataBytes = utf8.encode(data);
-      
-      // Decode signature from base64
-      final signatureBytes = base64Decode(signatureBase64);
 
       // Parse signature components (r and s values)
       var offset = 0;
+      
+      // Validate buffer for r length
+      if (offset + 4 > signatureBytes.length) {
+        AppLogger.error('Insufficient bytes for r length header');
+        return VerificationResult.failure('invalid_signature_format');
+      }
+      
       final rLength = _decodeLength(signatureBytes, offset);
       offset += 4;
+      
+      // Validate r bytes
+      if (offset + rLength > signatureBytes.length) {
+        AppLogger.error('Invalid rLength: $rLength exceeds buffer');
+        return VerificationResult.failure('invalid_signature_format');
+      }
+      
       final rBytes = signatureBytes.sublist(offset, offset + rLength);
       offset += rLength;
       
+      // Validate buffer for s length
+      if (offset + 4 > signatureBytes.length) {
+        AppLogger.error('Insufficient bytes for s length header');
+        return VerificationResult.failure('invalid_signature_format');
+      }
+      
       final sLength = _decodeLength(signatureBytes, offset);
       offset += 4;
+      
+      // Validate s bytes
+      if (offset + sLength > signatureBytes.length) {
+        AppLogger.error('Invalid sLength: $sLength exceeds buffer');
+        return VerificationResult.failure('invalid_signature_format');
+      }
+      
       final sBytes = signatureBytes.sublist(offset, offset + sLength);
 
       // Convert to BigInt
@@ -77,15 +118,15 @@ class CryptoUtils {
       
       if (isValid) {
         AppLogger.debug('Signature verification successful', 'Crypto');
+        return VerificationResult.success();
       } else {
-        AppLogger.warning('Signature verification failed - invalid signature', 'Crypto');
+        AppLogger.warning('Signature verification failed - signature mismatch', 'Crypto');
+        return VerificationResult.failure('signature_mismatch');
       }
-      
-      return isValid;
-    } catch (e) {
+    } catch (e, stack) {
       // Log the failure reason for debugging
-      AppLogger.error('Signature verification exception: $e');
-      return false;
+      AppLogger.error('Signature verification exception: $e', stackTrace: stack);
+      return VerificationResult.failure('verification_error: ${e.runtimeType}');
     }
   }
 

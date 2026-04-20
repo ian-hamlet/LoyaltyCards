@@ -8,6 +8,7 @@ export 'models/transaction.dart';
 export 'models/qr_tokens.dart';
 export 'models/operation_mode.dart';
 export 'models/supplier_config_backup.dart';
+export 'models/verification_result.dart';
 
 // Export constants
 export 'constants/constants.dart';

@@ -94,20 +94,48 @@ class CryptoUtils {
   /// Format: [x_length (4 bytes)][x_bytes][y_length (4 bytes)][y_bytes]
   /// 
   /// Returns ECPublicKey on success, null on failure
+  /// 
+  /// CR-1.1: Includes bounds checking to prevent out-of-bounds access
   static ECPublicKey? _decodePublicKey(String encoded) {
     try {
       final bytes = base64Decode(encoded);
+      
+      // Validate minimum length for headers (CR-1.1: bounds checking)
+      if (bytes.length < 8) {
+        AppLogger.error('Public key too short: ${bytes.length} bytes');
+        return null;
+      }
       
       // Read x coordinate
       var offset = 0;
       final xLength = _decodeLength(bytes, offset);
       offset += 4;
+      
+      // Bounds check for x coordinate (CR-1.1)
+      if (offset + xLength > bytes.length) {
+        AppLogger.error('Invalid xLength: $xLength exceeds buffer');
+        return null;
+      }
+      
       final xBytes = bytes.sublist(offset, offset + xLength);
       offset += xLength;
+      
+      // Validate remaining length for y header (CR-1.1)
+      if (offset + 4 > bytes.length) {
+        AppLogger.error('Insufficient bytes for yLength header');
+        return null;
+      }
       
       // Read y coordinate
       final yLength = _decodeLength(bytes, offset);
       offset += 4;
+      
+      // Bounds check for y coordinate (CR-1.1)
+      if (offset + yLength > bytes.length) {
+        AppLogger.error('Invalid yLength: $yLength exceeds buffer');
+        return null;
+      }
+      
       final yBytes = bytes.sublist(offset, offset + yLength);
       
       // Convert to BigInt

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -45,24 +46,29 @@ class BackupStorageService {
 
       AppLogger.debug('Calling ImageGallerySaver.saveImage...', 'BackupService');
       
-      // Add timeout because ImageGallerySaver can hang on iOS
-      // Wrap in Future to ensure we can apply timeout
-      final result = await Future.any([
-        Future.value(ImageGallerySaver.saveImage(
-          qrImageBytes,
-          quality: 100,
-          name: fileName,
-          isReturnImagePathOfIOS: true,
-        )),
-        Future.delayed(const Duration(seconds: 5), () {
-          AppLogger.warning('ImageGallerySaver.saveImage timed out after 5 seconds', 'BackupService');
-          AppLogger.warning('Image may still be saved, but API did not respond', 'BackupService');
-          return {'isSuccess': true, 'note': 'timeout_but_likely_saved'};
-        }),
-      ]);
+      // CR-1.2: Use timeout with explicit error handling
+      // Previously: timeout returned success (false positive risk)
+      // Now: timeout throws exception (fails gracefully)
+      final result = await ImageGallerySaver.saveImage(
+        qrImageBytes,
+        quality: 100,
+        name: fileName,
+        isReturnImagePathOfIOS: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          AppLogger.error(
+            'Photo save timeout - operation uncertain. User should try alternative backup method.',
+            tag: 'BackupService',
+          );
+          throw TimeoutException('Photo save timeout after 10 seconds');
+        },
+      );
 
       AppLogger.debug('ImageGallerySaver result: $result', 'BackupService');
-      final success = result['isSuccess'] == true;
+      
+      // CR-1.2: Verify actual success, not just absence of exception
+      final success = result is Map && result['isSuccess'] == true;
       
       if (success) {
         AppLogger.debug('Photo saved successfully to gallery', 'BackupService');
@@ -70,12 +76,21 @@ class BackupStorageService {
           AppLogger.debug('File path: ${result['filePath']}', 'BackupService');
         }
       } else {
-        AppLogger.warning('ImageGallerySaver returned isSuccess=false', 'BackupService');
+        AppLogger.error(
+          'ImageGallerySaver returned isSuccess=false or unexpected format',
+          tag: 'BackupService',
+        );
         AppLogger.debug('Full result object: $result', 'BackupService');
       }
       
       AppLogger.debug('=== saveToPhotos END (success: $success) ===', 'BackupService');
       return success;
+    } on TimeoutException catch (e) {
+      AppLogger.error(
+        'Photo save timeout: $e. User should try Email or PDF backup.',
+        tag: 'BackupService',
+      );
+      return false; // CR-1.2: Timeout = failure, not success
     } catch (e, stackTrace) {
       AppLogger.error('Error saving backup to photos: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
@@ -587,22 +602,32 @@ The QR code image is attached to this email.
       AppLogger.debug('Generated filename: $fileName', 'BackupService');
       AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
 
-      final result = await Future.any([
-        Future.value(ImageGallerySaver.saveImage(
-          qrImageBytes,
-          quality: 100,
-          name: fileName,
-          isReturnImagePathOfIOS: true,
-        )),
-        Future.delayed(const Duration(seconds: 5), () {
-          AppLogger.warning('ImageGallerySaver.saveImage timed out after 5 seconds', 'BackupService');
-          return {'isSuccess': true, 'note': 'timeout_but_likely_saved'};
-        }),
-      ]);
+      // CR-1.2: Use timeout with explicit error handling
+      final result = await ImageGallerySaver.saveImage(
+        qrImageBytes,
+        quality: 100,
+        name: fileName,
+        isReturnImagePathOfIOS: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          AppLogger.error(
+            'Simple token photo save timeout - operation uncertain',
+            tag: 'BackupService',
+          );
+          throw TimeoutException('Photo save timeout after 10 seconds');
+        },
+      );
 
-      final success = result['isSuccess'] == true;
+      final success = result is Map && result['isSuccess'] == true;
       AppLogger.debug('=== saveSimpleTokenToPhotos END (success: $success) ===', 'BackupService');
       return success;
+    } on TimeoutException catch (e) {
+      AppLogger.error(
+        'Simple token photo save timeout: $e',
+        tag: 'BackupService',
+      );
+      return false; // CR-1.2: Timeout = failure
     } catch (e, stackTrace) {
       AppLogger.error('Error saving simple token to photos: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');

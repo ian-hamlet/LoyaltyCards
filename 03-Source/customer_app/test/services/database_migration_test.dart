@@ -14,7 +14,10 @@ void main() {
     late DatabaseHelper dbHelper;
     late String testDbPath;
 
-    setUp(() async {
+    setUp() async {
+      // Small delay to ensure previous test file cleanup is complete
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       dbHelper = DatabaseHelper();
       final databasesPath = await getDatabasesPath();
       testDbPath = join(databasesPath, 'loyalty_cards.db');
@@ -29,6 +32,12 @@ void main() {
 
     tearDown(() async {
       try {
+        // Close database connection first to release locks
+        await dbHelper.close();
+        
+        // Small delay to ensure connection is fully closed
+        await Future.delayed(const Duration(milliseconds: 100));
+        
         await dbHelper.deleteDatabase();
         
         // Clean up backup files

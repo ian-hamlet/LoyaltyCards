@@ -19,7 +19,26 @@ void main() {
   });
 
   tearDown() async {
-    await dbHelper.clearAllData();
+    try {
+      await dbHelper.clearAllData();
+      // Close database connection to release locks
+      await dbHelper.close();
+      // Small delay to ensure cleanup completes
+      await Future.delayed(const Duration(milliseconds: 50));
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+  }
+
+  tearDownAll() async {
+    // Final cleanup to ensure database is fully released
+    try {
+      final dbHelper = DatabaseHelper();
+      await dbHelper.close();
+      await Future.delayed(const Duration(milliseconds: 100));
+    } catch (e) {
+      // Ignore
+    }
   }
 
   /// Helper function to create test cards

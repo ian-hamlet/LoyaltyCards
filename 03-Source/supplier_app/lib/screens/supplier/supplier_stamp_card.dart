@@ -798,11 +798,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _shareToken,
-                  icon: const Icon(Icons.share),
-                  label: const Text('Share QR Code'),
-                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _shareToken,
+                    icon: const Icon(Icons.share),
+                    label: const Text('Share QR Code'),
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                  ),
                 ),
                 
                 const SizedBox(height: 20),

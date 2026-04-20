@@ -245,7 +245,7 @@ class _SupplierHomeState extends State<SupplierHome> {
 
               const SizedBox(height: 32),
 
-              // Info Section
+              // Info Section (mode-aware)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -267,50 +267,55 @@ class _SupplierHomeState extends State<SupplierHome> {
                       ),
                       _buildInfoItem(
                         '2.',
-                        'Stamp Card',
-                        'Scan customer\'s card QR to add a cryptographically signed stamp',
+                        _business!.mode == OperationMode.simple ? 'Generate QR' : 'Stamp Card',
+                        _business!.mode == OperationMode.simple 
+                            ? 'Create printable QR codes that customers scan to receive stamps'
+                            : 'Scan customer\'s card QR to add a cryptographically signed stamp',
                       ),
                       _buildInfoItem(
                         '3.',
                         'Redeem',
                         'When card is complete, scan to validate and redeem reward',
                       ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: BrandColors.infoContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(Icons.info_outline, color: BrandColors.info, size: 16),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Statistics',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: BrandColors.textPrimary,
+                      // Statistics explanation only shown in secure mode
+                      if (_business!.mode == OperationMode.secure) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: BrandColors.infoContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.info_outline, color: BrandColors.info, size: 16),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Statistics',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: BrandColors.textPrimary,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Issued: Number of new cards you created for customers\n'
-                              'Stamped: Unique customer cards you have stamped directly\n'
-                              'Redeemed: Number of completed cards that have been redeemed',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue[900],
+                                ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                'Issued: Number of new cards you created for customers\n'
+                                'Stamped: Unique customer cards you have stamped directly\n'
+                                'Redeemed: Number of completed cards that have been redeemed',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue[900],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

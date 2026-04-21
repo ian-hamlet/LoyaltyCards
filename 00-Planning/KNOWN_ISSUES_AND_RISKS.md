@@ -2,10 +2,10 @@
 
 # Known Issues and Risks
 
-**Document Version:** 2.0  
+**Document Version:** 3.0  
 **Created:** 2026-04-08  
-**Last Updated:** 2026-04-11  
-**Current Build:** v0.1.0 (Build 11)
+**Last Updated:** 2026-04-21  
+**Current Build:** v0.3.0 (Build 46+)
 
 ---
 
@@ -311,10 +311,63 @@ Rate limiting (1 second between stamps) only enforced on customer app. Supplier 
 
 ## ✅ Current Status
 
-**Build Version:** v0.1.0 (Build 11)  
-**Phases Complete:** 0, 1, 2, 3, 4 (67% of project)  
+**Build Version:** v0.3.0 (Build 46+)  
+**Phases Complete:** 0, 1, 2, 3, 4, 5, 6 (All phases complete)  
 **Core P2P Functionality:** ✅ Working on physical devices  
-**Next Phase:** Phase 5 (Multi-Device Configuration)  
+**Test Coverage:** 92 passing tests (customer: 62/64, supplier: 30/30)  
+**Current Branch:** feature/updatedtest (from develop)  
 
-**Production Readiness:** Ready for single-device supplier testing and feedback
+**Production Readiness:** Ready for TestFlight deployment with UX improvements
+
+---
+
+## 🔴 Active Known Issues
+
+### Issue #1: Database Locking During Full Test Suite Execution
+
+**Status:** 🔴 ACTIVE  
+**Priority:** MEDIUM  
+**Discovered:** 2026-04-21 (v0.3.0)  
+**Affects:** Customer app unit tests only
+
+**Problem:**
+When running the complete customer_app test suite (`flutter test`), intermittent "attempt to write a readonly database" errors occur in 2-4 tests:
+- `CardRepository Edge Cases validation accepts card at exact limits`
+- `CardRepository Edge Cases validation accepts minimum valid values`
+
+Error: `SqfliteFfiException(sqlite_error: 1032)`
+
+**Root Cause:**
+Database locking/race condition when tests run in parallel. Individual tests pass when run in isolation, but fail when entire suite runs due to:
+- Multiple tests accessing same database file path
+- Insufficient cleanup between test groups
+- SQLite file-based locking on macOS during rapid test execution
+
+**Current Workaround:**
+- Tests pass reliably when run individually
+- Tests pass 90%+ of time when run as full suite (flaky, not deterministic)
+- 62 of 64 customer tests passing consistently
+- Does NOT affect production code (only test infrastructure)
+
+**Attempted Fixes Applied:**
+- ✅ Added `dbHelper.close()` in all `tearDown()` blocks
+- ✅ Added delays (50-200ms) between test groups
+- ✅ Added `tearDownAll()` cleanup
+- ✅ Database file deletion in cleanup
+- ⚠️ Issue persists intermittently
+
+**Next Steps:**
+- Consider using separate database file paths per test group
+- Investigate `sqflite_common_ffi` in-memory database mode
+- Add retry logic for flaky tests
+- Document workaround for CI/CD (run tests twice, accept if either pass)
+
+**Impact:**
+- **Production:** NONE (test infrastructure only)
+- **Development:** Minor annoyance (re-run tests if fail)
+- **CI/CD:** May need retry logic
+
+**Tracking:** Issue #9 in EXPERT_ARCHITECTURAL_REVIEW.md
+
+---
 

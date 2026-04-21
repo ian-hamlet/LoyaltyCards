@@ -206,6 +206,12 @@ Enable a single business to operate from multiple devices (e.g., coffee shop wit
 - Timestamp sanity checks (clock drift handling)
 - Stamp expiration (REQ-019)
 - Push notifications (requires server architecture)
+- **Dark Mode Support** (~13-15 hours)
+  - Theme-aware color system (replace ~198 hardcoded color references)
+  - Dynamic AppBar and container colors based on theme
+  - Card gradient adjustments for dark backgrounds
+  - User preference toggle in settings (Light/Dark/System)
+  - Benefits: Accessibility, battery savings on OLED, modern UX expectation
 
 ### Technical Debt to Address in Phase 6
 

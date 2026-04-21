@@ -75,6 +75,7 @@ Last Updated: April 21, 2026
 - Stamp added instantly to your phone
 - Rate limited: 1 stamp per hour per business
 - No staff interaction needed
+- **Smart Routing:** Don't worry about which card is open - stamps automatically go to the correct business!
 
 **2. Staff-Assisted (Secure Mode businesses):**
 - Staff generates QR code on their device
@@ -83,6 +84,12 @@ Last Updated: April 21, 2026
 - QR expires after 1-2 minutes
 
 **Tip:** You'll know which mode a business uses after your first scan. Simple mode = instant, Secure mode = validated.
+
+**💡 Smart Routing Feature (Simple Mode):**
+When you scan a stamp QR code, the app automatically finds the correct card for that business - even if you're viewing a different card screen. For example, if you have cards for "Coffee Shop" and "Restaurant", and you scan a "Restaurant" stamp while viewing your "Coffee Shop" card, the stamp will automatically go to your "Restaurant" card. No need to switch cards first!
+
+**🎉 Auto New Card:**
+When a card is completed, a new card is automatically created for the same business. If you scan stamps that exceed the requirement, the extra stamps go onto the new card. You'll see a notification explaining what happened.
 
 #### Redeeming Rewards
 
@@ -219,18 +226,16 @@ Last Updated: April 21, 2026
    - **🔐 Face ID/Touch ID prompt will appear** (Build 21+)
    - Authenticate to view backup QR (protects private keys)
    - **Use at least 2 backup methods:**
-     1. 🖨️ **Print** (HIGHLY RECOMMENDED)
+     1. 🖨️ **Print Backup** (HIGHLY RECOMMENDED)
         - Opens print dialog
         - Print and store in safe/locked drawer
         - This is your "master key"
-     2. 📸 **Save to Photos**
-        - Backs up to iCloud Photos
-        - Easy to find, searchable
-     3. 📧 **Email to Myself**
+     2. 📧 **Share via Email**
         - Accessible from any device
         - Search email for "LoyaltyCards Backup"
-     4. 📁 **Save to Files**
+     3. 📁 **Save to Files**
         - Store in password manager or iCloud Drive
+        - Choose Files app, iCloud Drive, etc.
    
    **⚠️ WARNING:** Without backup, if you lose your device:
    - All customer cards become invalid
@@ -399,17 +404,10 @@ Last Updated: April 21, 2026
 
 ### Permissions Required (iOS)
 
-**Photo Library:**
-- **When:** First time you tap "Save to Photos"
-- **Prompt:** iOS asks for permission
-- **Choose:** "Allow" or "Add Photos Only"
-- **If Denied:** Can't save to Photos (use other 3 methods)
-- **Re-enable:** Settings → Privacy → Photos → LoyaltyCards
-
-**No other permissions required!**
-- Email: Uses share sheet (no permission)
-- Files: Uses share sheet (no permission)
-- Print: System print dialog (no permission)
+**No special permissions required!**
+- **Share via Email:** Uses system share sheet (no permission needed)
+- **Save to Files:** Uses system share sheet (no permission needed)
+- **Print Backup:** Uses system print dialog (no permission needed)
 
 ---
 

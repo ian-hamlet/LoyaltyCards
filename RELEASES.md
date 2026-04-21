@@ -30,7 +30,7 @@ Examples:
   - **Token Generation UI:** Replaced single-stamp QR with denomination selector
   - **Annotated QR Images:** Clear visual labels (stamp count, expiry, business name)
   - **Multi-Stamp Processing:** Single scan can award multiple stamps
-  - **Enhanced Distribution:** Save to Photos, Print, Email workflows
+  - **Enhanced Distribution:** Print, Share via Email, Save to Files workflows
 - **Technical Implementation:**
   - StampToken model: Added stampCount, expiryDate, scanInterval fields
   - Business model: Added configurable scanInterval (stored as seconds)

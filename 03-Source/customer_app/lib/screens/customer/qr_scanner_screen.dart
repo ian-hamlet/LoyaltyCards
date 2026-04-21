@@ -16,6 +16,27 @@ import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Scanner screen for adding new cards or receiving stamps
+/// 
+/// **SMART ROUTING** (Simple Mode):
+/// When scanning a stamp QR code, the app uses "smart routing" to ensure
+/// stamps always go to the correct business card, regardless of which card
+/// screen you're currently viewing. For example:
+/// - You have cards for "Coffee Shop" and "Restaurant" 
+/// - You open the "Coffee Shop" card screen
+/// - You scan a "Restaurant" stamp QR code
+/// - The stamp is intelligently routed to your "Restaurant" card (not Coffee Shop)
+/// - This happens automatically based on the businessId in the QR code
+/// 
+/// This makes the scanning experience more forgiving - you don't need to be on
+/// the correct card screen to receive stamps. The system finds the right card for you.
+/// 
+/// **SECURE MODE:**
+/// Uses exact cardId matching - each card has a unique ID that must match the QR code.
+/// 
+/// **AUTO NEW CARD CREATION:**
+/// When a card reaches stampsRequired (is complete), a new card is automatically
+/// created for the same business. If there are overflow stamps from the scan,
+/// they are placed on the new card. Users are notified with a success message.
 class QRScannerScreen extends StatefulWidget {
   final QRScanMode mode;
 
@@ -291,7 +312,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final repository = CardRepository(DatabaseHelper());
     models.Card? card;
     
-    // For simple mode stamps, look up by businessId since cardId is generic
+    // SMART ROUTING: For simple mode stamps, look up by businessId since cardId is generic
+    // This ensures stamps go to the correct business card, regardless of which card screen
+    // the user is currently viewing. Stamps are intelligently routed based on the QR code's
+    // businessId, not the opened card.
     if (token.cardId == 'simple-mode-stamp' && token.businessId.isNotEmpty) {
       AppLogger.qr('Simple Mode Stamp Detected');
       AppLogger.business('Looking up card by businessId: ${token.businessId}');
@@ -568,11 +592,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       AppLogger.qr('All Additional Stamps Processed');
     }
     
-    // Check for overflow
+    // Check for card completion or overflow
     final newTotalStamps = card.stampsCollected + totalStampsAdded;
-    if (newTotalStamps > card.stampsRequired) {
+    if (newTotalStamps >= card.stampsRequired) {
       AppLogger.business('╔═══════════════════════════════════════════════════════════╗');
-      AppLogger.business('║ OVERFLOW DETECTED - AUTO-CREATING NEW CARD               ║');
+      AppLogger.business('║ CARD COMPLETE - AUTO-CREATING NEW CARD                   ║');
       AppLogger.business('╚═══════════════════════════════════════════════════════════╝');
       AppLogger.business('Current stamps: ${card.stampsCollected}');
       AppLogger.business('Adding: $totalStampsAdded');
@@ -701,8 +725,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         }
         
         if (mounted) {
-          Navigator.pop(context, 
-            'Card complete! 🎉 ${stampsToExistingCard} stamp${stampsToExistingCard > 1 ? 's' : ''} added to existing card${remainingOverflow > 0 ? ", new card started with $remainingOverflow" : ""}');
+          String message;
+          if (overflow == 0) {
+            message = 'Card complete! 🎉 New card ready for ${card.businessName}';
+          } else if (remainingOverflow > 0) {
+            message = 'Card complete! 🎉 ${stampsToExistingCard} stamp${stampsToExistingCard > 1 ? 's' : ''} added to existing card, new card started with $remainingOverflow';
+          } else {
+            message = 'Card complete! 🎉 ${stampsToExistingCard} stamp${stampsToExistingCard > 1 ? 's' : ''} added to existing card';
+          }
+          Navigator.pop(context, message);
         }
       } else {
         // No existing card with space - create new card (original behavior)
@@ -763,8 +794,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.business('  Card 2 (NEW): $overflow stamps');
         
         if (mounted) {
-          Navigator.pop(context, 
-            'Card complete! 🎉 New card started with $overflow stamp${overflow > 1 ? 's' : ''}');
+          String message;
+          if (overflow == 0) {
+            message = 'Card complete! 🎉 New card ready for ${card.businessName}';
+          } else {
+            message = 'Card complete! 🎉 New card started with $overflow stamp${overflow > 1 ? 's' : ''}';
+          }
+          Navigator.pop(context, message);
         }
       }
     } else {

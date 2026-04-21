@@ -41,30 +41,23 @@ The backup feature requires specific iOS permissions for certain storage methods
 - **If Cancelled:** Cannot access backup/clone features
 - **Fallback:** Passcode always available if biometrics fail
 
-### 2. **Save to Photos** - Permission Required ✋
-- **Permission:** `NSPhotoLibraryAddUsageDescription`
-- **Access Level:** "Add Photos Only" (write-only, no read access needed)
-- **When Prompt Appears:** First time user taps "Save to Photos"
-- **User Choice:** Allow or Don't Allow
-- **If Denied:** Feature won't work - user must enable in Settings → Privacy → Photos
-
-### 2. **Email to Myself** - No Permission Required ✅
+### 1. **Share via Email** - No Permission Required ✅
 - Uses system share sheet
 - Built-in email access via share functionality
 - No prompts, works immediately
 
-### 3. **Save to Files** - No Permission Required ✅
+### 2. **Save to Files** - No Permission Required ✅
 - Saves to app's document directory (no permission needed)
 - Opens share sheet for user to choose location
 - User can save to Files app, iCloud Drive, etc.
 - No prompts, works immediately
 
-### 4. **Print Backup** - No Permission Required ✅
+### 3. **Print Backup** - No Permission Required ✅
 - Opens system print dialog
 - No permissions needed
 - Works immediately
 
-**Note:** If user denies photo library access, they still have 3 other backup methods available.
+**Note:** All three methods use standard iOS functionality and require no special app permissions.
 
 ---
 

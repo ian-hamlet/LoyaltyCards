@@ -103,10 +103,11 @@ REQ-022 enhances Simple Mode to support flexible multi-denomination stamps (any 
 - **Example:** `LoyaltyCards-SimpleToken-5Stamps-CoffeeShop-2026-04-20.png`
 
 ### 5. **Distribution Methods**
-- **Save to Photos:** iOS gallery with proper filename
-- **Print:** PDF generation with instructions
-- **Email:** Share sheet with pre-filled subject and usage instructions
+- **Print Backup:** PDF generation with instructions
+- **Share via Email:** Share sheet with pre-filled subject and usage instructions
 - **Save to Files:** iOS Files app or Android Downloads
+
+**Note:** As of v0.3.1, "Save to Photos" was removed to streamline UX and eliminate photo library permissions.
 
 ---
 
@@ -201,9 +202,9 @@ class Business {
    - **Expiry Policy:** Select dropdown (None/Daily/Weekly/Custom)
 3. Tap "Generate QR Code"
 4. Choose distribution method:
-   - **Save to Photos:** Stores in gallery
-   - **Print:** Opens system print dialog
-   - **Email to Myself:** Opens share sheet
+   - **Print Backup:** Opens system print dialog
+   - **Share via Email:** Opens share sheet
+   - **Save to Files:** Opens file picker
 5. Print and laminate
 6. Keep in till/cash drawer
 
@@ -259,7 +260,8 @@ class Business {
 
 2. **Physical iOS Device Testing**
    - Real printer output quality
-   - Photo library integration
+   - System share functionality
+   - Consistent UX across all backup methods
    - Email attachment handling
    - QR code scanning reliability
    - Performance under load
@@ -299,7 +301,7 @@ class Business {
 
 ### Technical
 - **Requires iOS 13.0+** for printing/sharing features
-- **Permissions:** Photo library write access for "Save to Photos"
+- **Permissions:** None required - all methods use standard iOS share sheet
 - **File naming:** Special characters in business name are sanitized
 
 ---

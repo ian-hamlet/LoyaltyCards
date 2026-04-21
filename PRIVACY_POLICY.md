@@ -79,10 +79,11 @@ The following data is created and stored **locally on your device only**:
 - **When:** Both apps request camera access when you first try to scan a QR code
 - **Data:** No camera images are stored or transmitted; we only read QR code data
 
-### Photo Library Permission (Supplier App Only)
-- **Purpose:** Save backup QR codes to your Photos app for safekeeping
-- **When:** Only when you explicitly tap "Save to Photos" for a backup
-- **Data:** Only saves QR code images you choose to save; no photos are read or transmitted
+### Backup Methods (Supplier App Only)
+- **Purpose:** Save backup QR codes using system share functionality
+- **Methods:** Print Backup, Share via Email, Save to Files
+- **Permissions:** No special permissions required - all methods use standard iOS share sheet
+- **Data:** Only saves QR code images you choose to save; no data is transmitted to our servers
 
 ---
 

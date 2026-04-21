@@ -39,5 +39,14 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
+    # Suppress 64-to-32 bit conversion warning in device_info_plus native code
+    # Warning: "Implicit conversion loses integer precision: 'vm_size_t' to 'natural_t'"
+    # This is in third-party code we don't control (FPPDeviceInfoPlusPlugin.m)
+    if target.name == 'device_info_plus'
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_WARN_64_TO_32_BIT_CONVERSION'] = 'NO'
+      end
+    end
   end
 end

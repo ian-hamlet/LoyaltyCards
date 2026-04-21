@@ -88,9 +88,15 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
       }
     } catch (e, stackTrace) {
       AppLogger.error('QR Display ERROR', error: e, stackTrace: stackTrace, tag: 'QR');
+      
       setState(() {
-        _error = e.toString();
         _isLoading = false;
+        // Use user-friendly message if available
+        if (e is QRGenerationException) {
+          _error = e.getUserMessage();
+        } else {
+          _error = 'Failed to generate QR code. Please try again.';
+        }
       });
     }
   }

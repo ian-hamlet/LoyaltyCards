@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:shared/shared.dart';
 import '../models/biometric_auth_result.dart';
 
@@ -59,11 +58,6 @@ class BiometricAuthService {
       
       final bool isAuthenticated = await _auth.authenticate(
         localizedReason: reason,
-        options: AuthenticationOptions(
-          useErrorDialogs: useErrorDialogs,
-          stickyAuth: stickyAuth,
-          biometricOnly: false, // Allow passcode fallback
-        ),
       );
 
       if (isAuthenticated) {
@@ -77,16 +71,21 @@ class BiometricAuthService {
       AppLogger.error('Platform exception during authentication: ${e.code}', error: e, tag: 'BiometricAuth');
       
       // Parse specific error codes from local_auth package
+      // Note: local_auth 3.0+ removed error_codes, using string matching instead
       switch (e.code) {
-        case auth_error.notAvailable:
+        case 'NotAvailable':
+        case 'notAvailable':
           return const BiometricAuthResult.notAvailable('Biometric authentication is not available');
-        case auth_error.notEnrolled:
+        case 'NotEnrolled':
+        case 'notEnrolled':
+        case 'PasscodeNotSet':
+        case 'passcodeNotSet':
           return const BiometricAuthResult.notEnrolled();
-        case auth_error.passcodeNotSet:
-          return const BiometricAuthResult.notEnrolled();
-        case auth_error.permanentlyLockedOut:
+        case 'PermanentlyLockedOut':
+        case 'permanentlyLockedOut':
           return BiometricAuthResult.platformError(e, 'Too many failed attempts. Please try again later.');
-        case auth_error.lockedOut:
+        case 'LockedOut':
+        case 'lockedOut':
           return BiometricAuthResult.platformError(e, 'Temporarily locked. Please try again later.');
         default:
           return BiometricAuthResult.platformError(e, 'Authentication error: ${e.message}');

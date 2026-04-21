@@ -1,5 +1,3 @@
-import '../exceptions/qr_generation_exception.dart';
-
 /// Utility for converting exceptions to user-friendly messages
 /// 
 /// FIX HIGH-3: Maps technical exceptions to actionable user messages
@@ -9,11 +7,6 @@ class ErrorMessageMapper {
   /// 
   /// Handles specific exception types and provides fallback for unknown errors
   static String getUserMessage(Object error, {String? context}) {
-    // Check for our custom exceptions first
-    if (error is QRGenerationException) {
-      return error.getUserMessage();
-    }
-    
     // Check for database errors
     final errorStr = error.toString().toLowerCase();
     

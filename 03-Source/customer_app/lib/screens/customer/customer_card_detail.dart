@@ -9,6 +9,7 @@ import '../../services/stamp_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/device_service.dart';
+import '../../utils/error_message_mapper.dart';
 import 'qr_display_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'package:uuid/uuid.dart';

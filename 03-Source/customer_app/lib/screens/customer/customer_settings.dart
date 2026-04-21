@@ -7,6 +7,7 @@ import '../../services/stamp_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/biometric_auth_service.dart';
+import '../../utils/error_message_mapper.dart';
 
 /// Feature flag: Show dangerous delete button during testing phase
 /// Set to false before production App Store release

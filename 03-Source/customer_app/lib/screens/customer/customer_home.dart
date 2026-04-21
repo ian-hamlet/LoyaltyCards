@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../services/card_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
+import '../../utils/error_message_mapper.dart';
 import 'customer_card_detail.dart';
 import 'customer_settings.dart';
 import 'qr_scanner_screen.dart';

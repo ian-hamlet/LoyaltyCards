@@ -64,6 +64,25 @@ class QRTokenGenerator {
       AppLogger.error(
         'Failed to generate stamp request: $e',
         error: e,
+        stackTrace: stackTrace,
+        tag: 'QR',
+      );
+      
+      // If already a QRGenerationException, rethrow it
+      if (e is QRGenerationException) {
+        rethrow;
+      }
+      
+      // Wrap other exceptions
+      throw QRGenerationException(
+        'Failed to generate stamp request QR',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Generate a Redemption Request token to show supplier for reward
   /// 
   /// FIX HIGH-1: Added input validation and error handling
   RedemptionRequestToken generateRedemptionRequest({
@@ -127,24 +146,5 @@ class QRTokenGenerator {
         stackTrace: stackTrace,
       );
     }
-  }
-
-  /// Generate a Redemption Request token to show supplier for reward
-  RedemptionRequestToken generateRedemptionRequest({
-    required Card card,
-    required List<Stamp> stamps,
-  }) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    
-    // Extract all stamp signatures
-    final signatures = stamps.map((s) => s.signature).toList();
-    
-    return RedemptionRequestToken(
-      cardId: card.id,
-      businessId: card.businessId,
-      stampsCollected: card.stampsCollected,
-      stampSignatures: signatures,
-      timestamp: timestamp,
-    );
   }
 }

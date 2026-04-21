@@ -261,9 +261,6 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
         AppLogger.warning('shareViaEmail failed: ${result.message}', 'Backup');
         AppFeedback.error(context, result.getUserMessage());
       }
-        AppLogger.warning('shareViaEmail returned false', 'Backup');
-        AppFeedback.error(context, 'Failed to share');
-      }
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _shareViaEmail: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');

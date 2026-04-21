@@ -5,6 +5,7 @@ import 'package:shared/models/card.dart' as models;
 import '../../services/qr_token_generator.dart';
 import '../../services/stamp_repository.dart';
 import '../../services/database_helper.dart';
+import '../../exceptions/qr_generation_exception.dart';
 
 /// Screen to display customer QR codes for supplier scanning
 class QRDisplayScreen extends StatefulWidget {

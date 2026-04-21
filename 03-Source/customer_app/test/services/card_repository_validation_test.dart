@@ -14,8 +14,8 @@ void main() {
   late DatabaseHelper dbHelper;
 
   setUp(() async {
-    // Delay to ensure previous test file cleanup is complete
-    await Future.delayed(const Duration(milliseconds: 200));
+    // Use unique database name for this test file to prevent locking
+    await DatabaseHelper.resetForTesting(testDatabaseName: 'test_card_repository_validation.db');
     
     dbHelper = DatabaseHelper();
     repository = CardRepository(dbHelper);
@@ -24,25 +24,22 @@ void main() {
   tearDown() async {
     try {
       await dbHelper.clearAllData();
-      // Close database connection to release locks
       await dbHelper.close();
-      // Small delay to ensure cleanup completes
-      await Future.delayed(const Duration(milliseconds: 50));
     } catch (e) {
       // Ignore cleanup errors
     }
-  }
+  };
 
   tearDownAll() async {
-    // Final cleanup to ensure database is fully released
+    // Clean up test database file
     try {
+      await DatabaseHelper.resetForTesting();
       final dbHelper = DatabaseHelper();
-      await dbHelper.close();
-      await Future.delayed(const Duration(milliseconds: 100));
+      await dbHelper.deleteDatabase();
     } catch (e) {
       // Ignore
     }
-  }
+  };
 
   /// Helper function to create test cards
   Card createTestCard({

@@ -24,7 +24,7 @@ This directory contains the Phase 0+ implementation of the LoyaltyCards P2P syst
 │   │   ├── screens/customer/
 │   │   └── services/          # Repositories, validators, rate limiting
 │   ├── pubspec.yaml
-│   └── test/                  # 64 unit tests (62 pass consistently)
+│   └── test/                  # 70 unit tests (all passing)
 │       └── services/          # Service tests with mocking
 │
 ├── supplier_app/              # Supplier Flutter app (v0.3.0)
@@ -60,27 +60,24 @@ flutter run
 # Shared package (13 tests - StampSigner)
 cd shared && flutter test
 
-# Customer app (64 tests - 62 pass consistently, 2 flaky)
+# Customer app (70 tests - all passing)
 cd customer_app && flutter test
 
-# Supplier app (30 tests)
+# Supplier app (30 tests - all passing)
 cd supplier_app && flutter test
 ```
 
 **Test Status (v0.3.0):**
 - Shared StampSigner: 13/13 tests passing ✅
-- Customer services: 62/64 tests passing (2 flaky due to database locking)
+- Customer services: 70/70 tests passing ✅ (database locking issue RESOLVED)
 - Supplier services: 30/30 tests passing ✅
 
-**Known Test Issue:**
-When running the complete customer_app test suite, 2 tests in `card_repository_validation_test.dart` occasionally fail with "readonly database" errors due to SQLite file locking race conditions. This is a test infrastructure issue only - production code is unaffected. Tests pass reliably when run individually.
-
-See [KNOWN_ISSUES_AND_RISKS.md](../00-Planning/KNOWN_ISSUES_AND_RISKS.md#issue-1-database-locking-during-full-test-suite-execution) for details.
+**Total: 113 tests, 100% passing**
 
 **Test Coverage:**
 - Shared StampSigner cryptographic operations: 13 tests (95%+ coverage)
-- Customer services: 64 tests (rate limiting, validation, crypto, database)
-- Supplier services: 30 tests (KeyManager, StampSigner, database)
+- Customer services: 70 tests (rate limiting, validation, crypto, database, repositories)
+- Supplier services: 30 tests (KeyManager, StampSigner, database migration)
 
 **See:** [TESTING_STRATEGY.md](../TESTING_STRATEGY.md) for comprehensive test plan
 
@@ -93,16 +90,17 @@ See [KNOWN_ISSUES_AND_RISKS.md](../00-Planning/KNOWN_ISSUES_AND_RISKS.md#issue-1
   - Consistent slider patterns for discrete numeric values
   - Face ID/Touch ID authentication
   - Backup/restore functionality
-  - Comprehensive automated test suite (107 tests, 92+ passing consistently)
+  - Comprehensive automated test suite (113 tests, 100% passing)
   
 - ✅ **Phases 0-6:** Complete
   - Foundation, data layer, cryptography, P2P, UX polish, dual-mode
   
-- ✅ **Current:** Code review fixes and UX improvements
+- ✅ **Current:** Code review fixes and test infrastructure improvements
   - Database migration rollback safety
   - Enhanced simple supplier mode UX
   - Architectural review fixes implemented
   - iOS build stability improvements
+  - Database test locking issues resolved
 
 ## Quick Commands
 

@@ -635,6 +635,7 @@ This document tracks defects from two sources:
 - **Target Build:** Build 10
 - **Fix Verified:** 2026-04-15 - Physical iPad testing confirms Save to Photos now working with timeout
 - **Notes:** All 4 backup methods now functional. Save to Photos has known iOS package limitation (async hang) but Future.any() timeout workaround implemented. Users get feedback within 5 seconds max. Image successfully saves to Photos app. Print, Email, and Files methods all working perfectly.
+- **UPDATE 2026-04-21:** "Save to Photos" feature removed in v0.3.1 to streamline UX. Now offers 3 methods: Print Backup, Share via Email, Save to Files. No photo library permissions required.
 
 ### TEST-003: Supplier Restore Business QR Scanner Issues
 - **Source:** Testing - Both (iPhone and iPad)

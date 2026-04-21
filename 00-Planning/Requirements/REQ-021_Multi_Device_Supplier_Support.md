@@ -271,15 +271,15 @@ Initial Supplier Setup                 Device Lost/Broken
    "If you lose this device, you'll    3. Tap "Recover Existing Business"
     need this QR to restore"           
                                        4. Scan saved backup QR
-3. User chooses backup method:            (from print, password manager, etc.)
-   [ ] Print PDF                       
-   [ ] Save to Photos                  5. System validates backup
+3. User chooses backup method:            (from print, email, files, etc.)
+   [ ] Print Backup                       
+   [ ] Share via Email                 5. System validates backup
    [ ] Save to Files                   
-   [ ] Email to myself                 6. Restores exact configuration:
-                                          - Same Business ID
-4. User confirms backup saved             - Same crypto keys
-                                          - Same business name/settings
-5. Proceed to use supplier app         
+                                       6. Restores exact configuration:
+4. User confirms backup saved             - Same Business ID
+                                          - Same crypto keys
+5. Proceed to use supplier app            - Same business name/settings
+                                       
                                        7. All customer cards still valid!
                                        
                                        8. Continue operations

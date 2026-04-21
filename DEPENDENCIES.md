@@ -212,19 +212,19 @@ This document lists all third-party dependencies used in the LoyaltyCards projec
 ### Supplier App - Backup & Export Features
 
 #### image_gallery_saver
+#### ~~image_gallery_saver~~ (REMOVED in v0.3.1)
 - **Package:** `image_gallery_saver`
-- **Version:** ^2.0.3
-- **License:** Apache 2.0
-- **Purpose:** Save backup QR codes to photo gallery
-- **Security:** Requires photo library permission in Info.plist
-- **Used By:** Supplier App
-- **Website:** https://pub.dev/packages/image_gallery_saver
+- **Version:** ^2.0.3 (removed)
+- **Status:** No longer used - "Save to Photos" feature removed
+- **Reason:** Redundant with "Save to Files" which offers more flexibility
+- **Replaced By:** All backup methods now use `share_plus` for consistent UX
 
 #### share_plus
 - **Package:** `share_plus`
 - **Version:** ^10.1.4
 - **License:** BSD 3-Clause
 - **Purpose:** Share backup QR via email/files (iOS share sheet)
+- **Backup Methods:** Share via Email, Save to Files (uses native iOS share dialog)
 - **Security:** Uses iOS native share dialog, user controls destination
 - **Used By:** Supplier App
 - **Website:** https://pub.dev/packages/share_plus

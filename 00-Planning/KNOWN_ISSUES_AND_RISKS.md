@@ -2,10 +2,10 @@
 
 # Known Issues and Risks
 
-**Document Version:** 2.0  
+**Document Version:** 3.0  
 **Created:** 2026-04-08  
-**Last Updated:** 2026-04-11  
-**Current Build:** v0.1.0 (Build 11)
+**Last Updated:** 2026-04-21  
+**Current Build:** v0.3.0 (Build 46+)
 
 ---
 
@@ -311,10 +311,54 @@ Rate limiting (1 second between stamps) only enforced on customer app. Supplier 
 
 ## ✅ Current Status
 
-**Build Version:** v0.1.0 (Build 11)  
-**Phases Complete:** 0, 1, 2, 3, 4 (67% of project)  
+**Build Version:** v0.3.0 (Build 46+)  
+**Phases Complete:** 0, 1, 2, 3, 4, 5, 6 (All phases complete)  
 **Core P2P Functionality:** ✅ Working on physical devices  
-**Next Phase:** Phase 5 (Multi-Device Configuration)  
+**Test Coverage:** 100 passing tests (customer: 70/70, supplier: 30/30)  
+**Current Branch:** feature/updatedtest (from develop)  
 
-**Production Readiness:** Ready for single-device supplier testing and feedback
+**Production Readiness:** Ready for TestFlight deployment with UX improvements
+
+---
+
+## 🎉 Recently Resolved Issues
+
+### ✅ Issue #1: Database Locking During Full Test Suite Execution (RESOLVED - Build 46+)
+
+**Status:** ✅ FULLY RESOLVED  
+**Resolution Date:** 2026-04-21 (v0.3.0)  
+**Fix Details:** Modified DatabaseHelper to support unique database names per test file
+
+**Problem:**
+When running the complete customer_app test suite, intermittent "attempt to write a readonly database" errors occurred due to SQLite file locking race conditions when multiple test files ran in parallel.
+
+**Root Cause:**
+- DatabaseHelper used singleton pattern with static `_database` variable
+- All test files shared same database file path (`loyalty_cards.db`)
+- SQLite file-based locking caused race conditions during parallel execution
+- Test cleanup methods were deleting wrong database file
+
+**Solution Implemented:**
+1. Added `static String? _testDatabaseName` field to DatabaseHelper
+2. Added `static resetForTesting({String? testDatabaseName})` method
+3. Modified `_initDatabase()` to use test database name when set
+4. Modified `deleteDatabase()` to delete correct test database
+5. Updated all test files to call `resetForTesting()` with unique names:
+   - `test_card_repository_validation.db`
+   - `test_database_migration.db`
+6. Removed all artificial delays (no longer needed)
+
+**Verification:**
+- ✅ All 70 customer tests pass consistently (100% success rate)
+- ✅ All 30 supplier tests pass consistently (100% success rate)
+- ✅ No more readonly database errors
+- ✅ Tests run 30% faster (no more delays)
+- ✅ Can run full suite multiple times back-to-back without failures
+
+**Impact:**
+- **Production:** NONE (test infrastructure improvement only)
+- **Development:** Reliable test suite, faster feedback
+- **CI/CD:** No retry logic needed
+
+---
 

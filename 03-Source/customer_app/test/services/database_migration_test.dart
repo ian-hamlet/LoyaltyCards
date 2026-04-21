@@ -15,12 +15,12 @@ void main() {
     late String testDbPath;
 
     setUp(() async {
-      // Delay to ensure previous test file cleanup is complete
-      await Future.delayed(const Duration(milliseconds: 200));
+      // Use unique database name for this test file to prevent locking
+      await DatabaseHelper.resetForTesting(testDatabaseName: 'test_database_migration.db');
       
       dbHelper = DatabaseHelper();
       final databasesPath = await getDatabasesPath();
-      testDbPath = join(databasesPath, 'loyalty_cards.db');
+      testDbPath = join(databasesPath, 'test_database_migration.db');
       
       // Clean up any existing test database
       try {
@@ -32,12 +32,7 @@ void main() {
 
     tearDown(() async {
       try {
-        // Close database connection first to release locks
         await dbHelper.close();
-        
-        // Small delay to ensure connection is fully closed
-        await Future.delayed(const Duration(milliseconds: 100));
-        
         await dbHelper.deleteDatabase();
         
         // Clean up backup files

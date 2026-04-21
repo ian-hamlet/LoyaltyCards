@@ -8,10 +8,21 @@ import 'package:shared/shared.dart';
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
+  static String? _testDatabaseName; // Custom database name for testing
 
   factory DatabaseHelper() => _instance;
 
   DatabaseHelper._internal();
+
+  /// Reset singleton instance for testing
+  /// Call this in test setUp() with a unique database name per test file
+  static Future<void> resetForTesting({String? testDatabaseName}) async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+    _testDatabaseName = testDatabaseName;
+  }
 
   /// Get database instance (creates if doesn't exist)
   Future<Database> get database async {
@@ -23,7 +34,9 @@ class DatabaseHelper {
   /// Initialize database with schema
   Future<Database> _initDatabase() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, AppConstants.databaseName);
+    // Use custom test database name if set, otherwise use production name
+    final dbName = _testDatabaseName ?? AppConstants.databaseName;
+    final path = join(databasesPath, dbName);
 
     return await openDatabase(
       path,
@@ -388,7 +401,9 @@ class DatabaseHelper {
   /// Delete database file (complete reset)
   Future<void> deleteDatabase() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, AppConstants.databaseName);
+    // Use custom test database name if set, otherwise use production name
+    final dbName = _testDatabaseName ?? AppConstants.databaseName;
+    final path = join(databasesPath, dbName);
     AppLogger.database('Deleting database file: $path');
     await databaseFactory.deleteDatabase(path);
     _database = null;

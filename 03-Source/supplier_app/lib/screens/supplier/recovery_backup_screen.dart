@@ -8,6 +8,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/backup_storage_service.dart';
 import '../../services/key_manager.dart';
 import '../../services/biometric_auth_service.dart';
+import '../../models/biometric_auth_result.dart';
 import 'package:intl/intl.dart';
 
 /// Screen for creating and exporting supplier configuration backups
@@ -72,20 +73,29 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     
     final authMethodName = await _biometricAuth.getAuthMethodName();
     
-    final bool isAuthenticated = await _biometricAuth.authenticate(
+    final result = await _biometricAuth.authenticate(
       reason: 'Authenticate to view recovery backup QR code containing your private key',
     );
 
-    if (!isAuthenticated) {
-      AppLogger.warning('Authentication failed or cancelled - backup not generated', 'Backup');
+    if (!result.isSuccess) {
+      AppLogger.warning('Authentication failed: ${result.status}', 'Backup');
       if (mounted) {
         setState(() {
           _authenticationRequired = true;
           _isGenerating = false;
         });
         
-        // Show message and navigate back
-        AppFeedback.warning(context, 'Authentication required to view backup QR code');
+        // Show specific failure message
+        final message = result.getUserMessage();
+        final guidance = result.getActionableGuidance();
+        
+        if (guidance != null) {
+          AppFeedback.error(context, '$message\n$guidance');
+        } else if (result.status != BiometricAuthStatus.userCancelled) {
+          // Don't show error for user cancellation (they know they cancelled)
+          AppFeedback.warning(context, message);
+        }
+        
         Navigator.of(context).pop();
       }
       return;

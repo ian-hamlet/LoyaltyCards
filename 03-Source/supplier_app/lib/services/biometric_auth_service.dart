@@ -1,8 +1,14 @@
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:shared/shared.dart';
+import '../models/biometric_auth_result.dart';
 
 /// Service for handling biometric authentication (Face ID, Touch ID, Passcode)
 /// Used to protect sensitive operations like viewing private keys and backup QR codes
+/// 
+/// FIX HIGH-2: Returns structured BiometricAuthResult with specific failure reasons
+/// instead of generic bool, allowing callers to provide appropriate feedback
 class BiometricAuthService {
   final LocalAuthentication _auth = LocalAuthentication();
 
@@ -30,18 +36,26 @@ class BiometricAuthService {
 
   /// Authenticate user with biometrics or device passcode
   /// 
-  /// Returns true if authentication successful, false otherwise
+  /// FIX HIGH-2: Returns BiometricAuthResult with specific failure reason
+  /// instead of generic bool
   /// 
   /// [reason] - Message to show to user explaining why authentication is needed
   /// [useErrorDialogs] - Whether to show error dialogs (default: true)
   /// [stickyAuth] - Whether to keep authentication sticky (default: false)
-  Future<bool> authenticate({
+  Future<BiometricAuthResult> authenticate({
     required String reason,
     bool useErrorDialogs = true,
     bool stickyAuth = false,
   }) async {
     try {
       AppLogger.debug('Requesting biometric authentication...', 'BiometricAuth');
+      
+      // Check if available first
+      final isAvailable = await this.isAvailable();
+      if (!isAvailable) {
+        AppLogger.warning('Biometric auth not available on device', 'BiometricAuth');
+        return const BiometricAuthResult.notAvailable();
+      }
       
       final bool isAuthenticated = await _auth.authenticate(
         localizedReason: reason,
@@ -54,14 +68,32 @@ class BiometricAuthService {
 
       if (isAuthenticated) {
         AppLogger.debug('✅ Authentication successful', 'BiometricAuth');
+        return const BiometricAuthResult.success();
       } else {
         AppLogger.debug('❌ Authentication failed or cancelled', 'BiometricAuth');
+        return const BiometricAuthResult.cancelled();
       }
-
-      return isAuthenticated;
-    } catch (e) {
-      AppLogger.error('Authentication error: $e', tag: 'BiometricAuth');
-      return false;
+    } on PlatformException catch (e) {
+      AppLogger.error('Platform exception during authentication: ${e.code}', error: e, tag: 'BiometricAuth');
+      
+      // Parse specific error codes from local_auth package
+      switch (e.code) {
+        case auth_error.notAvailable:
+          return const BiometricAuthResult.notAvailable('Biometric authentication is not available');
+        case auth_error.notEnrolled:
+          return const BiometricAuthResult.notEnrolled();
+        case auth_error.passcodeNotSet:
+          return const BiometricAuthResult.notEnrolled();
+        case auth_error.permanentlyLockedOut:
+          return BiometricAuthResult.platformError(e, 'Too many failed attempts. Please try again later.');
+        case auth_error.lockedOut:
+          return BiometricAuthResult.platformError(e, 'Temporarily locked. Please try again later.');
+        default:
+          return BiometricAuthResult.platformError(e, 'Authentication error: ${e.message}');
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Unexpected authentication error', error: e, stackTrace: stackTrace, tag: 'BiometricAuth');
+      return BiometricAuthResult.platformError(e, 'Unexpected error during authentication');
     }
   }
 

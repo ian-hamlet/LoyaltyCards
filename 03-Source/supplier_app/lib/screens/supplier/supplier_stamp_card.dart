@@ -576,6 +576,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                     ? () {
                                         Haptics.light();
                                         setState(() => _stampCount--);
+                                        // Regenerate token if one exists (real-time update)
+                                        if (_stampToken != null) {
+                                          _generateSimpleModeStampQR();
+                                        }
                                       }
                                     : null,
                                 icon: const Icon(Icons.remove_circle),
@@ -592,6 +596,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                     ? () {
                                         Haptics.light();
                                         setState(() => _stampCount++);
+                                        // Regenerate token if one exists (real-time update)
+                                        if (_stampToken != null) {
+                                          _generateSimpleModeStampQR();
+                                        }
                                       }
                                     : null,
                                 icon: const Icon(Icons.add_circle),
@@ -606,6 +614,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                             label: _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
                             onChanged: (value) {
                               setState(() => _stampCount = value.toInt());
+                              // Regenerate token if one exists (real-time update)
+                              if (_stampToken != null) {
+                                _generateSimpleModeStampQR();
+                              }
                             },
                           ),
                           
@@ -654,6 +666,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                     _expiryOption = value!;
                                     _expiryDate = DateTime(picked.year, picked.month, picked.day, 23, 59, 59);
                                   });
+                                  // Regenerate token if one exists (real-time update)
+                                  if (_stampToken != null) {
+                                    _generateSimpleModeStampQR();
+                                  }
                                 }
                               } else {
                                 setState(() {
@@ -677,6 +693,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                     _expiryDate = DateTime(nextYear, nextMonth, 1, 0, 0, 0);
                                   }
                                 });
+                                // Regenerate token if one exists (real-time update)
+                                if (_stampToken != null) {
+                                  _generateSimpleModeStampQR();
+                                }
                               }
                             },
                           ),

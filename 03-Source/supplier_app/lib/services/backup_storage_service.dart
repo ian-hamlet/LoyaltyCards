@@ -36,7 +36,7 @@ import '../models/backup_result.dart';
 class BackupStorageService {
   /// 1. Save backup QR code to device photo gallery
   /// Works on both iOS (Photos app) and Android (Gallery)
-  static Future<bool> saveToPhotos(
+  static Future<BackupResult> saveToPhotos(
     SupplierConfigBackup backup,
     Uint8List qrImageBytes,
   ) async {
@@ -86,23 +86,46 @@ class BackupStorageService {
       }
       
       AppLogger.debug('=== saveToPhotos END (success: $success) ===', 'BackupService');
-      return success;
+      return success 
+        ? BackupResult.success() 
+        : BackupResult.failure(BackupFailureReason.unknown, 'Failed to save to photos. Check storage permissions.');
     } on TimeoutException catch (e) {
       AppLogger.error(
         'Photo save timeout: $e. User should try Email or PDF backup.',
         tag: 'BackupService',
       );
-      return false; // CR-1.2: Timeout = failure, not success
+      return BackupResult.failure(
+        BackupFailureReason.timeout,
+        'Operation timed out. Try an alternative backup method.',
+      );
     } catch (e, stackTrace) {
       AppLogger.error('Error saving backup to photos: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      // Check for specific error types
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('permission')) {
+        return BackupResult.failure(
+          BackupFailureReason.permissionDenied,
+          'Storage permission denied. Enable in Settings.',
+        );
+      } else if (errorString.contains('space') || errorString.contains('disk full')) {
+        return BackupResult.failure(
+          BackupFailureReason.diskFull,
+          'Not enough storage space. Free up space and try again.',
+        );
+      }
+      
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to save to photos: ${e.toString()}',
+      );
     }
   }
 
   /// 2. Generate and print PDF with backup QR code
   /// Opens system print dialog on both iOS and Android
-  static Future<bool> printBackup(
+  static Future<BackupResult> printBackup(
     SupplierConfigBackup backup,
     Uint8List qrImageBytes,
   ) async {
@@ -122,17 +145,29 @@ class BackupStorageService {
 
       AppLogger.debug('Print dialog opened successfully', 'BackupService');
       AppLogger.debug('=== printBackup END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
     } catch (e, stackTrace) {
       AppLogger.error('Error printing backup: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('cancel')) {
+        return BackupResult.failure(
+          BackupFailureReason.userCancelled,
+          'Print cancelled.',
+        );
+      }
+      
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to print: ${e.toString()}',
+      );
     }
   }
 
   /// 3. Share backup via email (or other apps)
   /// Opens system share sheet with pre-filled email option
-  static Future<bool> shareViaEmail(
+  static Future<BackupResult> shareViaEmail(
     SupplierConfigBackup backup,
     Uint8List qrImageBytes, {
     Rect? sharePositionOrigin,
@@ -185,17 +220,20 @@ The QR code image is attached to this email.
 
       AppLogger.debug('Share result: ${result.status}', 'BackupService');
       AppLogger.debug('=== shareViaEmail END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
     } catch (e, stackTrace) {
       AppLogger.error('Error sharing via email: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to share: ${e.toString()}',
+      );
     }
   }
 
   /// 4. Save backup to Files app / file system
   /// iOS: Saves to Files app, Android: Saves to Downloads
-  static Future<bool> saveToFiles(
+  static Future<BackupResult> saveToFiles(
     SupplierConfigBackup backup,
     Uint8List qrImageBytes, {
     Rect? sharePositionOrigin,
@@ -246,11 +284,34 @@ The QR code image is attached to this email.
       }
 
       AppLogger.debug('=== saveToFiles END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
+    } on UnsupportedError catch (e) {
+      AppLogger.error('Platform not supported: $e', tag: 'BackupService');
+      return BackupResult.failure(
+        BackupFailureReason.platformNotSupported,
+        'This backup method is not supported on your device.',
+      );
     } catch (e, stackTrace) {
       AppLogger.error('Error saving backup to files: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('permission')) {
+        return BackupResult.failure(
+          BackupFailureReason.permissionDenied,
+          'Storage permission denied. Enable in Settings.',
+        );
+      } else if (errorString.contains('space') || errorString.contains('disk full')) {
+        return BackupResult.failure(
+          BackupFailureReason.diskFull,
+          'Not enough storage space. Free up space and try again.',
+        );
+      }
+      
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to save to files: ${e.toString()}',
+      );
     }
   }
 
@@ -578,7 +639,7 @@ The QR code image is attached to this email.
   }
 
   /// Save Simple Mode stamp token QR to photo gallery
-  static Future<bool> saveSimpleTokenToPhotos({
+  static Future<BackupResult> saveSimpleTokenToPhotos({
     required String qrData,
     required String businessName,
     required int stampCount,
@@ -623,22 +684,38 @@ The QR code image is attached to this email.
 
       final success = result is Map && result['isSuccess'] == true;
       AppLogger.debug('=== saveSimpleTokenToPhotos END (success: $success) ===', 'BackupService');
-      return success;
+      return success
+        ? BackupResult.success()
+        : BackupResult.failure(BackupFailureReason.unknown, 'Failed to save to photos.');
     } on TimeoutException catch (e) {
       AppLogger.error(
         'Simple token photo save timeout: $e',
         tag: 'BackupService',
       );
-      return false; // CR-1.2: Timeout = failure
+      return BackupResult.failure(
+        BackupFailureReason.timeout,
+        'Operation timed out. Try another method.',
+      );
     } catch (e, stackTrace) {
       AppLogger.error('Error saving simple token to photos: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('permission')) {
+        return BackupResult.failure(
+          BackupFailureReason.permissionDenied,
+          'Storage permission denied.',
+        );
+      }
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to save: ${e.toString()}',
+      );
     }
   }
 
   /// Print Simple Mode stamp token QR
-  static Future<bool> printSimpleToken({
+  static Future<BackupResult> printSimpleToken({
     required String qrData,
     required String businessName,
     required int stampCount,
@@ -674,16 +751,27 @@ The QR code image is attached to this email.
       );
 
       AppLogger.debug('=== printSimpleToken END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
     } catch (e, stackTrace) {
       AppLogger.error('Error printing simple token: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('cancel')) {
+        return BackupResult.failure(
+          BackupFailureReason.userCancelled,
+          'Print cancelled.',
+        );
+      }
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to print: ${e.toString()}',
+      );
     }
   }
 
   /// Share Simple Mode stamp token via email
-  static Future<bool> shareSimpleTokenViaEmail({
+  static Future<BackupResult> shareSimpleTokenViaEmail({
     required String qrData,
     required String businessName,
     required int stampCount,
@@ -741,16 +829,19 @@ For best results:
       );
 
       AppLogger.debug('=== shareSimpleTokenViaEmail END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
     } catch (e, stackTrace) {
       AppLogger.error('Error sharing simple token via email: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to share: ${e.toString()}',
+      );
     }
   }
 
   /// Save Simple Mode stamp token to Files
-  static Future<bool> saveSimpleTokenToFiles({
+  static Future<BackupResult> saveSimpleTokenToFiles({
     required String qrData,
     required String businessName,
     required int stampCount,
@@ -794,11 +885,22 @@ For best results:
       }
 
       AppLogger.debug('=== saveSimpleTokenToFiles END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
     } catch (e, stackTrace) {
       AppLogger.error('Error saving simple token to files: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('permission')) {
+        return BackupResult.failure(
+          BackupFailureReason.permissionDenied,
+          'Storage permission denied.',
+        );
+      }
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to save: ${e.toString()}',
+      );
     }
   }
 
@@ -1025,7 +1127,7 @@ For best results:
   }
 
   /// Save Simple Mode issue card QR to photo gallery
-  static Future<bool> saveIssueCardToPhotos({
+  static Future<BackupResult> saveIssueCardToPhotos({
     required String qrData,
     required String businessName,
     required int initialStamps,
@@ -1067,22 +1169,38 @@ For best results:
 
       final success = result is Map && result['isSuccess'] == true;
       AppLogger.debug('=== saveIssueCardToPhotos END (success: $success) ===', 'BackupService');
-      return success;
+      return success
+        ? BackupResult.success()
+        : BackupResult.failure(BackupFailureReason.unknown, 'Failed to save to photos.');
     } on TimeoutException catch (e) {
       AppLogger.error(
         'Issue card photo save timeout: $e',
         tag: 'BackupService',
       );
-      return false;
+      return BackupResult.failure(
+        BackupFailureReason.timeout,
+        'Operation timed out. Try another method.',
+      );
     } catch (e, stackTrace) {
       AppLogger.error('Error saving issue card to photos: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('permission')) {
+        return BackupResult.failure(
+          BackupFailureReason.permissionDenied,
+          'Storage permission denied.',
+        );
+      }
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to save: ${e.toString()}',
+      );
     }
   }
 
   /// Print Simple Mode issue card QR
-  static Future<bool> printIssueCard({
+  static Future<BackupResult> printIssueCard({
     required String qrData,
     required String businessName,
     required int initialStamps,
@@ -1115,11 +1233,22 @@ For best results:
       );
 
       AppLogger.debug('=== printIssueCard END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
     } catch (e, stackTrace) {
       AppLogger.error('Error printing issue card: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('cancel')) {
+        return BackupResult.failure(
+          BackupFailureReason.userCancelled,
+          'Print cancelled.',
+        );
+      }
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to print: ${e.toString()}',
+      );
     }
   }
 
@@ -1217,7 +1346,7 @@ For best results:
   }
 
   /// Share Simple Mode issue card via native share sheet
-  static Future<bool> shareIssueCard({
+  static Future<BackupResult> shareIssueCard({
     required String qrData,
     required String businessName,
     required int initialStamps,
@@ -1273,11 +1402,14 @@ For best results:
       );
 
       AppLogger.debug('=== shareIssueCard END (success: true) ===', 'BackupService');
-      return true;
+      return BackupResult.success();
     } catch (e, stackTrace) {
       AppLogger.error('Error sharing issue card: $e', tag: 'BackupService');
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      return false;
+      return BackupResult.failure(
+        BackupFailureReason.unknown,
+        'Failed to share: ${e.toString()}',
+      );
     }
   }
 }

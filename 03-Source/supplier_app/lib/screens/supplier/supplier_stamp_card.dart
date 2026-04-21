@@ -398,7 +398,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     if (_business == null || _stampToken == null) return;
     
     try {
-      final success = await BackupStorageService.saveSimpleTokenToPhotos(
+      final result = await BackupStorageService.saveSimpleTokenToPhotos(
         qrData: _stampToken!.toQRString(),
         businessName: _business!.name,
         stampCount: _stampCount,
@@ -406,10 +406,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       );
       
       if (mounted) {
-        if (success) {
+        if (result.isSuccess) {
           AppFeedback.success(context, 'Saved to Photos');
         } else {
-          AppFeedback.error(context, 'Failed to save');
+          AppFeedback.error(context, result.getUserMessage());
         }
       }
     } catch (e) {
@@ -425,7 +425,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     if (_business == null || _stampToken == null) return;
     
     try {
-      final success = await BackupStorageService.printSimpleToken(
+      final result = await BackupStorageService.printSimpleToken(
         qrData: _stampToken!.toQRString(),
         businessName: _business!.name,
         stampCount: _stampCount,
@@ -433,10 +433,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       );
       
       if (mounted) {
-        if (success) {
+        if (result.isSuccess) {
           AppFeedback.success(context, 'Print dialog opened');
         } else {
-          AppFeedback.error(context, 'Failed to print');
+          AppFeedback.error(context, result.getUserMessage());
         }
       }
     } catch (e) {
@@ -455,7 +455,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       final size = MediaQuery.of(context).size;
       final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
       
-      final success = await BackupStorageService.shareSimpleTokenViaEmail(
+      final result = await BackupStorageService.shareSimpleTokenViaEmail(
         qrData: _stampToken!.toQRString(),
         businessName: _business!.name,
         stampCount: _stampCount,
@@ -464,10 +464,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       );
       
       if (mounted) {
-        if (success) {
+        if (result.isSuccess) {
           AppFeedback.success(context, 'Share sheet opened');
         } else {
-          AppFeedback.error(context, 'Failed to share');
+          AppFeedback.error(context, result.getUserMessage());
         }
       }
     } catch (e) {

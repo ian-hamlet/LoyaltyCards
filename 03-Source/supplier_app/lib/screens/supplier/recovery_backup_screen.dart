@@ -154,20 +154,20 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     AppLogger.debug('Calling BackupStorageService.printBackup...', 'Backup');
     
     try {
-      final success = await BackupStorageService.printBackup(
+      final result = await BackupStorageService.printBackup(
         _backup!,
         _qrImageBytes!,
       );
 
-      AppLogger.debug('printBackup returned: $success', 'Backup');
+      AppLogger.debug('printBackup returned: ${result.isSuccess}', 'Backup');
 
-      if (success) {
+      if (result.isSuccess) {
         setState(() => _completedMethods.add('print'));
         AppLogger.debug('Print method completed successfully', 'Backup');
         AppFeedback.success(context, 'Print dialog opened');
       } else {
-        AppLogger.warning('printBackup returned false - no dialog shown', 'Backup');
-        AppFeedback.error(context, 'Failed to open print dialog');
+        AppLogger.warning('printBackup failed: ${result.message}', 'Backup');
+        AppFeedback.error(context, result.getUserMessage());
       }
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _printBackup: $e', tag: 'Backup');
@@ -190,20 +190,20 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     AppLogger.debug('Calling BackupStorageService.saveToPhotos...', 'Backup');
     
     try {
-      final success = await BackupStorageService.saveToPhotos(
+      final result = await BackupStorageService.saveToPhotos(
         _backup!,
         _qrImageBytes!,
       );
 
-      AppLogger.debug('saveToPhotos returned: $success', 'Backup');
+      AppLogger.debug('saveToPhotos returned: ${result.isSuccess}', 'Backup');
 
-      if (success) {
+      if (result.isSuccess) {
         setState(() => _completedMethods.add('photos'));
         AppLogger.debug('Photos method completed successfully', 'Backup');
         AppFeedback.success(context, 'Saved to Photos');
       } else {
-        AppLogger.warning('saveToPhotos returned false - check permissions or storage', 'Backup');
-        AppFeedback.error(context, 'Failed to save to Photos - check permissions');
+        AppLogger.warning('saveToPhotos failed: ${result.message}', 'Backup');
+        AppFeedback.error(context, result.getUserMessage());
       }
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _saveToPhotos: $e', tag: 'Backup');
@@ -235,19 +235,22 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       AppLogger.debug('Share position: $sharePosition', 'Backup');
       AppLogger.debug('Calling BackupStorageService.shareViaEmail...', 'Backup');
 
-      final success = await BackupStorageService.shareViaEmail(
+      final result = await BackupStorageService.shareViaEmail(
         _backup!,
         _qrImageBytes!,
         sharePositionOrigin: sharePosition,
       );
 
-      AppLogger.debug('shareViaEmail returned: $success', 'Backup');
+      AppLogger.debug('shareViaEmail returned: ${result.isSuccess}', 'Backup');
 
-      if (success) {
+      if (result.isSuccess) {
         setState(() => _completedMethods.add('email'));
         AppLogger.debug('Email method completed successfully', 'Backup');
         AppFeedback.success(context, 'Share sheet opened');
       } else {
+        AppLogger.warning('shareViaEmail failed: ${result.message}', 'Backup');
+        AppFeedback.error(context, result.getUserMessage());
+      }
         AppLogger.warning('shareViaEmail returned false', 'Backup');
         AppFeedback.error(context, 'Failed to share');
       }
@@ -280,21 +283,21 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       AppLogger.debug('Share position for Files: $sharePosition', 'Backup');
       AppLogger.debug('Calling BackupStorageService.saveToFiles...', 'Backup');
 
-      final success = await BackupStorageService.saveToFiles(
+      final result = await BackupStorageService.saveToFiles(
         _backup!,
         _qrImageBytes!,
         sharePositionOrigin: sharePosition,
       );
 
-      AppLogger.debug('saveToFiles returned: $success', 'Backup');
+      AppLogger.debug('saveToFiles returned: ${result.isSuccess}', 'Backup');
 
-      if (success) {
+      if (result.isSuccess) {
         setState(() => _completedMethods.add('files'));
         AppLogger.debug('Files method completed successfully', 'Backup');
         AppFeedback.success(context, 'Saved to Files');
       } else {
-        AppLogger.warning('saveToFiles returned false', 'Backup');
-        AppFeedback.error(context, 'Failed to save to Files');
+        AppLogger.warning('saveToFiles failed: ${result.message}', 'Backup');
+        AppFeedback.error(context, result.getUserMessage());
       }
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _saveToFiles: $e', tag: 'Backup');

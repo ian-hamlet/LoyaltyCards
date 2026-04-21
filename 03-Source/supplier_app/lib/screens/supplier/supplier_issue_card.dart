@@ -474,17 +474,17 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     if (_business == null || _token == null) return;
     
     try {
-      final success = await BackupStorageService.saveIssueCardToPhotos(
+      final result = await BackupStorageService.saveIssueCardToPhotos(
         qrData: _token!.toQRString(),
         businessName: _business!.name,
         initialStamps: _initialStampCount,
       );
       
       if (mounted) {
-        if (success) {
+        if (result.isSuccess) {
           AppFeedback.success(context, 'Saved to Photos');
         } else {
-          AppFeedback.error(context, 'Failed to save');
+          AppFeedback.error(context, result.getUserMessage());
         }
       }
     } catch (e) {
@@ -500,17 +500,17 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     if (_business == null || _token == null) return;
     
     try {
-      final success = await BackupStorageService.printIssueCard(
+      final result = await BackupStorageService.printIssueCard(
         qrData: _token!.toQRString(),
         businessName: _business!.name,
         initialStamps: _initialStampCount,
       );
       
       if (mounted) {
-        if (success) {
+        if (result.isSuccess) {
           AppFeedback.success(context, 'Print dialog opened');
         } else {
-          AppFeedback.error(context, 'Failed to print');
+          AppFeedback.error(context, result.getUserMessage());
         }
       }
     } catch (e) {
@@ -529,7 +529,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       final size = MediaQuery.of(context).size;
       final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
       
-      final success = await BackupStorageService.shareIssueCard(
+      final result = await BackupStorageService.shareIssueCard(
         qrData: _token!.toQRString(),
         businessName: _business!.name,
         initialStamps: _initialStampCount,
@@ -537,10 +537,10 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       );
       
       if (mounted) {
-        if (success) {
+        if (result.isSuccess) {
           AppFeedback.success(context, 'Share sheet opened');
         } else {
-          AppFeedback.error(context, 'Failed to share');
+          AppFeedback.error(context, result.getUserMessage());
         }
       }
     } catch (e) {

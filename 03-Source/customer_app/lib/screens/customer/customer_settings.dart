@@ -7,6 +7,7 @@ import '../../services/stamp_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/biometric_auth_service.dart';
+import '../../utils/error_message_mapper.dart';
 
 /// Feature flag: Show dangerous delete button during testing phase
 /// Set to false before production App Store release
@@ -59,7 +60,13 @@ class _CustomerSettingsState extends State<CustomerSettings> {
         _authMethodName = authName;
       });
     } catch (e) {
-      AppLogger.error('Error loading security settings: $e', tag: 'Settings');
+      AppLogger.error('Error loading security settings', error: e, tag: 'Settings');
+      // Use defaults but log the error
+      setState(() {
+        _requireAppLock = false; // Safe default
+        _biometricAvailable = false;
+        _authMethodName = 'Passcode';
+      });
     }
   }
 
@@ -107,9 +114,18 @@ class _CustomerSettingsState extends State<CustomerSettings> {
 
       AppLogger.info('App lock ${value ? 'enabled' : 'disabled'}', 'Security');
     } catch (e) {
-      AppLogger.error('Error toggling app lock: $e', tag: 'Settings');
+      AppLogger.error('Error toggling app lock', error: e, tag: 'Settings');
+      
+      // Revert UI state since save failed
+      setState(() {
+        _requireAppLock = !value;
+      });
+      
       if (mounted) {
-        AppFeedback.error(context, 'Error updating setting');
+        AppFeedback.error(
+          context,
+          'Could not save app lock setting. Please try again.',
+        );
       }
     }
   }
@@ -208,11 +224,12 @@ class _CustomerSettingsState extends State<CustomerSettings> {
           Navigator.pop(context);
         }
       } catch (e) {
+        AppLogger.error('Error deleting data', error: e, tag: 'Settings');
         if (mounted) {
           // Pop loading dialog
           Navigator.pop(context);
 
-          AppFeedback.error(context, 'Error deleting data: $e');
+          AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'delete all data'));
         }
       }
     }

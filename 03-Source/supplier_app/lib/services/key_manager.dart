@@ -27,12 +27,9 @@ class KeyManager {
   Future<AsymmetricKeyPair<PublicKey, PrivateKey>> generateKeyPair() async {
     AppLogger.crypto('Generating ECDSA P-256 key pair');
     final keyParams = ECKeyGeneratorParameters(ECCurve_secp256r1());
-    final random = FortunaRandom();
     
-    // Seed the random number generator
-    final seedSource = Random.secure();
-    final seeds = List<int>.generate(32, (_) => seedSource.nextInt(256));
-    random.seed(KeyParameter(Uint8List.fromList(seeds)));
+    // CR-1.3: Use centralized secure random generator (removes duplication)
+    final random = _getSecureRandom();
 
     final generator = ECKeyGenerator()
       ..init(ParametersWithRandom(keyParams, random));
@@ -153,8 +150,9 @@ class KeyManager {
 
   /// Verify signature with public key
   /// 
+  /// CR-1.4: Returns VerificationResult with detailed failure reasons
   /// Delegates to shared CryptoUtils for consistency with customer app
-  static bool verifySignature(String data, String signatureBase64, String publicKeyEncoded) {
+  static VerificationResult verifySignature(String data, String signatureBase64, String publicKeyEncoded) {
     return CryptoUtils.verifySignature(
       data: data,
       signatureBase64: signatureBase64,
@@ -216,14 +214,40 @@ class KeyManager {
     try {
       final bytes = base64Decode(encoded);
       
+      // Validate minimum length for headers (CR-1.1: bounds checking)
+      if (bytes.length < 8) {
+        AppLogger.error('Public key too short: ${bytes.length} bytes (supplier)');
+        return null;
+      }
+      
       var offset = 0;
       final xLength = _decodeLength(bytes, offset);
       offset += 4;
+      
+      // Bounds check for x coordinate (CR-1.1)
+      if (offset + xLength > bytes.length) {
+        AppLogger.error('Invalid xLength: $xLength exceeds buffer (supplier)');
+        return null;
+      }
+      
       final xBytes = bytes.sublist(offset, offset + xLength);
       offset += xLength;
       
+      // Validate remaining length for y header (CR-1.1)
+      if (offset + 4 > bytes.length) {
+        AppLogger.error('Insufficient bytes for yLength header (supplier)');
+        return null;
+      }
+      
       final yLength = _decodeLength(bytes, offset);
       offset += 4;
+      
+      // Bounds check for y coordinate (CR-1.1)
+      if (offset + yLength > bytes.length) {
+        AppLogger.error('Invalid yLength: $yLength exceeds buffer (supplier)');
+        return null;
+      }
+      
       final yBytes = bytes.sublist(offset, offset + yLength);
       
       final x = BigInt.parse(xBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
@@ -257,6 +281,14 @@ class KeyManager {
         bytes[offset + 3];
   }
 
+  /// Generate cryptographically secure random number generator
+  /// 
+  /// Uses Dart's Random.secure() which provides platform-appropriate CSPRNG:
+  /// - iOS: SecRandomCopyBytes
+  /// - Android: /dev/urandom
+  /// 
+  /// CR-1.3: Centralized method to ensure consistent RNG across all crypto operations
+  /// and simplify future security updates.
   SecureRandom _getSecureRandom() {
     final random = FortunaRandom();
     final seedSource = Random.secure();

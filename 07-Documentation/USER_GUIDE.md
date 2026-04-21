@@ -2,8 +2,8 @@
 
 **Quick Start Guide for Businesses & Customers**
 
-Version 0.2.0 (Build 21)  
-Last Updated: April 17, 2026
+Version 0.3.0 (Build 46+)  
+Last Updated: April 21, 2026
 
 ---
 
@@ -75,6 +75,7 @@ Last Updated: April 17, 2026
 - Stamp added instantly to your phone
 - Rate limited: 1 stamp per hour per business
 - No staff interaction needed
+- **Smart Routing:** Don't worry about which card is open - stamps automatically go to the correct business!
 
 **2. Staff-Assisted (Secure Mode businesses):**
 - Staff generates QR code on their device
@@ -83,6 +84,12 @@ Last Updated: April 17, 2026
 - QR expires after 1-2 minutes
 
 **Tip:** You'll know which mode a business uses after your first scan. Simple mode = instant, Secure mode = validated.
+
+**💡 Smart Routing Feature (Simple Mode):**
+When you scan a stamp QR code, the app automatically finds the correct card for that business - even if you're viewing a different card screen. For example, if you have cards for "Coffee Shop" and "Restaurant", and you scan a "Restaurant" stamp while viewing your "Coffee Shop" card, the stamp will automatically go to your "Restaurant" card. No need to switch cards first!
+
+**🎉 Auto New Card:**
+When a card is completed, a new card is automatically created for the same business. If you scan stamps that exceed the requirement, the extra stamps go onto the new card. You'll see a notification explaining what happened.
 
 #### Redeeming Rewards
 
@@ -219,18 +226,16 @@ Last Updated: April 17, 2026
    - **🔐 Face ID/Touch ID prompt will appear** (Build 21+)
    - Authenticate to view backup QR (protects private keys)
    - **Use at least 2 backup methods:**
-     1. 🖨️ **Print** (HIGHLY RECOMMENDED)
+     1. 🖨️ **Print Backup** (HIGHLY RECOMMENDED)
         - Opens print dialog
         - Print and store in safe/locked drawer
         - This is your "master key"
-     2. 📸 **Save to Photos**
-        - Backs up to iCloud Photos
-        - Easy to find, searchable
-     3. 📧 **Email to Myself**
+     2. 📧 **Share via Email**
         - Accessible from any device
         - Search email for "LoyaltyCards Backup"
-     4. 📁 **Save to Files**
+     3. 📁 **Save to Files**
         - Store in password manager or iCloud Drive
+        - Choose Files app, iCloud Drive, etc.
    
    **⚠️ WARNING:** Without backup, if you lose your device:
    - All customer cards become invalid
@@ -253,33 +258,46 @@ Last Updated: April 17, 2026
 #### Simple Mode Workflow
 
 **One-Time Setup:**
+
+**Generate QR Code Stamp Tokens (Main Feature):**
+1. Tap "Generate QR Code Stamp Tokens" on home screen
+2. **Configure Token Settings** (optional - tap to expand):
+   - Adjust stamp value (1-7 stamps per scan)
+   - Set expiry date (optional - QR can expire after date)
+   - Settings collapsed by default for clean interface
+   - Tap accordion to expand/collapse configuration
+3. QR code appears on screen
+4. **Save QR Code** using built-in options:
+   - **Save** - Adds to Photos app for printing/reference
+   - **Print** - Opens system print dialog for physical copies
+   - **Share** - Email, AirDrop, or share via other apps
+5. Post QR code at checkout: "Scan to Add Stamps"
+6. **Generate new QR** anytime settings change (tap refresh icon)
+
+**Issue New Cards (For New Customers):**
 1. Tap "Issue Card" on home screen
-2. QR code appears - this is your **permanent "Get Card" QR**
-3. Print this QR code (or take screenshot)
-4. Post at checkout: "Scan for Loyalty Card"
-
-5. Tap "Add Stamp"
-6. QR code appears - this is your **permanent "Add Stamp" QR**
-7. Print this QR code
-8. Post at checkout: "Scan to Add Stamp"
-
-9. Tap "Redeem Card"
-10. QR code appears - this is your **permanent "Redeem" QR**
-11. Print this QR code
-12. Post at checkout: "Scan to Redeem Reward"
+2. **Quick Start Stamps** (optional - tap to expand):
+   - Pre-apply stamps (0 up to required stamps)
+   - Useful for welcome bonuses or promotions
+   - Use slider to adjust: tap +/- or drag
+   - Collapsed by default - tap to see options
+3. QR code appears on screen
+4. **Save QR Code** using same options:
+   - Save, Print, or Share buttons
+5. Customer scans QR to receive card
+6. Card appears in their wallet with any pre-applied stamps
 
 **Daily Operations:**
 - **Nothing!** Customers self-serve
-- QR codes never expire
+- QR codes never expire (unless you set expiry)
 - Customers scan as needed
-- You monitor redemptions
+- Generate new tokens when needed (different stamp values, etc.)
+- All operations accessible from home screen
 
 **Monitoring:**
-- Home screen shows stats:
-  - Cards issued
-  - Active cards
-  - Redemptions
-- View history: Settings → View Activity (coming soon)
+- Home screen shows mode-aware interface
+- "How it Works" section shows simple mode instructions
+- Statistics hidden in simple mode (not tracked)
 
 ---
 
@@ -289,18 +307,24 @@ Last Updated: April 17, 2026
 
 **Issue New Card:**
 1. Tap "Issue Card" button
-2. Choose initial stamps (0-7)
-3. QR code appears on screen (valid 1-2 minutes)
+2. **Quick Start Stamps** (optional - tap to expand):
+   - Pre-apply stamps using slider (0 up to required stamps)
+   - Tap +/- buttons or drag slider to adjust
+   - Collapsed by default for cleaner interface
+3. QR code appears on screen (valid 5 minutes)
 4. Customer scans with their phone
-5. Card added to customer's wallet
+5. Card added to customer's wallet with cryptographic validation
 
 **Add Stamps:**
 1. During customer purchase, tap "Add Stamp"
-2. Choose number of stamps (1-7)
-3. Time-limited QR appears on screen
+2. **Token Configuration** (optional - tap to expand):
+   - Choose number of stamps using slider (1-7)
+   - Set optional expiry date
+   - Collapsed by default
+3. Time-limited QR appears on screen (valid 5 minutes)
 4. Customer scans QR with phone
 5. Cryptographic validation happens automatically
-6. Stamp added if valid
+6. Stamp(s) added if valid
 
 **Redeem Reward:**
 1. Customer shows completed card (on their phone)
@@ -311,9 +335,10 @@ Last Updated: April 17, 2026
 6. If invalid: Error message, investigation needed
 
 **Key Points:**
-- QR codes expire (1-2 minutes) for security
-- Tap "Refresh" if customer needs more time
-- Statistics tracked: Settings → View Stats (coming soon)
+- QR codes expire (5 minutes) for security
+- Tap "Refresh" icon if customer needs more time
+- All optional settings use progressive disclosure (accordions)
+- Statistics tracked: visible on home screen
 
 ---
 
@@ -379,17 +404,10 @@ Last Updated: April 17, 2026
 
 ### Permissions Required (iOS)
 
-**Photo Library:**
-- **When:** First time you tap "Save to Photos"
-- **Prompt:** iOS asks for permission
-- **Choose:** "Allow" or "Add Photos Only"
-- **If Denied:** Can't save to Photos (use other 3 methods)
-- **Re-enable:** Settings → Privacy → Photos → LoyaltyCards
-
-**No other permissions required!**
-- Email: Uses share sheet (no permission)
-- Files: Uses share sheet (no permission)
-- Print: System print dialog (no permission)
+**No special permissions required!**
+- **Share via Email:** Uses system share sheet (no permission needed)
+- **Save to Files:** Uses system share sheet (no permission needed)
+- **Print Backup:** Uses system print dialog (no permission needed)
 
 ---
 

@@ -69,15 +69,17 @@ const String appVersion = 'v{major}.{minor}.{patch} (Build {build})';
 
 ## 🏗️ Architecture Principles
 
-### Current Architecture (Build 47)
+### Current Architecture (Build 21)
 
 1. **P2P (Peer-to-Peer)**: No central server
 2. **Local-First**: SQLite databases, offline-capable
 3. **QR Code Exchange**: All communication via QR codes
-4. **Cryptographic Validation**: RSA signatures for security
-5. **Dual-Mode Support** (NEW in Build 47):
+4. **Cryptographic Validation**: ECDSA P-256 signatures for security
+5. **Dual-Mode Support**:
    - **Simple Mode**: Trust-based, fast (coffee shops)
    - **Secure Mode**: Crypto validation (high-value rewards)
+6. **Biometric Authentication**: Face ID/Touch ID for private key access
+7. **Device Binding**: Multi-device duplication detection
 
 ### Technology Stack
 
@@ -93,7 +95,8 @@ const String appVersion = 'v{major}.{minor}.{patch} (Build {build})';
 
 ### Schema Version Management
 
-- **Current Version**: 4 (as of Build 47)
+- **Customer App Version**: 6 (as of Build 21)
+- **Supplier App Version**: 4 (as of Build 21)
 - **Location**: `shared/lib/constants/constants.dart`
 - **Migration**: Always provide migration path in `_onUpgrade()`
 
@@ -111,7 +114,7 @@ const String appVersion = 'v{major}.{minor}.{patch} (Build {build})';
 
 ---
 
-## 🎨 UX/UI Standards (Build 46+)
+## 🎨 UX/UI Standards
 
 ### Design System
 
@@ -210,7 +213,7 @@ See: `00-Planning/BUILD_46_TESTING_CHECKLIST.md`
 
 - **Branch**: Feature branches for experiments
 - **Commit**: Include build number in message
-- **Example**: `"Build 47: Add dual-mode operation support"`
+- **Example**: `"Build 21: Add Face ID authentication and security fixes"`
 
 ### TestFlight
 
@@ -240,13 +243,13 @@ See: `00-Planning/BUILD_46_TESTING_CHECKLIST.md`
 
 ---
 
-## 🎯 Current Status (Build 47)
+## 🎯 Current Status (Build 21)
 
-**Phase Completion**: 75% (5 of 9 phases)
+**Phase Completion**: ~90% (7 of 10 phases)
 
-**Ready For**: Device testing, TestFlight pilot
+**Ready For**: Continued pilot testing with critical fixes
 
-**Next Milestone**: Implement dual-mode UI and testing
+**Next Milestone**: Fix 4 critical issues identified in code review, expand test coverage
 
 ---
 
@@ -254,12 +257,12 @@ See: `00-Planning/BUILD_46_TESTING_CHECKLIST.md`
 
 - **Project Plan**: `00-Planning/PROJECT_DEVELOPMENT_PLAN.md`
 - **Current Status**: `00-Planning/CURRENT_STATUS.md`
-- **Quick Reference**: `00-Planning/QUICK_REFERENCE.md`
+- **Code Review**: `CODE_REVIEW_v0.2.0_Build_21.md`
 - **Requirements**: `00-Planning/Requirements/`
 - **Architecture**: `01-Design/Architecture/`
 
 ---
 
-**Last Updated**: April 12, 2026 (Build 47)  
+**Last Updated**: April 20, 2026 (Build 21)  
 **Maintained By**: Project Team + AI Assistants  
 **Review Frequency**: Each major build milestone

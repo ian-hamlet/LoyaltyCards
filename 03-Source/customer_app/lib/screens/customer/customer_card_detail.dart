@@ -9,6 +9,7 @@ import '../../services/stamp_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/device_service.dart';
+import '../../utils/error_message_mapper.dart';
 import 'qr_display_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'package:uuid/uuid.dart';
@@ -62,7 +63,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
       setState(() => _isLoading = false);
       if (mounted) {
-        AppFeedback.error(context, 'Error loading card: $e');
+        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load card'));
       }
     }
   }
@@ -360,24 +361,24 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         margin: const EdgeInsets.only(left: 40),
                         padding: const EdgeInsets.all(32),
                         decoration: BoxDecoration(
-                          color: Colors.green[50],
+                          color: BrandColors.successContainer,
                           borderRadius: const BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(20),
                           ),
-                          border: Border.all(color: Colors.green[200]!, width: 2),
+                          border: Border.all(color: BrandColors.success.withOpacity(0.3), width: 2),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle, size: 64, color: Colors.green[600]),
+                            const Icon(Icons.check_circle, size: 64, color: BrandColors.success),
                             const SizedBox(height: 12),
-                            Text(
+                            const Text(
                               'Card Redeemed!',
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.green[800],
+                                color: BrandColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -394,11 +395,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.access_time, size: 16, color: Colors.green[700]),
+                                        const Icon(Icons.access_time, size: 16, color: BrandColors.success),
                                         const SizedBox(width: 6),
                                         Text(
                                           '${_card!.redeemedAt!.hour}:${_card!.redeemedAt!.minute.toString().padLeft(2, '0')}',
-                                          style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                          style: const TextStyle(fontSize: 14, color: BrandColors.textPrimary, fontWeight: FontWeight.w500),
                                         ),
                                       ],
                                     ),
@@ -406,11 +407,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.calendar_today, size: 16, color: Colors.green[700]),
+                                        const Icon(Icons.calendar_today, size: 16, color: BrandColors.success),
                                         const SizedBox(width: 6),
                                         Text(
                                           '${_card!.redeemedAt!.day}/${_card!.redeemedAt!.month}/${_card!.redeemedAt!.year}',
-                                          style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                          style: const TextStyle(fontSize: 14, color: BrandColors.textPrimary, fontWeight: FontWeight.w500),
                                         ),
                                       ],
                                     ),
@@ -419,11 +420,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                               ),
                               const SizedBox(height: 12),
                             ],
-                            Text(
+                            const Text(
                               'This card has been redeemed and can be deleted.',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey[800],
+                                color: BrandColors.textSecondary,
                                 fontWeight: FontWeight.w500,
                               ),
                               textAlign: TextAlign.center,
@@ -509,20 +510,20 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                 Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.green[50],
+                    color: BrandColors.successContainer,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.green[200]!, width: 2),
+                    border: Border.all(color: BrandColors.success.withOpacity(0.3), width: 2),
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.check_circle, size: 80, color: Colors.green[600]),
+                      const Icon(Icons.check_circle, size: 80, color: BrandColors.success),
                       const SizedBox(height: 16),
-                      Text(
+                      const Text(
                         'Card Redeemed!',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green[800],
+                          color: BrandColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -539,11 +540,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.access_time, size: 16, color: Colors.green[700]),
+                                  const Icon(Icons.access_time, size: 16, color: BrandColors.success),
                                   const SizedBox(width: 6),
                                   Text(
                                     '${_card!.redeemedAt!.hour}:${_card!.redeemedAt!.minute.toString().padLeft(2, '0')}',
-                                    style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                    style: const TextStyle(fontSize: 14, color: BrandColors.textPrimary, fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),
@@ -551,11 +552,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.calendar_today, size: 16, color: Colors.green[700]),
+                                  const Icon(Icons.calendar_today, size: 16, color: BrandColors.success),
                                   const SizedBox(width: 6),
                                   Text(
                                     '${_card!.redeemedAt!.day}/${_card!.redeemedAt!.month}/${_card!.redeemedAt!.year}',
-                                    style: TextStyle(fontSize: 14, color: Colors.green[900], fontWeight: FontWeight.w500),
+                                    style: const TextStyle(fontSize: 14, color: BrandColors.textPrimary, fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),
@@ -564,11 +565,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         ),
                         const SizedBox(height: 12),
                       ],
-                      Text(
+                      const Text(
                         'This card has been redeemed and can be deleted.',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[800],
+                          color: BrandColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
@@ -780,37 +781,40 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
     
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: Colors.blue[50],
+      color: BrandColors.infoContainer,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.blue[700],
+          backgroundColor: BrandColors.info,
           child: const Icon(Icons.add_card, color: Colors.white, size: 20),
         ),
         title: const Text(
           'Card Created',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: BrandColors.textPrimary,
+          ),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               _formatDate(_card!.createdAt),
-              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 12, color: BrandColors.textSecondary),
             ),
             if (displayStampCount > 0) ...[
               const SizedBox(height: 4),
               Text(
                 'Started with $displayStampCount stamp${displayStampCount > 1 ? 's' : ''}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.blue[800],
+                  color: BrandColors.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ],
         ),
-        trailing: Icon(Icons.fiber_new, color: Colors.blue[700]),
+        trailing: const Icon(Icons.fiber_new, color: BrandColors.info),
       ),
     );
   }
@@ -1026,8 +1030,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         );
       }
     } catch (e) {
+      AppLogger.error('Error redeeming card', error: e, tag: 'CardDetail');
       if (mounted) {
-        AppFeedback.error(context, 'Error redeeming card: $e');
+        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'redeem card'));
       }
     }
   }

@@ -2,7 +2,7 @@ name: customer_app
 description: "LoyaltyCards Customer App - Digital loyalty card wallet"
 publish_to: 'none'
 
-version: 0.2.1+23
+version: 0.3.0+1
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -29,8 +29,8 @@ dependencies:
   uuid: ^4.3.0
   intl: ^0.20.2
   pointycastle: ^4.0.0
-  device_info_plus: ^11.2.0
-  local_auth: ^2.3.0
+  device_info_plus: ^13.1.0
+  local_auth: ^3.0.1
   
   # UI
   cupertino_icons: ^1.0.6

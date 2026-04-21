@@ -16,6 +16,27 @@ import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Scanner screen for adding new cards or receiving stamps
+/// 
+/// **SMART ROUTING** (Simple Mode):
+/// When scanning a stamp QR code, the app uses "smart routing" to ensure
+/// stamps always go to the correct business card, regardless of which card
+/// screen you're currently viewing. For example:
+/// - You have cards for "Coffee Shop" and "Restaurant" 
+/// - You open the "Coffee Shop" card screen
+/// - You scan a "Restaurant" stamp QR code
+/// - The stamp is intelligently routed to your "Restaurant" card (not Coffee Shop)
+/// - This happens automatically based on the businessId in the QR code
+/// 
+/// This makes the scanning experience more forgiving - you don't need to be on
+/// the correct card screen to receive stamps. The system finds the right card for you.
+/// 
+/// **SECURE MODE:**
+/// Uses exact cardId matching - each card has a unique ID that must match the QR code.
+/// 
+/// **AUTO NEW CARD CREATION:**
+/// When a card reaches stampsRequired (is complete), a new card is automatically
+/// created for the same business. If there are overflow stamps from the scan,
+/// they are placed on the new card. Users are notified with a success message.
 class QRScannerScreen extends StatefulWidget {
   final QRScanMode mode;
 
@@ -197,18 +218,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.qr('Processing initial stamp #${initialStamp.stampNumber}');
         AppLogger.qr('  Card ID for stamp: $cardId');
         
-        // Verify stamp signature (skip in simple mode)
+        // Verify stamp signature (skip in simple mode) (CR-1.4)
         if (token.mode == OperationMode.secure) {
           final signatureData = '$cardId:${initialStamp.stampNumber}:${initialStamp.timestamp}:$previousHash';
-          final isValid = KeyManager.verifySignature(
+          final verificationResult = KeyManager.verifySignature(
             signatureData,
             initialStamp.signature,
             token.publicKey,
           );
 
-          if (!isValid) {
+          if (!verificationResult.isValid) {
+            AppLogger.error('Initial stamp signature verification failed: ${verificationResult.failureReason}');
             setState(() {
-              _errorMessage = 'Invalid stamp signature at stamp #${initialStamp.stampNumber}';
+              _errorMessage = 'Invalid stamp signature: ${verificationResult.failureReason}';
               _isProcessing = false;
             });
             // Rollback: delete the card
@@ -290,7 +312,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final repository = CardRepository(DatabaseHelper());
     models.Card? card;
     
-    // For simple mode stamps, look up by businessId since cardId is generic
+    // SMART ROUTING: For simple mode stamps, look up by businessId since cardId is generic
+    // This ensures stamps go to the correct business card, regardless of which card screen
+    // the user is currently viewing. Stamps are intelligently routed based on the QR code's
+    // businessId, not the opened card.
     if (token.cardId == 'simple-mode-stamp' && token.businessId.isNotEmpty) {
       AppLogger.qr('Simple Mode Stamp Detected');
       AppLogger.business('Looking up card by businessId: ${token.businessId}');
@@ -317,19 +342,34 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
-    // Check rate limiting
+    // Check rate limiting (REQ-022: Use token's scanInterval if present)
     final rateLimiter = RateLimiter(DatabaseHelper());
     final rateLimit = await rateLimiter.canReceiveStamp(
       cardId: card.id,
       businessId: card.businessId,
       mode: card.mode,
+      scanInterval: token.scanInterval, // REQ-022: Supplier-specific rate limit
     );
 
     if (!rateLimit.canProceed) {
-      setState(() {
-        _errorMessage = rateLimit.message ?? 'Rate limit exceeded';
-        _isProcessing = false;
-      });
+      // Rate limit hit - immediately return to card screen to prevent abuse
+      // This prevents customers from waiting on camera screen and scanning again after timeout
+      AppLogger.warning('Rate limit hit - returning to card screen', 'RateLimit');
+      
+      if (mounted) {
+        // Clear any existing snackbars to prevent stacking
+        ScaffoldMessenger.of(context).clearSnackBars();
+        
+        // Show error feedback
+        AppFeedback.error(
+          context,
+          rateLimit.message ?? 'Please wait before scanning again',
+        );
+        
+        // Immediately pop back to card screen
+        // Don't stay on camera - prevents easy re-scanning after timeout
+        Navigator.pop(context, null);
+      }
       return;
     }
 
@@ -357,6 +397,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         businessPublicKey: card.businessPublicKey,
         expectedPreviousHash: expectedPrevHash,
         mode: card.mode,
+        stampsRequired: card.stampsRequired, // REQ-022
       );
 
       if (!validation.isValid) {
@@ -367,8 +408,29 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         return;
       }
     } else {
-      // Simple mode: Trust-based, no cryptographic validation
-      AppLogger.debug('Simple mode: Skipping cryptographic validation');
+      // REQ-022: Simple mode - validate expiry date and stamp count (skip crypto)
+      AppLogger.debug('Simple mode: Validating expiry and stamp count only', 'Token');
+      
+      // Check expiry date if present
+      if (token.expiryDate != null) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        if (now > token.expiryDate!) {
+          setState(() {
+            _errorMessage = 'This stamp token has expired';
+            _isProcessing = false;
+          });
+          return;
+        }
+      }
+      
+      // Validate stamp count
+      if (token.stampCount > card!.stampsRequired) {
+        setState(() {
+          _errorMessage = 'Invalid stamp count: ${token.stampCount} exceeds ${card!.stampsRequired}';
+          _isProcessing = false;
+        });
+        return;
+      }
     }
 
     // Add stamp to card
@@ -423,8 +485,46 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
     await transactionRepo.insertTransaction(stampTransaction);
     
-    // Process additional stamps if present
+    // REQ-022: Process multi-denomination stamps (Simple Mode)
     int totalStampsAdded = 1;
+    if (token.stampCount > 1) {
+      AppLogger.qr('REQ-022: Processing ${token.stampCount - 1} additional stamps from multi-denomination token');
+      
+      for (int i = 2; i <= token.stampCount; i++) {
+        final additionalStampNumber = stamps.length + i;
+        final additionalStampId = '${card.id}_stamp_$additionalStampNumber';
+        
+        AppLogger.debug('Adding denomination stamp $i of ${token.stampCount}', 'Stamp');
+        
+        final additionalStamp = Stamp(
+          id: additionalStampId,
+          cardId: card.id,
+          stampNumber: additionalStampNumber,
+          timestamp: DateTime.now().add(Duration(milliseconds: i)), // Slight offset
+          signature: token.signature, // Same signature for all in simple mode
+          previousHash: null, // Simple mode doesn't use hash chains
+          deviceId: deviceId,
+        );
+        
+        await stampRepo.insertStamp(additionalStamp);
+        totalStampsAdded++;
+        AppLogger.database('  Multi-denomination stamp $i saved to DB');
+        
+        // Log stamp transaction
+        final addlStampTransaction = models.Transaction(
+          id: const Uuid().v4(),
+          cardId: card.id,
+          type: TransactionType.stamp,
+          timestamp: DateTime.now(),
+          businessName: card.businessName,
+          details: 'Stamp #$additionalStampNumber earned (multi-denomination)',
+        );
+        await transactionRepo.insertTransaction(addlStampTransaction);
+      }
+      AppLogger.qr('REQ-022: All ${token.stampCount} stamps processed');
+    }
+    
+    // Process additional stamps if present (Secure Mode)
     if (token.additionalStamps.isNotEmpty) {
       AppLogger.qr('Processing ${token.additionalStamps.length} Additional Stamps ===');
       String currentPreviousHash = token.signature; // First additional stamp uses main stamp's signature
@@ -436,19 +536,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.qr('  previousHash: "$prevHashPreview"');
         AppLogger.qr('  signature: "$addlSigPreview"');
         
-        // Verify stamp signature (skip in simple mode)
+        // Verify stamp signature (skip in simple mode) (CR-1.4)
         if (card.mode == OperationMode.secure) {
           final signatureData = '${card.id}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
-          final isValid = KeyManager.verifySignature(
+          final verificationResult = KeyManager.verifySignature(
             signatureData,
             additionalStamp.signature,
             card.businessPublicKey,
           );
 
-          if (!isValid) {
-            AppLogger.error('Additional stamp signature verification FAILED');
+          if (!verificationResult.isValid) {
+            AppLogger.error('Additional stamp signature verification failed: ${verificationResult.failureReason}');
             setState(() {
-              _errorMessage = 'Invalid stamp signature at stamp #${additionalStamp.stampNumber}';
+              _errorMessage = 'Invalid stamp signature: ${verificationResult.failureReason}';
               _isProcessing = false;
             });
             // Note: We've already added some stamps. In production, you might want
@@ -492,11 +592,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       AppLogger.qr('All Additional Stamps Processed');
     }
     
-    // Check for overflow
+    // Check for card completion or overflow
     final newTotalStamps = card.stampsCollected + totalStampsAdded;
-    if (newTotalStamps > card.stampsRequired) {
+    if (newTotalStamps >= card.stampsRequired) {
       AppLogger.business('╔═══════════════════════════════════════════════════════════╗');
-      AppLogger.business('║ OVERFLOW DETECTED - AUTO-CREATING NEW CARD               ║');
+      AppLogger.business('║ CARD COMPLETE - AUTO-CREATING NEW CARD                   ║');
       AppLogger.business('╚═══════════════════════════════════════════════════════════╝');
       AppLogger.business('Current stamps: ${card.stampsCollected}');
       AppLogger.business('Adding: $totalStampsAdded');
@@ -625,8 +725,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         }
         
         if (mounted) {
-          Navigator.pop(context, 
-            'Card complete! 🎉 ${stampsToExistingCard} stamp${stampsToExistingCard > 1 ? 's' : ''} added to existing card${remainingOverflow > 0 ? ", new card started with $remainingOverflow" : ""}');
+          String message;
+          if (overflow == 0) {
+            message = 'Card complete! 🎉 New card ready for ${card.businessName}';
+          } else if (remainingOverflow > 0) {
+            message = 'Card complete! 🎉 ${stampsToExistingCard} stamp${stampsToExistingCard > 1 ? 's' : ''} added to existing card, new card started with $remainingOverflow';
+          } else {
+            message = 'Card complete! 🎉 ${stampsToExistingCard} stamp${stampsToExistingCard > 1 ? 's' : ''} added to existing card';
+          }
+          Navigator.pop(context, message);
         }
       } else {
         // No existing card with space - create new card (original behavior)
@@ -687,8 +794,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.business('  Card 2 (NEW): $overflow stamps');
         
         if (mounted) {
-          Navigator.pop(context, 
-            'Card complete! 🎉 New card started with $overflow stamp${overflow > 1 ? 's' : ''}');
+          String message;
+          if (overflow == 0) {
+            message = 'Card complete! 🎉 New card ready for ${card.businessName}';
+          } else {
+            message = 'Card complete! 🎉 New card started with $overflow stamp${overflow > 1 ? 's' : ''}';
+          }
+          Navigator.pop(context, message);
         }
       }
     } else {
@@ -752,18 +864,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
-    // Verify the redemption token signature
+    // Verify the redemption token signature (CR-1.4)
     final signatureData = token.getSignatureData();
-    final isValid = KeyManager.verifySignature(
+    final verificationResult = KeyManager.verifySignature(
       signatureData,
       token.signature,
       card.businessPublicKey,
     );
 
-    if (!isValid) {
-      AppLogger.error('Redemption token signature verification FAILED');
+    if (!verificationResult.isValid) {
+      AppLogger.error('Redemption token signature verification failed: ${verificationResult.failureReason}');
       setState(() {
-        _errorMessage = 'Invalid redemption token signature';
+        _errorMessage = 'Invalid redemption signature: ${verificationResult.failureReason}';
         _isProcessing = false;
       });
       return;

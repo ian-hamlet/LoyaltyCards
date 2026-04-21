@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
+import '../../utils/error_message_mapper.dart';
 import 'supplier_home.dart';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -195,15 +196,17 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
         AppLogger.warning('Error stopping camera after failure: $cameraError', 'Import');
       }
       
+      final userMessage = ErrorMessageMapper.getUserMessage(e);
+      
       setState(() {
         _isProcessing = false;
         _businessAlreadyExists = true; // Prevent further scanning attempts
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _errorMessage = userMessage;
       });
 
       if (mounted) {
         Haptics.error();
-        AppFeedback.error(context, 'Import failed: $_errorMessage');
+        AppFeedback.error(context, 'Import failed: $userMessage');
       }
     }
   }

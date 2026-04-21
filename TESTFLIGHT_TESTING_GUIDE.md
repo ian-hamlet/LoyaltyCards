@@ -359,20 +359,18 @@ _(Cannot easily test without actual restore, so skip to Scenario 2)_
 3. Find **"Backup & Recovery"** section
 4. Tap **"Create Recovery Backup"**
 5. **Authenticate with Face ID/Touch ID** (Build 21+)
-6. Choose **"Save to Photos"**
-7. Grant photo library permission if prompted
-8. Wait for confirmation
+6. Choose **"Share via Email"**
+7. Send email to yourself
 
 **Verify:**
-1. Open **Photos** app
-2. Check recent photos
-3. QR code image should be saved
+1. Check your email inbox
+2. Email should contain QR code attachment
 
 **Expected Results:**
 - Biometric auth required first (Build 21+)
-- QR code successfully saved to Photos
-- Image is clear and scannable
-- Contains business configuration data
+- Email compose sheet opens
+- QR code attached to email
+- Email sends successfully
 
 **✅ Pass / ❌ Fail**  
 **Notes:**
@@ -389,17 +387,15 @@ _(Cannot easily test without actual restore, so skip to Scenario 2)_
 2. Go to **Settings** (gear icon)
 3. Find **"Backup & Recovery"** section
 4. Tap **"Create Recovery Backup"**
-5. Choose **"Save to Photos"**
-6. Grant photo library permission if prompted
-7. Wait for confirmation
+5. Choose **"Print Backup"** or **"Save to Files"**
+6. Complete the save/print process
 
 **Verify:**
-1. Open **Photos** app
-2. Check recent photos
-3. QR code image should be saved
+1. Backup QR code is accessible
+2. QR code is clear and scannable
 
 **Expected Results:**
-- QR code successfully saved to Photos
+- QR code successfully saved or printed
 - Image is clear and scannable
 - Contains business configuration data
 
@@ -646,7 +642,7 @@ _(Cannot easily test without actual restore, so skip to Scenario 2)_
 - [ ] No crashes
 - [ ] No freezing
 - [ ] Camera permissions work
-- [ ] Photo library access works
+- [ ] Backup methods work (Print, Share, Save to Files)
 
 **Issues Found:**
 

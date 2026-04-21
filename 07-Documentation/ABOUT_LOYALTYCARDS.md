@@ -2,8 +2,8 @@
 
 **A Privacy-First Digital Loyalty Card System**
 
-Version 0.2.0 (Build 18)  
-Last Updated: April 16, 2026
+Version 0.2.0 (Build 21)  
+Last Updated: April 20, 2026
 
 ---
 
@@ -482,7 +482,7 @@ This approach solves the real-world user pain point (having to rotate camera eve
 
 **CRITICAL:** Your business configuration contains cryptographic keys that validate all customer cards. Losing your device without a backup means **all customer cards become invalid**.
 
-### Four Backup Methods
+### Three Backup Methods
 
 **1. 🖨️ Print Backup (HIGHLY RECOMMENDED)**
 - Generates PDF with backup QR code
@@ -491,21 +491,14 @@ This approach solves the real-world user pain point (having to rotate camera eve
 - Cannot be hacked or lost to cloud breach
 - Best practice: Print 2 copies, store separately
 
-**2. 📸 Save to Photos**
-- Saves QR image to iOS Photos app
-- Automatically backs up to iCloud Photos (if enabled)
-- Easy to find and access
-- Syncs across your Apple devices
-- Requires iOS photo library permission
-
-**3. 📧 Email to Yourself**
+**2. 📧 Share via Email**
 - Opens email with QR attachment
 - Send to your own email address
 - Access from any device with email
 - Searchable: "LoyaltyCards Backup"
 - Works with any email provider
 
-**4. 📁 Save to Files**
+**3. 📁 Save to Files**
 - Saves to Files app / iCloud Drive
 - Store in password manager (1Password, etc.)
 - Organize with other business documents

@@ -460,7 +460,7 @@ Please test both apps together following the demo instructions.
 - [ ] **Permissions requested with clear explanation:**
   - Camera (QR scanning): "Scan QR codes to collect stamps"
   - Face ID (Supplier only): "Authenticate to view private keys"
-  - Photo Library (Supplier only, optional): "Save backup QR to Photos"
+  - None required (all backup methods use standard iOS share sheet)
 
 ---
 

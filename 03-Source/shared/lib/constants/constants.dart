@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:flutter/material.dart' show Colors;
+import '../utils/app_logger.dart';
 
 /// Application-wide constants
 class AppConstants {
@@ -18,8 +20,8 @@ class AppConstants {
   
   // Database
   static const String databaseName = 'loyalty_cards.db';
-  static const int databaseVersion = 6; // Customer app schema version
-  static const int supplierDatabaseVersion = 4; // Supplier app schema version
+  static const int databaseVersion = 7; // Customer app schema version (v0.3.0+: Added performance indexes)
+  static const int supplierDatabaseVersion = 5; // Supplier app schema version (v5: Added scan_interval_seconds)
   
   // QR Code Settings
   static const double qrCodePadding = 16.0;
@@ -37,6 +39,11 @@ class AppConstants {
   static const int stampRateLimitMs = 5000; // 5 seconds between stamps (prevents duplicate scans)
   static const int issueIntervalMs = 30000; // 30 seconds between card issuances (supplier rate limit)
   static const int stampExpiryMs = 120000; // 2 minutes stamp token validity (timestamp tolerance)
+  
+  // REQ-022: Simple Mode Enhanced Rate Limits
+  static const int simpleModeDefaultScanIntervalMs = 30000; // 30 seconds default for simple mode (configurable per supplier)
+  static const int simpleModeMinScanIntervalMs = 5000; // 5 seconds minimum (prevents abuse)
+  static const int simpleModeMaxScanIntervalMs = 60000; // 60 seconds maximum (usability)
 }
 
 /// Typography scale for consistent text sizing
@@ -123,11 +130,32 @@ class BrandColors {
   ];
   
   /// Convert hex string to Color
-  static Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
+  /// 
+  /// Returns [fallback] color if hex string is invalid.
+  /// Default fallback is grey (Colors.grey).
+  /// 
+  /// Example:
+  /// ```dart
+  /// final color = AppColors.fromHex('#FF5722'); // Deep Orange
+  /// final safe = AppColors.fromHex('invalid', fallback: Colors.blue);
+  /// ```
+  static Color fromHex(String hexString, {Color fallback = Colors.grey}) {
+    try {
+      final buffer = StringBuffer();
+      if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+      buffer.write(hexString.replaceFirst('#', ''));
+      
+      final value = int.tryParse(buffer.toString(), radix: 16);
+      if (value == null) {
+        AppLogger.warning('Invalid hex color: $hexString, using fallback');
+        return fallback;
+      }
+      
+      return Color(value);
+    } catch (e) {
+      AppLogger.error('Color parse error for $hexString: $e');
+      return fallback;
+    }
   }
   
   /// Convert Color to hex string

@@ -101,12 +101,20 @@ class QRTokenGenerator {
   /// If [additionalStampCount] is provided (1-6), the token will include additional
   /// stamps with valid signatures and hash chain. This allows adding multiple stamps
   /// in a single QR scan operation.
+  /// 
+  /// REQ-022: Enhanced Simple Mode parameters:
+  /// - [stampCount]: Number of stamps this token grants (1-N, default 1)
+  /// - [expiryDate]: Optional expiry timestamp (null = no expiry)
+  /// - [scanInterval]: Optional supplier-specific rate limit in ms
   Future<StampToken> generateStampToken({
     required String businessId,
     required String cardId,
     required int stampNumber,
     required String previousHash,
     int additionalStampCount = 0,
+    int stampCount = 1, // REQ-022
+    int? expiryDate, // REQ-022
+    int? scanInterval, // REQ-022
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     
@@ -163,6 +171,9 @@ class QRTokenGenerator {
       signature: signature,
       timestamp: timestamp,
       additionalStamps: additionalStamps,
+      stampCount: stampCount, // REQ-022
+      expiryDate: expiryDate, // REQ-022
+      scanInterval: scanInterval, // REQ-022
     );
   }
 }

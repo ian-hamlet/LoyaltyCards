@@ -12,31 +12,24 @@ import '../../models/biometric_auth_result.dart';
 import 'package:intl/intl.dart';
 
 /// Screen for creating and exporting supplier configuration backups
-/// Offers four storage methods: Print, Photos, Email, Files
+/// Offers three storage methods: Print, Share via Email, Save to Files
 /// 
 /// **PERMISSIONS REQUIRED:**
 /// 
-/// 1. **Save to Photos:**
-///    - iOS Permission: NSPhotoLibraryAddUsageDescription (defined in Info.plist)
-///    - Level: "Add Photos Only" (write access, no read access needed)
-///    - Prompt: Appears first time user taps "Save to Photos"
-///    - User can allow or deny; denied means feature won't work
-/// 
-/// 2. **Email to Myself:**
+/// 1. **Share via Email:**
 ///    - No system permissions required
 ///    - Uses system share sheet which has built-in email access
 ///    - Works immediately without prompts
 /// 
-/// 3. **Save to Files:**
+/// 2. **Save to Files:**
 ///    - No system permissions required on iOS (app's own documents directory)
 ///    - Opens share sheet to let user choose save location
 ///    - User can select Files app, iCloud Drive, etc.
 /// 
-/// 4. **Print Backup:**
+/// 3. **Print Backup:**
 ///    - No permissions required
 ///    - Opens system print dialog
 ///    - User can print or save as PDF
-/// Offers four storage methods: Print, Photos, Email, Files
 class RecoveryBackupScreen extends StatefulWidget {
   final Business business;
   final bool isFirstTime; // True if called during initial setup
@@ -186,44 +179,8 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     }
   }
 
-  Future<void> _saveToPhotos() async {
-    AppLogger.debug('📷 Save to Photos button tapped', 'Backup');
-    
-    if (_backup == null || _qrImageBytes == null) {
-      AppLogger.error('Save to Photos failed: backup or image bytes are null', tag: 'Backup');
-      AppLogger.debug('  backup null: ${_backup == null}, imageBytes null: ${_qrImageBytes == null}', 'Backup');
-      AppFeedback.error(context, 'Backup data not ready');
-      return;
-    }
-
-    AppLogger.debug('Image bytes size: ${_qrImageBytes!.length} bytes', 'Backup');
-    AppLogger.debug('Calling BackupStorageService.saveToPhotos...', 'Backup');
-    
-    try {
-      final result = await BackupStorageService.saveToPhotos(
-        _backup!,
-        _qrImageBytes!,
-      );
-
-      AppLogger.debug('saveToPhotos returned: ${result.isSuccess}', 'Backup');
-
-      if (result.isSuccess) {
-        setState(() => _completedMethods.add('photos'));
-        AppLogger.debug('Photos method completed successfully', 'Backup');
-        AppFeedback.success(context, 'Saved to Photos');
-      } else {
-        AppLogger.warning('saveToPhotos failed: ${result.message}', 'Backup');
-        AppFeedback.error(context, result.getUserMessage());
-      }
-    } catch (e, stackTrace) {
-      AppLogger.error('Exception in _saveToPhotos: $e', tag: 'Backup');
-      AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
-      AppFeedback.error(context, 'Save error: $e');
-    }
-  }
-
   Future<void> _shareViaEmail() async {
-    AppLogger.debug('📧 Email to Myself button tapped', 'Backup');
+    AppLogger.debug('📧 Share via Email button tapped', 'Backup');
     
     if (_backup == null || _qrImageBytes == null) {
       AppLogger.error('Share via email failed: backup or image bytes are null', tag: 'Backup');
@@ -485,21 +442,10 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
 
                   SizedBox(height: 12),
 
-                  // Photos option
-                  _buildStorageOption(
-                    icon: Icons.photo_library,
-                    title: 'Save to Photos',
-                    subtitle: 'Backs up to iCloud automatically',
-                    completed: _completedMethods.contains('photos'),
-                    onTap: _saveToPhotos,
-                  ),
-
-                  SizedBox(height: 12),
-
                   // Email option
                   _buildStorageOption(
                     icon: Icons.email,
-                    title: 'Email to Myself',
+                    title: 'Share via Email',
                     subtitle: 'Easy to find and access',
                     completed: _completedMethods.contains('email'),
                     onTap: _shareViaEmail,
@@ -543,7 +489,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${_completedMethods.length}/4 methods completed',
+                                '${_completedMethods.length}/3 methods completed',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               if (_completedMethods.length < 2)

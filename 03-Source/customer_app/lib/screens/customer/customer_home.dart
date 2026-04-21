@@ -72,9 +72,10 @@ class _CustomerHomeState extends State<CustomerHome> {
         _isLoading = false;
       });
     } catch (e) {
+      AppLogger.error('Failed to load cards', error: e, tag: 'CustomerHome');
       setState(() => _isLoading = false);
       if (mounted) {
-        AppFeedback.error(context, 'Error loading cards: $e');
+        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load cards'));
       }
     }
   }

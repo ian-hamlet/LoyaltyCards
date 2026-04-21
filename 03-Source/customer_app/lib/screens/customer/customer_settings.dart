@@ -208,11 +208,12 @@ class _CustomerSettingsState extends State<CustomerSettings> {
           Navigator.pop(context);
         }
       } catch (e) {
+        AppLogger.error('Error deleting data', error: e, tag: 'Settings');
         if (mounted) {
           // Pop loading dialog
           Navigator.pop(context);
 
-          AppFeedback.error(context, 'Error deleting data: $e');
+          AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'delete all data'));
         }
       }
     }

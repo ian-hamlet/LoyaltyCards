@@ -195,15 +195,17 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
         AppLogger.warning('Error stopping camera after failure: $cameraError', 'Import');
       }
       
+      final userMessage = ErrorMessageMapper.getUserMessage(e);
+      
       setState(() {
         _isProcessing = false;
         _businessAlreadyExists = true; // Prevent further scanning attempts
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _errorMessage = userMessage;
       });
 
       if (mounted) {
         Haptics.error();
-        AppFeedback.error(context, 'Import failed: $_errorMessage');
+        AppFeedback.error(context, 'Import failed: $userMessage');
       }
     }
   }

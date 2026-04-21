@@ -62,7 +62,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
       setState(() => _isLoading = false);
       if (mounted) {
-        AppFeedback.error(context, 'Error loading card: $e');
+        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load card'));
       }
     }
   }
@@ -1026,8 +1026,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         );
       }
     } catch (e) {
+      AppLogger.error('Error redeeming card', error: e, tag: 'CardDetail');
       if (mounted) {
-        AppFeedback.error(context, 'Error redeeming card: $e');
+        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'redeem card'));
       }
     }
   }

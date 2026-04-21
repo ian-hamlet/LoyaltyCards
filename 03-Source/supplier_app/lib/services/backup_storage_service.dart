@@ -14,6 +14,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared/models/supplier_config_backup.dart';
 import 'package:shared/shared.dart';
+import '../models/backup_result.dart';
 
 /// Service for managing supplier configuration backup storage
 /// 
@@ -23,12 +24,13 @@ import 'package:shared/shared.dart';
 /// 3. Share via Email - Creates temp file and opens email share sheet
 /// 4. Save to Files - Opens system file picker to save QR image
 /// 
-/// ERROR HANDLING PATTERN:
-/// All methods return Future<bool>:
-/// - Returns true on success
-/// - Returns false on failure (logged via AppLogger.error)
-/// - Failures are graceful - user can try alternative backup method
-/// - Common failures: Permission denied, disk full, user cancelled
+/// ERROR HANDLING PATTERN (HP-1 FIX):
+/// All methods return Future<BackupResult>:
+/// - Returns BackupResult.success() on success
+/// - Returns BackupResult.failure(reason, message) on failure
+/// - Provides detailed error context via failureReason and message
+/// - Allows UI to show specific guidance based on failure type
+/// - Common failures: Permission denied, disk full, timeout, user cancelled
 /// 
 /// Cross-platform compatible (iOS & Android)
 class BackupStorageService {

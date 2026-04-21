@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../services/card_repository.dart';
 import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
+import '../../utils/error_message_mapper.dart';
 import 'customer_card_detail.dart';
 import 'customer_settings.dart';
 import 'qr_scanner_screen.dart';
@@ -46,20 +47,45 @@ class _CustomerHomeState extends State<CustomerHome> {
   }
 
   Future<void> _loadFilterPreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _hideRedeemed = prefs.getBool(_hideRedeemedKey) ?? true; // Default: hide redeemed
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _hideRedeemed = prefs.getBool(_hideRedeemedKey) ?? true; // Default: hide redeemed
+      });
+    } catch (e) {
+      AppLogger.error('Failed to load hide-redeemed preference', error: e, tag: 'Preferences');
+      // Use default but inform user
+      if (mounted) {
+        setState(() {
+          _hideRedeemed = true; // Default: hide redeemed
+        });
+      }
+    }
   }
 
   Future<void> _setHideRedeemed(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_hideRedeemedKey, value);
-    setState(() {
-      _hideRedeemed = value;
-      _filterCards();
-    });
-    AppLogger.debug('Hide redeemed cards: $value', 'Filter');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_hideRedeemedKey, value);
+      setState(() {
+        _hideRedeemed = value;
+        _filterCards();
+      });
+      AppLogger.debug('Hide redeemed cards: $value', 'Filter');
+    } catch (e) {
+      AppLogger.error('Failed to save hide-redeemed preference', error: e, tag: 'Preferences');
+      // Revert UI state since save failed
+      setState(() {
+        _hideRedeemed = !value; // Revert
+        _filterCards();
+      });
+      if (mounted) {
+        AppFeedback.warning(
+          context,
+          'Could not save filter preference. Your setting was not saved.',
+        );
+      }
+    }
   }
 
   Future<void> _loadCards() async {
@@ -72,9 +98,10 @@ class _CustomerHomeState extends State<CustomerHome> {
         _isLoading = false;
       });
     } catch (e) {
+      AppLogger.error('Failed to load cards', error: e, tag: 'CustomerHome');
       setState(() => _isLoading = false);
       if (mounted) {
-        AppFeedback.error(context, 'Error loading cards: $e');
+        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load cards'));
       }
     }
   }

@@ -7,6 +7,7 @@ import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/key_manager.dart';
 import '../../services/biometric_auth_service.dart';
+import '../../models/biometric_auth_result.dart';
 
 /// Screen for generating clone QR code to set up business on additional devices
 /// Clone QR expires in 24 hours and allows another device to get full business config
@@ -50,20 +51,29 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
     
     final authMethodName = await _biometricAuth.getAuthMethodName();
     
-    final bool isAuthenticated = await _biometricAuth.authenticate(
+    final result = await _biometricAuth.authenticate(
       reason: 'Authenticate to generate device clone QR code containing your private key',
     );
 
-    if (!isAuthenticated) {
-      AppLogger.warning('Authentication failed or cancelled - clone QR not generated', 'Clone');
+    if (!result.isSuccess) {
+      AppLogger.warning('Authentication failed: ${result.status}', 'Clone');
       if (mounted) {
         setState(() {
           _authenticationRequired = true;
           _isGenerating = false;
         });
         
-        // Show message and navigate back
-        AppFeedback.warning(context, 'Authentication required to generate clone QR code');
+        // Show specific failure message
+        final message = result.getUserMessage();
+        final guidance = result.getActionableGuidance();
+        
+        if (guidance != null) {
+          AppFeedback.error(context, '$message\n$guidance');
+        } else if (result.status != BiometricAuthStatus.userCancelled) {
+          // Don't show error for user cancellation (they know they cancelled)
+          AppFeedback.warning(context, message);
+        }
+        
         Navigator.of(context).pop();
       }
       return;

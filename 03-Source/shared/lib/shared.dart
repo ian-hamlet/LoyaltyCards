@@ -25,6 +25,7 @@ export 'utils/error_handler.dart';
 
 // Export exceptions
 export 'exceptions/repository_exceptions.dart';
+export 'exceptions/backup_exception.dart';
 
 // Export widgets
 export 'widgets/feedback.dart';

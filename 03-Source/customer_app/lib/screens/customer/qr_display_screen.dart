@@ -5,6 +5,7 @@ import 'package:shared/models/card.dart' as models;
 import '../../services/qr_token_generator.dart';
 import '../../services/stamp_repository.dart';
 import '../../services/database_helper.dart';
+import '../../exceptions/qr_generation_exception.dart';
 
 /// Screen to display customer QR codes for supplier scanning
 class QRDisplayScreen extends StatefulWidget {
@@ -88,9 +89,15 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
       }
     } catch (e, stackTrace) {
       AppLogger.error('QR Display ERROR', error: e, stackTrace: stackTrace, tag: 'QR');
+      
       setState(() {
-        _error = e.toString();
         _isLoading = false;
+        // Use user-friendly message if available
+        if (e is QRGenerationException) {
+          _error = e.getUserMessage();
+        } else {
+          _error = 'Failed to generate QR code. Please try again.';
+        }
       });
     }
   }

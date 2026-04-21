@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -14,10 +15,47 @@ class SupplierDatabaseHelper {
   SupplierDatabaseHelper._internal();
 
   /// Get database instance (creates if doesn't exist)
+  /// HP-2: Added timeout protection to prevent indefinite hangs
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+    
+    try {
+      _database = await _initDatabase().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          AppLogger.error('Database initialization timeout - database may be locked or corrupted', tag: 'Database');
+          throw TimeoutException('Database initialization failed after 10 seconds');
+        },
+      );
+      return _database!;
+    } on TimeoutException {
+      // Attempt recovery: delete corrupted database and recreate
+      AppLogger.error('Attempting database recovery after timeout', tag: 'Database');
+      await _attemptDatabaseRecovery();
+      rethrow;
+    } catch (e, stack) {
+      AppLogger.error('Database initialization error: $e', error: e, stackTrace: stack, tag: 'Database');
+      rethrow;
+    }
+  }
+  
+  /// Attempt to recover from corrupted database
+  Future<void> _attemptDatabaseRecovery() async {
+    try {
+      final databasesPath = await getDatabasesPath();
+      final path = join(databasesPath, 'loyalty_cards_supplier.db');
+      final file = File(path);
+      
+      if (await file.exists()) {
+        await file.delete();
+        AppLogger.warning('Deleted corrupted database file: $path', 'Database');
+      }
+      
+      // Reset database instance to allow recreation
+      _database = null;
+    } catch (e, stack) {
+      AppLogger.error('Database recovery failed: $e', error: e, stackTrace: stack, tag: 'Database');
+    }
   }
 
   /// Initialize database with schema

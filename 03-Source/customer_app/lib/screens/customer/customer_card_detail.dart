@@ -789,7 +789,10 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         ),
         title: const Text(
           'Card Created',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: BrandColors.textPrimary,
+          ),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

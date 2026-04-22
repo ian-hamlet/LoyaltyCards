@@ -643,7 +643,7 @@ group('BackupStorageService', () {
 
 **Purpose:** Validate end-to-end flows between Customer and Supplier apps without physical QR scanning.
 
-**Location:** `03-Source/integration_tests/`
+**Location:** `source/integration_tests/`
 
 **Approach:** Programmatically pass QR token data between app components.
 
@@ -1028,30 +1028,30 @@ jobs:
           channel: 'stable'
       
       - name: Install dependencies - Shared
-        run: cd 03-Source/shared && flutter pub get
+        run: cd source/shared && flutter pub get
       
       - name: Install dependencies - Customer App
-        run: cd 03-Source/customer_app && flutter pub get
+        run: cd source/customer_app && flutter pub get
       
       - name: Install dependencies - Supplier App
-        run: cd 03-Source/supplier_app && flutter pub get
+        run: cd source/supplier_app && flutter pub get
       
       - name: Run tests - Shared Package
-        run: cd 03-Source/shared && flutter test --coverage
+        run: cd source/shared && flutter test --coverage
       
       - name: Run tests - Customer App
-        run: cd 03-Source/customer_app && flutter test --coverage
+        run: cd source/customer_app && flutter test --coverage
       
       - name: Run tests - Supplier App
-        run: cd 03-Source/supplier_app && flutter test --coverage
+        run: cd source/supplier_app && flutter test --coverage
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           files: |
-            03-Source/shared/coverage/lcov.info,
-            03-Source/customer_app/coverage/lcov.info,
-            03-Source/supplier_app/coverage/lcov.info
+            source/shared/coverage/lcov.info,
+            source/customer_app/coverage/lcov.info,
+            source/supplier_app/coverage/lcov.info
       
       - name: Check coverage thresholds
         run: |

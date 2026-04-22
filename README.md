@@ -27,11 +27,11 @@ A peer-to-peer (P2P) digital loyalty card system that operates without a backend
 
 ```bash
 # Customer App
-cd 03-Source/customer_app
+cd source/customer_app
 flutter run
 
 # Supplier App
-cd 03-Source/supplier_app
+cd source/supplier_app
 flutter run
 ```
 
@@ -39,9 +39,9 @@ flutter run
 
 ```bash
 # All 264 tests (100% passing)
-cd 03-Source/shared && flutter test       # 131 tests
-cd 03-Source/customer_app && flutter test  # 87 tests
-cd 03-Source/supplier_app && flutter test  # 46 tests
+cd source/shared && flutter test       # 131 tests
+cd source/customer_app && flutter test  # 87 tests
+cd source/supplier_app && flutter test  # 46 tests
 ```
 
 See [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md) for comprehensive testing documentation.
@@ -60,7 +60,7 @@ See [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md) for com
 - [docs/technical/SECURITY_MODEL.md](docs/technical/SECURITY_MODEL.md) - Security architecture
 - [docs/technical/DATABASE_SCHEMA.md](docs/technical/DATABASE_SCHEMA.md) - Database design
 - [docs/development/](docs/development/) - AI prompts and development standards ⭐
-- [03-Source/README.md](03-Source/README.md) - Source code structure
+- [source/README.md](source/README.md) - Source code structure
 
 ### Planning & Process
 - [docs/project-management/NEXT_ACTIONS.md](docs/project-management/NEXT_ACTIONS.md) - Current status and roadmap
@@ -85,7 +85,7 @@ LoyaltyCards/
 ├── 02-AI-Prompts/            # AI-driven development artifacts
 │   └── *.md                  # Prompts and development standards
 │
-├── 03-Source/                # Source code (see 03-Source/README.md)
+├── source/                # Source code (see source/README.md)
 │   ├── shared/               # Shared Dart package (115 tests)
 │   ├── customer_app/         # Customer Flutter app (33 tests)
 │   ├── supplier_app/         # Supplier Flutter app (17 tests)
@@ -145,7 +145,7 @@ This project uses AI-driven development with comprehensive documentation of the 
 ## Getting Started
 
 1. **Clone the repository**
-2. **Install Flutter** (see [03-Source/FLUTTER_SETUP_GUIDE.md](03-Source/FLUTTER_SETUP_GUIDE.md))
+2. **Install Flutter** (see [source/FLUTTER_SETUP_GUIDE.md](source/FLUTTER_SETUP_GUIDE.md))
 3. **Run the apps** (see Quick Start above)
 4. **Run tests** to verify everything works
 5. **Read the docs** in `07-Documentation/`

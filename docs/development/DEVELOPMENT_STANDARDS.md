@@ -10,9 +10,9 @@
 
 ### Always Update Version Number
 
-**MANDATORY:** Update `03-Source/shared/lib/version.dart` for EVERY source code change.
+**MANDATORY:** Update `source/shared/lib/version.dart` for EVERY source code change.
 
-**Location:** `03-Source/shared/lib/version.dart`
+**Location:** `source/shared/lib/version.dart`
 
 **Format:**
 ```dart
@@ -46,7 +46,7 @@ const String appVersion = 'v{major}.{minor}.{patch} (Build {build})';
 ### Source Code Organization
 
 ```
-03-Source/
+source/
 ├── shared/              # Shared models, constants, utilities
 │   ├── lib/models/     # Business, Card, QR tokens, etc.
 │   ├── lib/constants/  # App-wide constants

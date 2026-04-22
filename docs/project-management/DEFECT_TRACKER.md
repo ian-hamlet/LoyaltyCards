@@ -542,9 +542,9 @@ This document tracks defects from two sources:
 - **Screen/Feature:** Version Management - All Apps
 - **Description:** Version and build numbers are stored in multiple locations and not synchronized. The version.dart display string, customer_app pubspec.yaml, and supplier_app pubspec.yaml can all have different values, causing confusion about what version is actually deployed.
 - **Reproduction Steps:**
-  1. Check `03-Source/shared/lib/version.dart` - shows v0.2.0 (Build 4)
-  2. Check `03-Source/customer_app/pubspec.yaml` - may show version: 0.2.0+4
-  3. Check `03-Source/supplier_app/pubspec.yaml` - may show version: 0.2.0+4
+  1. Check `source/shared/lib/version.dart` - shows v0.2.0 (Build 4)
+  2. Check `source/customer_app/pubspec.yaml` - may show version: 0.2.0+4
+  3. Check `source/supplier_app/pubspec.yaml` - may show version: 0.2.0+4
   4. Launch app on device - About screen shows version from version.dart
   5. App Store Connect shows version from pubspec.yaml
   6. These can get out of sync during development
@@ -1763,8 +1763,8 @@ This document tracks defects from two sources:
 - Document uninstall/reinstall workflow for users who need fresh start
 
 **Files Modified:**
-- [customer_app/lib/screens/customer/customer_settings.dart](03-Source/customer_app/lib/screens/customer/customer_settings.dart)
-- [supplier_app/lib/screens/supplier/supplier_settings.dart](03-Source/supplier_app/lib/screens/supplier/supplier_settings.dart)
+- [customer_app/lib/screens/customer/customer_settings.dart](source/customer_app/lib/screens/customer/customer_settings.dart)
+- [supplier_app/lib/screens/supplier/supplier_settings.dart](source/supplier_app/lib/screens/supplier/supplier_settings.dart)
 
 **Progression Plan (Original):**
 
@@ -2031,7 +2031,7 @@ This document tracks defects from two sources:
 
 - [TESTFLIGHT_TESTING_GUIDE.md](TESTFLIGHT_TESTING_GUIDE.md) - Testing procedures
 - [CODE_REVIEW_v0.2.0.md](CODE_REVIEW_v0.2.0.md) - Full code review report
-- [03-Source/shared/lib/version.dart](03-Source/shared/lib/version.dart) - Version tracking
+- [source/shared/lib/version.dart](source/shared/lib/version.dart) - Version tracking
 - `/memories/loyaltycards_technical_debt.md` - Permanent memory of issues
 
 ---

@@ -189,7 +189,7 @@ flutter devices
 
 ```powershell
 # Navigate to source directory
-cd E:\dev\personal\LoyaltyCards\03-Source
+cd E:\dev\personal\LoyaltyCards\source
 
 # Create new Flutter project
 flutter create loyalty_cards_prototype

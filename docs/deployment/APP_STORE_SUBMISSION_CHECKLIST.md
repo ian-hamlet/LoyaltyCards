@@ -18,7 +18,7 @@
 - [ ] **Release branch created** `releases/v0.2.0-build{N}`
 - [ ] **Archive builds completed**
   ```bash
-  cd 03-Source/customer_app
+  cd source/customer_app
   flutter clean && flutter pub get
   flutter build ipa --release
   

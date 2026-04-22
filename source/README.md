@@ -5,7 +5,7 @@ This directory contains the Phase 0+ implementation of the LoyaltyCards P2P syst
 ## Project Structure
 
 ```
-03-Source/
+source/
 ├── shared/                     # Shared Dart package (v0.3.0)
 │   ├── lib/
 │   │   ├── models/            # Data models (Card, Stamp, Business, Transaction)

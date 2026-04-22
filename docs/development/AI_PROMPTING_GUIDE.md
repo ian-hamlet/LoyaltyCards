@@ -724,8 +724,8 @@ If any issues found, provide:
 Please perform comprehensive pre-deployment review:
 
 ZERO TOLERANCE:
-[ ] Zero print() statements: `grep -r "print(" --include="*.dart" 03-Source/`
-[ ] Zero TODOs without issues: `grep -r "TODO" --include="*.dart" 03-Source/ | grep -v "#"`
+[ ] Zero print() statements: `grep -r "print(" --include="*.dart" source/`
+[ ] Zero TODOs without issues: `grep -r "TODO" --include="*.dart" source/ | grep -v "#"`
 [ ] Zero placeholder implementations
 [ ] All tests passing (unit + integration)
 

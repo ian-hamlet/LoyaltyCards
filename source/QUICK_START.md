@@ -23,8 +23,8 @@ A complete **Flutter prototype** ready for testing the P2P loyalty card interact
 
 | Document | Location | Purpose |
 |----------|----------|---------|
-| **Flutter Setup Guide** | `03-Source/FLUTTER_SETUP_GUIDE.md` | Complete installation instructions |
-| **Prototype README** | `03-Source/loyalty_cards_prototype/README.md` | How to run and test |
+| **Flutter Setup Guide** | `source/FLUTTER_SETUP_GUIDE.md` | Complete installation instructions |
+| **Prototype README** | `source/loyalty_cards_prototype/README.md` | How to run and test |
 | **Flutter Decision** | `01-Design/Architecture/DECISION_Flutter_Framework.md` | Why Flutter? |
 | **P2P Architecture** | `01-Design/Architecture/DECISION_P2P_Architecture.md` | How P2P works |
 
@@ -109,7 +109,7 @@ Verify: `flutter devices`
 ### Initialize Project
 
 ```bash
-cd E:\dev\personal\LoyaltyCards\03-Source\loyalty_cards_prototype
+cd E:\dev\personal\LoyaltyCards\source\loyalty_cards_prototype
 
 # Install dependencies
 flutter pub get
@@ -332,8 +332,8 @@ Once prototype testing is complete:
 - **Flutter Docs**: https://docs.flutter.dev
 - **QR Flutter**: https://pub.dev/packages/qr_flutter
 - **Mobile Scanner**: https://pub.dev/packages/mobile_scanner
-- **Our Setup Guide**: [03-Source/FLUTTER_SETUP_GUIDE.md](FLUTTER_SETUP_GUIDE.md)
-- **Prototype README**: [03-Source/loyalty_cards_prototype/README.md](loyalty_cards_prototype/README.md)
+- **Our Setup Guide**: [source/FLUTTER_SETUP_GUIDE.md](FLUTTER_SETUP_GUIDE.md)
+- **Prototype README**: [source/loyalty_cards_prototype/README.md](loyalty_cards_prototype/README.md)
 
 ---
 

@@ -381,9 +381,9 @@ await SupplierDatabaseHelper().clearAllData();
 ---
 
 **References:**
-- [Customer Database Helper](03-Source/customer_app/lib/services/database_helper.dart)
-- [Supplier Database Helper](03-Source/supplier_app/lib/services/supplier_database_helper.dart)
-- [Shared Constants](03-Source/shared/lib/constants/constants.dart)
+- [Customer Database Helper](source/customer_app/lib/services/database_helper.dart)
+- [Supplier Database Helper](source/supplier_app/lib/services/supplier_database_helper.dart)
+- [Shared Constants](source/shared/lib/constants/constants.dart)
 
 **Maintained by:** Development Team  
 **Last Updated:** April 18, 2026

@@ -31,7 +31,7 @@ This document tracks all testing activities across the LoyaltyCards project, inc
 
 ### 1.1 Shared Package Tests (115 tests)
 
-**Location:** `/03-Source/shared/test/`  
+**Location:** `/source/shared/test/`  
 **Status:** ✅ All Passing (115 tests)  
 **Last Run:** 2026-04-18  
 **Execution Time:** ~3 seconds
@@ -66,7 +66,7 @@ Result: 00:00 +115: All tests passed!
 
 ### 1.2 Customer App Tests (33 tests)
 
-**Location:** `/03-Source/customer_app/test/services/`  
+**Location:** `/source/customer_app/test/services/`  
 **Status:** ✅ All Passing (33 tests)  
 **Last Run:** 2026-04-18  
 **Execution Time:** ~3 seconds
@@ -113,7 +113,7 @@ Result: 00:00 +33: All tests passed!
 
 ### 1.3 Supplier App Tests (17 tests)
 
-**Location:** `/03-Source/supplier_app/test/services/`  
+**Location:** `/source/supplier_app/test/services/`  
 **Status:** ✅ All Passing (17 tests)  
 **Last Run:** 2026-04-18  
 **Execution Time:** ~17 seconds (real crypto operations)
@@ -213,7 +213,7 @@ Result: 00:00 +17: All tests passed!
 
 ### 1.2 Customer App Tests
 
-**Location:** `/03-Source/customer_app/test/`  
+**Location:** `/source/customer_app/test/`  
 **Status:** ⚠️ No tests yet  
 **Planned Tests:** 25+ tests
 
@@ -229,7 +229,7 @@ Result: 00:00 +17: All tests passed!
 
 ### 1.3 Supplier App Tests
 
-**Location:** `/03-Source/supplier_app/test/`  
+**Location:** `/source/supplier_app/test/`  
 **Status:** ⚠️ No tests yet  
 **Planned Tests:** 20+ tests
 
@@ -697,20 +697,20 @@ Result: 00:00 +17: All tests passed!
 
 **Shared Package:**
 ```bash
-cd 03-Source/shared
+cd source/shared
 flutter test
 ```
 
 **Customer App:**
 ```bash
-cd 03-Source/customer_app
+cd source/customer_app
 flutter test
 # No tests yet
 ```
 
 **Supplier App:**
 ```bash
-cd 03-Source/supplier_app
+cd source/supplier_app
 flutter test
 # No tests yet
 ```
@@ -718,7 +718,7 @@ flutter test
 **All Tests:**
 ```bash
 # From project root
-cd 03-Source
+cd source
 flutter test shared/test
 ```
 

@@ -637,7 +637,7 @@ When a card is completed, a new card is automatically created for the same busin
 
 **Documentation:**
 - About LoyaltyCards: `/07-Documentation/ABOUT_LOYALTYCARDS.md`
-- Testing Guide: `/03-Source/supplier_app/BACKUP_TESTING_GUIDE.md`
+- Testing Guide: `/source/supplier_app/BACKUP_TESTING_GUIDE.md`
 
 **Common Issues:**
 - Review troubleshooting sections above

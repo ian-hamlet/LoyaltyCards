@@ -281,7 +281,7 @@ Future<bool> _validateSchemaBeforeMigration(Database db) async {
 
 **Expert Validation:**
 
-I reviewed your ECDSA implementation in [supplier_app/lib/services/key_manager.dart](03-Source/supplier_app/lib/services/key_manager.dart) and [shared/lib/utils/crypto_utils.dart](03-Source/shared/lib/utils/crypto_utils.dart).
+I reviewed your ECDSA implementation in [supplier_app/lib/services/key_manager.dart](source/supplier_app/lib/services/key_manager.dart) and [shared/lib/utils/crypto_utils.dart](source/shared/lib/utils/crypto_utils.dart).
 
 **Verdict: Cryptographically sound** ✅
 
@@ -318,8 +318,8 @@ Did you check if private keys ever touch the log system?
 
 ```bash
 # Search your codebase
-grep -r "AppLogger.*private" 03-Source/
-grep -r "print.*key" 03-Source/
+grep -r "AppLogger.*private" source/
+grep -r "print.*key" source/
 ```
 
 **If you log private key material, it could:**
@@ -1965,8 +1965,8 @@ test('throws when private key not found', () async {
 Search your codebase for this pattern:
 
 ```bash
-grep -r "AppLogger.*key" 03-Source/
-grep -r "print.*key" 03-Source/
+grep -r "AppLogger.*key" source/
+grep -r "print.*key" source/
 ```
 
 **Found:** (hypothetical risk)

@@ -25,7 +25,7 @@
 ### 1.1 Open Customer App in Xcode
 
 ```bash
-cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app/ios
+cd /Users/ianhamlet/development/LoyaltyCards/source/customer_app/ios
 open Runner.xcworkspace
 ```
 
@@ -78,7 +78,7 @@ Flutter apps must be built using `flutter build ipa` command. Xcode's Product â†
 **In Terminal:**
 
 ```bash
-cd /Users/ianhamlet/development/LoyaltyCards/03-Source/customer_app
+cd /Users/ianhamlet/development/LoyaltyCards/source/customer_app
 
 # Clean previous builds
 flutter clean
@@ -127,7 +127,7 @@ unzip -p build/ios/ipa/customer_app.ipa \
 2. Open Transporter app
 3. Sign in with your Apple ID (same as Xcode)
 4. Drag and drop `customer_app.ipa` into Transporter window
-   - Location: `03-Source/customer_app/build/ios/ipa/customer_app.ipa`
+   - Location: `source/customer_app/build/ios/ipa/customer_app.ipa`
 5. Click **Deliver** button
 6. Wait for upload to complete (2-5 minutes)
 7. Check for success message
@@ -169,7 +169,7 @@ xcrun altool --upload-app \
 **Close current Xcode window first, then:**
 
 ```bash
-cd /Users/ianhamlet/development/LoyaltyCards/03-Source/supplier_app/ios
+cd /Users/ianhamlet/development/LoyaltyCards/source/supplier_app/ios
 open Runner.xcworkspace
 ```
 
@@ -203,7 +203,7 @@ open Runner.xcworkspace
 **In Terminal:**
 
 ```bash
-cd /Users/ianhamlet/development/LoyaltyCards/03-Source/supplier_app
+cd /Users/ianhamlet/development/LoyaltyCards/source/supplier_app
 
 # Clean previous builds
 flutter clean
@@ -232,7 +232,7 @@ ls -lh build/ios/ipa/supplier_app.ipa
 **Using Transporter (Recommended):**
 1. Open Transporter app
 2. Drag `supplier_app.ipa` into window
-   - Location: `03-Source/supplier_app/build/ios/ipa/supplier_app.ipa`
+   - Location: `source/supplier_app/build/ios/ipa/supplier_app.ipa`
 3. Click **Deliver**
 4. Wait for success
 
@@ -446,13 +446,13 @@ Requires customers to have LoyaltyCards app installed.
 **Flutter Build Commands:**
 ```bash
 # Customer App
-cd 03-Source/customer_app
+cd source/customer_app
 flutter clean && flutter pub get
 flutter build ipa --release
 # Output: build/ios/ipa/customer_app.ipa (~19-20 MB)
 
 # Supplier App
-cd 03-Source/supplier_app
+cd source/supplier_app
 flutter clean && flutter pub get
 flutter build ipa --release
 # Output: build/ios/ipa/supplier_app.ipa (~22-23 MB)

@@ -59,16 +59,16 @@
 cd /Users/ianhamlet/development/LoyaltyCards
 
 # 1. Update version
-# Edit: 03-Source/shared/lib/version.dart
+# Edit: source/shared/lib/version.dart
 # Change to: v0.2.1 (Build 5)
 
 # 2. Update both app versions
-# Edit: 03-Source/customer_app/pubspec.yaml
-# Edit: 03-Source/supplier_app/pubspec.yaml
+# Edit: source/customer_app/pubspec.yaml
+# Edit: source/supplier_app/pubspec.yaml
 # Change to: version: 0.2.1+5
 
 # 3. Build both IPAs
-cd 03-Source/customer_app
+cd source/customer_app
 flutter clean && flutter build ipa --release
 
 cd ../supplier_app
@@ -180,9 +180,9 @@ Before deploying Build 5:
 - [DEFECT_TRACKER.md](DEFECT_TRACKER.md) - Full defect list
 - [TESTFLIGHT_TESTING_GUIDE.md](TESTFLIGHT_TESTING_GUIDE.md) - Testing procedures
 - [CODE_REVIEW_v0.2.0.md](CODE_REVIEW_v0.2.0.md) - Code review findings
-- [03-Source/shared/lib/version.dart](03-Source/shared/lib/version.dart) - Version string
-- [03-Source/customer_app/pubspec.yaml](03-Source/customer_app/pubspec.yaml) - Customer version
-- [03-Source/supplier_app/pubspec.yaml](03-Source/supplier_app/pubspec.yaml) - Supplier version
+- [source/shared/lib/version.dart](source/shared/lib/version.dart) - Version string
+- [source/customer_app/pubspec.yaml](source/customer_app/pubspec.yaml) - Customer version
+- [source/supplier_app/pubspec.yaml](source/supplier_app/pubspec.yaml) - Supplier version
 
 ---
 

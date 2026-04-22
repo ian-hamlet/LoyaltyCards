@@ -286,11 +286,11 @@ TESTFLIGHT DEPLOYMENT GATE:
 
 CODE QUALITY:
 [ ] Zero print() statements in entire codebase
-    grep -r "print(" --include="*.dart" 03-Source/
+    grep -r "print(" --include="*.dart" source/
 [ ] Zero TODOs without GitHub issues
-    grep -r "TODO" --include="*.dart" 03-Source/ | grep -v "#"
+    grep -r "TODO" --include="*.dart" source/ | grep -v "#"
 [ ] Zero placeholder implementations
-    grep -r "placeholder\|for now" --include="*.dart" 03-Source/
+    grep -r "placeholder\|for now" --include="*.dart" source/
 [ ] All tests passing (unit + integration)
     flutter test && flutter test integration_test/
 

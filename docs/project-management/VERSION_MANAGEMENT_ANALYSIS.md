@@ -9,7 +9,7 @@
 ## 📍 Current State - Where Version Info is Stored
 
 ### 1. **Display Version (User-Facing)**
-**File:** `03-Source/shared/lib/version.dart`
+**File:** `source/shared/lib/version.dart`
 ```dart
 const String appVersion = 'v0.2.0 (Build 0)';
 ```
@@ -36,8 +36,8 @@ import 'package:shared/shared.dart'; // Exports appVersion constant
 
 ### 2. **iOS Build Version (App Store/TestFlight)**
 **Files:** 
-- `03-Source/customer_app/pubspec.yaml`
-- `03-Source/supplier_app/pubspec.yaml`
+- `source/customer_app/pubspec.yaml`
+- `source/supplier_app/pubspec.yaml`
 
 **Current Values:** Both set to:
 ```yaml
@@ -64,8 +64,8 @@ These variables are then injected into `Info.plist`:
 
 ### 3. **Auto-Generated Files (Git-Ignored)**
 **Files:**
-- `03-Source/customer_app/ios/Flutter/Generated.xcconfig`
-- `03-Source/supplier_app/ios/Flutter/Generated.xcconfig`
+- `source/customer_app/ios/Flutter/Generated.xcconfig`
+- `source/supplier_app/ios/Flutter/Generated.xcconfig`
 
 **Current Values:**
 ```
@@ -173,13 +173,13 @@ VERSION=$1
 BUILD=$2
 
 # Update shared/lib/version.dart
-echo "const String appVersion = 'v$VERSION (Build $BUILD)';" > 03-Source/shared/lib/version.dart
+echo "const String appVersion = 'v$VERSION (Build $BUILD)';" > source/shared/lib/version.dart
 
 # Update customer_app/pubspec.yaml
-sed -i '' "s/^version: .*/version: $VERSION+$BUILD/" 03-Source/customer_app/pubspec.yaml
+sed -i '' "s/^version: .*/version: $VERSION+$BUILD/" source/customer_app/pubspec.yaml
 
 # Update supplier_app/pubspec.yaml
-sed -i '' "s/^version: .*/version: $VERSION+$BUILD/" 03-Source/supplier_app/pubspec.yaml
+sed -i '' "s/^version: .*/version: $VERSION+$BUILD/" source/supplier_app/pubspec.yaml
 
 echo "✅ Updated to v$VERSION (Build $BUILD)"
 ```
@@ -202,9 +202,9 @@ echo "✅ Updated to v$VERSION (Build $BUILD)"
 Create `.git/hooks/pre-commit`:
 ```bash
 #!/bin/bash
-VERSION_DART=$(grep "appVersion = " 03-Source/shared/lib/version.dart | grep -o "Build [0-9]*" | grep -o "[0-9]*")
-CUSTOMER_BUILD=$(grep "^version:" 03-Source/customer_app/pubspec.yaml | grep -o "+[0-9]*" | grep -o "[0-9]*")
-SUPPLIER_BUILD=$(grep "^version:" 03-Source/supplier_app/pubspec.yaml | grep -o "+[0-9]*" | grep -o "[0-9]*")
+VERSION_DART=$(grep "appVersion = " source/shared/lib/version.dart | grep -o "Build [0-9]*" | grep -o "[0-9]*")
+CUSTOMER_BUILD=$(grep "^version:" source/customer_app/pubspec.yaml | grep -o "+[0-9]*" | grep -o "[0-9]*")
+SUPPLIER_BUILD=$(grep "^version:" source/supplier_app/pubspec.yaml | grep -o "+[0-9]*" | grep -o "[0-9]*")
 
 if [ "$VERSION_DART" != "$CUSTOMER_BUILD" ] || [ "$VERSION_DART" != "$SUPPLIER_BUILD" ]; then
   echo "❌ Version mismatch detected!"
@@ -250,7 +250,7 @@ fi
 
 1. **Add dependency (both apps):**
    ```bash
-   cd 03-Source/customer_app
+   cd source/customer_app
    flutter pub add package_info_plus
    
    cd ../supplier_app

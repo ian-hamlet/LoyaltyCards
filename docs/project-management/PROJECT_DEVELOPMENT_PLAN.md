@@ -26,7 +26,7 @@ This document outlines the complete development plan for the LoyaltyCards P2P lo
 
 ```
 LoyaltyCards/
-├── 03-Source/
+├── source/
 │   ├── shared/                        # Shared Dart package (40% of code)
 │   │   ├── lib/
 │   │   │   ├── models/                # Card, Stamp, Transaction, Business

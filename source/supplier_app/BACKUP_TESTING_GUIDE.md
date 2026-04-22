@@ -456,7 +456,7 @@ Once import/recovery is implemented, test:
 
 ```bash
 # 1. Deploy to device
-cd 03-Source/supplier_app
+cd source/supplier_app
 flutter run --release
 
 # 2. In app:

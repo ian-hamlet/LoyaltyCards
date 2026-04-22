@@ -403,7 +403,7 @@ Manual monitoring:
 
 ### Clean Install
 ```bash
-cd 03-Source/customer_app && flutter pub get
+cd source/customer_app && flutter pub get
 cd ../supplier_app && flutter pub get
 cd ../shared && flutter pub get
 ```
@@ -424,9 +424,9 @@ flutter pub get   # Re-fetch and verify checksums
 
 ## References
 
-- [Customer App pubspec.yaml](03-Source/customer_app/pubspec.yaml)
-- [Supplier App pubspec.yaml](03-Source/supplier_app/pubspec.yaml)
-- [Shared Package pubspec.yaml](03-Source/shared/pubspec.yaml)
+- [Customer App pubspec.yaml](source/customer_app/pubspec.yaml)
+- [Supplier App pubspec.yaml](source/supplier_app/pubspec.yaml)
+- [Shared Package pubspec.yaml](source/shared/pubspec.yaml)
 - [Flutter Dependency Management](https://docs.flutter.dev/development/tools/pubspec)
 - [pub.dev Package Repository](https://pub.dev)
 

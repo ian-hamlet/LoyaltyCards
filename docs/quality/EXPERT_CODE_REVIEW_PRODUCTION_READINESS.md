@@ -47,9 +47,9 @@ The LoyaltyCards codebase demonstrates **strong production readiness** following
 - **Key Derivation:** HKDF for deriving HMAC keys from private keys
 
 **Files Reviewed:**
-- [shared/lib/utils/crypto_utils.dart](03-Source/shared/lib/utils/crypto_utils.dart)
-- [supplier_app/lib/services/key_manager.dart](03-Source/supplier_app/lib/services/key_manager.dart)
-- [customer_app/lib/services/key_manager.dart](03-Source/customer_app/lib/services/key_manager.dart)
+- [shared/lib/utils/crypto_utils.dart](source/shared/lib/utils/crypto_utils.dart)
+- [supplier_app/lib/services/key_manager.dart](source/supplier_app/lib/services/key_manager.dart)
+- [customer_app/lib/services/key_manager.dart](source/customer_app/lib/services/key_manager.dart)
 
 #### ✅ Signature Verification (FIX CRIT-1, CRIT-2)
 **FIXED:** Previous hardcoded HMAC key and timing attack vulnerabilities have been resolved.
@@ -70,13 +70,13 @@ static VerificationResult verifySignature({
 ```
 
 **Security Improvements Applied:**
-1. ✅ **HKDF Key Derivation** ([supplier_config_backup.dart:148-159](03-Source/shared/lib/models/supplier_config_backup.dart#L148-L159))
+1. ✅ **HKDF Key Derivation** ([supplier_config_backup.dart:148-159](source/shared/lib/models/supplier_config_backup.dart#L148-L159))
    - Derives HMAC key from business private key using HKDF
    - Salt: `'LoyaltyCards-Backup-HMAC-Salt-v1'`
    - Info: `'signature-key'`
    - Each business has unique HMAC key
 
-2. ✅ **Constant-Time Comparison** ([supplier_config_backup.dart:238-250](03-Source/shared/lib/models/supplier_config_backup.dart#L238-L250))
+2. ✅ **Constant-Time Comparison** ([supplier_config_backup.dart:238-250](source/shared/lib/models/supplier_config_backup.dart#L238-L250))
    ```dart
    static bool _constantTimeCompare(String a, String b) {
      if (a.length != b.length) return false;
@@ -90,7 +90,7 @@ static VerificationResult verifySignature({
    - Prevents timing side-channel attacks
    - XOR + OR pattern ensures constant execution time
 
-3. ✅ **Bounds Checking** ([crypto_utils.dart:145-189](03-Source/shared/lib/utils/crypto_utils.dart#L145-L189))
+3. ✅ **Bounds Checking** ([crypto_utils.dart:145-189](source/shared/lib/utils/crypto_utils.dart#L145-L189))
    - Validates buffer lengths before reading
    - Prevents RangeError on malformed signatures
    - Example: `if (offset + xLength > bytes.length) return null;`
@@ -105,7 +105,7 @@ static VerificationResult verifySignature({
 **Implementation:**
 - Private keys stored in FlutterSecureStorage (platform keychain/keystore)
 - Never exposed in logs or error messages
-- `Business.toJson()` explicitly excludes private key ([models/business.dart:31](03-Source/shared/lib/models/business.dart#L31))
+- `Business.toJson()` explicitly excludes private key ([models/business.dart:31](source/shared/lib/models/business.dart#L31))
 - Biometric authentication protects access to backup QR codes containing private keys
 
 **Potential Exposure Points Checked:**
@@ -122,7 +122,7 @@ static VerificationResult verifySignature({
 #### ✅ Biometric Authentication (FIX HIGH-2)
 **FIXED:** Both apps now return structured `BiometricAuthResult` instead of boolean.
 
-**Supplier App Implementation:** ([supplier_app/lib/services/biometric_auth_service.dart:40-98](03-Source/supplier_app/lib/services/biometric_auth_service.dart#L40-L98))
+**Supplier App Implementation:** ([supplier_app/lib/services/biometric_auth_service.dart:40-98](source/supplier_app/lib/services/biometric_auth_service.dart#L40-L98))
 ```dart
 Future<BiometricAuthResult> authenticate({
   required String reason,
@@ -138,7 +138,7 @@ Future<BiometricAuthResult> authenticate({
 }
 ```
 
-**Customer App Implementation:** ([customer_app/lib/services/biometric_auth_service.dart](03-Source/customer_app/lib/services/biometric_auth_service.dart))
+**Customer App Implementation:** ([customer_app/lib/services/biometric_auth_service.dart](source/customer_app/lib/services/biometric_auth_service.dart))
 - ⚠️ **MEDIUM-1:** Still returns `bool` instead of `BiometricAuthResult`
 - Impact: Less detailed error information for user feedback
 - Recommendation: Update to match supplier app pattern
@@ -192,7 +192,7 @@ Future<BiometricAuthResult> authenticate({
 #### ✅ Database Input Validation
 **Pattern Applied:** Runtime validation in repositories
 
-**Example:** [card_repository.dart:72-88](03-Source/customer_app/lib/services/card_repository.dart#L72-L88)
+**Example:** [card_repository.dart:72-88](source/customer_app/lib/services/card_repository.dart#L72-L88)
 ```dart
 Future<void> insertCard(models.Card card) async {
   _validateCard(card); // Runtime validation (works in ALL build modes)
@@ -272,7 +272,7 @@ AppLogger.error('Failed to decode public key: $e'); // ✅ Generic error, no key
 #### ✅ User-Facing Error Messages (FIX HIGH-3)
 **FIXED:** Implemented user-friendly error message mapping.
 
-**Example:** [error_message_mapper.dart](03-Source/customer_app/lib/utils/error_message_mapper.dart)
+**Example:** [error_message_mapper.dart](source/customer_app/lib/utils/error_message_mapper.dart)
 ```dart
 static String getCardErrorMessage(Object error) {
   if (error is CardValidationException) {
@@ -326,12 +326,12 @@ static String getCardErrorMessage(Object error) {
 
 **Customer App Examples:**
 
-1. **TransactionRepository** ([transaction_repository.dart](03-Source/customer_app/lib/services/transaction_repository.dart))
+1. **TransactionRepository** ([transaction_repository.dart](source/customer_app/lib/services/transaction_repository.dart))
    - ✅ All database operations wrapped in transaction repository
    - ✅ No naked database calls in UI code
    - ✅ Returns typed results (List, count, etc.)
 
-2. **Database Timeout Protection** ([database_helper.dart:38-51](03-Source/customer_app/lib/services/database_helper.dart#L38-L51))
+2. **Database Timeout Protection** ([database_helper.dart:38-51](source/customer_app/lib/services/database_helper.dart#L38-L51))
    ```dart
    Future<Database> get database async {
      if (_database != null) return _database!;
@@ -354,9 +354,9 @@ static String getCardErrorMessage(Object error) {
    - ✅ 10-second timeout prevents indefinite hangs
    - ✅ Automatic recovery: deletes corrupted database
    - ✅ Logged for debugging
-   - ✅ **TESTED:** [database_timeout_test.dart](03-Source/customer_app/test/services/database_timeout_test.dart) (17 tests)
+   - ✅ **TESTED:** [database_timeout_test.dart](source/customer_app/test/services/database_timeout_test.dart) (17 tests)
 
-3. **Database Migration Safety** ([database_helper.dart:197-230](03-Source/customer_app/lib/services/database_helper.dart#L197-L230))
+3. **Database Migration Safety** ([database_helper.dart:197-230](source/customer_app/lib/services/database_helper.dart#L197-L230))
    ```dart
    Future<void> _onUpgradeWithSafety(Database db, int oldVersion, int newVersion) async {
      String? backupPath;
@@ -377,11 +377,11 @@ static String getCardErrorMessage(Object error) {
    - ✅ Backup before migration
    - ✅ Schema validation after migration
    - ✅ Automatic rollback on failure
-   - ✅ **TESTED:** [database_migration_test.dart](03-Source/customer_app/test/services/database_migration_test.dart)
+   - ✅ **TESTED:** [database_migration_test.dart](source/customer_app/test/services/database_migration_test.dart)
 
 #### ✅ QR Token Generation (FIX HIGH-1)
 
-**Supplier App:** [qr_token_generator.dart](03-Source/supplier_app/lib/services/qr_token_generator.dart)
+**Supplier App:** [qr_token_generator.dart](source/supplier_app/lib/services/qr_token_generator.dart)
 ```dart
 Future<CardIssueToken> generateCardIssueToken({
   required Business business,
@@ -399,7 +399,7 @@ Future<CardIssueToken> generateCardIssueToken({
 - ✅ Clear exception messages
 - ✅ Proper async/await error propagation
 
-**Customer App:** [qr_token_generator.dart:16-48](03-Source/customer_app/lib/services/qr_token_generator.dart#L16-L48)
+**Customer App:** [qr_token_generator.dart:16-48](source/customer_app/lib/services/qr_token_generator.dart#L16-L48)
 ```dart
 Future<CardStampRequestToken> generateStampRequest({required Card card}) async {
   try {
@@ -434,9 +434,9 @@ Future<CardStampRequestToken> generateStampRequest({required Card card}) async {
 - Could fail on disk full or permission issues
 
 **Affected Files:**
-- [customer_app/lib/main.dart:68](03-Source/customer_app/lib/main.dart#L68)
-- [customer_app/lib/screens/customer/qr_scanner_screen.dart:53](03-Source/customer_app/lib/screens/customer/qr_scanner_screen.dart#L53)
-- [supplier_app/lib/screens/supplier/supplier_stamp_card.dart:76](03-Source/supplier_app/lib/screens/supplier/supplier_stamp_card.dart#L76)
+- [customer_app/lib/main.dart:68](source/customer_app/lib/main.dart#L68)
+- [customer_app/lib/screens/customer/qr_scanner_screen.dart:53](source/customer_app/lib/screens/customer/qr_scanner_screen.dart#L53)
+- [supplier_app/lib/screens/supplier/supplier_stamp_card.dart:76](source/supplier_app/lib/screens/supplier/supplier_stamp_card.dart#L76)
 - 10 more locations
 
 **Recommendation:**
@@ -484,7 +484,7 @@ class PreferencesService {
 
 **Custom Exception Hierarchy:**
 
-1. **QRGenerationException** ([customer_app/lib/exceptions/qr_generation_exception.dart](03-Source/customer_app/lib/exceptions/qr_generation_exception.dart))
+1. **QRGenerationException** ([customer_app/lib/exceptions/qr_generation_exception.dart](source/customer_app/lib/exceptions/qr_generation_exception.dart))
    ```dart
    class QRGenerationException implements Exception {
      final String message;
@@ -497,17 +497,17 @@ class PreferencesService {
    }
    ```
 
-2. **TransactionException** ([customer_app/lib/exceptions/transaction_exception.dart](03-Source/customer_app/lib/exceptions/transaction_exception.dart))
+2. **TransactionException** ([customer_app/lib/exceptions/transaction_exception.dart](source/customer_app/lib/exceptions/transaction_exception.dart))
    - Wraps database transaction errors
    - Provides context about what operation failed
 
-3. **Repository Exceptions** ([shared/lib/exceptions/repository_exceptions.dart](03-Source/shared/lib/exceptions/repository_exceptions.dart))
+3. **Repository Exceptions** ([shared/lib/exceptions/repository_exceptions.dart](source/shared/lib/exceptions/repository_exceptions.dart))
    - `CardValidationException`
    - `DatabaseConstraintException`
    - Clear user messages
    - Runtime validation (works in production builds)
 
-4. **BackupException** ([shared/lib/exceptions/backup_exception.dart](03-Source/shared/lib/exceptions/backup_exception.dart))
+4. **BackupException** ([shared/lib/exceptions/backup_exception.dart](source/shared/lib/exceptions/backup_exception.dart))
    - Backup/restore operation failures
    - Detailed failure reasons
 
@@ -599,13 +599,13 @@ AppLogger.crypto('Generating ECDSA P-256 key pair');
 - TODOs in test files: ✅ **15 found** (all documented as requiring external package mocks)
 
 **Test TODOs** (All Low Priority):
-- [customer_app/test/services/database_timeout_test.dart](03-Source/customer_app/test/services/database_timeout_test.dart) (8 TODOs)
+- [customer_app/test/services/database_timeout_test.dart](source/customer_app/test/services/database_timeout_test.dart) (8 TODOs)
   - Require database corruption simulation
   - Require log capture mechanism
   - Require file permission simulation
   - **Status:** Documented for future enhancement, not blocking
 
-- [supplier_app/test/services/backup_storage_service_test.dart](03-Source/supplier_app/test/services/backup_storage_service_test.dart) (7 TODOs)
+- [supplier_app/test/services/backup_storage_service_test.dart](source/supplier_app/test/services/backup_storage_service_test.dart) (7 TODOs)
   - Require ImageGallerySaver mock
   - Require Printing package mock
   - Require Share package mock
@@ -635,11 +635,11 @@ AppLogger.crypto('Generating ECDSA P-256 key pair');
 **Observation:**
 Customer and Supplier apps both have `KeyManager` classes with similar structure but different functionality:
 
-- **Customer KeyManager:** ([customer_app/lib/services/key_manager.dart](03-Source/customer_app/lib/services/key_manager.dart))
+- **Customer KeyManager:** ([customer_app/lib/services/key_manager.dart](source/customer_app/lib/services/key_manager.dart))
   - Signature verification only (delegates to shared CryptoUtils)
   - 20 lines of code
 
-- **Supplier KeyManager:** ([supplier_app/lib/services/key_manager.dart](03-Source/supplier_app/lib/services/key_manager.dart))
+- **Supplier KeyManager:** ([supplier_app/lib/services/key_manager.dart](source/supplier_app/lib/services/key_manager.dart))
   - Key generation, storage, signing, verification
   - 300+ lines of code
 
@@ -711,7 +711,7 @@ lib/
 
 ### 3.4 Magic Numbers & Constants - ✅ EXCELLENT
 
-**Centralized Constants:** [shared/lib/constants/constants.dart](03-Source/shared/lib/constants/constants.dart)
+**Centralized Constants:** [shared/lib/constants/constants.dart](source/shared/lib/constants/constants.dart)
 
 ```dart
 class AppConstants {
@@ -835,7 +835,7 @@ class AppConstants {
 #### Documented Test TODOs
 **Location:** Test files only (not production code)
 
-**Database Timeout Tests** ([database_timeout_test.dart](03-Source/customer_app/test/services/database_timeout_test.dart)):
+**Database Timeout Tests** ([database_timeout_test.dart](source/customer_app/test/services/database_timeout_test.dart)):
 ```dart
 test('Database recovery recreates database after deletion', () async {
   // TODO: Implement using database file corruption simulation
@@ -848,7 +848,7 @@ test('Recovery logs error when database cannot be deleted', () async {
 });
 ```
 
-**Backup Storage Tests** ([backup_storage_service_test.dart](03-Source/supplier_app/test/services/backup_storage_service_test.dart)):
+**Backup Storage Tests** ([backup_storage_service_test.dart](source/supplier_app/test/services/backup_storage_service_test.dart)):
 ```dart
 test('saveToPhotos saves QR to device photo gallery', () async {
   // TODO: Implement with ImageGallerySaver mock
@@ -981,9 +981,9 @@ test('verifySignature returns success for valid stamp signature', () async {
 | CRIT-3 | TransactionRepository missing error handling | ✅ FIXED | Comprehensive try-catch added |
 
 **Verification:**
-- [shared/lib/models/supplier_config_backup.dart:143-159](03-Source/shared/lib/models/supplier_config_backup.dart#L143-L159) - HKDF implementation
-- [shared/lib/models/supplier_config_backup.dart:238-250](03-Source/shared/lib/models/supplier_config_backup.dart#L238-L250) - Constant-time comparison
-- [customer_app/lib/services/transaction_repository.dart](03-Source/customer_app/lib/services/transaction_repository.dart) - Error handling
+- [shared/lib/models/supplier_config_backup.dart:143-159](source/shared/lib/models/supplier_config_backup.dart#L143-L159) - HKDF implementation
+- [shared/lib/models/supplier_config_backup.dart:238-250](source/shared/lib/models/supplier_config_backup.dart#L238-L250) - Constant-time comparison
+- [customer_app/lib/services/transaction_repository.dart](source/customer_app/lib/services/transaction_repository.dart) - Error handling
 
 ---
 
@@ -997,16 +997,16 @@ test('verifySignature returns success for valid stamp signature', () async {
 | HIGH-4 | SharedPreferences failures unhandled | 🟡 PARTIAL | Some error handling added, wrapper recommended |
 
 **Verification:**
-- [customer_app/lib/services/qr_token_generator.dart:16-48](03-Source/customer_app/lib/services/qr_token_generator.dart#L16-L48) - Error handling
-- [supplier_app/lib/services/biometric_auth_service.dart:40-98](03-Source/supplier_app/lib/services/biometric_auth_service.dart#L40-L98) - Structured result
-- [customer_app/lib/utils/error_message_mapper.dart](03-Source/customer_app/lib/utils/error_message_mapper.dart) - Message mapping
+- [customer_app/lib/services/qr_token_generator.dart:16-48](source/customer_app/lib/services/qr_token_generator.dart#L16-L48) - Error handling
+- [supplier_app/lib/services/biometric_auth_service.dart:40-98](source/supplier_app/lib/services/biometric_auth_service.dart#L40-L98) - Structured result
+- [customer_app/lib/utils/error_message_mapper.dart](source/customer_app/lib/utils/error_message_mapper.dart) - Message mapping
 
 ---
 
 ### 5.3 MEDIUM Priority Issues - 3 Recommendations
 
 #### 🟡 MEDIUM-1: Customer App Biometric Auth Returns Bool
-**File:** [customer_app/lib/services/biometric_auth_service.dart](03-Source/customer_app/lib/services/biometric_auth_service.dart)
+**File:** [customer_app/lib/services/biometric_auth_service.dart](source/customer_app/lib/services/biometric_auth_service.dart)
 
 **Current:**
 ```dart

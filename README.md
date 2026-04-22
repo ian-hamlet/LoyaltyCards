@@ -1,6 +1,6 @@
 # LoyaltyCards Application
 
-**Status:** v0.3.0+1 (Build 23) - Production-Ready, Deployed to TestFlight  
+**Status:** v0.3.0+1 - Production-Ready, Deployed to TestFlight  
 **Last Updated:** 2026-04-22  
 **Test Coverage:** 264 automated tests (100% passing)  
 **Release Branch:** releases/v0.3.0-build01
@@ -100,7 +100,7 @@ See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for complete navigation of 
 
 ## Current Status
 
-**Version:** v0.3.0+1 (Build 23)  
+**Version:** v0.3.0+1  
 **Phase:** Production - TestFlight Testing  
 **Status:** Production-ready, all critical security fixes deployed
 

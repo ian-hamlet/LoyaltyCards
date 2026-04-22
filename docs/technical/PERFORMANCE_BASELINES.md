@@ -1,10 +1,12 @@
 # Performance Baselines
 
-**LoyaltyCards v0.2.0 Build 21**  
+**LoyaltyCards - Initial Baseline: v0.2.0 Build 21, Current: v0.3.0+1 Build 23**  
 **Platform:** iOS 13.0+  
-**Test Date:** April 18, 2026  
+**Test Date:** April 18, 2026 (Build 21 baseline measurements)  
 **Purpose:** Establish performance benchmarks for regression testing  
-**Last Updated:** April 18, 2026
+**Last Updated:** April 22, 2026
+
+**Note:** These measurements represent the initial baseline captured at Build 21. Performance characteristics remain consistent in v0.3.0+1 Build 23 (security fixes and package updates did not impact performance metrics).
 
 ---
 

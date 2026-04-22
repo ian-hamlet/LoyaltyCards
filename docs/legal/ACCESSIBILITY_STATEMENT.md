@@ -1,9 +1,11 @@
 # Accessibility Statement
 
-**LoyaltyCards v0.2.0**  
+**LoyaltyCards v0.3.0+1**  
 **Commitment:** Making digital loyalty cards accessible to everyone  
-**Last Updated:** April 18, 2026  
+**Last Updated:** April 22, 2026  
 **Compliance Target:** WCAG 2.1 Level AA
+
+**Note:** Accessibility features unchanged from v0.2.0 to v0.3.0+1 (security and package updates only).
 
 ---
 

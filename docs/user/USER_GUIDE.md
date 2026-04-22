@@ -2,8 +2,8 @@
 
 **Quick Start Guide for Businesses & Customers**
 
-Version 0.3.0 (Build 46+)  
-Last Updated: April 21, 2026
+Version 0.3.0+1 (Build 23)  
+Last Updated: April 22, 2026
 
 ---
 

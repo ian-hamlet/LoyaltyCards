@@ -49,9 +49,9 @@ This document establishes baseline performance metrics for LoyaltyCards applicat
 ### Customer App (LoyaltyCards)
 
 **IPA File Size:**
-- Build 21: **19.9 MB** (compressed)
-- Build 20: 19.8 MB
-- Build 15: 19.5 MB
+- v0.2.0+21: **19.9 MB** (compressed)
+- v0.2.0+20: 19.8 MB
+- v0.2.0+15: 19.5 MB
 
 **App Installation Size:**
 - Fresh Install: ~45 MB
@@ -70,9 +70,9 @@ This document establishes baseline performance metrics for LoyaltyCards applicat
 ### Supplier App (LoyaltyCards Business)
 
 **IPA File Size:**
-- Build 21: **22.7 MB** (compressed)
-- Build 20: 22.5 MB
-- Build 15: 22.2 MB
+- v0.2.0+21: **22.7 MB** (compressed)
+- v0.2.0+20: 22.5 MB
+- v0.2.0+15: 22.2 MB
 
 **App Installation Size:**
 - Fresh Install: ~50 MB

@@ -236,9 +236,15 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ---
 
-## 📝 Project Metadata (5 files)
+## 📝 Project Metadata (7 files)
 
 **Location:** `docs/meta/`
+
+### ⭐ [docs/meta/PROJECT_TEMPLATE_BOOTSTRAP_GUIDE.md](docs/meta/PROJECT_TEMPLATE_BOOTSTRAP_GUIDE.md)
+**Purpose:** Comprehensive guide for using LoyaltyCards as a template for new projects. Includes detailed bootstrap process, file-by-file update instructions, dependency management strategy, and proven organizational patterns.
+
+### ⭐ [docs/meta/QUICK_START_NEW_PROJECT.md](docs/meta/QUICK_START_NEW_PROJECT.md)
+**Purpose:** 30-minute quick start guide for bootstrapping new projects from this template. Streamlined version of the comprehensive bootstrap guide with essential steps only.
 
 ### [docs/meta/PROJECT_METADATA.md](docs/meta/PROJECT_METADATA.md)
 **Purpose:** Project metadata including repository info, team contacts, key dates, technology stack, and project identifiers.
@@ -259,7 +265,7 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ## 📊 Summary Statistics
 
-**Total Documentation:** 70 files organized across 8 categories  
+**Total Documentation:** 72 files organized across 8 categories  
 - Root: 3 files (README, CHANGELOG, this index)
 - Development: 7 files (AI prompts, standards, response guidelines)
 - Project Management: 30 files (planning, 24 requirements, defects, user stories)
@@ -268,6 +274,7 @@ These documents contain proven prompt templates for triggering comprehensive cod
 - Legal: 3 files (privacy, terms, accessibility)
 - Quality: 8 files (reviews, testing, vulnerabilities)
 - User: 2 files (guides)
+- Meta: 7 files (metadata, template guides)
 - Meta: 5 files (project metadata, documentation tracking)
 - Source: 3 files (source/README.md, QUICK_START.md, FLUTTER_SETUP_GUIDE.md - not tracked in this index)
 
@@ -279,6 +286,23 @@ These documents contain proven prompt templates for triggering comprehensive cod
 ---
 
 ## 🎯 Quick Navigation by Role
+
+### Using This Project as a Template
+**Want to start a new project using this structure?**
+
+1. **Quick Start (30 min):** [docs/meta/QUICK_START_NEW_PROJECT.md](docs/meta/QUICK_START_NEW_PROJECT.md)
+2. **Detailed Guide (2 hours):** [docs/meta/PROJECT_TEMPLATE_BOOTSTRAP_GUIDE.md](docs/meta/PROJECT_TEMPLATE_BOOTSTRAP_GUIDE.md)
+
+**What you get:**
+- ✅ Proven documentation structure
+- ✅ AI agent guidelines and prompting patterns
+- ✅ Code review templates
+- ✅ Testing strategy
+- ✅ Legal document templates
+- ✅ Deployment procedures
+- ✅ Dependency management strategy
+
+---
 
 ### For Developers
 1. [README.md](README.md) - Start here

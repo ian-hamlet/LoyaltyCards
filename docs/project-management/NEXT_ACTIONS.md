@@ -1,9 +1,9 @@
 # Next Actions
 
-**Document Version:** 3.0  
+**Document Version:** 4.0  
 **Created:** 2026-04-11  
 **Updated:** 2026-04-22  
-**Current Build:** v0.3.0+1 (Build 23)  
+**Current Version:** v0.3.0+1  
 **Current Phase:** Production Deployment Complete - In TestFlight
 
 ---
@@ -34,7 +34,7 @@ You have successfully completed 8 development phases:
 - Customer instruction banners throughout
 - All core P2P functionality tested on physical devices
 
-**v0.3.0+1 (Build 23) Achievements:**
+**v0.3.0+1 Achievements:**
 - ✅ All critical security vulnerabilities fixed (HKDF key derivation, constant-time comparison)
 - ✅ Comprehensive error handling implemented (264 passing tests)
 - ✅ Package updates completed (device_info_plus 13.1, local_auth 3.0.1, share_plus 12.0.2)
@@ -42,6 +42,7 @@ You have successfully completed 8 development phases:
 - ✅ Deployed to TestFlight for production testing
 - ✅ Merged to main branch with permanent release branch (releases/v0.3.0-build01)
 - ✅ Production-ready status confirmed by comprehensive code review
+- ✅ Clean codebase (zero debug print statements)
 
 **Test Suite Status:**
 - 264 automated tests passing (100%)
@@ -65,7 +66,7 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ### Active Testing
 
-**TestFlight Build:** v0.3.0+1 (Build 23)
+**TestFlight Version:** v0.3.0+1
 **Deployed:** April 21, 2026
 **Target Users:** Internal testers + pilot businesses
 **Duration:** Ongoing
@@ -138,36 +139,30 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ### Future Enhancements (Backlog)
 
-**Post-v1.0 Features:**
+**Post-v1.0 Features (Aligned with P2P Architecture):**
 
-**1. Dark Mode Support** (~13-15 hours)
+**1. Dark Mode Support** (~13-15 hours) - HIGH DEMAND
 - Theme-aware color system (replace ~198 hardcoded colors)
 - Dynamic AppBar and container colors
 - Card gradient adjustments for dark backgrounds
 - User preference toggle (Light/Dark/System)
 - Benefits: Accessibility, battery savings, modern UX
+- **Status:** Feasible, no architecture changes needed
 
-**2. Multi-Device Configuration** (~12-14 hours)
-- Enable businesses to operate from multiple devices
-- Secure key distribution via QR
-- Configuration export/import screens
-- Most valuable for secure mode businesses
+**2. Local Analytics Dashboard** (~8-10 hours) - MEDIUM VALUE
+- Per-device business metrics only (respects P2P privacy model)
+- Daily/weekly stamp trends (from local device data)
+- Redemption patterns (cards scanned by this device)
+- Peak hours analysis (from local timestamps)
+- **Note:** Cannot track customer retention or aggregate analytics (no backend)
+- **Status:** Feasible within P2P constraints
 
-**3. Advanced Analytics** (~20 hours)
-- Business dashboard enhancements
-- Customer retention metrics
-- Peak hours analysis
-- Redemption patterns
-
-**4. Stamp Expiration** (REQ-019) (~8-10 hours)
-- Time-limited stamps
-- Automatic expiry handling
-- User notifications
-
-**5. Enhanced Backup/Restore** (~6-8 hours)
-- Cloud backup options (iCloud)
-- Automatic backup scheduling
-- Multi-device sync (requires architecture changes)
+**3. Enhanced Expiry Notifications** (~4-6 hours) - LOW PRIORITY
+- Visual indicators for expiring stamps (already have expiry support)
+- Local notifications for soon-to-expire rewards
+- Grace period before automatic expiry
+- **Note:** Core expiry functionality already implemented in v0.3.0+1
+- **Status:** Enhancement to existing feature
 
 ---
 
@@ -175,7 +170,7 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ### Current Production Build
 
-**Version:** v0.3.0+1 (Build 23)  
+**Version:** v0.3.0+1  
 **Status:** ✅ Deployed to TestFlight  
 **Release Branch:** releases/v0.3.0-build01  
 **Deployment Date:** April 21, 2026
@@ -208,13 +203,12 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ### Known Technical Debt
 
-**Low Priority Items:**
-1. Debug logging cleanup (wrap in `kDebugMode`)
-2. Integration tests for P2P flows
-3. Performance profiling on older iPhone models
-4. Accessibility audit (VoiceOver testing)
+**Low Priority Quality Improvements:**
+1. Integration tests for P2P flows (end-to-end QR workflows)
+2. Performance profiling on older iPhone models (iPhone 11, SE)
+3. Accessibility audit (VoiceOver, Dynamic Type testing)
 
-**Note:** None of these items block App Store submission
+**Note:** None of these items block App Store submission. Debug logging already clean (zero print() statements in production code).
 
 ---
 
@@ -236,11 +230,13 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 - Timestamp tracking enables fraud pattern detection
 - Device binding warnings for multi-device card usage
 
-**Future Server Options (Post-MVP):**
-- Optional analytics backend (privacy-preserving)
-- Push notification service
-- Multi-device sync (opt-in)
-- Business-to-business card transfer
+**Future Server Options (Post-MVP - Architecture Change Required):**
+- Optional analytics backend (privacy-preserving, aggregate-only)
+- Push notification service (promotional offers, expiry reminders)
+- Cloud backup service (encrypted user data, opt-in)
+- Business-to-business card transfer (network effects)
+
+**Note:** All server features would require significant architecture changes and ongoing operational costs. Current P2P model eliminates server dependency entirely.
 
 ---
 
@@ -300,12 +296,17 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ### Post-Launch Roadmap (v1.1+)
 
-**Priority Order:**
-1. Dark mode support (high user demand)
-2. Multi-device configuration (business request)
-3. Advanced analytics (business value)
-4. Stamp expiration (fraud prevention)
-5. Cloud backup (user convenience)
+**Realistic Priority Order:**
+1. Dark mode support (~13-15 hours) - High user demand, accessibility benefit
+2. Integration testing (~10-12 hours) - Quality improvement, regression prevention
+3. Local analytics dashboard (~8-10 hours) - Business value within P2P constraints
+4. Performance profiling (~6-8 hours) - Ensure older device support
+5. Accessibility audit (~8-10 hours) - App Store requirement for inclusive design
+
+**Not Planned (Architecture Incompatible):**
+- ❌ Multi-device sync (contradicts P2P, would require backend)
+- ❌ Aggregated analytics (no central data collection in P2P model)
+- ❌ Cloud auto-backup (users already have file/email/print options)
 
 ---
 

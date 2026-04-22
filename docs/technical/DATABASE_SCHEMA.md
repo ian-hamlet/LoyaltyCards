@@ -141,7 +141,7 @@ Key-value store for application preferences and state.
 - **Added:** `redeemed_at` column to `cards` table
 - **Purpose:** Track exact timestamp of card redemption
 
-#### v5 → v6 (Build 21 - Current)
+#### v5 → v6 (v0.2.0+21 - Current v0.3.0+1)
 - **Added:** `device_id` column to `cards` table
 - **Added:** `device_id` column to `stamps` table
 - **Purpose:** Multi-device duplication detection (V-005 security fix)

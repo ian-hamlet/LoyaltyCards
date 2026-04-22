@@ -187,7 +187,7 @@ A customer could back up their device, restore to a second device, and have the 
 - Difficult to detect without centralized tracking
 - Legitimate use (device upgrade) vs. fraud (intentional duplication)
 
-**Fix Implemented (Build 21):**
+**Fix Implemented (v0.2.0+21):****
 
 **1. Device Tracking:**
 - Added `device_info_plus` package to get unique device identifiers

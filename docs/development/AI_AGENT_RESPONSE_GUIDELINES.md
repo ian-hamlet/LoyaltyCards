@@ -244,11 +244,48 @@ Start by reading these files in order:
 
 ---
 
+## AI Agent Behavior Preferences
+
+### Terminal Command Execution
+
+**⚠️ IMPORTANT: Always ask for permission before executing terminal commands.**
+
+- Do not automatically run commands with `run_in_terminal` tool
+- Request user confirmation first before executing any terminal operations
+- This applies to **all commands**, including read-only operations like `git status`, `ls`, `cat`, etc.
+- User must explicitly approve each command execution
+
+**Rationale:** Gives users control over what commands run in their environment and prevents unintended side effects.
+
+---
+
+### Git Commit Workflow
+
+**⚠️ IMPORTANT: Never automatically commit changes to git.**
+
+- Do **not** run `git add`, `git commit`, or `git push` automatically
+- User manages their own git workflow and commit timing
+- User will explicitly request git operations when ready
+
+**Helpful Reminders:**
+- If significant file changes have been made and no git operations mentioned, you may gently remind: "You have uncommitted changes - would you like to stage and commit them?"
+- Appropriate times to remind:
+  - After completing a major feature or fix
+  - After multiple file edits across a session
+  - When user asks "what's next?" or similar wrap-up questions
+- Do not nag repeatedly - once per work session is sufficient
+
+**Rationale:** Users have their own commit strategies and timing preferences. Some prefer atomic commits, others batch multiple changes. Respect the user's workflow.
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-04-22 | Initial guidelines created |
+| 1.1 | 2026-04-22 | Added AI Agent Behavior Preferences section |
+| 1.2 | 2026-04-22 | Added Git Commit Workflow preferences |
 
 ---
 

@@ -7,7 +7,159 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.0] - Build 21 (2026-04-18) - CURRENT
+## [0.3.0+1] - Build 23 (2026-04-21) - CURRENT
+
+**Status:** ✅ Production - Deployed to TestFlight  
+**Release Branch:** releases/v0.3.0-build01
+
+### 🔒 CRITICAL Security Fixes
+
+#### Fixed
+- **SEC-001: Hardcoded HMAC Key Vulnerability** - CRITICAL
+  - Replaced hardcoded HMAC key with HKDF key derivation from business private key
+  - Each business now has unique HMAC key derived cryptographically
+  - Prevents forgery of backup QR codes
+  - File: `shared/lib/models/supplier_config_backup.dart`
+
+- **SEC-002: Timing Attack Vulnerability** - HIGH
+  - Implemented constant-time comparison for signature verification
+  - XOR-based byte comparison prevents timing-based signature guessing
+  - Protects against side-channel attacks
+  - File: `shared/lib/models/supplier_config_backup.dart`
+
+- **ERROR-001: Missing Error Handling** - CRITICAL
+  - Added comprehensive error handling to TransactionRepository (all 11 methods)
+  - Prevents app crashes on database errors
+  - User-friendly error messages via TransactionException.getUserMessage()
+  - File: `customer_app/lib/services/transaction_repository.dart`
+
+### 📦 Package Updates
+
+#### Updated
+- `device_info_plus`: 11.5.0 → 13.1.0 (fixes Xcode 64-to-32 bit warnings)
+- `local_auth`: 2.3.0 → 3.0.1 (breaking API changes handled)
+- `share_plus`: 10.1.4 → 12.0.2 (enhanced sharing capabilities)
+- `win32`: 5.15.0 → 6.0.1 (Windows compatibility)
+
+#### Breaking Changes Handled
+- `local_auth` 3.0.1: Removed `AuthenticationOptions` parameter, simplified authenticate() calls
+- Updated both customer and supplier apps for API compatibility
+
+### 🐛 Bug Fixes
+
+#### Fixed
+- **Multi-Stamp Token Generation Bug** - CRITICAL (Simple Mode)
+  - QR codes now regenerate in real-time when slider or expiry changes
+  - Prevents customers scanning outdated tokens
+  - File: `supplier_app/lib/screens/supplier/supplier_stamp_card.dart`
+
+- **Text Contrast Issue** - HIGH (Accessibility)
+  - "Card Created" title in stamp history now readable on light blue background
+  - Added `color: BrandColors.textPrimary` to title text
+  - File: `customer_app/lib/screens/customer/customer_card_detail.dart`
+
+### ✨ Features & Improvements
+
+#### Added
+- **QR Token Generator Error Handling** - HIGH
+  - QRGenerationException with comprehensive error handling
+  - All QR generation paths now properly handle failures
+  - File: `customer_app/lib/services/qr_token_generator.dart`
+
+- **Biometric Auth Structured Results** - HIGH
+  - BiometricAuthResult with 6 specific status types
+  - Eliminates silent failures in authentication flows
+  - Files: `customer_app/lib/services/biometric_auth_service.dart`, `supplier_app/lib/services/biometric_auth_service.dart`
+
+- **User-Friendly Error Messages** - HIGH
+  - ErrorMessageMapper utility for translating technical errors
+  - Consistent error presentation across both apps
+  - File: `shared/lib/utils/error_handler.dart`
+
+- **SharedPreferences Error Handling** - HIGH
+  - Try-catch wrapping with UI state revert on failure
+  - Prevents silent data loss
+  - File: `customer_app/lib/screens/customer/customer_settings.dart`
+
+#### Changed
+- **UX Streamlining** - Removed "Save to Photos" option from backup workflows
+  - Simplified to 3 options: Print, Share via Email, Save to Files
+  - Reduces user confusion and maintenance burden
+  - File: `supplier_app/lib/screens/supplier/recovery_backup_screen.dart`
+
+- **Smart Routing Documentation** - Added comprehensive inline documentation
+  - Explains auto-routing to correct business card
+  - Documents auto-new-card creation on completion (not just overflow)
+  - File: `customer_app/lib/screens/customer/qr_scanner_screen.dart`
+
+### ✅ Testing
+
+#### Added
+- **TEST-001: BackupStorageService Tests** - 16 comprehensive tests
+  - HKDF key derivation validation
+  - Constant-time comparison verification
+  - QR generation edge cases
+  - File: `shared/test/services/backup_storage_service_test.dart`
+
+- **TEST-002: Database Timeout Tests** - 17 comprehensive tests
+  - 10-second timeout verification
+  - Recovery mechanism validation
+  - Both customer and supplier app coverage
+  - Files: `customer_app/test/services/database_timeout_test.dart`, `supplier_app/test/services/database_timeout_test.dart`
+
+#### Updated
+- **Test Suite Expansion**: 165 → 264 tests (99 new tests added)
+  - Customer App: 70 → 87 tests
+  - Supplier App: 30 → 46 tests
+  - Shared Package: 115 → 131 tests
+- **Test Success Rate**: 100% (264/264 passing)
+
+### 📚 Documentation
+
+#### Added
+- `EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md` - Comprehensive production readiness assessment
+- `EXPERT_ARCHITECTURAL_REVIEW.md` - Architecture review report
+- `DOCUMENTATION_INDEX.md` - Master index of all project documentation
+- `DOCUMENTATION_CLEANUP_SUMMARY.md` - Documentation consolidation record
+- `LESSONS_LEARNED.md` - AI-driven development insights
+
+#### Updated
+- Major documentation reorganization into 8 logical categories
+- 56 files moved from flat structure to organized folders
+- All paths updated and cross-references maintained
+
+#### Removed
+- 12 outdated/duplicate documents consolidated
+
+### 🗄️ Database
+
+#### No Changes
+- Customer App Database: v7 (stable)
+- Supplier App Database: v5 (stable)
+
+### 🔧 Technical Debt Addressed
+
+- Removed obsolete `loyalty_cards_prototype` folder
+- Suppressed Xcode warning for device_info_plus (64-to-32 bit conversion)
+- Code review findings fully addressed (all CRITICAL and HIGH priority issues)
+
+---
+
+## [0.2.1+23] - Build 23 (2026-04-18)
+
+**Status:** ✅ TestFlight Testing (Internal)  
+**Note:** Version number remained 0.2.1+23 during bug fixes before incrementing to 0.3.0+1
+
+### 🐛 Bug Fixes
+
+#### Fixed
+- Various minor bug fixes during pre-release testing
+- UI/UX refinements based on internal feedback
+- Stability improvements
+
+---
+
+## [0.2.0] - Build 21 (2026-04-18)
 
 **Status:** 🚧 In Development (feature/security-vulnerability-fixes → develop)
 

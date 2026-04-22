@@ -50,9 +50,14 @@ These documents contain proven prompt templates for triggering comprehensive cod
 **Usage:** Include in context when requesting AI to generate or modify code.  
 **Value:** Ensures consistent code style, error handling patterns, and architecture compliance.
 
+### ⭐ [docs/development/AI_AGENT_RESPONSE_GUIDELINES.md](docs/development/AI_AGENT_RESPONSE_GUIDELINES.md)
+**Purpose:** Standard formatting for how AI agents should present information and file references.  
+**Usage:** AI agents should follow these guidelines when explaining project structure, referencing files, or providing documentation locations.  
+**Value:** Helps developers learn project structure through consistent folder-first file references and visual tree diagrams. Portable across machines via git.
+
 ---
 
-## 💻 Development (6 files)
+## 💻 Development (7 files)
 
 **Location:** `docs/development/`
 
@@ -254,9 +259,9 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ## 📊 Summary Statistics
 
-**Total Documentation:** 69 files organized across 8 categories  
+**Total Documentation:** 70 files organized across 8 categories  
 - Root: 3 files (README, CHANGELOG, this index)
-- Development: 6 files (AI prompts, standards)
+- Development: 7 files (AI prompts, standards, response guidelines)
 - Project Management: 30 files (planning, 24 requirements, defects, user stories)
 - Technical: 8 files (architecture, database, security, dependencies)
 - Deployment: 7 files (TestFlight, App Store, operations)

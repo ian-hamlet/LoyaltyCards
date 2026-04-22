@@ -17,45 +17,45 @@ Examples:
 
 ## Current Releases
 
-### v0.3.0+1 (In Development - REQ-022)
-- **Date:** April 20, 2026
-- **Platform:** Development/Testing
-- **Branch:** develop
+### v0.3.0+1 - Build 23 (✅ Released to TestFlight)
+- **Date:** April 21, 2026
+- **Platform:** TestFlight Production
+- **Branch:** main, releases/v0.3.0-build01
 - **Version:** 0.3.0+1
-- **Focus:** REQ-022 - Enhanced Simple Mode with Multi-Denomination Stamps
+- **Status:** ✅ DEPLOYED - Active Testing
+- **Focus:** Critical Security Fixes and Production Readiness
 - **Major Changes:**
-  - **Flexible Stamp Denominations:** Any value from 1 to stampsRequired
-  - **Expiry Policies:** None, Daily, Weekly, or Custom date
-  - **Supplier-Specific Scan Intervals:** Configurable 5-60 seconds
-  - **Token Generation UI:** Replaced single-stamp QR with denomination selector
-  - **Annotated QR Images:** Clear visual labels (stamp count, expiry, business name)
-  - **Multi-Stamp Processing:** Single scan can award multiple stamps
-  - **Enhanced Distribution:** Print, Share via Email, Save to Files workflows
-- **Technical Implementation:**
-  - StampToken model: Added stampCount, expiryDate, scanInterval fields
-  - Business model: Added configurable scanInterval (stored as seconds)
-  - Database: Supplier DB upgraded to v5 (scan_interval_seconds column)
-  - Customer app: Enhanced TokenValidator, RateLimiter with dynamic intervals
-  - Supplier app: Redesigned Simple Mode stamp screen
-  - Backward compatible: Old tokens continue to work (stampCount defaults to 1)
+  - **CRITICAL Security Fixes:**
+    - SEC-001: HKDF key derivation (replaced hardcoded HMAC key)
+    - SEC-002: Constant-time comparison (prevents timing attacks)
+    - ERROR-001: Comprehensive error handling in TransactionRepository
+  - **Package Updates:**
+    - device_info_plus: 11.5.0 → 13.1.0
+    - local_auth: 2.3.0 → 3.0.1 (breaking changes handled)
+    - share_plus: 10.1.4 → 12.0.2
+  - **Bug Fixes:**
+    - Multi-stamp token generation (real-time QR regeneration)
+    - Text contrast issue (stamp history title)
+  - **UX Improvements:**
+    - Removed "Save to Photos" option (simplified backup workflows)
+    - Enhanced smart routing documentation
 - **Test Coverage:**
-  - Shared package: 131 tests (includes 18 new REQ-022 tests)
-  - Customer app: 49 tests (includes 18 new REQ-022 tests)
-  - All edge cases covered: expiry, stampCount validation, overflow, rate limits
-- **Files Modified:**
-  - Shared: 4 files (models, constants, tests)
-  - Supplier app: 5 files (UI, database, services)
-  - Customer app: 3 files (validation, rate limiting, scanning)
+  - 264 automated tests (100% passing)
+  - Shared: 131 tests (+16 security, +17 timeout tests)
+  - Customer: 87 tests
+  - Supplier: 46 tests
 - **Documentation:**
-  - REQ-022_IMPLEMENTATION_SUMMARY.md (comprehensive implementation guide)
-  - Enhanced test files with REQ-022 test groups
-- **Status:** ✅ Code complete, all tests passing
-- **Next Steps:**
-  - Simulator testing (token generation, multi-stamp scanning)
-  - Physical device testing (printer output, QR scanning reliability)
-  - TestFlight deployment after device validation
+  - Major reorganization into 8 logical categories
+  - 69 documents organized with DOCUMENTATION_INDEX.md
+  - Production readiness assessment completed
+- **Technical Details:**
+  - Customer App Database: v7 (stable)
+  - Supplier App Database: v5 (stable)
+  - Release branch: releases/v0.3.0-build01 (permanent snapshot)
+- **Code Review:** Comprehensive production readiness assessment completed
+- **Next Steps:** Gather TestFlight user feedback before App Store submission
 
-### v0.2.1-build23 (TestFlight - Previous)
+### v0.2.1-build23 (Previous TestFlight)
 - **Date:** April 18, 2026
 - **Platform:** TestFlight (Internal Testing)
 - **Branch:** develop

@@ -60,7 +60,7 @@ This document tracks defects from two sources:
 
 ### CR-001: Broken Public Key Encoding in Card Issuance
 - **Source:** Code Review
-- **Status:** ✅ FIXED
+- **Status:** ✅ FIXED - DEPLOYED v0.3.0+1
 - **Priority:** CRITICAL
 - **File:** `supplier_app/lib/services/stamp_signer.dart` (line 113-117)
 - **Description:** `_encodePublicKey()` returns `publicKey.toString()` instead of proper base64 encoding. Outputs "Instance of 'ECPublicKey'" in QR codes.
@@ -73,15 +73,13 @@ This document tracks defects from two sources:
   2. Issue card
   3. Scan QR in customer app
   4. Public key field contains garbage string
-- **Fix Required:** Use KeyManager's existing `_encodePublicKey()` method
-- **Estimated Effort:** 30 minutes
-- **Testing Required:** Issue card in secure mode, verify signature validation works
-- **Assigned To:** 
-- **Target Build:** Build 5
+- **Fix Applied:** Used KeyManager's existing `_encodePublicKey()` method
+- **Deployed:** Build 23 (v0.3.0+1)
+- **Testing Verified:** Issue card in secure mode, signature validation works
 
 ### CR-002: Excessive Debug Logging in Production
 - **Source:** Code Review
-- **Status:** ✅ FIXED
+- **Status:** ✅ FIXED - DEPLOYED v0.3.0+1
 - **Priority:** CRITICAL
 - **Files:** 
   - `customer_app/lib/services/qr_token_generator.dart` (20+ print statements)

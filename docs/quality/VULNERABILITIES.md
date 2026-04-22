@@ -1,7 +1,8 @@
 # Security Vulnerability Assessment
 
-**LoyaltyCards v0.2.0 Build 21**  
+**LoyaltyCards v0.3.0+1 Build 23**  
 **Assessment Date:** April 17, 2026  
+**Updated:** April 22, 2026 (v0.3.0+1 deployment)  
 **Assessor:** Development Team  
 **Scope:** iOS application security audit
 
@@ -9,10 +10,10 @@
 
 ## Executive Summary
 
-This document captures the security vulnerability assessment performed on LoyaltyCards v0.2.0 prior to TestFlight deployment. The assessment identified 9 potential security concerns, categorized by severity and implementation status.
+This document captures the security vulnerability assessment performed on LoyaltyCards v0.2.0 prior to TestFlight deployment. All critical vulnerabilities have been addressed in v0.3.0+1.
 
-**Status Overview:**
-- ✅ **FIXED:** 2 vulnerabilities (V-002, V-005)
+**Status Overview (v0.3.0+1):**
+- ✅ **FIXED & DEPLOYED:** 2 vulnerabilities (V-002, V-005) - Deployed in v0.3.0+1
 - 📋 **BY DESIGN:** 2 vulnerabilities (V-001, V-009)
 - ✅ **VERIFIED OK:** 2 vulnerabilities (V-003, V-004)
 - ⚠️ **DOCUMENTED:** 1 vulnerability (V-006)
@@ -53,7 +54,7 @@ Simple Mode is intentionally trust-based, designed to mirror physical stamp card
 ### V-002: Private Key Extraction
 
 **Severity:** CRITICAL  
-**Status:** ✅ FIXED (Build 20/21)  
+**Status:** ✅ FIXED & DEPLOYED (Build 20/21, v0.3.0+1)  
 **Affected Component:** Supplier App - Recovery Backup & Clone features
 
 **Description:**  
@@ -64,7 +65,7 @@ Prior to Build 20, the Supplier App's recovery backup and device clone features 
 - Attacker could impersonate the business
 - Complete compromise of Secure Mode security
 
-**Fix Implemented (Build 20):**
+**Fix Implemented (Build 20, deployed v0.3.0+1):**
 - Added `local_auth` package for biometric authentication
 - Created `BiometricAuthService` for unified authentication
 - Recovery backup QR now requires Face ID/Touch ID/Passcode
@@ -77,11 +78,12 @@ Prior to Build 20, the Supplier App's recovery backup and device clone features 
 - `supplier_app/lib/screens/supplier/recovery_backup_screen.dart` - Added auth requirement
 - `supplier_app/lib/screens/supplier/clone_device_screen.dart` - Added auth requirement
 
-**Testing Required:**
+**Testing:**
 - ✅ Compile-tested (builds successfully)
-- ⏳ Physical device testing pending
+- ✅ Physical device testing completed
+- ✅ Deployed to TestFlight Build 23 (v0.3.0+1)
 
-**Resolution:** ✅ FIXED
+**Resolution:** ✅ FIXED & DEPLOYED
 
 ---
 

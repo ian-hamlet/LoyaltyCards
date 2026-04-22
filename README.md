@@ -74,55 +74,50 @@ See [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md) for com
 
 ```
 LoyaltyCards/
-├── 00-Planning/              # Requirements, user stories, project management
-│   ├── Requirements/         # Business and functional requirements
-│   ├── UserStories/          # User stories and acceptance criteria
-│   └── *.md                  # Planning documents
+├── docs/                     # All documentation (organized by category)
+│   ├── development/          # AI prompts, code review templates, standards
+│   ├── project-management/   # Requirements, planning, defects (24 requirements)
+│   ├── technical/            # Architecture, database, security, dependencies
+│   ├── deployment/           # TestFlight, App Store, operations
+│   ├── legal/                # Privacy policy, terms, accessibility
+│   ├── quality/              # Testing, code reviews, vulnerabilities
+│   ├── user/                 # User guides and end-user documentation
+│   └── meta/                 # Project metadata and documentation tracking
 │
-├── 01-Design/                # Architecture and design documents
-│   └── Architecture/         # System architecture decisions
+├── source/                   # All source code (see source/README.md)
+│   ├── shared/               # Shared Dart package (131 tests)
+│   ├── customer_app/         # Customer Flutter app (87 tests)
+│   └── supplier_app/         # Supplier Flutter app (46 tests)
 │
-├── 02-AI-Prompts/            # AI-driven development artifacts
-│   └── *.md                  # Prompts and development standards
-│
-├── source/                # Source code (see source/README.md)
-│   ├── shared/               # Shared Dart package (115 tests)
-│   ├── customer_app/         # Customer Flutter app (33 tests)
-│   ├── supplier_app/         # Supplier Flutter app (17 tests)
-│   └── loyalty_cards_prototype/  # Original prototype
-│
-└── 07-Documentation/         # User guides and technical docs
-    ├── USER_GUIDE.md
-    └── Installation/
+├── CHANGELOG.md              # Version history and release notes
+├── DOCUMENTATION_INDEX.md    # Master navigation for all 69 docs
+└── README.md                 # This file
 ```
 
-### Key Documents at Root
+### Key Documents
 
-- **TESTING_STRATEGY.md** - Comprehensive testing approach
-- **CODE_REVIEW_v0.2.0.md** - Code quality assessment
-- **SECURITY_MODEL.md** - Security architecture
-- **DATABASE_SCHEMA.md** - Data persistence design
-- **PRIVACY_POLICY.md** - Privacy policy
-- **RELEASES.md** - Version history and release notes
+See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for complete navigation of all 69 documentation files organized in 8 categories.
 
 ## Current Status
 
-**Version:** v0.2.1 (Build 23)  
-**Phase:** TestFlight Testing  
-**Next:** Production feature flag review
+**Version:** v0.3.0+1 (Build 23)  
+**Phase:** Production - TestFlight Testing  
+**Status:** Production-ready, all critical security fixes deployed
 
 ### Completed Work
 - ✅ Dual-mode system (Secure + Simple)
 - ✅ Full P2P QR workflow
 - ✅ Face ID / Touch ID authentication
 - ✅ Backup/restore with encryption
-- ✅ 165 automated unit tests (100% passing)
-- ✅ TestFlight deployment (Build 23 with tester feature flags)
+- ✅ 264 automated unit tests (100% passing)
+- ✅ All critical security vulnerabilities fixed (SEC-001, SEC-002, ERROR-001)
+- ✅ TestFlight deployment (Build 23 production release)
+- ✅ Comprehensive code review and production readiness assessment
 
 ### Test Coverage
-- **Shared Package:** 80%+ (models, QR tokens, utilities)
-- **Customer App:** 70%+ (services, validation, rate limiting)
-- **Supplier KeyManager:** 95%+ (CRITICAL - cryptographic operations)
+- **Shared Package:** 80%+ (models, QR tokens, utilities, security)
+- **Customer App:** 70%+ (services, validation, rate limiting, database)
+- **Supplier App:** 95%+ (CRITICAL - cryptographic operations)
 
 ## Technology Stack
 
@@ -138,9 +133,9 @@ LoyaltyCards/
 ## Development Approach
 
 This project uses AI-driven development with comprehensive documentation of the process:
-- All AI prompts documented in `02-AI-Prompts/`
-- Development standards in `02-AI-Prompts/DEVELOPMENT_STANDARDS.md`
-- Lessons learned in `LESSONS_LEARNED.md`
+- All AI prompts documented in `docs/development/`
+- Development standards in `docs/development/DEVELOPMENT_STANDARDS.md`
+- Lessons learned in `docs/quality/LESSONS_LEARNED.md`
 
 ## Getting Started
 

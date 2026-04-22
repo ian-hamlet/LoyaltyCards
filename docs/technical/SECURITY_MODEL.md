@@ -381,4 +381,4 @@ QR code displayed
 
 ---
 
-**Questions?** See [USER_GUIDE.md](../07-Documentation/USER_GUIDE.md) for operational guidance.
+**Questions?** See [USER_GUIDE.md](../user/USER_GUIDE.md) for operational guidance.

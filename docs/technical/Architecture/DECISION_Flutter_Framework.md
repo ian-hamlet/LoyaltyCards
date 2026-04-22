@@ -268,9 +268,9 @@ loyalty_cards_flutter/
 
 ## Related Documents
 
-- [REQ-003: Mobile Platform Support](../../00-Planning/Requirements/REQ-003_Mobile_Platform_Support.md)
-- [REQ-009: QR/Barcode Scanning](../../00-Planning/Requirements/REQ-009_QR_Barcode_Scanning.md)
-- [REQ-015: Peer-to-Peer Data Architecture](../../00-Planning/Requirements/REQ-015_Backend_Data_Storage.md)
+- [REQ-003: Mobile Platform Support](../../project-management/Requirements/REQ-003_Mobile_Platform_Support.md)
+- [REQ-009: QR/Barcode Scanning](../../project-management/Requirements/REQ-009_QR_Barcode_Scanning.md)
+- [REQ-015: Peer-to-Peer Data Architecture](../../project-management/Requirements/REQ-015_Backend_Data_Storage.md)
 - [ARCH-001: P2P Architecture Decision](DECISION_P2P_Architecture.md)
 
 ## Approval

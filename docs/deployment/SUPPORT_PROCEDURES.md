@@ -20,7 +20,7 @@ This document provides comprehensive support procedures for handling user inquir
 - **Hours:** Monday-Friday, 9am-5pm [Your Timezone]
 
 ### Self-Service
-- **User Guide:** [USER_GUIDE.md](07-Documentation/USER_GUIDE.md)
+- **User Guide:** [USER_GUIDE.md](../user/USER_GUIDE.md)
 - **FAQ:** See Common Issues section below
 - **In-App Help:** Settings → Help & Support
 
@@ -803,8 +803,8 @@ A: No! Suppliers don't collect your name, email, phone, or any personal data.
 ## Support Resources
 
 ### Internal Documentation
-- [User Guide](07-Documentation/USER_GUIDE.md)
-- [Security Model](SECURITY_MODEL.md)
+- [User Guide](../user/USER_GUIDE.md)
+- [Security Model](../technical/SECURITY_MODEL.md)
 - [Vulnerabilities](VULNERABILITIES.md)
 - [Defect Tracker](DEFECT_TRACKER.md)
 

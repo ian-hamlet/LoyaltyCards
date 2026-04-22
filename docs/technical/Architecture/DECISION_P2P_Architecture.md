@@ -369,10 +369,10 @@ const previousHash = stamps.length > 0
 
 ## Related Documents
 
-- [REQ-015: Peer-to-Peer Data Architecture](../../00-Planning/Requirements/REQ-015_Backend_Data_Storage.md)
-- [REQ-010: P2P Data Synchronization](../../00-Planning/Requirements/REQ-010_Data_Synchronization.md)
-- [REQ-020: Security Requirements](../../00-Planning/Requirements/REQ-020_Security_Requirements.md)
-- [REQ-017: Cost Minimization](../../00-Planning/Requirements/REQ-017_Cost_Minimization.md)
+- [REQ-015: Peer-to-Peer Data Architecture](../../project-management/Requirements/REQ-015_Backend_Data_Storage.md)
+- [REQ-010: P2P Data Synchronization](../../project-management/Requirements/REQ-010_Data_Synchronization.md)
+- [REQ-020: Security Requirements](../../project-management/Requirements/REQ-020_Security_Requirements.md)
+- [REQ-017: Cost Minimization](../../project-management/Requirements/REQ-017_Cost_Minimization.md)
 
 ## Approval
 

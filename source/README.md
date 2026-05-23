@@ -6,7 +6,7 @@ This directory contains the Phase 0+ implementation of the LoyaltyCards P2P syst
 
 ```
 source/
-├── shared/                     # Shared Dart package (v0.3.0)
+├── shared/                     # Shared Dart package (v0.3.0+1)
 │   ├── lib/
 │   │   ├── models/            # Data models (Card, Stamp, Business, Transaction)
 │   │   ├── utils/             # Crypto, logging utilities
@@ -18,7 +18,7 @@ source/
 │       ├── services/          # StampSigner cryptographic tests
 │       └── qr_tokens_test.dart
 │
-├── customer_app/              # Customer Flutter app (v0.3.0)
+├── customer_app/              # Customer Flutter app (v0.3.0+1)
 │   ├── lib/
 │   │   ├── main.dart
 │   │   ├── screens/customer/
@@ -27,7 +27,7 @@ source/
 │   └── test/                  # 70 unit tests (all passing)
 │       └── services/          # Service tests with mocking
 │
-├── supplier_app/              # Supplier Flutter app (v0.3.0)
+├── supplier_app/              # Supplier Flutter app (v0.3.0+1)
 │   ├── lib/
 │   │   ├── main.dart
 │   │   ├── screens/supplier/
@@ -67,7 +67,7 @@ cd customer_app && flutter test
 cd supplier_app && flutter test
 ```
 
-**Test Status (v0.3.0):**
+**Test Status (v0.3.0+1):**
 - Shared StampSigner: 13/13 tests passing ✅
 - Customer services: 70/70 tests passing ✅ (database locking issue RESOLVED)
 - Supplier services: 30/30 tests passing ✅

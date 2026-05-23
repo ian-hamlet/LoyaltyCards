@@ -1,8 +1,8 @@
 # Next Actions
 
-**Document Version:** 4.0  
+**Document Version:** 4.1  
 **Created:** 2026-04-11  
-**Updated:** 2026-04-22  
+**Updated:** 2026-05-23  
 **Current Version:** v0.3.0+1  
 **Current Phase:** Production Deployment Complete - In TestFlight
 
@@ -104,6 +104,25 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ## 🎯 Next Actions
 
+### Rollout Decision (Captured 2026-05-23)
+
+**Release Intent:**
+- Launch to **App Store** (general availability), not TestFlight-only distribution
+- Publish as a **free app** (no paid tier required for initial rollout)
+- Target initial usage to a local pilot context (friend's coffee shop + local customers)
+
+**Support & Responsibility Stance:**
+- No ongoing support SLA or maintenance commitment
+- App provided as convenience software; paper cards/stamps remain a valid fallback
+- Fraud/abuse edge-case responsibility remains with participating businesses' operational controls
+
+**App Store Rollout Constraints:**
+- Complete App Store metadata/screenshots for both apps
+- Configure availability for intended launch regions only (expand later if needed)
+- Ensure Terms/Privacy language clearly states no warranty, limited support, and business-side verification responsibilities
+
+---
+
 ### Immediate Priority: TestFlight Feedback Analysis
 
 **Activity:** Monitor and respond to TestFlight user feedback  
@@ -126,8 +145,14 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 **Required Materials:**
 - [ ] App Store screenshots (6.5" and 5.5" iPhone)
+- [ ] Define screenshot fixture workflow for simulators (seeded test states)
+  - Candidate approach: debug-only scenario seeder for repeatable states (new card, mid-progress, just stamped, completed, redeemed)
+  - Alternative: preload SQLite fixtures before screenshot capture
 - [ ] App Store descriptions (Customer App + Supplier App)
 - [ ] Keywords and category selection
+- [ ] Set launch price to Free for both apps in App Store Connect
+- [ ] Set launch availability to intended local rollout regions
+- [ ] Add release note text clarifying paper-card fallback for businesses that choose not to use app workflows
 - [ ] Privacy policy (already complete ✅)
 - [ ] App Store app icons (already complete ✅)
 - [ ] Age rating questionnaire

@@ -38,14 +38,30 @@ Last Updated: April 22, 2026
 ### 🔐 Security & Privacy (Optional)
 
 **App Lock with Face ID/Touch ID:**
+LoyaltyCards provides optional app-level security for privacy-conscious users.
+
+**Availability:**
+- Available on all devices with Face ID, Touch ID, or passcode
+- *This feature is NOT available on older devices without biometric capabilities*
+
+**How to Enable:**
 - Go to Settings → Security
 - Toggle "Lock App with Face ID" (or Touch ID)
-- **Default: OFF** (opt-in for privacy-conscious users)
-- When enabled: Face ID required every time you open app
-- Protects your loyalty cards from casual viewing
-- Passcode fallback always available
+- Verify your authentication method
 
-**Note:** This is optional. Most users leave it OFF for convenience.
+**What it does:**
+- **When enabled:** Face ID/Touch ID required every time you open app
+- **When disabled (default):** App opens normally without authentication
+- **Passcode fallback:** Always available if biometrics unavailable
+- **Protects:** Your loyalty cards from casual viewing if device is lost
+
+**Default Setting:** OFF (opt-in for extra privacy)  
+**Note:** This is completely optional. Most users leave it OFF for convenience. Enable only if you want maximum privacy for your loyalty cards.
+
+**Requirements for App Store:**
+- App includes `NSFaceIDUsageDescription` in Info.plist
+- Optional feature - users can enable or disable
+- Complies with Apple's biometric authentication guidelines
 
 ---
 

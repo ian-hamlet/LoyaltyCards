@@ -154,6 +154,11 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             subtitle: Text('${widget.business.stampsRequired} stamps'),
           ),
           ListTile(
+            leading: const Icon(Icons.security),
+            title: const Text('Operation Mode'),
+            subtitle: Text(widget.business.mode.displayName),
+          ),
+          ListTile(
             leading: const Icon(Icons.key),
             title: const Text('Business ID'),
             subtitle: Text(

@@ -146,14 +146,6 @@ class _SupplierHomeState extends State<SupplierHome> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${_business!.stampsRequired} stamps to reward',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
                     // Hide statistics in simple mode (counters not tracked)
                     if (_business!.mode == OperationMode.secure) ...[
                       const SizedBox(height: 20),

@@ -110,12 +110,30 @@ This document lists all third-party dependencies used in the LoyaltyCards projec
 - **Version:** ^2.3.0
 - **License:** BSD 3-Clause
 - **Purpose:** Biometric authentication (Face ID, Touch ID, Passcode)
+- **Availability:**
+  - ✅ iOS 11.3+ (with passcode fallback on all versions)
+  - ✅ Android 6.0+ (app uses iOS only, see limitations)
+  - ✅ Automatic fallback to device passcode if biometrics unavailable
 - **Security Considerations:**
-  - Official Flutter plugin
-  - Protects private key access (V-002 security fix)
-  - Uses iOS LocalAuthentication framework
-  - Required Info.plist permission: NSFaceIDUsageDescription
-- **Used By:** Supplier App (critical security component)
+  - Official Flutter plugin (part of Flutter ecosystem)
+  - Uses iOS LocalAuthentication framework (native iOS APIs)
+  - Passcode fallback always available for older devices
+  - Required Info.plist entry: NSFaceIDUsageDescription (for Face ID permission)
+  - No biometric data collected, stored, or transmitted by app
+  - Keys never extracted without authentication
+  - V-002 Security Fix: Protects private key access in Secure Mode
+- **Implementation Details:**
+  - **Customer App:** Optional app lock feature (Face ID/Touch ID/Passcode)
+    - User can enable/disable in Settings → Security
+    - Default: OFF (disabled)
+    - When enabled: Authentication required on app launch
+  - **Supplier App:** Required for sensitive operations (CRITICAL SECURITY)
+    - Always required for: Viewing recovery backup QR, Creating device clone QR
+    - Protects private cryptographic keys (ECDSA P-256)
+    - Cannot be disabled - always protects sensitive operations
+    - Passcode fallback on devices without biometrics
+- **Used By:** Customer App (optional), Supplier App (critical security component)
+- **Wrapped By:** BiometricAuthService (custom service in both apps)
 - **Website:** https://pub.dev/packages/local_auth
 
 ---

@@ -1,7 +1,7 @@
 # Terms of Service
 
 **LoyaltyCards**  
-**Last Updated:** April 17, 2026
+**Last Updated:** May 23, 2026
 
 ---
 
@@ -258,6 +258,18 @@ THE APP IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, IN
 - Businesses are solely responsible for honoring their loyalty programs
 - Customers must resolve disputes with businesses directly
 
+### 8.4 No Ongoing Support Commitment
+
+- LoyaltyCards may be offered without guaranteed ongoing support, maintenance, or response times
+- We may provide updates at our sole discretion, but we are not obligated to provide fixes for every reported issue
+- If app workflows are unavailable or unsuitable for a business, paper cards/stamps remain a valid operational alternative
+
+### 8.5 Fraud and Abuse Allocation
+
+- LoyaltyCards provides tooling and safeguards, but does not guarantee prevention of all fraud or abuse scenarios
+- Participating businesses are responsible for applying operational controls (identity checks, redemption verification, staff judgment)
+- We are not liable for losses arising from edge-case fraud, abuse, social engineering, or operational misuse
+
 ---
 
 ## 9. Acceptable Use
@@ -310,10 +322,10 @@ Any disputes shall be resolved in the courts of **[Your Jurisdiction]**.
 
 ## 13. Contact Information
 
-For questions or concerns about these Terms of Service:
+For legal questions or concerns about these Terms of Service:
 
-**Email:** [Your Support Email]  
-**Website:** [Your Website]
+**Email:** [Legal Contact Email]  
+**Website:** [Project Website]
 
 ---
 

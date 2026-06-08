@@ -25,7 +25,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   int _stampsRequired = AppConstants.defaultStampsRequired;
   String _selectedColor = BrandColors.cardColorOptions.first;
   int _selectedLogoIndex = 0;
-  OperationMode _selectedMode = OperationMode.secure; // Default to secure
+  OperationMode _selectedMode = OperationMode.simple; // Default to simple
   int _scanIntervalSeconds = 30; // REQ-022: Default 30 seconds for simple mode
   bool _isCreating = false;
 

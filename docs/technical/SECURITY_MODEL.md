@@ -1,7 +1,7 @@
 # Security Model & Risk Documentation
 
-**LoyaltyCards v0.3.0+1**  
-**Last Updated:** April 17, 2026
+**LoyaltyCards v0.3.1+3**  
+**Last Updated:** June 8, 2026
 
 ---
 

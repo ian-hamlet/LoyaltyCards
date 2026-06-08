@@ -17,6 +17,23 @@ Examples:
 
 ## Current Releases
 
+### v0.3.1+3 - Build 25 (🔄 In Development)
+- **Date:** June 8, 2026
+- **Platform:** Development (feature/minorupdate branch)
+- **Branch:** feature/minorupdate → develop
+- **Version:** 0.3.1+3
+- **Status:** 🔄 IN DEVELOPMENT - QA Testing
+- **Focus:** Bug Fixes and UX Improvements
+- **Major Changes:**
+  - **QR Scanner UX Fix:**
+    - Added clear error messages when non-stamp QRs are scanned in stamp mode
+    - Detects card-issuance QRs and suggests using Add Card instead
+    - Added 2-second cooldown to prevent rapid error message retriggers
+    - Consolidated error display to single inline message (removed duplicate snackbar)
+  - **Previous Release Summary:** See v0.3.0+1 below
+- **Testing:** Ready for device testing via Xcode
+- **Next Steps:** Merge to develop, prepare for App Store submission
+
 ### v0.3.0+1 - Build 23 (✅ Released to TestFlight)
 - **Date:** April 21, 2026
 - **Platform:** TestFlight Production

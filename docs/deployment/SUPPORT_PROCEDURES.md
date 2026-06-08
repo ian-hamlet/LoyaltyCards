@@ -1,6 +1,6 @@
 # Support Procedures
 
-**LoyaltyCards v0.2.0**  
+**LoyaltyCards v0.3.0+1**  
 **Purpose:** User support guidelines and issue resolution  
 **Last Updated:** April 18, 2026
 

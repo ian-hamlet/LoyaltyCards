@@ -478,7 +478,7 @@ ian.hamlet@dotConnected.com
 - Customer: `com.ianhamlet.loyaltycards.customerApp`
 - Supplier: `com.ianhamlet.loyaltycards.supplierApp`
 
-**Version:** v0.2.1 (Current: Build 23)
+**Version:** v0.3.0+1 (Current: Build 23 TestFlight)
 
 **GitHub:** https://github.com/ian-hamlet/LoyaltyCards
 

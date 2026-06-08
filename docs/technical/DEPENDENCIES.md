@@ -1,6 +1,6 @@
 # Dependencies
 
-**LoyaltyCards v0.2.0 Build 21**  
+**LoyaltyCards v0.3.0+1 Build 23**  
 **Platform:** Flutter 3.3.0+, Dart 3.3.0+  
 **Last Updated:** April 18, 2026
 

@@ -53,6 +53,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   final MobileScannerController _controller = MobileScannerController();
   bool _isProcessing = false;
   String? _errorMessage;
+  DateTime? _cooldownUntil;
+  static const Duration _errorCooldownDuration = Duration(seconds: 2);
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
   @override
@@ -97,6 +99,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   Future<void> _handleQRCode(String qrData) async {
     if (_isProcessing) return;
+    if (_cooldownUntil != null && DateTime.now().isBefore(_cooldownUntil!)) return;
 
     setState(() {
       _isProcessing = true;
@@ -107,10 +110,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       final token = QRToken.fromQRString(qrData);
 
       if (token == null) {
-        setState(() {
-          _errorMessage = 'Invalid QR code format';
-          _isProcessing = false;
-        });
+        final message = widget.mode == QRScanMode.receiveStamp
+            ? 'This is not a valid stamp QR code. Please scan a stamp QR from the supplier app.'
+            : 'This is not a valid card QR code. Please scan a card issuance QR.';
+        _showScanError(message);
         return;
       }
 
@@ -123,29 +126,28 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           break;
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Error processing QR: $e';
-        _isProcessing = false;
-      });
+      _showScanError('Error processing QR: $e');
     }
+  }
+
+  void _showScanError(String message) {
+    setState(() {
+      _errorMessage = message;
+      _isProcessing = false;
+      _cooldownUntil = DateTime.now().add(_errorCooldownDuration);
+    });
   }
 
   Future<void> _handleCardIssue(QRToken token) async {
     if (token is! CardIssueToken) {
-      setState(() {
-        _errorMessage = 'Wrong QR type. Please scan a card issuance QR.';
-        _isProcessing = false;
-      });
+      _showScanError('Wrong QR type. Please scan a card issuance QR.');
       return;
     }
 
     // Validate token
     final validation = await TokenValidator.validateCardIssueToken(token);
     if (!validation.isValid) {
-      setState(() {
-        _errorMessage = validation.error ?? 'Invalid token';
-        _isProcessing = false;
-      });
+      _showScanError(validation.error ?? 'Invalid token');
       return;
     }
 
@@ -229,10 +231,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
           if (!verificationResult.isValid) {
             AppLogger.error('Initial stamp signature verification failed: ${verificationResult.failureReason}');
-            setState(() {
-              _errorMessage = 'Invalid stamp signature: ${verificationResult.failureReason}';
-              _isProcessing = false;
-            });
+            _showScanError('Invalid stamp signature: ${verificationResult.failureReason}');
             // Rollback: delete the card
             await cardRepository.deleteCard(cardId);
             return;
@@ -301,10 +300,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     
     // Handle stamp tokens
     if (token is! StampToken) {
-      setState(() {
-        _errorMessage = 'Wrong QR type. Please scan a stamp or redemption token QR.';
-        _isProcessing = false;
-      });
+      final message = token is CardIssueToken
+          ? 'This QR is for adding a new card, not collecting a stamp. Use Add Card to scan it.'
+          : 'Wrong QR type. Please scan a stamp or redemption token QR.';
+      _showScanError(message);
       return;
     }
 
@@ -335,10 +334,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
 
     if (card == null) {
-      setState(() {
-        _errorMessage = 'Card not found. Please add the card first.';
-        _isProcessing = false;
-      });
+      _showScanError('Card not found. Please add the card first.');
       return;
     }
 
@@ -401,10 +397,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       );
 
       if (!validation.isValid) {
-        setState(() {
-          _errorMessage = validation.error ?? 'Invalid stamp';
-          _isProcessing = false;
-        });
+        _showScanError(validation.error ?? 'Invalid stamp');
         return;
       }
     } else {
@@ -415,20 +408,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       if (token.expiryDate != null) {
         final now = DateTime.now().millisecondsSinceEpoch;
         if (now > token.expiryDate!) {
-          setState(() {
-            _errorMessage = 'This stamp token has expired';
-            _isProcessing = false;
-          });
+          _showScanError('This stamp token has expired');
           return;
         }
       }
       
       // Validate stamp count
       if (token.stampCount > card!.stampsRequired) {
-        setState(() {
-          _errorMessage = 'Invalid stamp count: ${token.stampCount} exceeds ${card!.stampsRequired}';
-          _isProcessing = false;
-        });
+        _showScanError('Invalid stamp count: ${token.stampCount} exceeds ${card!.stampsRequired}');
         return;
       }
     }
@@ -547,10 +534,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
           if (!verificationResult.isValid) {
             AppLogger.error('Additional stamp signature verification failed: ${verificationResult.failureReason}');
-            setState(() {
-              _errorMessage = 'Invalid stamp signature: ${verificationResult.failureReason}';
-              _isProcessing = false;
-            });
+            _showScanError('Invalid stamp signature: ${verificationResult.failureReason}');
             // Note: We've already added some stamps. In production, you might want
             // to implement a transaction rollback here.
             return;
@@ -829,38 +813,26 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final card = await repository.getCardById(token.cardId);
 
     if (card == null) {
-      setState(() {
-        _errorMessage = 'Card not found. Please add the card first.';
-        _isProcessing = false;
-      });
+      _showScanError('Card not found. Please add the card first.');
       return;
     }
 
     // Verify card is from the same business
     if (card.businessId != token.businessId) {
-      setState(() {
-        _errorMessage = 'Card business mismatch';
-        _isProcessing = false;
-      });
+      _showScanError('Card business mismatch');
       return;
     }
 
     // Verify card is complete
     if (!card.isComplete) {
       final remaining = card.stampsRequired - card.stampsCollected;
-      setState(() {
-        _errorMessage = 'This card isn\'t complete yet. You need $remaining more stamp${remaining > 1 ? 's' : ''} before you can redeem.';
-        _isProcessing = false;
-      });
+      _showScanError('This card isn\'t complete yet. You need $remaining more stamp${remaining > 1 ? 's' : ''} before you can redeem.');
       return;
     }
 
     // Check if card was already redeemed
     if (card.isRedeemed) {
-      setState(() {
-        _errorMessage = 'This card has already been redeemed!';
-        _isProcessing = false;
-      });
+      _showScanError('This card has already been redeemed!');
       return;
     }
 
@@ -874,10 +846,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     if (!verificationResult.isValid) {
       AppLogger.error('Redemption token signature verification failed: ${verificationResult.failureReason}');
-      setState(() {
-        _errorMessage = 'Invalid redemption signature: ${verificationResult.failureReason}';
-        _isProcessing = false;
-      });
+      _showScanError('Invalid redemption signature: ${verificationResult.failureReason}');
       return;
     }
 

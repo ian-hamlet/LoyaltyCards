@@ -233,11 +233,8 @@
 
 /// IMPORTANT: Version Number Management
 /// =====================================
-/// When updating version for new build, you MUST update THREE files:
-/// 1. 03-Source/customer_app/pubspec.yaml (line 5: version: X.Y.Z+BUILD)
-/// 2. 03-Source/supplier_app/pubspec.yaml (line 5: version: X.Y.Z+BUILD)
-/// 3. 03-Source/shared/lib/version.dart (this file, appVersion constant below)
-///
-/// All three MUST match exactly or builds will show inconsistent version numbers.
-/// Build number (+BUILD) must increment for every TestFlight upload.
-const String appVersion = '0.3.0+1';
+/// # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
+
+
+/// # source/shared/lib/version.dart: 
+const String appVersion = '0.3.1+5';

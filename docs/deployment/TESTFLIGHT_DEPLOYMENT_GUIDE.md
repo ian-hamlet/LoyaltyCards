@@ -12,7 +12,7 @@
 - [x] Xcode 26.3 installed
 - [x] Apple Developer account active ($99/year)
 - [x] Privacy Policy live at: https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
-- [x] Version: v0.3.1+3
+- [x] Version: v0.3.1+5
 - [x] Custom app icons installed
 - [x] Bundle IDs ready:
   - Customer: `com.ianhamlet.loyaltycards.customerApp`
@@ -478,7 +478,7 @@ ian.hamlet@dotConnected.com
 - Customer: `com.ianhamlet.loyaltycards.customerApp`
 - Supplier: `com.ianhamlet.loyaltycards.supplierApp`
 
-**Version:** v0.3.1+3 (Current: Build 25 Development)
+**Version:** v0.3.1+5 (Current: Build 25 Development)
 
 **GitHub:** https://github.com/ian-hamlet/LoyaltyCards
 

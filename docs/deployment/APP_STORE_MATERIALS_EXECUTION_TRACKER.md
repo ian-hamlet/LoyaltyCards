@@ -8,10 +8,10 @@
 ## Execution Snapshot (2026-06-11)
 
 ### Completed Today
-- [x] App versions aligned to `1.0.0+6` across customer/supplier/shared version files
-- [x] Release documentation aligned to `v1.0.0+6`
+- [x] App versions aligned to `1.0.1+7` across customer/supplier/shared version files
+- [x] Release documentation aligned to `v1.0.1+7`
 - [x] Changes merged to `develop`, fast-forwarded to `main`, and synced to `releases/v1.0.0(6)`
-- [x] Build `1.0.0+6` uploaded to App Store Connect (both apps)
+- [x] Build `1.0.1+7` uploaded to App Store Connect (both apps)
 - [x] App statuses confirmed as "Waiting for Review"
 - [x] Fast Item 1 complete: App Review quick-response templates drafted
 - [x] Fast Item 2 complete: Release announcement and support macros drafted

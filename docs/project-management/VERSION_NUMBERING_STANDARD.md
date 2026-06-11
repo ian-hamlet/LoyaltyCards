@@ -116,18 +116,18 @@ Update **only the current-release sections** in these files:
 
 **README.md**
 ```markdown
-**Status:** v1.0.0+6 - Release Candidate, App Store Submission Prep
-**Current Version:** v1.0.0+6
+**Status:** v1.0.1+7 - Release Candidate, App Store Submission Prep
+**Current Version:** v1.0.1+7
 ```
 
 **docs/meta/PROJECT_METADATA.md**
 ```markdown
-- **Status**: v1.0.0+6 Release Candidate - Build 6
+- **Status**: v1.0.1+7 Release Candidate - Build 7
 ```
 
 **docs/project-management/NEXT_ACTIONS.md**
 ```markdown
-**Current Version:** v1.0.0+6
+**Current Version:** v1.0.1+7
 ```
 
 **docs/user/USER_GUIDE.md**
@@ -204,7 +204,7 @@ When bumping to a new version, use this checklist:
 
 ### Scenario 1: Minor Bug Fix in Production
 
-**Current:** v1.0.0+6 in TestFlight/App Store submission prep  
+**Current:** v1.0.1+7 in TestFlight/App Store submission prep  
 **Action:** New build for TestFlight
 
 1. Update pubspec files: `0.3.0+2`
@@ -213,7 +213,7 @@ When bumping to a new version, use this checklist:
 
 ### Scenario 2: New Feature Ready for Release
 
-**Current:** v1.0.0+6 in TestFlight/App Store submission prep  
+**Current:** v1.0.1+7 in TestFlight/App Store submission prep  
 **Action:** Feature release
 
 1. Update pubspec files: `0.4.0+1`
@@ -223,7 +223,7 @@ When bumping to a new version, use this checklist:
 
 ### Scenario 3: App Store First Release
 
-**Current:** v1.0.0+6 on TestFlight  
+**Current:** v1.0.1+7 on TestFlight  
 **Action:** Launch to App Store
 
 1. Decide if same version or bump (typically same): `1.0.0+1`
@@ -261,8 +261,8 @@ When in doubt, the pubspec files are the authoritative version.
 Documentation is derived from this.
 
 ### Rule 3: Version Appears in Format
-- In code: `1.0.0+6` (no 'v' prefix)
-- In docs: `v1.0.0+6` or `Version 1.0.0+6` (with 'v' or 'Version' prefix for clarity)
+- In code: `1.0.1+7` (no 'v' prefix)
+- In docs: `v1.0.1+7` or `Version 1.0.1+7` (with 'v' or 'Version' prefix for clarity)
 
 ### Rule 4: Build Number Tracks Deployments
 - TestFlight increments build: `0.3.0+1`, `0.3.0+2`, `0.3.0+23`
@@ -273,7 +273,7 @@ Documentation is derived from this.
 
 ## Quick Reference
 
-**Current Version:** v1.0.0+6  
+**Current Version:** v1.0.1+7  
 **Status:** Release candidate, deployed to TestFlight  
 **Next Version:** To be determined based on changes
 

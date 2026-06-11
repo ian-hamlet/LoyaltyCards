@@ -1,7 +1,7 @@
-# TestFlight Deployment Guide - LoyaltyCards v1.0.0+6
+# TestFlight Deployment Guide - LoyaltyCards v1.0.1+7
 
 **Date:** June 11, 2026  
-**Current Version:** v1.0.0+6  
+**Current Version:** v1.0.1+7  
 **Apps:** LoyaltyCards (Customer) + LoyaltyCards Business (Supplier)  
 **Method:** Automatic signing via Xcode
 
@@ -12,7 +12,7 @@
 - [x] Xcode 26.3 installed
 - [x] Apple Developer account active ($99/year)
 - [x] Privacy Policy live at: https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
-- [x] Version: v1.0.0+6
+- [x] Version: v1.0.1+7
 - [x] Custom app icons installed
 - [x] Bundle IDs ready:
   - Customer: `com.ianhamlet.loyaltycards.customerApp`
@@ -478,7 +478,7 @@ ian.hamlet@dotConnected.com
 - Customer: `com.ianhamlet.loyaltycards.customerApp`
 - Supplier: `com.ianhamlet.loyaltycards.supplierApp`
 
-**Version:** v1.0.0+6 (Current release candidate)
+**Version:** v1.0.1+7 (Current release candidate)
 
 **GitHub:** https://github.com/ian-hamlet/LoyaltyCards
 

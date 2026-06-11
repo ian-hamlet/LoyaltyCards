@@ -3,7 +3,7 @@
 **Document Version:** 4.1  
 **Created:** 2026-04-11  
 **Updated:** 2026-06-11  
-**Current Version:** v1.0.0+6  
+**Current Version:** v1.0.1+7  
 **Current Phase:** Release Candidate - App Store Submission Preparation
 
 ---
@@ -66,7 +66,7 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ### Active Testing
 
-**TestFlight Version:** v1.0.0+6
+**TestFlight Version:** v1.0.1+7
 **Deployed:** June 11, 2026
 **Target Users:** Internal testers + pilot businesses
 **Duration:** Ongoing
@@ -195,7 +195,7 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ### Current Production Build
 
-**Version:** v1.0.0+6  
+**Version:** v1.0.1+7  
 **Status:** ✅ Release candidate deployed to TestFlight  
 **Release Branch:** releases/v1.0.0-build6  
 **Deployment Date:** June 11, 2026
@@ -352,7 +352,7 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 
 ## ✅ Summary
 
-**Current State:** Production-ready v1.0.0+6 release candidate deployed to TestFlight
+**Current State:** Production-ready v1.0.1+7 release candidate deployed to TestFlight
 
 **Next Focus:** TestFlight feedback → App Store preparation → v1.0 launch
 

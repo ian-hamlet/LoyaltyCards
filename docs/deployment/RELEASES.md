@@ -17,6 +17,20 @@ Examples:
 
 ## Current Releases
 
+### v1.0.1+7 - Build 7 (🟡 Release Candidate)
+- **Date:** June 11, 2026
+- **Platform:** App Store Submission Candidate
+- **Branch:** develop
+- **Version:** 1.0.1+7
+- **Status:** 🟡 READY FOR FINAL VALIDATION
+- **Focus:** App Store submission hardening and device-specific UI validation
+- **Major Changes:**
+  - Responsive stamp layout fixes for smaller screenshot simulator targets
+  - Customer home card stamp display now width-aware with overflow wrapping
+  - Customer detail stamp display aligned to the same responsive behavior
+- **Testing:** Validated on iPhone 14 Pro and iPhone SE simulator targets
+- **Next Steps:** Upload build 7, complete final App Store Connect metadata checks, submit for review
+
 ### v1.0.0+6 - Build 6 (🟡 Release Candidate)
 - **Date:** June 11, 2026
 - **Platform:** App Store Submission Candidate

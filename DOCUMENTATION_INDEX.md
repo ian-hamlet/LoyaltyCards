@@ -1,7 +1,7 @@
 # LoyaltyCards Documentation Index
 
-**Last Updated:** April 22, 2026  
-**Project Version:** v0.3.1+5 (Build 25 - Development)  
+**Last Updated:** June 11, 2026  
+**Project Version:** v1.0.0+6 (Release Candidate)  
 **Purpose:** Comprehensive index of all project documentation  
 **Documentation Structure:** Reorganized into logical categories for easy navigation
 

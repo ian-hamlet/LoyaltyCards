@@ -1,11 +1,11 @@
 # Accessibility Statement
 
-**LoyaltyCards v0.3.1+5**  
+**LoyaltyCards v1.0.0+6**  
 **Commitment:** Making digital loyalty cards accessible to everyone  
-**Last Updated:** April 22, 2026  
+**Last Updated:** June 11, 2026  
 **Compliance Target:** WCAG 2.1 Level AA
 
-**Note:** Accessibility features unchanged from v0.2.0 to v0.3.0+1 (security and package updates only).
+**Note:** Accessibility features unchanged from v0.2.0 through v1.0.0+6 (security and package updates only).
 
 ---
 
@@ -17,7 +17,7 @@ LoyaltyCards is committed to ensuring digital accessibility for all users, inclu
 
 ## Current Accessibility Status
 
-**Status:** 🟡 **Partial Compliance** (v0.2.0)
+**Status:** 🟡 **Partial Compliance** (v1.0.0+6)
 
 LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conformant" means that some parts of the application do not fully conform to the accessibility standard.
 
@@ -454,7 +454,7 @@ We are actively working toward full compliance with WCAG 2.1 Level AA and releva
 
 **Maintained by:** Development Team  
 **Last Updated:** April 18, 2026  
-**Next Review:** After v0.3.0 release (planned Q3 2026)
+**Next Review:** After v1.0.0 public release (planned Q3 2026)
 
 ---
 

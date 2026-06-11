@@ -117,8 +117,8 @@ git push origin develop
 
 ## 📊 Current Status (Update Me!)
 
-**Current Build:** v0.2.0 (Build 4)  
-**Next Build:** v0.2.1 (Build 5)  
+**Current Build:** v1.0.0 (Build 6)  
+**Next Build:** v1.0.0 (Build 7)  
 **Status:** Testing in progress
 
 **Defects Logged:**

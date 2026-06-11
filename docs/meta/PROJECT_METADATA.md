@@ -3,9 +3,9 @@
 ## Project Information
 - **Working Name**: LoyaltyCards
 - **Project Type**: Mobile Application Development (Two-App System)
-- **Status**: v0.3.0+1 Production - Build 23 in TestFlight
+- **Status**: v1.0.0+6 Release Candidate - Build 6
 - **Created**: 2026-03-30
-- **Last Updated**: 2026-04-22
+- **Last Updated**: 2026-06-11
 - **Repository**: GitHub (ian-hamlet/LoyaltyCards)
 
 ## Development Approach

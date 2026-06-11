@@ -1,7 +1,7 @@
-# TestFlight Deployment Guide - LoyaltyCards v0.3.1+3
+# TestFlight Deployment Guide - LoyaltyCards v1.0.0+6
 
-**Date:** June 8, 2026  
-**Current Version:** v0.3.1+3  
+**Date:** June 11, 2026  
+**Current Version:** v1.0.0+6  
 **Apps:** LoyaltyCards (Customer) + LoyaltyCards Business (Supplier)  
 **Method:** Automatic signing via Xcode
 
@@ -12,7 +12,7 @@
 - [x] Xcode 26.3 installed
 - [x] Apple Developer account active ($99/year)
 - [x] Privacy Policy live at: https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
-- [x] Version: v0.3.1+5
+- [x] Version: v1.0.0+6
 - [x] Custom app icons installed
 - [x] Bundle IDs ready:
   - Customer: `com.ianhamlet.loyaltycards.customerApp`
@@ -111,7 +111,7 @@ flutter build ipa --release
 # Check IPA exists
 ls -lh build/ios/ipa/customer_app.ipa
 
-# Verify version (should show 0.2.0 and build 21)
+# Verify version (should show 1.0.0 and build 6)
 unzip -p build/ios/ipa/customer_app.ipa \
   Payload/Runner.app/Info.plist | \
   grep -A1 CFBundleShortVersionString
@@ -312,7 +312,7 @@ We collect ZERO personal data. All cards and stamps are stored locally on your d
 **Build:**
 - Wait 10-15 minutes after upload
 - Build will appear in "Build" section
-- Select the build (0.2.0)
+- Select the build (1.0.0)
 
 **Age Rating:**
 - Click "Edit" next to Age Rating
@@ -377,7 +377,7 @@ Requires customers to have LoyaltyCards app installed.
    - Name: "Internal Testers"
    - Add yourself (your Apple ID email)
    
-4. Select build (0.2.0)
+4. Select build (1.0.0)
 5. Fill in **Test Information:**
    - **What to Test:** "Initial pilot testing of loyalty card functionality"
    - **Beta App Description:** (copy from App Information description)
@@ -385,8 +385,8 @@ Requires customers to have LoyaltyCards app installed.
    - **Privacy Policy URL:** https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
 
 6. **Export Compliance:**
-   - Does your app use encryption? **NO** (unless using HTTPS for network calls)
-   - Or select "No, my app does not use encryption"
+   - Does your app use encryption? **YES**
+   - Select standardized encryption exemption (ECDSA/SHA-256, no proprietary cryptography)
 
 7. Click **Submit for Review**
 
@@ -478,7 +478,7 @@ ian.hamlet@dotConnected.com
 - Customer: `com.ianhamlet.loyaltycards.customerApp`
 - Supplier: `com.ianhamlet.loyaltycards.supplierApp`
 
-**Version:** v0.3.1+5 (Current: Build 25 Development)
+**Version:** v1.0.0+6 (Current release candidate)
 
 **GitHub:** https://github.com/ian-hamlet/LoyaltyCards
 

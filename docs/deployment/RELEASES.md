@@ -17,6 +17,20 @@ Examples:
 
 ## Current Releases
 
+### v1.0.0+6 - Build 6 (🟡 Release Candidate)
+- **Date:** June 11, 2026
+- **Platform:** App Store Submission Candidate
+- **Branch:** release branch pending final cut
+- **Version:** 1.0.0+6
+- **Status:** 🟡 READY FOR FINAL VALIDATION
+- **Focus:** First public App Store release preparation
+- **Major Changes:**
+  - Version alignment across customer, supplier, and shared package metadata
+  - App Store materials execution tracker added and activated
+  - Submission documentation updated for v1.0.0 release train
+- **Testing:** Final TestFlight validation in progress
+- **Next Steps:** Upload build 6, complete App Store Connect metadata, submit for review
+
 ### v0.3.1+3 - Build 25 (🔄 In Development)
 - **Date:** June 8, 2026
 - **Platform:** Development (feature/minorupdate branch)

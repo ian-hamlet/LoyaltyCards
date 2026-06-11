@@ -1,10 +1,10 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v0.2.0**  
+**LoyaltyCards v1.0.0+6**  
 **Customer App:** LoyaltyCards - Digital Stamps  
 **Supplier App:** LoyaltyCards Business  
 **Target Release:** TBD  
-**Last Updated:** April 18, 2026
+**Last Updated:** June 11, 2026
 
 ---
 
@@ -13,9 +13,9 @@
 ### ✅ Code & Build Preparation
 
 - [ ] **Final build number incremented** in pubspec.yaml (both apps)
-- [ ] **Version number confirmed** (v0.2.0 for initial release)
+- [ ] **Version number confirmed** (v1.0.0 for public release)
 - [ ] **All code merged to `main` branch**
-- [ ] **Release branch created** `releases/v0.2.0-build{N}`
+- [ ] **Release branch created** `releases/v1.0.0-build{N}`
 - [ ] **Archive builds completed**
   ```bash
   cd source/customer_app

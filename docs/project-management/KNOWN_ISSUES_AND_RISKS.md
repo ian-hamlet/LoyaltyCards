@@ -4,8 +4,8 @@
 
 **Document Version:** 3.0  
 **Created:** 2026-04-08  
-**Last Updated:** 2026-04-21  
-**Current Build:** v0.3.0+1
+**Last Updated:** 2026-06-11  
+**Current Build:** v1.0.0+6
 
 ---
 

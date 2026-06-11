@@ -2,7 +2,7 @@
 
 **Created:** April 22, 2026  
 **Target Version:** v1.0.0 (First Public Release)  
-**Current Version:** v0.3.0+1 (TestFlight)  
+**Current Version:** v1.0.0+6 (Release Candidate)  
 **Estimated Timeline:** 3-4 weeks  
 **Status:** 📋 Planning Phase
 
@@ -150,8 +150,8 @@ git push origin gh-pages
 
 ### 1.1 Update Version Numbers ⏳
 
-**Current Version:** v0.3.0+1  
-**Target Version:** v1.0.0+100
+**Current Version:** v1.0.0+6  
+**Target Version:** v1.0.0+6
 
 **Files to Update:**
 ```
@@ -163,12 +163,12 @@ source/shared/lib/version.dart
 **Changes:**
 ```yaml
 # In both pubspec.yaml files:
-version: 1.0.0+100
+version: 1.0.0+6
 ```
 
 **Checklist:**
-- [ ] Update customer_app/pubspec.yaml to `1.0.0+100`
-- [ ] Update supplier_app/pubspec.yaml to `1.0.0+100`
+- [ ] Update customer_app/pubspec.yaml to `1.0.0+6`
+- [ ] Update supplier_app/pubspec.yaml to `1.0.0+6`
 - [ ] Update source/shared/lib/version.dart release notes
 - [ ] Document v1.0.0 changes in CHANGELOG.md
 - [ ] Test builds locally after version change
@@ -412,7 +412,7 @@ open -a Simulator
 
 **Pre-Build Checks:**
 - [ ] All code merged to `main` branch
-- [ ] Version updated to 1.0.0+100 in both apps
+- [ ] Version updated to 1.0.0+6 in both apps
 - [ ] No debug print statements in code
 - [ ] All tests passing (264 tests)
 - [ ] Release branch created
@@ -1157,7 +1157,7 @@ Date | Customer DLs | Supplier DLs | Reviews (⭐) | Crashes | Support Emails
 Use this as your daily checklist:
 
 ### Pre-Launch
-- [ ] Version updated to 1.0.0+100
+- [ ] Version updated to 1.0.0+6
 - [ ] Legal URLs live (privacy, terms, support)
 - [ ] Screenshots captured (30 total)
 - [ ] Marketing copy finalized

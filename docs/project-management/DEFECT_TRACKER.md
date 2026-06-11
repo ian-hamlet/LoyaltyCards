@@ -1,9 +1,9 @@
-Update# Defect Tracker - v0.2.0 Post-Testing
+Update# Defect Tracker - v1.0.0+6 Pre-Release
 
-**Current Version:** v0.2.0 (Build 21) - Security Enhancements  
-**TestFlight Version:** v0.2.0 (Build 15)  
-**Target Version:** v0.2.0 (Build 21+)  
-**Last Updated:** April 17, 2026
+**Current Version:** v1.0.0+6 (Build 6) - Release Candidate  
+**TestFlight Version:** v1.0.0+6 (Build 6)  
+**Target Version:** v1.0.0 (Public Release)  
+**Last Updated:** June 11, 2026
 
 ---
 

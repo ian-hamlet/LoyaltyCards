@@ -716,55 +716,60 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   }
 
   Widget _buildStampGrid(Color brandColor) {
-    final rows = (_card!.stampsRequired / 5).ceil();
-    final stampsPerRow = (_card!.stampsRequired / rows).ceil();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const baseStampSize = 36.0;
+        const minStampSize = 24.0;
+        const stampSpacing = 8.0;
+        const targetMinStampsPerRow = 8;
 
-    return Column(
-      children: List.generate(rows, (rowIndex) {
-        final startIndex = rowIndex * stampsPerRow;
-        final endIndex = (startIndex + stampsPerRow < _card!.stampsRequired) 
-            ? startIndex + stampsPerRow 
-            : _card!.stampsRequired;
-        
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(endIndex - startIndex, (colIndex) {
-              final stampIndex = startIndex + colIndex;
-              final isCollected = stampIndex < _card!.stampsCollected;
-              
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isCollected ? Colors.white : Colors.transparent,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 2,
-                    ),
-                  ),
-                  child: isCollected
-                      ? Icon(Icons.check, color: brandColor, size: 20)
-                      : Center(
-                          child: Text(
-                            '${stampIndex + 1}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+        final targetPerRow = _card!.stampsRequired < targetMinStampsPerRow
+            ? _card!.stampsRequired
+            : targetMinStampsPerRow;
+
+        final sizeToFitTarget = targetPerRow > 0
+            ? (constraints.maxWidth - ((targetPerRow - 1) * stampSpacing)) /
+                targetPerRow
+            : baseStampSize;
+
+        final stampSize = sizeToFitTarget.clamp(minStampSize, baseStampSize);
+        final stampFontSize = (stampSize * 0.36).clamp(10.0, 13.0);
+
+        return Wrap(
+          alignment: WrapAlignment.center,
+          runAlignment: WrapAlignment.center,
+          spacing: stampSpacing,
+          runSpacing: stampSpacing,
+          children: List.generate(_card!.stampsRequired, (index) {
+            final isCollected = index < _card!.stampsCollected;
+
+            return Container(
+              width: stampSize,
+              height: stampSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isCollected ? Colors.white : Colors.transparent,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 2,
                 ),
-              );
-            }),
-          ),
+              ),
+              child: isCollected
+                  ? Icon(Icons.check, color: brandColor, size: stampSize * 0.56)
+                  : Center(
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: stampFontSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 

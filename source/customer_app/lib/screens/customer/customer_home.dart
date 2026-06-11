@@ -525,19 +525,40 @@ class _LoyaltyCardWidget extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               
-              // Progress
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(card.stampsRequired, (index) {
-                  final isCollected = index < card.stampsCollected;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: _StampCircle(
-                      isCollected: isCollected,
-                      color: brandColor,
-                    ),
+              // Progress (responsive: fit at least 8 stamps per row when possible)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  const baseStampSize = 28.0;
+                  const minStampSize = 20.0;
+                  const stampSpacing = 8.0;
+                  const targetMinStampsPerRow = 8;
+
+                  final targetPerRow = card.stampsRequired < targetMinStampsPerRow
+                      ? card.stampsRequired
+                      : targetMinStampsPerRow;
+
+                  final sizeToFitTarget = targetPerRow > 0
+                      ? (constraints.maxWidth - ((targetPerRow - 1) * stampSpacing)) /
+                          targetPerRow
+                      : baseStampSize;
+
+                  final stampSize = sizeToFitTarget.clamp(minStampSize, baseStampSize);
+
+                  return Wrap(
+                    alignment: WrapAlignment.center,
+                    runAlignment: WrapAlignment.center,
+                    spacing: stampSpacing,
+                    runSpacing: stampSpacing,
+                    children: List.generate(card.stampsRequired, (index) {
+                      final isCollected = index < card.stampsCollected;
+                      return _StampCircle(
+                        isCollected: isCollected,
+                        color: brandColor,
+                        size: stampSize,
+                      );
+                    }),
                   );
-                }),
+                },
               ),
               const SizedBox(height: 12),
               
@@ -563,17 +584,19 @@ class _LoyaltyCardWidget extends StatelessWidget {
 class _StampCircle extends StatelessWidget {
   final bool isCollected;
   final Color color;
+  final double size;
 
   const _StampCircle({
     required this.isCollected,
     required this.color,
+    this.size = 28,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 28,
-      height: 28,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isCollected ? color : Colors.transparent,
@@ -583,9 +606,9 @@ class _StampCircle extends StatelessWidget {
         ),
       ),
       child: isCollected
-          ? const Icon(
+          ? Icon(
               Icons.check,
-              size: 16,
+              size: size * 0.57,
               color: Colors.white,
             )
           : null,

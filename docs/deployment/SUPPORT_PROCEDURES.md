@@ -31,6 +31,67 @@ This document provides comprehensive support procedures for handling user inquir
 
 ---
 
+## Launch Communications Pack (v1.0.0+6)
+
+### Release Announcement Draft
+
+Use this for website/newsletter/social launch message.
+
+LoyaltyCards is now available on the App Store.
+
+LoyaltyCards helps customers collect digital loyalty stamps with privacy-first, offline-capable workflows. LoyaltyCards Business helps merchants issue and redeem stamps without subscriptions or customer-data collection.
+
+Highlights:
+- No account required
+- Works offline
+- QR-based customer/supplier flow
+- Privacy-first architecture
+
+Support:
+- Contact: ian.hamlet@dotConnected.com
+
+### Support Macro - General Launch Inquiry
+
+Hello [Name],
+
+Thanks for your message and for trying LoyaltyCards.
+
+If you are a customer, install LoyaltyCards.
+If you are a business, install LoyaltyCards Business.
+
+The apps are designed to work together for card issuance, stamp collection, and redemption.
+
+If you share your device model, iOS version, and the step where you are blocked, we can help quickly.
+
+Best regards,
+LoyaltyCards Support
+
+### Support Macro - Reviewer/User Confusion About Two Apps
+
+Hello [Name],
+
+LoyaltyCards uses two apps by design:
+- LoyaltyCards: customer wallet app
+- LoyaltyCards Business: supplier app
+
+Both are required to complete the full loyalty workflow.
+
+Best regards,
+LoyaltyCards Support
+
+### Support Macro - Offline and Privacy Clarification
+
+Hello [Name],
+
+LoyaltyCards does not require account login for core functionality and is designed for offline operation.
+
+The system is privacy-first and does not rely on collecting customer personal data for normal usage.
+
+Best regards,
+LoyaltyCards Support
+
+---
+
 ## Issue Classification
 
 ### Priority Levels

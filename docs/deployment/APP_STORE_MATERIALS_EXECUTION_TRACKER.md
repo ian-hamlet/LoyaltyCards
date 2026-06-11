@@ -3,7 +3,33 @@
 **Project:** LoyaltyCards iOS Public Launch (Customer + Supplier)
 **Created:** 2026-06-11
 **Target Submission Window:** 2026-06-25 to 2026-06-27
-**Status:** In Progress
+**Status:** In Review (Waiting for Review)
+
+## Execution Snapshot (2026-06-11)
+
+### Completed Today
+- [x] App versions aligned to `1.0.0+6` across customer/supplier/shared version files
+- [x] Release documentation aligned to `v1.0.0+6`
+- [x] Changes merged to `develop`, fast-forwarded to `main`, and synced to `releases/v1.0.0(6)`
+- [x] Build `1.0.0+6` uploaded to App Store Connect (both apps)
+- [x] App statuses confirmed as "Waiting for Review"
+- [x] Fast Item 1 complete: App Review quick-response templates drafted
+- [x] Fast Item 2 complete: Release announcement and support macros drafted
+- [x] Fast Item 3 complete: Tracker moved to in-review phase with monitoring cadence
+
+### In Progress
+- [x] Build processing verification in App Store Connect
+- [x] Metadata final entry into both App Store listings
+- [x] Screenshot capture and upload for all required sizes
+- [x] Final compliance/review packet validation in App Store Connect
+- [ ] Review queue monitoring and rapid-response readiness
+
+### Next Actions (Immediate)
+1. Confirm both uploaded builds are in "Processed" state and selectable.
+2. Attach builds to the Customer and Supplier app versions.
+3. Enter finalized metadata from the packet files generated in this phase.
+4. Capture and upload screenshot sets (6.7, 6.5, 5.5 for both apps).
+5. Complete export compliance and App Privacy answers, then run go/no-go.
 
 ---
 
@@ -19,6 +45,19 @@ This tracker is execution-focused and complements:
 - APP_STORE_CONFIGURATION.md
 - TESTFLIGHT_DEPLOYMENT_GUIDE.md
 - V1_0_0_APP_STORE_LAUNCH_PLAN.md
+
+## Generated Material Files (Ready to Use)
+
+- [x] Metadata packet ready: `APP_STORE_METADATA_PACKET_v1_0_0_6.md`
+- [x] App Review packet ready: `APP_REVIEW_PACKET_v1_0_0_6.md`
+- [x] Screenshot capture plan ready: `SCREENSHOT_CAPTURE_PLAN_v1_0_0_6.md`
+
+## In-Review Monitoring Cadence
+
+- Check App Store Connect review messages twice daily (morning and evening).
+- Respond to any App Review question within 24 hours.
+- Keep reviewer contact email and phone actively monitored during review window.
+- If metadata clarification is requested, respond with copy from `APP_REVIEW_PACKET_v1_0_0_6.md`.
 
 ---
 
@@ -42,17 +81,23 @@ Assign one person to each role before execution starts.
 **Goal:** Finalize all decisions that affect submission material.
 
 ### Tasks
-- [ ] Confirm release version/build number policy for both apps
-- [ ] Confirm Supplier app price tier
+- [x] Confirm release version/build number policy for both apps
+- [x] Confirm Supplier app price tier (Free)
 - [ ] Confirm release strategy (manual release after approval vs automatic)
-- [ ] Confirm final app names/subtitles for both listings
-- [ ] Confirm final support email/contact path
+- [x] Confirm final app names/subtitles for both listings
+- [x] Confirm final support email/contact path
 
 ### Deliverables
 - [ ] Decision log completed in this file (append below)
 
 ### Exit Criteria (Gate)
-- [ ] No unresolved product/pricing/release-policy decisions
+- [x] No unresolved product/pricing/release-policy decisions
+
+**Pricing Confirmed:** Both apps Free
+- Customer app (LoyaltyCards): Free (Tier 0)
+- Supplier app (LoyaltyCards Business): Free (Tier 0)
+
+**Next:** Set pricing in App Store Connect → Pricing and Availability for both apps.
 
 ---
 
@@ -193,9 +238,9 @@ Each app requires:
 ## Submission Day Runbook
 **Target:** 2026-06-25 to 2026-06-27
 
-- [ ] Submit Customer app
-- [ ] Submit Supplier app
-- [ ] Confirm both entered review queue
+- [x] Submit Customer app
+- [x] Submit Supplier app
+- [x] Confirm both entered review queue
 - [ ] Monitor App Review messages 2x daily
 - [ ] Respond to reviewer questions within 24 hours
 
@@ -234,6 +279,9 @@ Use once per day until submission.
 | Date | Decision | Owner | Notes |
 |------|----------|-------|-------|
 | 2026-06-11 | Tracker created | Release Owner | Initial execution baseline |
+| 2026-06-11 | Review status entered | Release Owner | Both apps now show Waiting for Review |
+| 2026-06-11 | Fast items 1/2/3 completed | Release Owner | Reviewer templates, launch comms, support macros, and monitoring cadence documented |
+| 2026-06-11 | Pricing decision finalized | Release Owner | Both Customer and Supplier apps set to Free (Tier 0) |
 
 ---
 

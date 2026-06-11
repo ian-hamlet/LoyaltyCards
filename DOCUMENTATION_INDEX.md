@@ -152,7 +152,7 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ---
 
-## 🚀 Deployment & Operations (7 files)
+## 🚀 Deployment & Operations (8 files)
 
 **Location:** `docs/deployment/`
 
@@ -173,6 +173,9 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ### [docs/deployment/SUPPORT_PROCEDURES.md](docs/deployment/SUPPORT_PROCEDURES.md)
 **Purpose:** Customer support procedures including common issues, troubleshooting steps, and escalation paths.
+
+### [docs/deployment/SIMULATOR_DB_SEEDING_GUIDE.md](docs/deployment/SIMULATOR_DB_SEEDING_GUIDE.md)
+**Purpose:** Repeatable process for seeding screenshot-ready customer data into iOS simulators (including iPhone 14 Pro and iPhone SE) using the in-repo script.
 
 ### [docs/deployment/APP_ICON_PROMPTS.txt](docs/deployment/APP_ICON_PROMPTS.txt)
 **Purpose:** Prompts and specifications used for generating app icons with AI image generation tools.

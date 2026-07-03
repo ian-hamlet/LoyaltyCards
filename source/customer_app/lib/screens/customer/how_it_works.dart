@@ -55,7 +55,7 @@ class HowItWorks extends StatelessWidget {
                 icon: Icons.shopping_bag,
                 color: BrandColors.secondary,
                 title: 'Make a Purchase',
-                description: 'When you make a purchase, show your QR code to the cashier. They\'ll scan it to add a stamp to your card.',
+                description: 'When you make a purchase, show your QR code to the cashier. They\'ll scan it to add a stamp to your card. Each card displays an icon indicating the business\'s mode: Express mode uses fast, trust-based stamping with an hour-based rate limit, while Secure mode uses cryptographic validation for stronger fraud protection.',
               ),
               
               const SizedBox(height: AppSpacing.lg),
@@ -79,7 +79,7 @@ class HowItWorks extends StatelessWidget {
                 icon: Icons.redeem,
                 color: BrandColors.success,
                 title: 'Redeem Rewards',
-                description: 'When your card is full, show it to the cashier to claim your reward. The card automatically resets so you can start earning your next one.',
+                description: 'When your card is full, redemption differs by mode. In Express mode, show your completed card to the cashier for manual verification and confirmation. In Secure mode, there\'s a secure handshake where the business scans your card\'s redemption QR to validate and confirm the reward cryptographically. After redemption, your card resets for the next cycle.',
               ),
               
               const SizedBox(height: AppSpacing.xl),

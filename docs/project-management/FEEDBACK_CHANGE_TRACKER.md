@@ -340,3 +340,38 @@ Verification
 - [ ] Supplier app behavior verified (Step 5 includes detailed mode-specific redemption explanation)
 - [ ] Supplier app behavior verified (step order is now 1-5 and copy reads correctly)
 - [ ] Related docs reviewed by maintainer
+
+### FB-009: Add mode guidance to customer app How It Works
+- Date Logged: 2026-07-03
+- Source: Direct user feedback
+- App Scope: Customer
+- Priority: P2
+- Linked Defect: N/A
+- Summary: Customer app How It Works should explain Express vs Secure mode differences and their redemption process variations.
+- Reproduction/Context: Customer app How It Works lacked explanation of mode differences and how they affect the stamp/redemption experience.
+- Proposed Code Change:
+  - Step 2 (Make a Purchase) now explains mode choice, includes mention of mode-indicator icons on cards, and describes Express vs Secure scanning approaches.
+  - Step 4 (Redeem Rewards) now explains mode-specific redemption processes: Express (manual verification), Secure (cryptographic handshake).
+- Implementation Notes:
+  - Implemented in `source/customer_app/lib/screens/customer/how_it_works.dart`.
+  - Step 2 description expanded to introduce Express vs Secure modes and note mode-indicator icons on cards.
+  - Step 4 description expanded with Express (customer shows card for manual verification) vs Secure (business scans redemption QR for cryptographic validation) flow.
+- Status: Ready for Test
+
+Documentation Impact Checklist
+- [ ] User docs reviewed
+  - [ ] docs/user/USER_GUIDE.md align customer experience guidance with new mode explanations in How It Works
+  - [ ] docs/user/ABOUT_LOYALTYCARDS.md update if feature messaging mirrors changed How It Works wording
+  - [ ] docs/user/SUPPLIER_SETUP_GUIDE.md update only if customer redemption steps are referenced
+- [ ] Maintenance docs reviewed
+  - [ ] docs/deployment/TESTFLIGHT_TESTING_GUIDE.md add/adjust validation checks for revised How It Works steps
+  - [ ] docs/project-management/DEFECT_TRACKER.md update only if tracked as formal defect
+  - [ ] docs/project-management/NEXT_ACTIONS.md update only if customer UX documentation refresh is prioritized
+  - [ ] docs/deployment/SUPPORT_PROCEDURES.md update only if support scripts reference old How It Works wording
+- [ ] Version metadata checked where relevant
+  - [ ] Release/build references aligned with source/shared/pubspec.yaml after implementation
+
+Verification
+- [ ] Customer app behavior verified (Step 2 includes mode guidance and icon explanation)
+- [ ] Customer app behavior verified (Step 4 includes mode-specific redemption process explanation)
+- [ ] Related docs reviewed by maintainer

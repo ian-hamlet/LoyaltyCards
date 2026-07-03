@@ -393,33 +393,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     }
   }
 
-  // REQ-022: Save token QR to photo gallery
-  Future<void> _saveToPhotos() async {
-    if (_business == null || _stampToken == null) return;
-    
-    try {
-      final result = await BackupStorageService.saveSimpleTokenToPhotos(
-        qrData: _stampToken!.toQRString(),
-        businessName: _business!.name,
-        stampCount: _stampCount,
-        expiryDate: _expiryDate,
-      );
-      
-      if (mounted) {
-        if (result.isSuccess) {
-          AppFeedback.success(context, 'Saved to Photos');
-        } else {
-          AppFeedback.error(context, result.getUserMessage());
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Error saving token to photos: $e', tag: 'StampToken');
-      if (mounted) {
-        AppFeedback.error(context, 'Error: $e');
-      }
-    }
-  }
-
   // REQ-022: Print token QR
   Future<void> _printToken() async {
     if (_business == null || _stampToken == null) return;
@@ -796,35 +769,36 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 const SizedBox(height: 20),
                 
                 // Action Buttons (REQ-022)
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _saveToPhotos,
-                        icon: const Icon(Icons.photo_library),
-                        label: const Text('Save'),
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _printToken,
-                        icon: const Icon(Icons.print),
-                        label: const Text('Print'),
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _shareToken,
-                    icon: const Icon(Icons.share),
-                    label: const Text('Share QR Code'),
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _printToken,
+                          icon: const Icon(Icons.print),
+                          label: const Text('Print'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            alignment: Alignment.center,
+                            minimumSize: const Size.fromHeight(48),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _shareToken,
+                          icon: const Icon(Icons.share),
+                          label: const Text('Share QR'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            alignment: Alignment.center,
+                            minimumSize: const Size.fromHeight(48),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 
@@ -834,27 +808,38 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: BrandColors.infoContainer,
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                    border: Border.all(color: Theme.of(context).colorScheme.tertiary),
                   ),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.lightbulb_outline, color: BrandColors.info, size: 20),
-                          SizedBox(width: 8),
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: Theme.of(context).colorScheme.onTertiaryContainer,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
                           Text(
                             'How to Use',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onTertiaryContainer,
+                            ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         '1. Print and laminate this QR code\n2. Keep in till or cash drawer\n3. Show to customer after purchase\n4. Customer scans to receive stamps',
-                        style: TextStyle(fontSize: 12, color: BrandColors.textPrimary),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onTertiaryContainer,
+                        ),
                       ),
                     ],
                   ),

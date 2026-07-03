@@ -314,6 +314,8 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Recovery Backup'),
@@ -335,15 +337,15 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                   Container(
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      border: Border.all(color: Colors.red, width: 2),
+                      color: colorScheme.errorContainer,
+                      border: Border.all(color: colorScheme.error, width: 2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.security, color: Colors.red, size: 32),
+                            Icon(Icons.security, color: colorScheme.onErrorContainer, size: 32),
                             SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -354,13 +356,16 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.red,
+                                      color: colorScheme.onErrorContainer,
                                     ),
                                   ),
                                   SizedBox(height: 4),
                                   Text(
                                     'Anyone with this QR can impersonate your business',
-                                    style: TextStyle(fontSize: 14),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: colorScheme.onErrorContainer,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -469,8 +474,8 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: _completedMethods.length >= 2
-                          ? Colors.green.shade50
-                          : Colors.grey.shade100,
+                          ? colorScheme.tertiaryContainer
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -480,8 +485,8 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                               ? Icons.check_circle
                               : Icons.info_outline,
                           color: _completedMethods.length >= 2
-                              ? Colors.green
-                              : Colors.grey,
+                              ? colorScheme.onTertiaryContainer
+                              : colorScheme.onSurfaceVariant,
                         ),
                         SizedBox(width: 12),
                         Expanded(
@@ -490,14 +495,19 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                             children: [
                               Text(
                                 '${_completedMethods.length}/3 methods completed',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: _completedMethods.length >= 2
+                                      ? colorScheme.onTertiaryContainer
+                                      : colorScheme.onSurface,
+                                ),
                               ),
                               if (_completedMethods.length < 2)
                                 Text(
                                   'We recommend at least 2 methods',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                             ],

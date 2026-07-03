@@ -156,6 +156,8 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Clone to Another Device'),
@@ -189,15 +191,15 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade50,
+                          color: colorScheme.secondaryContainer,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.green.shade200),
+                          border: Border.all(color: colorScheme.secondary),
                         ),
                         child: Column(
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.device_hub, color: Colors.green.shade700, size: 28),
+                                Icon(Icons.device_hub, color: colorScheme.onSecondaryContainer, size: 28),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
@@ -205,16 +207,19 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.green.shade900,
+                                      color: colorScheme.onSecondaryContainer,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 12),
-                            const Text(
+                            Text(
                               'Scan this QR code on your second device to set up the same business configuration.',
-                              style: TextStyle(fontSize: 14),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colorScheme.onSecondaryContainer,
+                              ),
                             ),
                           ],
                         ),

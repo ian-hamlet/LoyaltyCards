@@ -394,68 +394,89 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                   ],
                                 ),
                               ),
-                              
-                              // Save/Print buttons for simple mode
-                              if (_business!.mode == OperationMode.simple) ...[
-                                const SizedBox(height: 20),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: _printToken,
-                                        icon: const Icon(Icons.print),
-                                        label: const Text('Print'),
-                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: _shareToken,
-                                        icon: const Icon(Icons.share),
-                                        label: const Text('Share QR Code'),
-                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                
-                                const SizedBox(height: 20),
-                                
-                                // Instructions
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: BrandColors.infoContainer,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: BrandColors.info.withOpacity(0.3)),
-                                  ),
-                                  child: const Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(Icons.lightbulb_outline, color: BrandColors.info, size: 20),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'How to Use',
-                                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        '1. Show this QR code to customers directly from your device\n2. Or print and display it in your business\n3. Customer scans to add your loyalty card\n4. This QR code is reusable for all new customers',
-                                        style: TextStyle(fontSize: 12, color: BrandColors.textPrimary),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                         ),
                       ),
+
+                      // Save/Print buttons for simple mode
+                      if (_business!.mode == OperationMode.simple) ...[
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _printToken,
+                                  icon: const Icon(Icons.print),
+                                  label: const Text('Print'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    alignment: Alignment.center,
+                                    minimumSize: const Size.fromHeight(48),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _shareToken,
+                                  icon: const Icon(Icons.share),
+                                  label: const Text('Share QR'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    alignment: Alignment.center,
+                                    minimumSize: const Size.fromHeight(48),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Instructions
+                        SizedBox(
+                          width: double.infinity,
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: colorScheme.tertiaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: colorScheme.tertiary),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.lightbulb_outline, color: colorScheme.onTertiaryContainer, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'How to Use',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onTertiaryContainer,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '1. Show this QR code to customers directly from your device\n2. Or print and display it in your business\n3. Customer scans to add your loyalty card\n4. This QR code is reusable for all new customers',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.onTertiaryContainer,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

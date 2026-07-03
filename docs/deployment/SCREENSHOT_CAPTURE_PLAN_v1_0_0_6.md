@@ -4,6 +4,15 @@ This is the execution plan for required App Store screenshot sets.
 
 ---
 
+## Device Assignment
+
+| Screen Size | Device | Type | Resolution |
+|-------------|--------|------|-----------|
+| 6.7" | iPhone 16 Pro Max | Physical | 1290 x 2796 |
+| 6.5" | iPhone 14 Pro | Simulator | 1242 x 2688 |
+| 5.5" | iPhone SE (3rd gen) | Simulator | 1242 x 2208 |
+| 12.9" (optional) | iPad Pro | Physical | 2048 x 2732 |
+
 ## Required Output
 
 Per app, provide 15 screenshots total:

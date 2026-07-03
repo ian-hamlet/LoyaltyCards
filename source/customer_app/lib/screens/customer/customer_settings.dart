@@ -531,7 +531,7 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                         '• Pull down on home screen to refresh cards\n'
                         '• Tap a card to view details and stamps\n'
                         '• Delete single cards by long-pressing them\n'
-                        '• Rate limit: 1 second between stamps\n'
+                        '• Rate limit: Each business sets how quickly stamps can be scanned, which varies by business\n'
                         '• All data is stored securely on your device',
                         style: TextStyle(
                           fontSize: 14,

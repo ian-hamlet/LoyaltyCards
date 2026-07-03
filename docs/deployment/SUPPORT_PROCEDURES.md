@@ -1,8 +1,8 @@
 # Support Procedures
 
-**LoyaltyCards v1.0.0+6**  
+**LoyaltyCards v1.0.1+7**  
 **Purpose:** User support guidelines and issue resolution  
-**Last Updated:** June 11, 2026
+**Last Updated:** July 3, 2026
 
 ---
 
@@ -31,7 +31,7 @@ This document provides comprehensive support procedures for handling user inquir
 
 ---
 
-## Launch Communications Pack (v1.0.0+6)
+## Launch Communications Pack (v1.0.1+7)
 
 ### Release Announcement Draft
 

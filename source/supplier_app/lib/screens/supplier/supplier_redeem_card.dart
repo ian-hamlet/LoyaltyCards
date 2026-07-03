@@ -115,7 +115,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Simple Mode - Manual Redemption',
+                              'Express Mode - Manual Redemption',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: BrandColors.textPrimary,

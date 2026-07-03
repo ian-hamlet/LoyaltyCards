@@ -126,7 +126,7 @@ class SupplierConfigBackup {
     final dataToSign = '${backup.type}|${backup.version}|${backup.businessId}|'
         '${backup.businessName}|${backup.privateKey}|${backup.publicKey}|'
         '${backup.stampsRequired}|${backup.brandColor}|'
-        '${backup.operationMode.name}|${backup.timestamp.toIso8601String()}|'
+      '${backup.operationMode.toStorageString()}|${backup.timestamp.toIso8601String()}|'
         '${backup.expiresAt?.toIso8601String() ?? 'null'}';
 
     // Derive HMAC key from business private key using HKDF
@@ -180,7 +180,7 @@ class SupplierConfigBackup {
       'publicKey': publicKey,
       'stampsRequired': stampsRequired,
       'brandColor': brandColor,
-      'operationMode': operationMode.name,
+      'operationMode': operationMode.toStorageString(),
       'timestamp': timestamp.toIso8601String(),
       'expiresAt': expiresAt?.toIso8601String(),
       'signature': signature,
@@ -203,9 +203,8 @@ class SupplierConfigBackup {
       publicKey: json['publicKey'] as String,
       stampsRequired: json['stampsRequired'] as int,
       brandColor: json['brandColor'] as String,
-      operationMode: OperationMode.values.firstWhere(
-        (mode) => mode.name == json['operationMode'],
-        orElse: () => OperationMode.secure,
+      operationMode: OperationModeExtension.fromString(
+        (json['operationMode'] as String?) ?? 'secure',
       ),
       timestamp: DateTime.parse(json['timestamp'] as String),
       expiresAt: json['expiresAt'] != null

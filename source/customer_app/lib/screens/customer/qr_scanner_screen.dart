@@ -315,8 +315,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // This ensures stamps go to the correct business card, regardless of which card screen
     // the user is currently viewing. Stamps are intelligently routed based on the QR code's
     // businessId, not the opened card.
-    if (token.cardId == 'simple-mode-stamp' && token.businessId.isNotEmpty) {
-      AppLogger.qr('Simple Mode Stamp Detected');
+    if ((token.cardId == 'express-mode-stamp' || token.cardId == 'simple-mode-stamp') && token.businessId.isNotEmpty) {
+      AppLogger.qr('Express Mode Stamp Detected');
       AppLogger.business('Looking up card by businessId: ${token.businessId}');
       final allCards = await repository.getAllCards();
       try {

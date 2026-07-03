@@ -9,7 +9,7 @@ class AppConstants {
   // Application Info
   static const String appName = 'LoyaltyCards';
   static const String customerAppName = 'LoyaltyCards';
-  static const String supplierAppName = 'Configure Your Customer Loyalty Cards';
+  static const String supplierAppName = 'Configure Your Customer Loyalty Scheme';
   
   // Version
   static const String version = '0.1.0';

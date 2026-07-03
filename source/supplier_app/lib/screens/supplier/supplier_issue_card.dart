@@ -92,6 +92,9 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Issue New Card'),
@@ -170,7 +173,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                   : (_initialStampCount == 1 ? '1 stamp pre-applied' : '$_initialStampCount stamps pre-applied'),
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey[600],
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                             children: [
@@ -181,14 +184,14 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[50],
+                                      color: colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'Pre-apply stamps to new cards. Useful for welcome bonuses or promotions. Set to 0 for standard card issuance.',
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: BrandColors.textSecondary,
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -340,13 +343,13 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: _business!.mode == OperationMode.simple
-                                      ? Colors.blue[50]
-                                      : Colors.orange[50],
+                                      ? colorScheme.primaryContainer
+                                      : colorScheme.secondaryContainer,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: _business!.mode == OperationMode.simple
-                                        ? Colors.blue[300]!
-                                        : Colors.orange[300]!,
+                                        ? colorScheme.primary
+                                        : colorScheme.secondary,
                                   ),
                                 ),
                                 child: Row(
@@ -358,8 +361,8 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                           : Icons.timer_outlined,
                                       size: 16,
                                       color: _business!.mode == OperationMode.simple
-                                          ? Colors.blue[700]
-                                          : Colors.orange[700],
+                                          ? colorScheme.onPrimaryContainer
+                                          : colorScheme.onSecondaryContainer,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
@@ -371,10 +374,10 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: _business!.mode == OperationMode.simple
-                                            ? Colors.blue[900]
+                                            ? colorScheme.onPrimaryContainer
                                             : (_remainingTime != null && _remainingTime!.inMinutes < 2
-                                                ? Colors.red[900]
-                                                : Colors.orange[900]),
+                                                ? colorScheme.error
+                                                : colorScheme.onSecondaryContainer),
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -382,7 +385,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                       const SizedBox(width: 8),
                                       IconButton(
                                         onPressed: _loadBusinessAndGenerateToken,
-                                        icon: Icon(Icons.refresh, size: 18, color: Colors.orange[700]),
+                                        icon: Icon(Icons.refresh, size: 18, color: colorScheme.onSecondaryContainer),
                                         padding: EdgeInsets.zero,
                                         constraints: const BoxConstraints(),
                                         tooltip: 'Refresh QR Code',

@@ -289,7 +289,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                       Text(
                         _card!.isComplete 
                             ? 'Ready to redeem your reward'
-                            : 'Simple Mode - Scan to collect stamps',
+                            : 'Express Mode - Scan to collect stamps',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

@@ -6,6 +6,8 @@ class HowItWorks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('How It Works'),
@@ -43,7 +45,7 @@ class HowItWorks extends StatelessWidget {
                 icon: Icons.storefront,
                 color: BrandColors.primary,
                 title: 'Set Up Your Business',
-                description: 'Configure your loyalty card program with your business name, brand colors, and rewards requirements. Choose how many stamps customers need to earn a reward.',
+                description: 'Configure your loyalty card program with your business name, brand colors, and rewards requirements. Choose how many stamps customers need to earn a reward. Select Express mode for the fastest reusable QR workflow, or Secure mode for per-scan cryptographic validation.',
               ),
               
               const SizedBox(height: AppSpacing.lg),
@@ -52,10 +54,10 @@ class HowItWorks extends StatelessWidget {
               _buildStep(
                 context,
                 stepNumber: 2,
-                icon: Icons.qr_code_2,
-                color: BrandColors.secondary,
-                title: 'Add Cards to Customer Wallets',
-                description: 'Customers can scan your business QR code to add your card to their wallet. Or, you can issue cards directly to customers—optionally pre-loaded with stamps for first-time bonuses or bulk purchases.',
+                icon: Icons.backup,
+                color: BrandColors.warning,
+                title: 'Back Up Your Business Configuration',
+                description: 'Create and store a secure backup so you can restore your business configuration and cryptographic keys if you change or lose your device. Without a valid backup, previously issued customer cards may no longer validate correctly.',
               ),
               
               const SizedBox(height: AppSpacing.lg),
@@ -64,10 +66,10 @@ class HowItWorks extends StatelessWidget {
               _buildStep(
                 context,
                 stepNumber: 3,
-                icon: Icons.add_circle,
-                color: BrandColors.accent,
-                title: 'Issue Stamps',
-                description: 'Scan a customer\'s QR code to add stamps to their card. You can add multiple stamps in a single operation—perfect for larger purchases or special promotions. It\'s fast and requires no personal data.',
+                icon: Icons.qr_code_2,
+                color: BrandColors.secondary,
+                title: 'Add Cards to Customer Wallets',
+                description: 'Customers can scan your business QR code to add your card to their wallet. Or, you can issue cards directly to customers—optionally pre-loaded with stamps for first-time bonuses or bulk purchases.',
               ),
               
               const SizedBox(height: AppSpacing.lg),
@@ -76,10 +78,22 @@ class HowItWorks extends StatelessWidget {
               _buildStep(
                 context,
                 stepNumber: 4,
+                icon: Icons.add_circle,
+                color: BrandColors.accent,
+                title: 'Issue Stamps',
+                description: 'Scan a customer\'s QR code to add stamps to their card. You can add multiple stamps in a single operation—perfect for larger purchases or special promotions. It\'s fast and requires no personal data. In Secure mode, each stamp is cryptographically signed to prevent fraud and ensure authenticity. In Express mode, QR codes for cards and stamps can be prepared ahead of time and saved or printed, ideal for high-volume environments like coffee shops or restaurants.',
+              ),
+              
+              const SizedBox(height: AppSpacing.lg),
+              
+              // Step 5
+              _buildStep(
+                context,
+                stepNumber: 5,
                 icon: Icons.card_giftcard,
                 color: BrandColors.success,
                 title: 'Redeem Rewards',
-                description: 'When a card is full, scan the customer\'s QR code to verify and redeem their reward. The card automatically resets for the next one.',
+                description: 'When a card is full, complete redemption based on your selected mode. In Express mode, the customer shows a completed card and you manually confirm redemption. In Secure mode, scan the customer\'s redemption QR to validate and complete redemption with cryptographic verification. After redemption, the customer can continue collecting on the next card cycle.',
               ),
               
               const SizedBox(height: AppSpacing.xl),
@@ -106,6 +120,7 @@ class HowItWorks extends StatelessWidget {
                           'Secure & Private',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onPrimaryContainer,
                           ),
                         ),
                       ],
@@ -114,7 +129,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'Your cryptographic keys are generated and stored securely on this device. Each stamp is digitally signed to prevent fraud. No customer personal data is required or collected.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ],
@@ -145,6 +160,7 @@ class HowItWorks extends StatelessWidget {
                           'Dynamic QR Codes',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onSecondaryContainer,
                           ),
                         ),
                       ],
@@ -153,7 +169,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'For security, QR codes are time-limited and regenerate automatically. If a QR code expires during use, simply refresh it by tapping the refresh button on the screen.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ],
@@ -184,6 +200,7 @@ class HowItWorks extends StatelessWidget {
                           'Works Offline',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onTertiaryContainer,
                           ),
                         ),
                       ],
@@ -192,7 +209,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'No internet connection required. The entire system works peer-to-peer using QR codes and digital signatures.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: colorScheme.onTertiaryContainer,
                       ),
                     ),
                   ],

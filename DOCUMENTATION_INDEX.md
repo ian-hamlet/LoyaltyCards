@@ -1,7 +1,7 @@
 # LoyaltyCards Documentation Index
 
-**Last Updated:** June 11, 2026  
-**Project Version:** v1.0.0+6 (Release Candidate)  
+**Last Updated:** July 3, 2026  
+**Project Version:** v1.0.1+7 (Release Candidate)  
 **Purpose:** Comprehensive index of all project documentation  
 **Documentation Structure:** Reorganized into logical categories for easy navigation
 
@@ -84,6 +84,9 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ### [docs/project-management/DEFECT_WORKFLOW.md](docs/project-management/DEFECT_WORKFLOW.md)
 **Purpose:** Process for logging, prioritizing, and resolving defects during development or testing.
+
+### [docs/project-management/FEEDBACK_CHANGE_TRACKER.md](docs/project-management/FEEDBACK_CHANGE_TRACKER.md)
+**Purpose:** Single intake log for post-testing feedback items with mandatory user-doc and maintenance-doc impact checks.
 
 ### [docs/project-management/VERSION_MANAGEMENT_ANALYSIS.md](docs/project-management/VERSION_MANAGEMENT_ANALYSIS.md)
 **Purpose:** Analysis of version numbering strategy and build management approach.

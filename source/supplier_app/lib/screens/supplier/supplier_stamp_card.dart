@@ -368,7 +368,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       // It's reusable and doesn't require customer card info
       final stampToken = await _tokenGenerator.generateStampToken(
         businessId: _business!.id,
-        cardId: 'simple-mode-stamp', // Generic ID for simple mode
+        cardId: 'express-mode-stamp', // Generic ID for express mode
         stampNumber: 1, // Generic stamp number
         previousHash: '', // No hash chain in simple mode
         additionalStampCount: 0,

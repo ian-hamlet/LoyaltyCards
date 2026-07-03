@@ -2,11 +2,11 @@
 /// 
 /// Determines the security/trust model used for card operations
 /// 
-/// - Simple: Fast, trust-based stamping with time limits
+/// - Express: Fast, trust-based stamping with time limits
 /// - Secure: Full cryptographic validation (current implementation)
 
 enum OperationMode {
-  /// Simple mode: Trust-based stamping with time limits
+  /// Express mode: Trust-based stamping with time limits
   /// 
   /// Best for:
   /// - Coffee shops and low-value rewards
@@ -43,7 +43,7 @@ extension OperationModeExtension on OperationMode {
   String get displayName {
     switch (this) {
       case OperationMode.simple:
-        return 'Simple Mode';
+        return 'Express Mode';
       case OperationMode.secure:
         return 'Secure Mode';
     }
@@ -53,7 +53,7 @@ extension OperationModeExtension on OperationMode {
   String get description {
     switch (this) {
       case OperationMode.simple:
-        return 'Fast & easy - trust-based stamping';
+        return 'Fastest flow - reusable QR stamping';
       case OperationMode.secure:
         return 'Cryptographic validation - maximum security';
     }
@@ -63,7 +63,7 @@ extension OperationModeExtension on OperationMode {
   String get recommendedFor {
     switch (this) {
       case OperationMode.simple:
-        return 'Recommended for coffee shops, restaurants, and low-value rewards';
+        return 'Recommended for coffee shops, restaurants, and low-value rewards with fast checkout';
       case OperationMode.secure:
         return 'Recommended for gyms, salons, and high-value rewards';
     }
@@ -83,6 +83,7 @@ extension OperationModeExtension on OperationMode {
   static OperationMode fromString(String value) {
     switch (value.toLowerCase()) {
       case 'simple':
+      case 'express':
         return OperationMode.simple;
       case 'secure':
         return OperationMode.secure;
@@ -93,6 +94,12 @@ extension OperationModeExtension on OperationMode {
 
   /// Convert to string for storage
   String toStorageString() {
-    return name; // 'simple' or 'secure'
+    // Persist as 'express' while still accepting legacy 'simple' values.
+    switch (this) {
+      case OperationMode.simple:
+        return 'express';
+      case OperationMode.secure:
+        return 'secure';
+    }
   }
 }

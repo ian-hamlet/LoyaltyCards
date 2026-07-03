@@ -3,6 +3,8 @@
 **Version:** v0.2.0 → v0.2.1  
 **Purpose:** Fast reference for logging and fixing defects
 
+**Current Intake Tracker:** [FEEDBACK_CHANGE_TRACKER.md](FEEDBACK_CHANGE_TRACKER.md)
+
 ---
 
 ## 🚀 Quick Start
@@ -34,6 +36,17 @@
 **3. Update statistics at bottom**
 
 **4. Save and commit:** `git add DEFECT_TRACKER.md && git commit -m "test: Add TEST-XXX defect" && git push`
+
+**5. Run documentation impact check before closing defect:**
+- User docs
+  - `docs/user/USER_GUIDE.md`
+  - `docs/user/SUPPLIER_SETUP_GUIDE.md`
+  - `docs/user/ABOUT_LOYALTYCARDS.md`
+- Maintenance docs
+  - `docs/deployment/SUPPORT_PROCEDURES.md`
+  - `docs/deployment/TESTFLIGHT_TESTING_GUIDE.md`
+  - `docs/project-management/NEXT_ACTIONS.md`
+  - `docs/project-management/DEFECT_TRACKER.md`
 
 ---
 

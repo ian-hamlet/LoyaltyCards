@@ -223,7 +223,9 @@ class _SupplierHomeState extends State<SupplierHome> {
               _ActionCard(
                 icon: Icons.redeem,
                 title: AppStrings.supplierRedeemCard,
-                subtitle: 'Scan completed card for redemption',
+                subtitle: _business!.mode == OperationMode.simple
+                    ? 'Customer shows completed card for redemption'
+                    : 'Scan completed card for redemption',
                 color: BrandColors.success,
                 onTap: () {
                   Navigator.push(
@@ -267,7 +269,9 @@ class _SupplierHomeState extends State<SupplierHome> {
                       _buildInfoItem(
                         '3.',
                         'Redeem',
-                        'When card is complete, scan to validate and redeem reward',
+                        _business!.mode == OperationMode.simple
+                            ? 'Customer shows a completed card and you confirm redemption'
+                            : 'When card is complete, scan to validate and redeem reward',
                       ),
                       // Statistics explanation only shown in secure mode
                       if (_business!.mode == OperationMode.secure) ...[
@@ -441,7 +445,7 @@ class _ActionCard extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

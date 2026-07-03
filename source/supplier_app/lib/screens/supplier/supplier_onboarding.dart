@@ -262,7 +262,9 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     ),
                     const SizedBox(width: 8),
                     Tooltip(
-                      message: 'Simple: Fast, trust-based (coffee shops)\nSecure: Crypto validation (high-value)',
+                      triggerMode: TooltipTriggerMode.tap,
+                      showDuration: const Duration(seconds: 10),
+                      message: 'Express: Fastest checkout with reusable QR codes for trusted, low-value rewards.\nSecure: Per-scan cryptographic validation for higher-value rewards and stronger fraud resistance.',
                       child: Icon(
                         Icons.info_outline,
                         size: 18,
@@ -315,7 +317,9 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ),
                       const SizedBox(width: 8),
                       Tooltip(
-                        message: 'Prevents customers from scanning the same QR code multiple times in quick succession (5-60 seconds)',
+                        triggerMode: TooltipTriggerMode.tap,
+                        showDuration: const Duration(seconds: 10),
+                        message: 'Controls the minimum wait time between accepted stamp scans for a customer card. If scanned too soon, the scan is blocked and the customer must wait. Best used for Express mode reusable QR flows. Range: 5-60 seconds.',
                         child: Icon(
                           Icons.info_outline,
                           size: 18,

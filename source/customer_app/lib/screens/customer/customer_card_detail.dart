@@ -103,7 +103,8 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
     if (_stamps.isNotEmpty) {
       lastStampHash = _stamps.last.signature;
       AppLogger.qr('Including lastStampHash from stamp #${_stamps.last.stampNumber}');
-      AppLogger.qr('Hash = "${lastStampHash.substring(0, 20)}..."');
+      final hashPreview = lastStampHash.length > 20 ? '${lastStampHash.substring(0, 20)}...' : lastStampHash;
+      AppLogger.qr('Hash = "$hashPreview"');
     } else {
       AppLogger.qr('No stamps, lastStampHash will be empty');
     }
@@ -492,27 +493,15 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             ] else ...[
               // SECURE MODE: Show customer QR code
               if (!_card!.isRedeemed)
-                Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                      child: Icon(
-                        Icons.enhanced_encryption,
-                        size: 48,
-                        color: Colors.orange[700],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                      child: Text(
-                        _card!.isComplete
-                            ? 'Show this QR code to redeem your card and get your reward'
-                            : 'Show this QR code to collect stamps',
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  child: Text(
+                    _card!.isComplete
+                        ? 'Show this QR code to redeem your card and get your reward'
+                        : 'Show this QR code to collect stamps',
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
 
               // QR Code or Redeemed Message

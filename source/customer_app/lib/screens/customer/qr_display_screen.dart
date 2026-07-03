@@ -57,7 +57,12 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
           final token = await generator.generateStampRequest(card: widget.card);
           AppLogger.qr('Stamp request token generated successfully');
           AppLogger.qr('Token currentStamps = ${token.currentStamps}');
-          AppLogger.qr('Token lastStampHash = "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"');
+          final hashPreview = token.lastStampHash.isEmpty
+              ? '(empty)'
+              : (token.lastStampHash.length > 20
+                  ? '${token.lastStampHash.substring(0, 20)}...'
+                  : token.lastStampHash);
+          AppLogger.qr('Token lastStampHash = "$hashPreview"');
           setState(() {
             _qrData = token.toQRString();
             _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;

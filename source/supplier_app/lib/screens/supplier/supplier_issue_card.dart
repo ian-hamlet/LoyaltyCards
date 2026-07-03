@@ -402,32 +402,22 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                   children: [
                                     Expanded(
                                       child: OutlinedButton.icon(
-                                        onPressed: _saveToPhotos,
-                                        icon: const Icon(Icons.photo_library),
-                                        label: const Text('Save'),
-                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: OutlinedButton.icon(
                                         onPressed: _printToken,
                                         icon: const Icon(Icons.print),
                                         label: const Text('Print'),
                                         style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
                                       ),
                                     ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: _shareToken,
+                                        icon: const Icon(Icons.share),
+                                        label: const Text('Share QR Code'),
+                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                                      ),
+                                    ),
                                   ],
-                                ),
-                                const SizedBox(height: 12),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: OutlinedButton.icon(
-                                    onPressed: _shareToken,
-                                    icon: const Icon(Icons.share),
-                                    label: const Text('Share QR Code'),
-                                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                                  ),
                                 ),
                                 
                                 const SizedBox(height: 20),
@@ -470,32 +460,6 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                   ),
                 ),
     );
-  }
-
-  // Save issue card QR to photos
-  Future<void> _saveToPhotos() async {
-    if (_business == null || _token == null) return;
-    
-    try {
-      final result = await BackupStorageService.saveIssueCardToPhotos(
-        qrData: _token!.toQRString(),
-        businessName: _business!.name,
-        initialStamps: _initialStampCount,
-      );
-      
-      if (mounted) {
-        if (result.isSuccess) {
-          AppFeedback.success(context, 'Saved to Photos');
-        } else {
-          AppFeedback.error(context, result.getUserMessage());
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Error saving issue card to photos: $e', tag: 'IssueCard');
-      if (mounted) {
-        AppFeedback.error(context, 'Error: $e');
-      }
-    }
   }
 
   // Print issue card QR

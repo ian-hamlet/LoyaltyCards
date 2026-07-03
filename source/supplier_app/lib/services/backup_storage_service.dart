@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
@@ -18,11 +17,10 @@ import '../models/backup_result.dart';
 
 /// Service for managing supplier configuration backup storage
 /// 
-/// Supports four backup methods:
-/// 1. Save to Photos - Saves QR code image to device photo library
-/// 2. Print Backup - Generates PDF and opens system print dialog
-/// 3. Share via Email - Creates temp file and opens email share sheet
-/// 4. Save to Files - Opens system file picker to save QR image
+/// Supports backup distribution methods:
+/// 1. Print Backup - Generates PDF and opens system print dialog
+/// 2. Share via Email - Creates temp file and opens email share sheet
+/// 3. Save to Files - Opens system file picker to save QR image
 /// 
 /// ERROR HANDLING PATTERN (HP-1 FIX):
 /// All methods return Future<BackupResult>:
@@ -34,96 +32,7 @@ import '../models/backup_result.dart';
 /// 
 /// Cross-platform compatible (iOS & Android)
 class BackupStorageService {
-  /// 1. Save backup QR code to device photo gallery
-  /// Works on both iOS (Photos app) and Android (Gallery)
-  static Future<BackupResult> saveToPhotos(
-    SupplierConfigBackup backup,
-    Uint8List qrImageBytes,
-  ) async {
-    try {
-      AppLogger.debug('=== saveToPhotos START ===', 'BackupService');
-      final fileName = _generateFileName(backup, 'png');
-      AppLogger.debug('Generated filename: $fileName', 'BackupService');
-      AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
-
-      AppLogger.debug('Calling ImageGallerySaver.saveImage...', 'BackupService');
-      
-      // CR-1.2: Use timeout with explicit error handling
-      // Previously: timeout returned success (false positive risk)
-      // Now: timeout throws exception (fails gracefully)
-      final result = await Future.value(ImageGallerySaver.saveImage(
-        qrImageBytes,
-        quality: 100,
-        name: fileName,
-        isReturnImagePathOfIOS: true,
-      )).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          AppLogger.error(
-            'Photo save timeout - operation uncertain. User should try alternative backup method.',
-            tag: 'BackupService',
-          );
-          throw TimeoutException('Photo save timeout after 10 seconds');
-        },
-      );
-
-      AppLogger.debug('ImageGallerySaver result: $result', 'BackupService');
-      
-      // CR-1.2: Verify actual success, not just absence of exception
-      final success = result is Map && result['isSuccess'] == true;
-      
-      if (success) {
-        AppLogger.debug('Photo saved successfully to gallery', 'BackupService');
-        if (result['filePath'] != null) {
-          AppLogger.debug('File path: ${result['filePath']}', 'BackupService');
-        }
-      } else {
-        AppLogger.error(
-          'ImageGallerySaver returned isSuccess=false or unexpected format',
-          tag: 'BackupService',
-        );
-        AppLogger.debug('Full result object: $result', 'BackupService');
-      }
-      
-      AppLogger.debug('=== saveToPhotos END (success: $success) ===', 'BackupService');
-      return success 
-        ? BackupResult.success() 
-        : BackupResult.failure(BackupFailureReason.unknown, 'Failed to save to photos. Check storage permissions.');
-    } on TimeoutException catch (e) {
-      AppLogger.error(
-        'Photo save timeout: $e. User should try Email or PDF backup.',
-        tag: 'BackupService',
-      );
-      return BackupResult.failure(
-        BackupFailureReason.timeout,
-        'Operation timed out. Try an alternative backup method.',
-      );
-    } catch (e, stackTrace) {
-      AppLogger.error('Error saving backup to photos: $e', tag: 'BackupService');
-      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      
-      // Check for specific error types
-      final errorString = e.toString().toLowerCase();
-      if (errorString.contains('permission')) {
-        return BackupResult.failure(
-          BackupFailureReason.permissionDenied,
-          'Storage permission denied. Enable in Settings.',
-        );
-      } else if (errorString.contains('space') || errorString.contains('disk full')) {
-        return BackupResult.failure(
-          BackupFailureReason.diskFull,
-          'Not enough storage space. Free up space and try again.',
-        );
-      }
-      
-      return BackupResult.failure(
-        BackupFailureReason.unknown,
-        'Failed to save to photos: ${e.toString()}',
-      );
-    }
-  }
-
-  /// 2. Generate and print PDF with backup QR code
+  /// 1. Generate and print PDF with backup QR code
   /// Opens system print dialog on both iOS and Android
   static Future<BackupResult> printBackup(
     SupplierConfigBackup backup,
@@ -165,7 +74,7 @@ class BackupStorageService {
     }
   }
 
-  /// 3. Share backup via email (or other apps)
+  /// 2. Share backup via email (or other apps)
   /// Opens system share sheet with pre-filled email option
   static Future<BackupResult> shareViaEmail(
     SupplierConfigBackup backup,
@@ -231,7 +140,7 @@ The QR code image is attached to this email.
     }
   }
 
-  /// 4. Save backup to Files app / file system
+  /// 3. Save backup to Files app / file system
   /// iOS: Saves to Files app, Android: Saves to Downloads
   static Future<BackupResult> saveToFiles(
     SupplierConfigBackup backup,
@@ -636,82 +545,6 @@ The QR code image is attached to this email.
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     
     return byteData!.buffer.asUint8List();
-  }
-
-  /// Save Simple Mode stamp token QR to photo gallery
-  static Future<BackupResult> saveSimpleTokenToPhotos({
-    required String qrData,
-    required String businessName,
-    required int stampCount,
-    DateTime? expiryDate,
-  }) async {
-    try {
-      AppLogger.debug('=== saveSimpleTokenToPhotos START ===', 'BackupService');
-      
-      final qrImageBytes = await generateSimpleTokenQRImageBytes(
-        qrData: qrData,
-        businessName: businessName,
-        stampCount: stampCount,
-        expiryDate: expiryDate,
-      );
-      
-      final fileName = _generateSimpleTokenFileName(
-        businessName: businessName,
-        stampCount: stampCount,
-        date: DateTime.now(),
-        extension: 'png',
-      );
-      
-      AppLogger.debug('Generated filename: $fileName', 'BackupService');
-      AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
-
-      // CR-1.2: Use timeout with explicit error handling
-      final result = await Future.value(ImageGallerySaver.saveImage(
-        qrImageBytes,
-        quality: 100,
-        name: fileName,
-        isReturnImagePathOfIOS: true,
-      )).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          AppLogger.error(
-            'Simple token photo save timeout - operation uncertain',
-            tag: 'BackupService',
-          );
-          throw TimeoutException('Photo save timeout after 10 seconds');
-        },
-      );
-
-      final success = result is Map && result['isSuccess'] == true;
-      AppLogger.debug('=== saveSimpleTokenToPhotos END (success: $success) ===', 'BackupService');
-      return success
-        ? BackupResult.success()
-        : BackupResult.failure(BackupFailureReason.unknown, 'Failed to save to photos.');
-    } on TimeoutException catch (e) {
-      AppLogger.error(
-        'Simple token photo save timeout: $e',
-        tag: 'BackupService',
-      );
-      return BackupResult.failure(
-        BackupFailureReason.timeout,
-        'Operation timed out. Try another method.',
-      );
-    } catch (e, stackTrace) {
-      AppLogger.error('Error saving simple token to photos: $e', tag: 'BackupService');
-      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      
-      final errorString = e.toString().toLowerCase();
-      if (errorString.contains('permission')) {
-        return BackupResult.failure(
-          BackupFailureReason.permissionDenied,
-          'Storage permission denied.',
-        );
-      }
-      return BackupResult.failure(
-        BackupFailureReason.unknown,
-        'Failed to save: ${e.toString()}',
-      );
-    }
   }
 
   /// Print Simple Mode stamp token QR
@@ -1124,79 +957,6 @@ For best results:
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     
     return byteData!.buffer.asUint8List();
-  }
-
-  /// Save Simple Mode issue card QR to photo gallery
-  static Future<BackupResult> saveIssueCardToPhotos({
-    required String qrData,
-    required String businessName,
-    required int initialStamps,
-  }) async {
-    try {
-      AppLogger.debug('=== saveIssueCardToPhotos START ===', 'BackupService');
-      
-      final qrImageBytes = await generateIssueCardQRImageBytes(
-        qrData: qrData,
-        businessName: businessName,
-        initialStamps: initialStamps,
-      );
-      
-      final fileName = _generateIssueCardFileName(
-        businessName: businessName,
-        initialStamps: initialStamps,
-        date: DateTime.now(),
-        extension: 'png',
-      );
-      
-      AppLogger.debug('Generated filename: $fileName', 'BackupService');
-      AppLogger.debug('Image bytes size: ${qrImageBytes.length}', 'BackupService');
-
-      final result = await Future.value(ImageGallerySaver.saveImage(
-        qrImageBytes,
-        quality: 100,
-        name: fileName,
-        isReturnImagePathOfIOS: true,
-      )).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          AppLogger.error(
-            'Issue card photo save timeout - operation uncertain',
-            tag: 'BackupService',
-          );
-          throw TimeoutException('Photo save timeout after 10 seconds');
-        },
-      );
-
-      final success = result is Map && result['isSuccess'] == true;
-      AppLogger.debug('=== saveIssueCardToPhotos END (success: $success) ===', 'BackupService');
-      return success
-        ? BackupResult.success()
-        : BackupResult.failure(BackupFailureReason.unknown, 'Failed to save to photos.');
-    } on TimeoutException catch (e) {
-      AppLogger.error(
-        'Issue card photo save timeout: $e',
-        tag: 'BackupService',
-      );
-      return BackupResult.failure(
-        BackupFailureReason.timeout,
-        'Operation timed out. Try another method.',
-      );
-    } catch (e, stackTrace) {
-      AppLogger.error('Error saving issue card to photos: $e', tag: 'BackupService');
-      AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
-      
-      final errorString = e.toString().toLowerCase();
-      if (errorString.contains('permission')) {
-        return BackupResult.failure(
-          BackupFailureReason.permissionDenied,
-          'Storage permission denied.',
-        );
-      }
-      return BackupResult.failure(
-        BackupFailureReason.unknown,
-        'Failed to save: ${e.toString()}',
-      );
-    }
   }
 
   /// Print Simple Mode issue card QR

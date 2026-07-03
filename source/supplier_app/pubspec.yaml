@@ -46,7 +46,6 @@ dependencies:
   google_fonts: ^8.0.2
   
   # Backup Storage Options
-  image_gallery_saver: ^2.0.3  # Save QR to photo gallery - latest available
   share_plus: ^12.0.2           # Share via email/files (updated for testing)
   printing: ^5.13.4             # Print PDF functionality
   pdf: ^3.11.1                  # Generate PDF documents

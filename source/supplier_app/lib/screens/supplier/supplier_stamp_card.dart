@@ -393,33 +393,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     }
   }
 
-  // REQ-022: Save token QR to photo gallery
-  Future<void> _saveToPhotos() async {
-    if (_business == null || _stampToken == null) return;
-    
-    try {
-      final result = await BackupStorageService.saveSimpleTokenToPhotos(
-        qrData: _stampToken!.toQRString(),
-        businessName: _business!.name,
-        stampCount: _stampCount,
-        expiryDate: _expiryDate,
-      );
-      
-      if (mounted) {
-        if (result.isSuccess) {
-          AppFeedback.success(context, 'Saved to Photos');
-        } else {
-          AppFeedback.error(context, result.getUserMessage());
-        }
-      }
-    } catch (e) {
-      AppLogger.error('Error saving token to photos: $e', tag: 'StampToken');
-      if (mounted) {
-        AppFeedback.error(context, 'Error: $e');
-      }
-    }
-  }
-
   // REQ-022: Print token QR
   Future<void> _printToken() async {
     if (_business == null || _stampToken == null) return;
@@ -796,35 +769,28 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 const SizedBox(height: 20),
                 
                 // Action Buttons (REQ-022)
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _saveToPhotos,
-                        icon: const Icon(Icons.photo_library),
-                        label: const Text('Save'),
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _printToken,
-                        icon: const Icon(Icons.print),
-                        label: const Text('Print'),
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _shareToken,
-                    icon: const Icon(Icons.share),
-                    label: const Text('Share QR Code'),
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _printToken,
+                          icon: const Icon(Icons.print),
+                          label: const Text('Print'),
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _shareToken,
+                          icon: const Icon(Icons.share),
+                          label: const Text('Share QR Code'),
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 

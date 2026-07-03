@@ -114,7 +114,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'No personal information required. No email, no phone number, no account. Your loyalty cards are stored privately on your device.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -153,7 +153,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'Every stamp is digitally signed by the business to prevent fraud. Your cards are stored securely using industry-standard encryption.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -192,7 +192,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'Your QR codes are time-limited for security and regenerate automatically. If a code expires while showing it, simply tap the refresh button to generate a new one.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -231,7 +231,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'No internet connection required. Earn stamps and redeem rewards even when offline.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -300,7 +300,7 @@ class HowItWorks extends StatelessWidget {
               Text(
                 description,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

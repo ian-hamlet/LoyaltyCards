@@ -375,3 +375,38 @@ Verification
 - [ ] Customer app behavior verified (Step 2 includes mode guidance and icon explanation)
 - [ ] Customer app behavior verified (Step 4 includes mode-specific redemption process explanation)
 - [ ] Related docs reviewed by maintainer
+
+### FB-010: Fix dark-mode visibility in How It Works info box text
+- Date Logged: 2026-07-03
+- Source: Direct user feedback
+- App Scope: Both
+- Priority: P2
+- Linked Defect: N/A
+- Summary: Info box and step description body text in customer and supplier How It Works screens were hard to read in dark mode due to hardcoded light-palette colors.
+- Reproduction/Context: On dark theme, the Privacy/Security/QR Code/Offline info sections and step descriptions used hardcoded `Colors.grey[700]` and `Colors.grey[600]`, creating poor contrast.
+- Proposed Code Change:
+  - Replace all hardcoded grey body text colors in How It Works info boxes with `Theme.of(context).colorScheme.onSurfaceVariant`.
+  - Replace step description text colors in _buildStep method with `Theme.of(context).colorScheme.onSurfaceVariant`.
+- Implementation Notes:
+  - Implemented in `source/customer_app/lib/screens/customer/how_it_works.dart`: Updated Privacy, Security, QR Code, and Offline section body text from `Colors.grey[700]` to `onSurfaceVariant`. Updated step descriptions in _buildStep from `Colors.grey[600]` to `onSurfaceVariant`.
+  - Implemented in `source/supplier_app/lib/screens/supplier/how_it_works.dart`: Updated step descriptions in _buildStep from `Colors.grey[600]` to `onSurfaceVariant`.
+- Status: Ready for Test
+
+Documentation Impact Checklist
+- [ ] User docs reviewed
+  - [ ] docs/user/USER_GUIDE.md update only if dark-mode behavior is explicitly documented
+  - [ ] docs/user/SUPPLIER_SETUP_GUIDE.md update only if visual guidance screenshots/text need refresh
+  - [ ] docs/user/ABOUT_LOYALTYCARDS.md update only if UI screenshot/copy references affected styles
+- [ ] Maintenance docs reviewed
+  - [ ] docs/deployment/TESTFLIGHT_TESTING_GUIDE.md add dark-mode readability checks for How It Works info sections
+  - [ ] docs/project-management/DEFECT_TRACKER.md update only if tracked as formal defect entry
+  - [ ] docs/project-management/NEXT_ACTIONS.md update only if accessibility/UX polish priorities are adjusted
+  - [ ] docs/deployment/SUPPORT_PROCEDURES.md update only if support scripts mention these specific visuals
+- [ ] Version metadata checked where relevant
+  - [ ] Release/build references aligned with source/shared/pubspec.yaml after implementation
+
+Verification
+- [ ] Customer app behavior verified in dark mode (How It Works info box text readable)
+- [ ] Customer app behavior verified in dark mode (step descriptions readable)
+- [ ] Supplier app behavior verified in dark mode (step descriptions readable)
+- [ ] Related docs reviewed by maintainer

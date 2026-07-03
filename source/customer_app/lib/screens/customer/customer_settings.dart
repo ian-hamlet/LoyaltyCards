@@ -4,7 +4,6 @@ import 'package:shared/shared.dart' hide Card;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/card_repository.dart';
 import '../../services/stamp_repository.dart';
-import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/biometric_auth_service.dart';
 import '../../utils/error_message_mapper.dart';
@@ -23,7 +22,6 @@ class CustomerSettings extends StatefulWidget {
 class _CustomerSettingsState extends State<CustomerSettings> {
   final CardRepository _cardRepo = CardRepository(DatabaseHelper());
   final StampRepository _stampRepo = StampRepository(DatabaseHelper());
-  final TransactionRepository _transactionRepo = TransactionRepository(DatabaseHelper());
   final BiometricAuthService _biometricAuth = BiometricAuthService();
   
   /// Check if dangerous delete button should be shown
@@ -33,9 +31,6 @@ class _CustomerSettingsState extends State<CustomerSettings> {
   int _cardCount = 0;
   int _stampCount = 0;
   int _completeCardsCount = 0;
-  int _cardsAddedCount = 0;
-  int _stampsEarnedCount = 0;
-  int _redeemedCount = 0;
   bool _isLoading = true;
   bool _requireAppLock = false;
   bool _biometricAvailable = false;
@@ -135,12 +130,6 @@ class _CustomerSettingsState extends State<CustomerSettings> {
     try {
       final cards = await _cardRepo.getAllCards();
       final stamps = await _stampRepo.getAllStamps();
-      final transactions = await _transactionRepo.getAllTransactions();
-      
-      // Count transaction types
-      final pickupTransactions = transactions.where((t) => t.type == TransactionType.pickup).toList();
-      final stampTransactions = transactions.where((t) => t.type == TransactionType.stamp).toList();
-      final redemptionTransactions = transactions.where((t) => t.type == TransactionType.redemption).toList();
       
       // Count complete cards (ready to redeem)
       final completeCards = cards.where((card) => 
@@ -151,9 +140,6 @@ class _CustomerSettingsState extends State<CustomerSettings> {
         _cardCount = cards.length;
         _stampCount = stamps.length;
         _completeCardsCount = completeCards.length;
-        _cardsAddedCount = pickupTransactions.length;
-        _stampsEarnedCount = stampTransactions.length;
-        _redeemedCount = redemptionTransactions.length;
         _isLoading = false;
       });
     } catch (e) {
@@ -311,59 +297,6 @@ class _CustomerSettingsState extends State<CustomerSettings> {
 
                 const Divider(height: 32),
 
-                // Activity History Section
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Activity History',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.add_card),
-                  title: const Text('Cards Added'),
-                  subtitle: const Text('New cards you\'ve received'),
-                  trailing: Text(
-                    '$_cardsAddedCount',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF673AB7),
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.star),
-                  title: const Text('Stamps Earned'),
-                  subtitle: const Text('Times you\'ve received stamps'),
-                  trailing: Text(
-                    '$_stampsEarnedCount',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF673AB7),
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.card_giftcard),
-                  title: const Text('Rewards Redeemed'),
-                  subtitle: const Text('Completed cards you\'ve redeemed'),
-                  trailing: Text(
-                    '$_redeemedCount',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF673AB7),
-                    ),
-                  ),
-                ),
-
-                const Divider(height: 32),
-
                 // App Information Section
                 const Padding(
                   padding: EdgeInsets.all(16),
@@ -473,31 +406,6 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                   ),
                   const SizedBox(height: 32),
                 ],
-
-                const Divider(height: 32),
-                // App Version Section
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'App Information',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ListTile(
-                        leading: const Icon(Icons.info_outline),
-                        title: const Text('Version'),
-                        subtitle: Text(appVersion),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ],
-                  ),
-                ),
 
                 const Divider(height: 32),
                 // Tips Section

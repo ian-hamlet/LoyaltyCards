@@ -170,7 +170,7 @@ Verification
   - Add clear explanatory text for both settings.
 - Implementation Notes:
   - Implemented in `source/supplier_app/lib/screens/supplier/supplier_onboarding.dart`.
-  - Both Operation Mode and Customer Scan Cooldown icons now use tap-triggered tooltips with updated explanatory text.
+  - Stamps Required, Operation Mode, and Customer Scan Cooldown icons now use tap-triggered tooltips with updated explanatory text.
   - Tooltip behavior uses `TooltipTriggerMode.tap` and a 10-second display duration.
 - Status: Ready for Test
 

@@ -197,7 +197,9 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     ),
                     const SizedBox(width: 8),
                     Tooltip(
-                      message: 'How many stamps customers need to earn a reward (3-20)',
+                      triggerMode: TooltipTriggerMode.tap,
+                      showDuration: const Duration(seconds: 10),
+                      message: 'Sets how many stamps a customer must collect before earning a reward. Lower values redeem faster; higher values encourage repeat visits. Range: 3-20 stamps.',
                       child: Icon(
                         Icons.info_outline,
                         size: 18,

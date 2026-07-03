@@ -281,15 +281,13 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   child: Column(
                     children: [
                       Icon(
-                        Icons.all_inclusive,
+                        Icons.bolt,
                         size: 64,
                         color: Colors.blue[400],
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _card!.isComplete 
-                            ? 'Ready to redeem your reward'
-                            : 'Express Mode - Scan to collect stamps',
+                        'Express Mode',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -494,15 +492,27 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             ] else ...[
               // SECURE MODE: Show customer QR code
               if (!_card!.isRedeemed)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  child: Text(
-                    _card!.isComplete 
-                        ? 'Show this QR code to redeem your card and get your reward'
-                        : 'Show this QR code to collect stamps',
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: Icon(
+                        Icons.enhanced_encryption,
+                        size: 48,
+                        color: Colors.orange[700],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      child: Text(
+                        _card!.isComplete
+                            ? 'Show this QR code to redeem your card and get your reward'
+                            : 'Show this QR code to collect stamps',
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
 
               // QR Code or Redeemed Message

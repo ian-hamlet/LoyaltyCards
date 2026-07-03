@@ -461,8 +461,8 @@ class _LoyaltyCardWidget extends StatelessWidget {
                             // Mode indicator icon
                             Icon(
                               card.mode == OperationMode.simple 
-                                  ? Icons.all_inclusive 
-                                  : Icons.security_outlined,
+                                ? Icons.bolt 
+                                : Icons.enhanced_encryption,
                               size: 14,
                               color: card.mode == OperationMode.simple 
                                   ? Colors.blue[600] 

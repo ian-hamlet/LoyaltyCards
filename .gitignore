@@ -69,3 +69,6 @@ appsettings.Development.json
 # Package files
 *.nupkg
 *.snupkg
+
+# App Store screenshot staging (local only, not source - upload directly to App Store Connect)
+/screenshots/

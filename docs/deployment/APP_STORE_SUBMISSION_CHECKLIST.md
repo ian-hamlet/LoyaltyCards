@@ -180,13 +180,12 @@ Run your loyalty program across multiple devices:
 • Clone to new devices (registers, iPads, staff phones)
 • All devices issue stamps for the same program
 
-BUSINESS ANALYTICS
+SIMPLE COUNTERS, BY DESIGN
 
-Track your loyalty program performance:
-• Cards issued today/this week/all time
-• Stamps given out
-• Cards redeemed
-• Simple dashboard, no complicated reports
+Track the basics without invasive tracking:
+• Lifetime totals for cards issued, stamps given, and redemptions
+• No customer profiles, no behavior tracking, nothing to mine
+• Deliberately simple - because we never collect the customer data a fuller dashboard would require in the first place
 
 PRIVACY FOCUSED
 
@@ -200,7 +199,7 @@ Other loyalty systems charge:
 • Setup fees
 • Customer data storage fees
 
-LoyaltyCards Business: One-time app purchase, zero ongoing costs.
+LoyaltyCards Business: Completely free, zero ongoing costs.
 
 *Note: Customers need the free LoyaltyCards app to collect stamps.
 
@@ -220,19 +219,25 @@ loyalty program,small business,coffee shop,rewards,stamps,qr code,point of sale,
 
 #### Customer App Screenshots — 6.9" Display, 1320 × 2868 px
 
-- [ ] Screenshot 1: Home screen with active loyalty cards
-- [ ] Screenshot 2: Card detail showing stamps collected
-- [ ] Screenshot 3: QR scanner ready to collect stamp
-- [ ] Screenshot 4: Redemption QR code displayed
-- [ ] Screenshot 5: Transaction history
+- [x] Screenshot 1: Wallet home with active loyalty cards
+- [x] Screenshot 2: Card detail showing stamps collected
+- [x] Screenshot 3: QR scanner ready to collect stamp (background blurred to remove real-world desk/keyboard content — see capture plan for method)
+- [x] Screenshot 4: Redemption confirmation dialog (Express Mode's honesty/trust-based redemption — accurate to the actual flow, not a QR-display screen)
+- [x] Screenshot 5: Card Detail scrolled to Stamp History
+
+**Note (2026-07-20):** screen 5 originally said "Transaction history," assuming a Settings-level history screen. That screen was deliberately removed from the app on 2026-07-03 (`6f1ce7a`) — the only history view that exists is the per-card Stamp History shown here. See `docs/deployment/SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md` for full detail.
 
 #### Supplier App Screenshots — 6.9" Display, 1320 × 2868 px
 
-- [ ] Screenshot 1: Business configuration screen
-- [ ] Screenshot 2: Issue card QR code
-- [ ] Screenshot 3: Stamp issuance screen
-- [ ] Screenshot 4: Business analytics dashboard
-- [ ] Screenshot 5: Multi-device backup/clone
+- [x] Screenshot 1: Business configuration/home screen
+- [x] Screenshot 2: Issue card QR code
+- [x] Screenshot 3: Stamp issuance screen
+- [x] Screenshot 4: Recovery backup screen
+- [x] Screenshot 5: Clone-to-another-device screen
+
+**Note (2026-07-20):** the original plan called for a "Business analytics dashboard" screenshot, but there is no dashboard screen — the app only shows 3 lifetime counters (Issued/Stamped/Redeemed) inline on the home screen header, and only in Secure Mode. Swapped for a second backup/clone screenshot instead, since that feature works in both modes and doesn't require a Secure Mode setup detour just for a screenshot. See `docs/deployment/SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md` for the corrected shot list.
+
+**All 10 screenshots captured, QA'd, and staged locally** in `screenshots/customer_app/` and `screenshots/supplier_app/` (2026-07-20) — not yet uploaded to App Store Connect.
 
 **iPad:** optional, only needed if the app targets iPad as a distinct experience — not currently planned, skip unless that changes.
 
@@ -327,7 +332,7 @@ Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`), still need entering 
 
 - [x] **First Name:** Ian
 - [x] **Last Name:** Hamlet
-- [ ] **Phone Number:** **[NEEDS A REAL NUMBER — not filled in, must be one you'll actually monitor during review]**
+- [x] **Phone Number:** 07968135909
 - [x] **Email Address:** ian.hamlet@dotconnected.com
 - [x] **Demo Account:** Not applicable (no backend/accounts)
 
@@ -335,15 +340,15 @@ Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`), still need entering 
 
 ### 💰 Pricing & Availability
 
-**Open decision:** an earlier internal tracker (`APP_STORE_MATERIALS_EXECUTION_TRACKER.md`, 2026-06-11) recorded a decision that both apps would be Free, contradicting an even earlier plan (`V1_0_0_APP_STORE_LAUNCH_PLAN.md`) that suggested a paid Supplier app ($2.99). Neither was ever actually set in App Store Connect. **This needs a final decision before submission** — it affects the Supplier app's marketing copy ("one-time purchase," "NO ONGOING COSTS" section) further down this document.
+**Decided 2026-07-20:** both apps are Free. (Resolves the earlier conflict between `APP_STORE_MATERIALS_EXECUTION_TRACKER.md`, which recorded Free, and `V1_0_0_APP_STORE_LAUNCH_PLAN.md`, which had suggested a paid Supplier app — neither was ever actually set in App Store Connect. Marketing copy elsewhere in this document updated to match: "one-time purchase" language removed.)
 
 #### Customer App
-- [ ] **Price:** Free (with optional In-App Purchases: NO) — low-risk default, not yet set in ASC
+- [x] **Price:** Free (no In-App Purchases) — decided, not yet set in ASC
 - [ ] **Availability:** All countries/regions
 - [ ] **Release Date:** Automatic or manual release (choose one)
 
 #### Supplier App
-- [ ] **Price:** **UNDECIDED** — Free vs. one-time paid ($0.99–$4.99 range previously discussed). Decide before entering metadata in ASC.
+- [x] **Price:** Free (no In-App Purchases) — decided, not yet set in ASC
 - [ ] **Availability:** All countries/regions
 - [ ] **Release Date:** Automatic or manual release
 
@@ -423,7 +428,7 @@ ANALYTICS:
 
 #### Contact Information for App Review
 
-- [ ] **Phone Number:** same open item as above — needs a real, monitored number, not invented here
+- [x] **Phone Number:** 07968135909
 - [x] **Email Address:** ian.hamlet@dotconnected.com (checked daily during review — commit to this before submitting)
 - [x] **Notes for Reviewers:**
 ```
@@ -472,9 +477,9 @@ Please test both apps together following the demo instructions.
 - [ ] **Smooth scrolling** on all supported devices — needs physical-device regression pass
 
 #### Business Model
-- [ ] **Business model clear** (Customer: free, Supplier: ???) — blocked on the open Supplier pricing decision above
-- [ ] **No hidden costs** after purchase
-- [ ] **No subscription** (one-time purchase only) — true if Supplier stays a one-time purchase; re-check once pricing is finalized
+- [x] **Business model clear** — both apps free, decided 2026-07-20
+- [x] **No hidden costs** — nothing to purchase
+- [x] **No subscription, no purchase at all** — fully free
 
 #### Design
 - [x] **Follows iOS design guidelines** — standard Flutter Material widgets throughout
@@ -575,7 +580,7 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟡 In Progress — legal/support infrastructure and most decided answers are ready; blocked on: Supplier pricing decision, App Review contact phone number, physical-device regression pass, screenshots, and actual App Store Connect data entry/build upload  
+**Document Status:** 🟢 Ready for submission mechanics — legal/support infrastructure, all decisions (pricing: both apps Free, contact phone, copyright), and all 10 screenshots (captured, QA'd, staged locally) are done. The app has been running in TestFlight/demos for a while, so this phase is submission prep, not first-time validation — a final sanity pass on the actual build going up is still sensible but isn't a separate blocker. What's left is mechanical: confirm actual App Store Connect state (app records, Developer Program status), create the release branch, build/upload the IPAs, enter metadata + screenshots into ASC, and submit.  
 **Maintained by:** Development Team  
 **Last Updated:** July 20, 2026
 

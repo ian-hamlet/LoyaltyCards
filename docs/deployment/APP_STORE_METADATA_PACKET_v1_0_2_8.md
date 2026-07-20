@@ -145,13 +145,12 @@ Run your loyalty program across multiple devices:
 - Clone to new devices (registers, iPads, staff phones)
 - All devices issue stamps for the same program
 
-BUSINESS ANALYTICS
+SIMPLE COUNTERS, BY DESIGN
 
-Track your loyalty program performance:
-- Cards issued today/this week/all time
-- Stamps given out
-- Cards redeemed
-- Simple dashboard, no complicated reports
+Track the basics without invasive tracking:
+- Lifetime totals for cards issued, stamps given, and redemptions
+- No customer profiles, no behavior tracking, nothing to mine
+- Deliberately simple - because we never collect the customer data a fuller dashboard would require in the first place
 
 PRIVACY FOCUSED
 
@@ -159,7 +158,7 @@ Unlike traditional loyalty systems, you don't collect customer emails, phone num
 
 NO ONGOING COSTS
 
-Other loyalty systems often charge monthly subscriptions and setup fees. LoyaltyCards Business is a one-time app purchase with zero ongoing costs.
+Other loyalty systems often charge monthly subscriptions and setup fees. LoyaltyCards Business is completely free, with zero ongoing costs.
 
 Download LoyaltyCards Business and start building customer loyalty today.
 
@@ -168,8 +167,11 @@ This app is the business side of a two-app system and is reviewed together with 
 
 ---
 
-## Open Decisions Before This Packet Is Submission-Ready
+## Decisions (resolved 2026-07-20)
 
-- [ ] **Pricing:** `APP_STORE_MATERIALS_EXECUTION_TRACKER.md` records both apps as Free (decided 2026-06-11), but earlier planning docs suggested a paid Supplier app ($2.99). Confirm final price in App Store Connect before submission — the "NO ONGOING COSTS" / "one-time app purchase" language above assumes a non-zero one-time price; if Supplier ends up Free too, adjust that paragraph.
-- [ ] **Copyright line:** Needs a real name/entity, e.g. `© 2026 Ian Hamlet`.
-- [ ] **Age Rating questionnaire:** Draft answers (all "None", expected 4+) are in `APP_STORE_SUBMISSION_CHECKLIST.md` — still accurate, just needs to be entered in App Store Connect.
+- [x] **Pricing:** both apps Free — confirmed by the developer. "NO ONGOING COSTS" copy above updated to match (was assuming a one-time paid Supplier app).
+- [x] **Copyright line:** `© 2026 Ian Hamlet`
+- [x] **App Review contact phone:** 07968135909
+- [x] **Age Rating questionnaire:** Draft answers (all "None", expected 4+) are in `APP_STORE_SUBMISSION_CHECKLIST.md` — still accurate, just needs to be entered in App Store Connect.
+
+**Still needs entering into the actual App Store Connect UI** — these are decided/drafted here, not yet live in ASC.

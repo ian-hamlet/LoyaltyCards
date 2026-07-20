@@ -2,6 +2,8 @@
 
 This guide captures the repeatable process for seeding screenshot-ready customer data into iOS simulators.
 
+**Need this on a physical device instead?** Use `scripts/seed_customer_device_db.sh` (added 2026-07-20) — same seed data, but pulls/pushes the database via `xcrun devicectl device copy` (app-data-container file access) instead of `simctl get_app_container`, since simulator tooling has no equivalent on real hardware. Usage: `./scripts/seed_customer_device_db.sh "Ians iPhone"` (device name or UDID — see `xcrun devicectl list devices`). Same one-time-setup requirement: the app must have been installed and launched at least once so its database exists. **Warning:** this overwrites whatever is currently in the app on that device; the script keeps a local timestamped backup of the pre-seed database (not written back to the device) but there's no on-device undo.
+
 ## Purpose
 
 Use this when you need realistic Wallet screenshots quickly without manually creating cards and stamps.
@@ -14,9 +16,10 @@ Use this when you need realistic Wallet screenshots quickly without manually cre
 
 ## Script Location
 
-- `scripts/seed_customer_simulator_db.sh`
+- `scripts/seed_customer_simulator_db.sh` (simulator)
+- `scripts/seed_customer_device_db.sh` (physical device)
 
-This script is intentionally kept in-repo for reuse in future screenshot cycles.
+Both scripts are intentionally kept in-repo for reuse in future screenshot cycles.
 
 ---
 

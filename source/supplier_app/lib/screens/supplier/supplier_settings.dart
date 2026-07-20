@@ -9,7 +9,7 @@ import 'clone_device_screen.dart';
 
 /// Feature flag: Show dangerous reset button during testing phase
 /// Set to false before production App Store release
-const bool _enableResetInRelease = true;
+const bool _enableResetInRelease = false;
 
 class SupplierSettings extends StatefulWidget {
   final Business business;

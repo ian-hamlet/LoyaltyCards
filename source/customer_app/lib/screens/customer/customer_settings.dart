@@ -10,7 +10,7 @@ import '../../utils/error_message_mapper.dart';
 
 /// Feature flag: Show dangerous delete button during testing phase
 /// Set to false before production App Store release
-const bool _enableDeleteInRelease = true;
+const bool _enableDeleteInRelease = false;
 
 class CustomerSettings extends StatefulWidget {
   const CustomerSettings({super.key});

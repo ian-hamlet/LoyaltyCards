@@ -327,6 +327,7 @@ Collect feedback from TestFlight users on both Simple and Secure operation modes
 3. Local analytics dashboard (~8-10 hours) - Business value within P2P constraints
 4. Performance profiling (~6-8 hours) - Ensure older device support
 5. Accessibility audit (~8-10 hours) - App Store requirement for inclusive design
+6. Replace launch screen placeholder image (~1 hour) - Both apps ship Flutter's default 1x1 transparent placeholder in `LaunchImage.imageset`, so launch currently shows a brief blank white flash instead of branded artwork. Not required for submission (confirmed 2026-07-21, doesn't block build or App Review), but a quick win using the existing app icon art (168×185pt @1x/2x/3x) once there's time.
 
 **Not Planned (Architecture Incompatible):**
 - ❌ Multi-device sync (contradicts P2P, would require backend)

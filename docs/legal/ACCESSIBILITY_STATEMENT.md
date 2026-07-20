@@ -5,7 +5,7 @@
 **Last Updated:** July 20, 2026  
 **Compliance Target:** WCAG 2.1 Level AA
 
-**Note:** A dedicated accessibility/theme audit is planned before the final pre-submission build (see "Dark Mode" section below) and this statement will be re-reviewed at that point.
+**Note:** The known dark-mode text-legibility risk has been checked and ruled out (see "Dark Mode" section below, verified 2026-07-20). Broader VoiceOver/semantic-labeling work remains open — see Roadmap.
 
 ---
 
@@ -129,11 +129,13 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 #### Dark Mode
 
 **12. Dark Mode Support**
-- ⚠️ **PARTIAL / UNREVIEWED:** The app follows the device's system light/dark appearance (Flutter theme + dark theme are wired up), but this was never built as an explicit, user-facing feature — it's been evolving as a byproduct of incremental contrast fixes rather than a designed capability
+- ⚠️ **PARTIAL:** The app follows the device's system light/dark appearance (`main.dart` in both apps wires up real, distinct `theme:`/`darkTheme:` `ColorScheme.fromSeed` objects, defaulting to `ThemeMode.system`), but this was never built as an explicit, user-facing feature
 - ⚠️ No in-app toggle to choose Light/Dark/System independent of the device setting
-- ⚠️ Coverage is inconsistent: several screens have had one-off contrast/readability fixes (e.g. supplier QR action screens, "how it works" info boxes) but no full-app audit has been done
+- ✅ **Verified (2026-07-20):** Checked every `BrandColors.textPrimary`/`BrandColors.textSecondary` text-color usage across both apps (21 instances total — 10 in the Supplier app, 11 in the Customer app) against their enclosing background. All of them sit on a fixed `BrandColors.*Container` background (or an explicit `Colors.white`/`Colors.grey[50]`), never on the theme's dynamic surface color — so none of them go illegible in dark mode. This is a deliberate, pre-existing pattern (one instance — the "Card Created" badge — was fixed this exact way in a past release per `CHANGELOG.md` v0.3.0+1), not an oversight.
+- ⚠️ What this means in practice: branded info/success/warning callout badges keep a fixed light background + dark text regardless of the app's theme, so in dark mode they render as a light-colored badge on an otherwise-dark screen. That's a **visual style inconsistency**, not a contrast/legibility failure — text stays fully readable either way.
+- ⚠️ This check covered the specific symbols most likely to cause invisible text (`BrandColors.textPrimary`/`textSecondary`); it was not an exhaustive pixel-by-pixel audit of every screen and widget, and no automated/manual VoiceOver or Dynamic Type dark-mode testing has been performed.
 
-**Status:** A full review of theming/dark-mode coverage is planned before the final pre-submission build, to confirm consistent contrast and readability across every screen in both apps. Until that review is complete, this statement should not claim full dark mode support.
+**Status:** The specific legibility risk this section previously flagged has been checked and ruled out. Making the branded badges themselves theme-aware (so they blend into dark mode instead of staying fixed-light) remains an optional future polish item, not a release blocker.
 
 ---
 
@@ -236,22 +238,23 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 
 ---
 
-### Barrier 4: Dark Mode Coverage Unreviewed
+### Barrier 4: Fixed-Color Badges Don't Adapt to Dark Mode
 
-**Issue:** The app follows system light/dark appearance, but coverage has not been audited screen-by-screen, and there's no in-app override independent of the device setting
+**Issue:** The app follows system light/dark appearance for its main surfaces, but branded info/success/warning callout badges keep a fixed light background regardless of theme (see "Dark Mode Support" above), and there's no in-app override independent of the device setting
 
 **Impact:**
-- Some screens may have suboptimal contrast in dark appearance until the full audit is complete
+- No legibility impact — text on these badges remains readable in both themes, verified 2026-07-20
+- Visual inconsistency: a light-colored badge can appear on an otherwise dark-themed screen
 - Users cannot force dark (or light) mode independent of their device setting
 
 **Workaround:**
 - iOS "Reduce White Point" setting (Settings → Accessibility → Display)
 - iOS "Smart Invert" provides pseudo dark mode
-- Toggle the device's own Light/Dark appearance setting, which the app follows
+- Toggle the device's own Light/Dark appearance setting, which the app follows for its main surfaces
 
-**Planned (before final pre-submission build):**
-- Full screen-by-screen contrast/readability audit in both light and dark appearance
-- Decide whether an in-app Light/Dark/System override is worth adding for v1.0, or deferred to a later release
+**Future polish (not a release blocker):**
+- Optionally give branded badge containers theme-derived variants so they blend into dark mode
+- Decide whether an in-app Light/Dark/System override is worth adding for a future release
 
 ---
 
@@ -295,8 +298,7 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 ### Before Final Pre-Submission Build
 
 **High Priority:**
-- [ ] Full screen-by-screen dark/light contrast and readability audit (both apps)
-- [ ] Decide on in-app Light/Dark/System override vs. following system setting only
+- [x] Verify the known dark-mode text-legibility risk (`BrandColors.textPrimary`/`textSecondary` on dynamic surfaces) — checked 2026-07-20, confirmed not present; see "Dark Mode Support" above
 - [ ] Add Semantics widgets to all interactive elements
 - [ ] Optimize VoiceOver announcements
 - [ ] Add semantic labels for card details
@@ -304,6 +306,8 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 - [ ] Test with real VoiceOver users
 
 **Medium Priority (may defer post-v1.0):**
+- [ ] Give fixed-color badge containers theme-derived variants for visual consistency in dark mode (polish, not a legibility issue)
+- [ ] Decide on in-app Light/Dark/System override vs. following system setting only
 - [ ] Improve Dynamic Type support (all text scalable)
 - [ ] Add haptic feedback for key actions
 - [ ] Audio confirmation for successful scans
@@ -405,9 +409,9 @@ If you encounter accessibility barriers while using LoyaltyCards, please contact
 **Level AA:** ⚠️ Partially Conformant  
 **Level AAA:** ❌ Not Conformant
 
-**Last Evaluation:** April 18, 2026  
-**Evaluation Method:** Self-assessment (manual testing)  
-**Next Evaluation:** Before the final pre-submission build for v1.0 App Store release
+**Last Evaluation:** April 18, 2026 (general self-assessment); dark-mode legibility risk specifically re-checked July 20, 2026  
+**Evaluation Method:** Self-assessment (manual testing + targeted code review)  
+**Next Evaluation:** Before the final pre-submission build, covering the remaining open roadmap items (VoiceOver/semantics work)
 
 ---
 
@@ -438,6 +442,7 @@ We are actively working toward full compliance with WCAG 2.1 Level AA and releva
 |---------|------|---------|
 | 1.0 | April 18, 2026 | Initial accessibility statement for v0.2.0 |
 | 1.1 | July 20, 2026 | Corrected Dark Mode claims to match actual (system-following, unaudited) implementation; removed unplanned NFC commitment; filled in contact email; updated version/dates |
+| 1.2 | July 20, 2026 | Verified the specific dark-mode legibility risk (BrandColors.textPrimary/textSecondary on dynamic surfaces) across both apps and confirmed it does not occur — all instances pair fixed text with fixed backgrounds. Reframed as a visual style item (fixed-color badges in dark mode), not a contrast/legibility bug. Updated roadmap accordingly. |
 
 ---
 

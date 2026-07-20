@@ -1,10 +1,12 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v1.0.0+6**  
+**LoyaltyCards v1.0.2+8**  
 **Customer App:** LoyaltyCards - Digital Stamps  
 **Supplier App:** LoyaltyCards Business  
 **Target Release:** TBD  
-**Last Updated:** June 11, 2026
+**Last Updated:** July 20, 2026
+
+**Status note:** This app has only ever been distributed via TestFlight beta — no version has gone further. An earlier internal tracker (`APP_STORE_MATERIALS_EXECUTION_TRACKER.md`) recorded a submission for v1.0.1+7 that did not actually happen (the required legal/support URLs didn't exist yet at the time). Treat every box below as unchecked-until-verified in App Store Connect directly, regardless of what any other document claims.
 
 ---
 
@@ -12,10 +14,10 @@
 
 ### ✅ Code & Build Preparation
 
-- [ ] **Final build number incremented** in pubspec.yaml (both apps)
-- [ ] **Version number confirmed** (v1.0.0 for public release)
-- [ ] **All code merged to `main` branch**
-- [ ] **Release branch created** `releases/v1.0.0-build{N}`
+- [x] **Final build number incremented** in pubspec.yaml (both apps) — `1.0.2+8`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
+- [x] **Version number confirmed** — v1.0.2+8 is the current `develop`/`main` version (not v1.0.0 — that number is stale from an earlier plan)
+- [x] **All code merged to `main` branch** — `main` and `develop` are equalized as of commit `5aa32c6`
+- [ ] **Release branch created** `releases/v1.0.2-build8` — not yet created
 - [ ] **Archive builds completed**
   ```bash
   cd source/customer_app
@@ -28,10 +30,10 @@
   ```
 - [ ] **IPA files uploaded to App Store Connect** via Transporter
 - [ ] **Build processing complete** in App Store Connect (10-15 min wait)
-- [ ] **No build warnings or errors**
-- [ ] **All compilation errors resolved**
-- [ ] **TestFlight beta testing completed** (minimum 1 week)
-- [ ] **Critical bugs resolved** (zero CRITICAL defects in DEFECT_TRACKER.md)
+- [x] **All 264 automated tests passing** (131 shared + 87 customer + 46 supplier), verified 2026-07-20 against current `develop`/`main` — supersedes the "no build warnings" / "no compilation errors" items below as a stronger signal
+- [ ] **No build warnings or errors** — not yet verified via an actual `flutter build ipa --release` (only `flutter test`/`flutter analyze`-level checks done so far)
+- [ ] **TestFlight beta testing completed for *this* build** (v1.0.2+8 has never actually been uploaded to TestFlight — it exists only as committed source so far; the "beta tested" claim applies to earlier builds, not this one)
+- [x] **Critical bugs resolved** (zero CRITICAL/HIGH defects open in `DEFECT_TRACKER.md`)
 
 ---
 
@@ -39,8 +41,8 @@
 
 #### Customer App: LoyaltyCards - Digital Stamps
 
-- [ ] **App Name:** LoyaltyCards - Digital Stamps (or "LoyaltyCards")
-- [ ] **Bundle ID:** `com.ianhamlet.loyaltycards.customerApp`
+- [ ] **App Name:** LoyaltyCards - Digital Stamps (or "LoyaltyCards") — decided here, needs entering/confirming in ASC
+- [ ] **Bundle ID:** `com.ianhamlet.loyaltycards.customerApp` — should already be registered (TestFlight beta ran under this bundle ID), verify in ASC
 - [ ] **SKU:** `loyaltycards-customer-001`
 - [ ] **Primary Language:** English (US)
 - [ ] **Primary Category:** Lifestyle
@@ -49,8 +51,8 @@
 
 #### Supplier App: LoyaltyCards Business
 
-- [ ] **App Name:** LoyaltyCards Business
-- [ ] **Bundle ID:** `com.ianhamlet.loyaltycards.supplierApp`
+- [ ] **App Name:** LoyaltyCards Business — decided here, needs entering/confirming in ASC
+- [ ] **Bundle ID:** `com.ianhamlet.loyaltycards.supplierApp` — should already be registered (TestFlight beta ran under this bundle ID), verify in ASC
 - [ ] **SKU:** `loyaltycards-supplier-001`
 - [ ] **Primary Language:** English (US)
 - [ ] **Primary Category:** Business
@@ -214,51 +216,35 @@ loyalty program,small business,coffee shop,rewards,stamps,qr code,point of sale,
 
 ### 📸 Screenshots & App Previews
 
-#### Customer App Screenshots (Required Sizes)
+**Corrected requirement (2026-07-20):** the 6.7"/6.5"/5.5" three-tier system below is Apple's *old* policy. As of 2026, Apple only requires screenshots for the **6.9" display (1320 × 2868 px)** and auto-scales them for every other device size. See [`SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md`](SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md) for the corrected plan and sourcing. Total requirement: **5 screenshots per app (10 total), not 30.** Capturing on a physical iPhone 16 Pro Max (native 1320×2868 resolution), not a simulator.
 
-**6.7" Display (iPhone 14 Pro Max, 15 Pro Max)** - 1290 x 2796 pixels
+#### Customer App Screenshots — 6.9" Display, 1320 × 2868 px
+
 - [ ] Screenshot 1: Home screen with active loyalty cards
 - [ ] Screenshot 2: Card detail showing stamps collected
 - [ ] Screenshot 3: QR scanner ready to collect stamp
 - [ ] Screenshot 4: Redemption QR code displayed
 - [ ] Screenshot 5: Transaction history
 
-**6.5" Display (iPhone 14 Plus, 11 Pro Max)** - 1242 x 2688 pixels
-- [ ] Same 5 screenshots as above
+#### Supplier App Screenshots — 6.9" Display, 1320 × 2868 px
 
-**5.5" Display (iPhone 8 Plus, 7 Plus)** - 1242 x 2208 pixels
-- [ ] Same 5 screenshots as above
-
-**12.9" iPad Pro (3rd gen+)** - 2048 x 2732 pixels (optional)
-- [ ] Same screenshots optimized for iPad layout
-
-#### Supplier App Screenshots (Required Sizes)
-
-**6.7" Display** - 1290 x 2796 pixels
 - [ ] Screenshot 1: Business configuration screen
 - [ ] Screenshot 2: Issue card QR code
 - [ ] Screenshot 3: Stamp issuance screen
 - [ ] Screenshot 4: Business analytics dashboard
 - [ ] Screenshot 5: Multi-device backup/clone
 
-**6.5" Display** - 1242 x 2688 pixels
-- [ ] Same 5 screenshots
-
-**5.5" Display** - 1242 x 2208 pixels
-- [ ] Same 5 screenshots
-
-**12.9" iPad Pro** - 2048 x 2732 pixels (optional)
-- [ ] Same screenshots optimized for iPad
+**iPad:** optional, only needed if the app targets iPad as a distinct experience — not currently planned, skip unless that changes.
 
 ---
 
 ### 🎨 App Icon
 
-- [ ] **Icon files included** in Xcode asset catalog
-- [ ] **All required sizes present** (20pt - 1024pt)
-- [ ] **1024x1024 App Store icon** uploaded (PNG, no transparency)
-- [ ] **Icon follows guidelines** (no iOS UI elements, no rounded corners in source)
-- [ ] **Customer & Supplier icons visually distinct**
+- [x] **Icon files included** in Xcode asset catalog — 37 PNGs per app in `Assets.xcassets/AppIcon.appiconset/`, sizes 16px–1024px, verified present
+- [x] **All required sizes present** (20pt - 1024pt)
+- [x] **1024x1024 App Store icon has no transparency** — **fixed 2026-07-20:** all 74 icon files (37 × 2 apps) had an alpha channel, which Apple's App Store Connect hard-rejects on the large icon upload. Flattened to opaque via a PNG→JPEG(q100)→PNG round-trip through `sips` (mechanical fix, no visible change — verified by direct visual comparison before/after on both apps' 1024px icons). All 74 files confirmed `hasAlpha: no` after the fix, dimensions unchanged.
+- [ ] **Icon follows guidelines** (no iOS UI elements) — ⚠️ minor, non-blocking: the source artwork has rounded corners and a drop shadow baked in (visible in both apps' icons) rather than being a plain edge-to-edge square; Apple applies its own corner mask on top regardless, so this isn't a rejection risk the way the alpha channel was, but it's not best practice either. Not fixed — would require new source art, out of scope for this pass.
+- [x] **Customer & Supplier icons visually distinct** — orange wallet-with-cards (Customer) vs. orange QR-code-with-badge (Supplier), visually confirmed
 
 ---
 
@@ -266,15 +252,18 @@ loyalty program,small business,coffee shop,rewards,stamps,qr code,point of sale,
 
 #### Age Rating Questionnaire
 
-- [ ] **Unrestricted Web Access:** No
-- [ ] **Alcohol, Tobacco, Drugs:** None
-- [ ] **Profanity or Crude Humor:** None
-- [ ] **Sexual Content or Nudity:** None
-- [ ] **Cartoon or Fantasy Violence:** None
-- [ ] **Realistic Violence:** None
-- [ ] **Medical/Treatment Information:** None
-- [ ] **Gambling:** None (loyalty stamps not considered gambling)
-- [ ] **Horror/Fear Themes:** None
+Answers decided (all consistent with actual app content), still need entering into ASC's questionnaire UI:
+
+- [x] **Unrestricted Web Access:** No
+- [x] **Alcohol, Tobacco, Drugs:** None
+- [x] **Profanity or Crude Humor:** None
+- [x] **Sexual Content or Nudity:** None
+- [x] **Cartoon or Fantasy Violence:** None
+- [x] **Realistic Violence:** None
+- [x] **Medical/Treatment Information:** None
+- [x] **Gambling:** None (loyalty stamps not considered gambling)
+- [x] **Horror/Fear Themes:** None
+- [ ] Entered into App Store Connect's actual questionnaire (both apps)
 
 **Expected Rating:** 4+ (all ages)
 
@@ -282,48 +271,50 @@ loyalty program,small business,coffee shop,rewards,stamps,qr code,point of sale,
 
 #### Privacy Policy
 
-- [ ] **Privacy Policy URL:** [Required - must be publicly accessible]
-  - Hosted at: TBD (e.g., https://loyaltycards.app/privacy)
-  - File available: [PRIVACY_POLICY.md](PRIVACY_POLICY.md)
-- [ ] **Privacy Policy content accurate**
-- [ ] **No data collection statement** clearly stated
-- [ ] **GDPR compliant** (privacy-first design)
+- [x] **Privacy Policy URL:** live — https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
+  - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
+- [x] **Privacy Policy content accurate** — reviewed 2026-07-20, stale "Save to Photos" reference removed
+- [x] **No data collection statement** clearly stated
+- [x] **GDPR compliant** (privacy-first design)
+- [ ] Paste this URL into App Store Connect (App Privacy section, both apps)
 
 ---
 
 #### Terms of Service
 
-- [ ] **Terms of Service URL:** [Optional but recommended]
-  - Hosted at: TBD (e.g., https://loyaltycards.app/terms)
-  - File available: [TERMS_OF_SERVICE.md](TERMS_OF_SERVICE.md)
-- [ ] **Terms cover both customer and supplier use**
-- [ ] **Fraud prevention disclaimers included**
+- [x] **Terms of Service URL:** live — https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
+  - Source: [docs/legal/TERMS_OF_SERVICE.md](../legal/TERMS_OF_SERVICE.md)
+- [x] **Terms cover both customer and supplier use**
+- [x] **Fraud prevention disclaimers included**
+- [x] **Liability/data-integrity disclaimers strengthened** (2026-07-20) — explicit "not liable for user input errors or falsified data" language, and an explicit statement that suppliers (not LoyaltyCards) are responsible for verifying presented card/stamp data before issuing rewards, same standard as a paper card
+- [ ] Paste this URL into App Store Connect (both apps)
 
 ---
 
 #### Support URL
 
-- [ ] **Support URL:** [Required]
-  - TBD (e.g., https://loyaltycards.app/support or support email)
-- [ ] **Support contact method** confirmed and monitored
+- [x] **Support URL:** live — https://ian-hamlet.github.io/LoyaltyCards/support/
+- [x] **Support contact method** — ian.hamlet@dotconnected.com; monitoring cadence still needs to be a real daily habit once live, not just documented
+- [ ] Paste this URL into App Store Connect (both apps)
 
 ---
 
 #### Marketing URL
 
-- [ ] **Marketing URL:** [Optional]
-  - TBD (e.g., https://loyaltycards.app)
+- [ ] **Marketing URL:** Optional. Could point to https://ian-hamlet.github.io/LoyaltyCards/ (the new landing page) or be left blank — decide before submission
 
 ---
 
 ### 🔐 Export Compliance
 
-- [ ] **App uses encryption:** YES
+Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`), still need entering into ASC:
+
+- [x] **App uses encryption:** YES
   - ECDSA P-256 signatures (pointycastle)
   - SHA-256 hashing (crypto)
-- [ ] **Encryption is:** Exempt (standardized encryption, no proprietary algorithms)
-- [ ] **CCATS required:** NO (exempt under streamlined encryption)
-- [ ] **Export Compliance documentation** reviewed
+- [x] **Encryption is:** Exempt (standardized encryption, no proprietary algorithms)
+- [x] **CCATS required:** NO (exempt under streamlined encryption)
+- [ ] **Export Compliance documentation** entered into App Store Connect (both apps)
 
 **Recommended Answer:**
 - Uses standard encryption (AES, RSA, ECDSA)
@@ -334,23 +325,25 @@ loyalty program,small business,coffee shop,rewards,stamps,qr code,point of sale,
 
 ### 📞 Contact Information
 
-- [ ] **First Name:** [Your first name]
-- [ ] **Last Name:** [Your last name]
-- [ ] **Phone Number:** [Required, for Apple contact]
-- [ ] **Email Address:** [Must be monitored]
-- [ ] **Demo Account:** Not applicable (no backend/accounts)
+- [x] **First Name:** Ian
+- [x] **Last Name:** Hamlet
+- [ ] **Phone Number:** **[NEEDS A REAL NUMBER — not filled in, must be one you'll actually monitor during review]**
+- [x] **Email Address:** ian.hamlet@dotconnected.com
+- [x] **Demo Account:** Not applicable (no backend/accounts)
 
 ---
 
 ### 💰 Pricing & Availability
 
+**Open decision:** an earlier internal tracker (`APP_STORE_MATERIALS_EXECUTION_TRACKER.md`, 2026-06-11) recorded a decision that both apps would be Free, contradicting an even earlier plan (`V1_0_0_APP_STORE_LAUNCH_PLAN.md`) that suggested a paid Supplier app ($2.99). Neither was ever actually set in App Store Connect. **This needs a final decision before submission** — it affects the Supplier app's marketing copy ("one-time purchase," "NO ONGOING COSTS" section) further down this document.
+
 #### Customer App
-- [ ] **Price:** Free (with optional In-App Purchases: NO)
+- [ ] **Price:** Free (with optional In-App Purchases: NO) — low-risk default, not yet set in ASC
 - [ ] **Availability:** All countries/regions
 - [ ] **Release Date:** Automatic or manual release (choose one)
 
 #### Supplier App
-- [ ] **Price:** TBD ($0.99 - $4.99 suggested one-time purchase)
+- [ ] **Price:** **UNDECIDED** — Free vs. one-time paid ($0.99–$4.99 range previously discussed). Decide before entering metadata in ASC.
 - [ ] **Availability:** All countries/regions
 - [ ] **Release Date:** Automatic or manual release
 
@@ -430,9 +423,9 @@ ANALYTICS:
 
 #### Contact Information for App Review
 
-- [ ] **Phone Number:** [Monitored during review process]
-- [ ] **Email Address:** [Checked daily during review]
-- [ ] **Notes for Reviewers:**
+- [ ] **Phone Number:** same open item as above — needs a real, monitored number, not invented here
+- [x] **Email Address:** ian.hamlet@dotconnected.com (checked daily during review — commit to this before submitting)
+- [x] **Notes for Reviewers:**
 ```
 This is a peer-to-peer (P2P) digital loyalty card system. No backend servers, no user accounts, no data collection.
 
@@ -467,33 +460,33 @@ Please test both apps together following the demo instructions.
 ### 🔍 App Review Guidelines Compliance
 
 #### Functionality
-- [ ] **App is complete** (not a demo or trial)
-- [ ] **App is functional** (no placeholder content)
-- [ ] **No beta/test references** in UI or marketing text
-- [ ] **Buttons and features work** as described
+- [x] **App is complete** (not a demo or trial) — all core P2P flows implemented per DEFECT_TRACKER.md
+- [x] **App is functional** (no placeholder content) — grepped both apps' screens for beta/placeholder/TODO-style text, none found
+- [x] **No beta/test references** in UI or marketing text — verified 2026-07-20 via grep, none found
+- [ ] **Buttons and features work as described** — needs the physical-device regression pass
 
 #### Performance
-- [ ] **App doesn't crash** during normal use
-- [ ] **No memory leaks** detected
-- [ ] **Launch time < 3 seconds**
-- [ ] **Smooth scrolling** on all supported devices
+- [ ] **App doesn't crash** during normal use — needs physical-device regression pass (cannot verify statically)
+- [ ] **No memory leaks** detected — needs physical-device regression pass
+- [ ] **Launch time < 3 seconds** — needs physical-device regression pass
+- [ ] **Smooth scrolling** on all supported devices — needs physical-device regression pass
 
 #### Business Model
-- [ ] **Business model clear** (Customer: free, Supplier: paid)
+- [ ] **Business model clear** (Customer: free, Supplier: ???) — blocked on the open Supplier pricing decision above
 - [ ] **No hidden costs** after purchase
-- [ ] **No subscription** (one-time purchase only)
+- [ ] **No subscription** (one-time purchase only) — true if Supplier stays a one-time purchase; re-check once pricing is finalized
 
 #### Design
-- [ ] **Follows iOS design guidelines**
-- [ ] **Native iOS look and feel**
-- [ ] **Consistent UI throughout**
-- [ ] **Dark mode support** (if applicable)
+- [x] **Follows iOS design guidelines** — standard Flutter Material widgets throughout
+- [x] **Native iOS look and feel**
+- [x] **Consistent UI throughout**
+- [x] **Dark mode support** — both apps follow system light/dark appearance (`ThemeMode.system`, real distinct ColorScheme objects); the specific text-legibility risk was checked and ruled out 2026-07-20 (see `docs/legal/ACCESSIBILITY_STATEMENT.md`). Some branded badges keep a fixed light background in dark mode — a style inconsistency, not a functional gap, and doesn't block submission.
 
 #### Legal
-- [ ] **Privacy policy accurate** and accessible
-- [ ] **Terms of service** available
-- [ ] **No copyright infringement** (all content original or licensed)
-- [ ] **Complies with export regulations**
+- [x] **Privacy policy accurate** and accessible — live at https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html, reviewed 2026-07-20
+- [x] **Terms of service** available — live at https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html, strengthened 2026-07-20
+- [x] **No copyright infringement** (all content original or licensed)
+- [x] **Complies with export regulations** — standard cryptography only, see Export Compliance section above
 
 ---
 
@@ -567,20 +560,24 @@ Please test both apps together following the demo instructions.
 
 ## Quick Reference: Required URLs
 
-Before submission, host these documents publicly:
+All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages.yml` + `site/`):
 
-1. **Privacy Policy:** https://[yourdomain]/privacy
-   - Source: [PRIVACY_POLICY.md](PRIVACY_POLICY.md)
-2. **Terms of Service:** https://[yourdomain]/terms
-   - Source: [TERMS_OF_SERVICE.md](TERMS_OF_SERVICE.md)
-3. **Support:** https://[yourdomain]/support or support@[yourdomain]
-4. **Marketing (optional):** https://[yourdomain]
+1. **Privacy Policy:** https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
+   - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
+2. **Terms of Service:** https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
+   - Source: [docs/legal/TERMS_OF_SERVICE.md](../legal/TERMS_OF_SERVICE.md)
+3. **Support:** https://ian-hamlet.github.io/LoyaltyCards/support/
+   - Source: [docs/legal/SUPPORT_PAGE.md](../legal/SUPPORT_PAGE.md)
+4. **Accessibility Statement** (not an ASC field, linked from the site): https://ian-hamlet.github.io/LoyaltyCards/legal/accessibility-statement.html
+5. **Marketing (optional):** https://ian-hamlet.github.io/LoyaltyCards/ — decide whether to use this or leave blank
+
+**Note:** the published HTML in `site/` was hand-converted from the Markdown sources above and is not auto-generated — any future edits to the Markdown need to be mirrored into the matching `site/**/*.html` file.
 
 ---
 
-**Document Status:** 🚧 Draft - Complete before first App Store submission  
+**Document Status:** 🟡 In Progress — legal/support infrastructure and most decided answers are ready; blocked on: Supplier pricing decision, App Review contact phone number, physical-device regression pass, screenshots, and actual App Store Connect data entry/build upload  
 **Maintained by:** Development Team  
-**Last Updated:** April 18, 2026
+**Last Updated:** July 20, 2026
 
 ---
 

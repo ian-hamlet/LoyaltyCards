@@ -5,6 +5,10 @@
 **Target Submission Window:** 2026-06-25 to 2026-06-27
 **Status:** In Review (Waiting for Review)
 
+**⚠️ Corrections (2026-07-20):** Two things below turned out to be wrong and should not be trusted as-is:
+1. **This "In Review" status does not reflect reality.** The app has only ever been distributed via TestFlight beta — no submission actually happened in June, since the legal/support URLs this tracker's own gates required didn't exist yet at the time. See `docs/deployment/APP_STORE_SUBMISSION_CHECKLIST.md` for the current, verified status.
+2. **The screenshot requirement below (6.7"/6.5"/5.5", 30 total) is outdated.** Apple's current policy only requires the 6.9" size (1320×2868), 10 total. See `docs/deployment/SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md`.
+
 ## Execution Snapshot (2026-06-11)
 
 ### Completed Today

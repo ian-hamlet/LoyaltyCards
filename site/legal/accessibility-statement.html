@@ -38,7 +38,7 @@
   <h1>Accessibility Statement</h1>
   <p class="meta">LoyaltyCards v1.0.2+8 &nbsp;·&nbsp; Last Updated: July 20, 2026 &nbsp;·&nbsp; Compliance Target: WCAG 2.1 Level AA</p>
 
-  <div class="note">A dedicated accessibility/theming audit — including dark-mode contrast coverage — is planned before the final pre-submission build, and this statement will be re-reviewed at that point.</div>
+  <div class="note">The known dark-mode text-legibility risk has been checked and ruled out (see "Dark Mode" below, verified July 20, 2026). Broader VoiceOver/semantic-labeling work remains open — see Roadmap.</div>
 
   <p>LoyaltyCards is committed to ensuring digital accessibility for all users, including those with disabilities. We strive to continually improve the user experience for everyone and apply relevant accessibility standards.</p>
 
@@ -62,7 +62,7 @@
   <h3>Dynamic Type</h3>
   <p>Body text scales with system settings; some headings use fixed sizes; QR code size doesn't scale (functional limitation); card layout may break at extreme text sizes (200%+).</p>
   <h3>Dark Mode</h3>
-  <p>The app follows the device's system light/dark appearance (this is wired up at the theme level), but it was never built as an explicit, designed feature — it's evolved from incremental contrast fixes rather than a full audit. There is no in-app toggle to choose Light/Dark/System independent of the device setting, and coverage across screens is inconsistent. <strong>A full screen-by-screen contrast/readability review is planned before the final pre-submission build</strong> — until that's complete, this statement does not claim full dark mode support.</p>
+  <p>The app follows the device's system light/dark appearance (both apps' main.dart wire up real, distinct light/dark ColorScheme objects, defaulting to system mode), but there is no in-app toggle to choose Light/Dark/System independent of the device setting. <strong>Verified July 20, 2026:</strong> every text-color usage most likely to cause an illegible-text bug in dark mode (21 instances across both apps) was checked against its background — all of them pair fixed text with a fixed background (branded info/success/warning badges), so none go illegible in dark mode. This is a deliberate, pre-existing pattern, not an oversight. The visible effect is that these badges keep a fixed light background regardless of theme, so in dark mode they can look like a light-colored card on an otherwise dark screen — a style inconsistency, not a legibility problem.</p>
 
   <h2>Not Yet Implemented</h2>
   <ul>
@@ -80,8 +80,8 @@
   <p>Cards use color and layout to convey information, which can be harder for color-blind or screen-reader users. Business name and stamp count are always present as text, mitigating this partially.</p>
   <h3>Limited Screen Reader Optimization</h3>
   <p>VoiceOver support relies on iOS defaults rather than custom optimization; navigation flow may not be fully optimal for screen reader users. All buttons have text labels and navigation is linear and predictable as a baseline mitigation.</p>
-  <h3>Dark Mode Coverage Unreviewed</h3>
-  <p>See "Dark Mode" above — some screens may have suboptimal contrast in dark appearance until the planned audit is complete, and users cannot force a mode independent of their device setting.</p>
+  <h3>Fixed-Color Badges Don't Adapt to Dark Mode</h3>
+  <p>See "Dark Mode" above — branded callout badges keep a fixed light background regardless of theme (verified as a style issue, not a legibility one), and users cannot force a light/dark mode independent of their device setting.</p>
 
   <h2>Testing Performed</h2>
   <p>Manual testing has covered basic VoiceOver navigation, Dynamic Type at system sizes, Reduce Motion, manual WCAG contrast checks, and touch target measurement. No automated accessibility testing or CI/CD checks are in place yet, and no formal audit or testing with users who have disabilities has been performed yet.</p>
@@ -89,10 +89,14 @@
   <h2>Roadmap</h2>
   <h3>Before the final pre-submission build</h3>
   <ul>
-    <li>Full screen-by-screen dark/light contrast and readability audit (both apps)</li>
-    <li>Decide on an in-app Light/Dark/System override vs. following the system setting only</li>
+    <li><s>Verify the dark-mode text-legibility risk</s> — done July 20, 2026, confirmed not present</li>
     <li>Add Semantics widgets to all interactive elements; optimize VoiceOver announcements and card-detail labels</li>
     <li>Improve QR scanner accessibility (voice guidance); test with real VoiceOver users</li>
+  </ul>
+  <h3>Medium priority (may defer post-v1.0)</h3>
+  <ul>
+    <li>Give fixed-color badge containers theme-derived variants for dark-mode visual consistency (polish, not a legibility issue)</li>
+    <li>Decide on an in-app Light/Dark/System override vs. following the system setting only</li>
   </ul>
   <h3>Under consideration (not committed, post-v1.0)</h3>
   <ul>
@@ -107,7 +111,7 @@
     <tr><td>AA</td><td>Partially Conformant</td></tr>
     <tr><td>AAA</td><td>Not Conformant</td></tr>
   </table>
-  <p>Evaluation Method: self-assessment (manual testing). Next Evaluation: before the final pre-submission build for the v1.0 App Store release.</p>
+  <p>Evaluation Method: self-assessment (manual testing + targeted code review). Last Evaluation: April 18, 2026 (general); dark-mode legibility risk specifically re-checked July 20, 2026. Next Evaluation: before the final pre-submission build, covering the remaining open roadmap items.</p>
 
   <h2>Legal Compliance Context</h2>
   <p>Relevant standards we track: Americans with Disabilities Act (ADA) Title III and Section 508 in the US; WCAG 2.1 and EN 301 549 internationally; Apple's iOS Human Interface Guidelines and App Store Review Guideline 2.5.18 (Accessibility). We are actively working toward full WCAG 2.1 Level AA compliance.</p>

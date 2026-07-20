@@ -1,4 +1,10 @@
-# Screenshot Capture Plan (v1.0.0+6)
+# Screenshot Capture Plan (v1.0.0+6) — SUPERSEDED
+
+**⚠️ This document is superseded by [`SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md`](SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md).**
+
+It was written against an outdated understanding of Apple's App Store screenshot requirements (the 6.7"/6.5"/5.5" three-tier system). As of 2026, Apple only requires screenshots for the largest display size (6.9", 1320×2868) and auto-scales them for all other device listings — see the current doc for the corrected, verified requirement and capture method. Kept here for historical reference only.
+
+---
 
 This is the execution plan for required App Store screenshot sets.
 

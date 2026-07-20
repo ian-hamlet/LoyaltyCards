@@ -1,8 +1,8 @@
 # Support Procedures
 
-**LoyaltyCards v1.0.1+7**  
+**LoyaltyCards v1.0.2+8**  
 **Purpose:** User support guidelines and issue resolution  
-**Last Updated:** July 3, 2026
+**Last Updated:** July 20, 2026
 
 ---
 
@@ -15,9 +15,9 @@ This document provides comprehensive support procedures for handling user inquir
 ## Support Channels
 
 ### Primary Support
-- **Email:** support@[yourdomain.com] (TBD)
+- **Email:** ian.hamlet@dotconnected.com
 - **Response Time:** 24-48 hours (business days)
-- **Hours:** Monday-Friday, 9am-5pm [Your Timezone]
+- **Hours:** Monday-Friday, 9am-5pm UK time (GMT/BST)
 
 ### Self-Service
 - **User Guide:** [USER_GUIDE.md](../user/USER_GUIDE.md)
@@ -31,7 +31,7 @@ This document provides comprehensive support procedures for handling user inquir
 
 ---
 
-## Launch Communications Pack (v1.0.1+7)
+## Launch Communications Pack (v1.0.2+8)
 
 ### Release Announcement Draft
 
@@ -48,7 +48,7 @@ Highlights:
 - Privacy-first architecture
 
 Support:
-- Contact: ian.hamlet@dotConnected.com
+- Contact: ian.hamlet@dotconnected.com
 
 ### Support Macro - General Launch Inquiry
 
@@ -277,12 +277,17 @@ please try force-quitting the app (swipe up in app switcher) and reopening it.
 3. If card appears, it was redeemed
 ```
 
-**Solution 3: Database Reset (Last Resort)**
+**Solution 3: Full Reset via Uninstall (Last Resort)**
 ```
 ⚠️ WARNING: This deletes all cards and stamps
 
-1. Settings → Advanced → Clear All Data
-2. Confirm deletion
+Note: The in-app "Delete All Data" button is intentionally hidden in
+App Store release builds (see DEFECT_TRACKER.md DECISION-016) to
+prevent accidental data loss. The only reset path for a production
+user is to delete and reinstall the app.
+
+1. Long-press the LoyaltyCards app icon → Remove App → Delete App
+2. Reinstall LoyaltyCards from the App Store
 3. Re-scan cards from suppliers
 ```
 
@@ -297,8 +302,9 @@ If your card isn't appearing after scanning, try these steps:
 If the card still doesn't appear, it may have been marked as redeemed. 
 Check Settings → Show Redeemed Cards.
 
-As a last resort, you can reset the app (this deletes all cards):
-Settings → Advanced → Clear All Data
+As a last resort, you can reset the app (this deletes all cards) by
+deleting and reinstalling LoyaltyCards from the App Store — there is
+no in-app "clear data" option in the released version, by design.
 
 Then re-scan your active cards from the businesses.
 ```
@@ -544,7 +550,7 @@ WITHOUT RECOVERY BACKUP:
 Your business configuration cannot be automatically restored. However, your 
 private cryptographic keys may still be in your device's Keychain.
 
-Please contact support@[domain] and we'll help you recover your business 
+Please contact ian.hamlet@dotconnected.com and we'll help you recover your business 
 configuration manually.
 
 PREVENTION: 
@@ -695,7 +701,7 @@ WITHOUT RECOVERY BACKUP QR:
 Your private keys are stored in iOS Keychain (separate from app data). 
 If you're using the same device, we may be able to recover your keys.
 
-Please contact support@[domain] immediately for assistance.
+Please contact ian.hamlet@dotconnected.com immediately for assistance.
 
 WORST CASE (device lost + no backup):
 ❌ Business configuration cannot be recovered
@@ -795,7 +801,7 @@ We're actively working on a fix for this and expect to release an update within
 [timeframe]. We appreciate your patience.
 
 [If need more info:]
-We'd like to help resolve this. Could you please contact us at support@[domain] 
+We'd like to help resolve this. Could you please contact us at ian.hamlet@dotconnected.com 
 with more details about [specific question]?
 
 [Always end with:]
@@ -876,5 +882,5 @@ A: No! Suppliers don't collect your name, email, phone, or any personal data.
 ---
 
 **Maintained by:** Development & Support Team  
-**Last Updated:** April 18, 2026  
+**Last Updated:** July 20, 2026  
 **Next Review:** Monthly or after major release

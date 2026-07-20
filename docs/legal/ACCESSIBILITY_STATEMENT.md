@@ -1,11 +1,11 @@
 # Accessibility Statement
 
-**LoyaltyCards v1.0.0+6**  
+**LoyaltyCards v1.0.2+8**  
 **Commitment:** Making digital loyalty cards accessible to everyone  
-**Last Updated:** June 11, 2026  
+**Last Updated:** July 20, 2026  
 **Compliance Target:** WCAG 2.1 Level AA
 
-**Note:** Accessibility features unchanged from v0.2.0 through v1.0.0+6 (security and package updates only).
+**Note:** A dedicated accessibility/theme audit is planned before the final pre-submission build (see "Dark Mode" section below) and this statement will be re-reviewed at that point.
 
 ---
 
@@ -17,7 +17,7 @@ LoyaltyCards is committed to ensuring digital accessibility for all users, inclu
 
 ## Current Accessibility Status
 
-**Status:** 🟡 **Partial Compliance** (v1.0.0+6)
+**Status:** 🟡 **Partial Compliance** (v1.0.2+8)
 
 LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conformant" means that some parts of the application do not fully conform to the accessibility standard.
 
@@ -129,11 +129,11 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 #### Dark Mode
 
 **12. Dark Mode Support**
-- ❌ **NOT IMPLEMENTED:** No dedicated dark mode
-- ⚠️ System dark mode not respected
-- ⚠️ Bright white backgrounds in dark environments
+- ⚠️ **PARTIAL / UNREVIEWED:** The app follows the device's system light/dark appearance (Flutter theme + dark theme are wired up), but this was never built as an explicit, user-facing feature — it's been evolving as a byproduct of incremental contrast fixes rather than a designed capability
+- ⚠️ No in-app toggle to choose Light/Dark/System independent of the device setting
+- ⚠️ Coverage is inconsistent: several screens have had one-off contrast/readability fixes (e.g. supplier QR action screens, "how it works" info boxes) but no full-app audit has been done
 
-**Planned:** Dark mode support in v0.3.0
+**Status:** A full review of theming/dark-mode coverage is planned before the final pre-submission build, to confirm consistent contrast and readability across every screen in both apps. Until that review is complete, this statement should not claim full dark mode support.
 
 ---
 
@@ -188,10 +188,10 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 - Business can scan customer's QR code (for stamps/redemption)
 - Supplier can verbally confirm card details
 
-**Future Enhancement:**
-- NFC support (planned v1.0.0) - non-visual alternative
+**Future Enhancement (not currently planned/scheduled):**
 - Voice-guided QR scanning
 - Manual code entry option
+- NFC as a non-visual alternative to QR (would require architecture changes; not on the current roadmap)
 
 ---
 
@@ -236,22 +236,22 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 
 ---
 
-### Barrier 4: No Dark Mode
+### Barrier 4: Dark Mode Coverage Unreviewed
 
-**Issue:** No dark mode support for light-sensitive users
+**Issue:** The app follows system light/dark appearance, but coverage has not been audited screen-by-screen, and there's no in-app override independent of the device setting
 
 **Impact:**
-- Bright white screens uncomfortable in dark environments
-- May cause eye strain for photosensitive users
+- Some screens may have suboptimal contrast in dark appearance until the full audit is complete
+- Users cannot force dark (or light) mode independent of their device setting
 
 **Workaround:**
 - iOS "Reduce White Point" setting (Settings → Accessibility → Display)
 - iOS "Smart Invert" provides pseudo dark mode
+- Toggle the device's own Light/Dark appearance setting, which the app follows
 
-**Future Enhancement (v0.3.0):**
-- Full dark mode theme
-- Respect iOS dark mode setting
-- Optional always-dark mode in app settings
+**Planned (before final pre-submission build):**
+- Full screen-by-screen contrast/readability audit in both light and dark appearance
+- Decide whether an in-app Light/Dark/System override is worth adding for v1.0, or deferred to a later release
 
 ---
 
@@ -292,31 +292,33 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 
 ## Roadmap to Full Compliance
 
-### v0.3.0 (Next Release)
+### Before Final Pre-Submission Build
 
 **High Priority:**
+- [ ] Full screen-by-screen dark/light contrast and readability audit (both apps)
+- [ ] Decide on in-app Light/Dark/System override vs. following system setting only
 - [ ] Add Semantics widgets to all interactive elements
-- [ ] Implement Dark Mode support
 - [ ] Optimize VoiceOver announcements
 - [ ] Add semantic labels for card details
 - [ ] Improve QR scanner accessibility (voice guidance)
 - [ ] Test with real VoiceOver users
 
-**Medium Priority:**
+**Medium Priority (may defer post-v1.0):**
 - [ ] Improve Dynamic Type support (all text scalable)
 - [ ] Add haptic feedback for key actions
 - [ ] Audio confirmation for successful scans
 - [ ] Better contrast mode support
 
-### v1.0.0 (Future)
+### Future (Post-v1.0)
 
-**Planned:**
-- [ ] NFC support (non-visual alternative to QR)
+**Under consideration, not committed:**
 - [ ] Voice-guided card selection
 - [ ] Simplified UI mode
 - [ ] Customizable high-contrast themes
-- [ ] Professional accessibility audit
+- [ ] Professional third-party accessibility audit
 - [ ] WCAG 2.1 Level AA certification
+
+**Note:** An earlier draft of this document referenced planned NFC support as a non-visual alternative to QR scanning. That is not on the current product roadmap (see `docs/project-management/NEXT_ACTIONS.md`) and has been removed from this statement to avoid committing to an unplanned feature. QR scanning (Barrier 1 below) remains a visual-only requirement for now.
 
 ---
 
@@ -380,7 +382,7 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 
 If you encounter accessibility barriers while using LoyaltyCards, please contact us:
 
-**Email:** accessibility@[yourdomain.com] (TBD)  
+**Email:** ian.hamlet@dotconnected.com  
 **Subject Line:** "Accessibility Issue - [App Name]"
 
 **Please include:**
@@ -405,7 +407,7 @@ If you encounter accessibility barriers while using LoyaltyCards, please contact
 
 **Last Evaluation:** April 18, 2026  
 **Evaluation Method:** Self-assessment (manual testing)  
-**Next Evaluation:** After v0.3.0 release (Q3 2026)
+**Next Evaluation:** Before the final pre-submission build for v1.0 App Store release
 
 ---
 
@@ -435,14 +437,15 @@ We are actively working toward full compliance with WCAG 2.1 Level AA and releva
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | April 18, 2026 | Initial accessibility statement for v0.2.0 |
+| 1.1 | July 20, 2026 | Corrected Dark Mode claims to match actual (system-following, unaudited) implementation; removed unplanned NFC commitment; filled in contact email; updated version/dates |
 
 ---
 
 ## Resources
 
 ### Internal Documentation
-- [User Guide](07-Documentation/USER_GUIDE.md) - Includes accessibility tips
-- [Support Procedures](SUPPORT_PROCEDURES.md) - Accessibility support
+- [User Guide](../user/USER_GUIDE.md) - Includes accessibility tips
+- [Support Procedures](../deployment/SUPPORT_PROCEDURES.md) - Accessibility support
 
 ### External Resources
 - [Apple Accessibility](https://www.apple.com/accessibility/)
@@ -453,8 +456,8 @@ We are actively working toward full compliance with WCAG 2.1 Level AA and releva
 ---
 
 **Maintained by:** Development Team  
-**Last Updated:** April 18, 2026  
-**Next Review:** After v1.0.0 public release (planned Q3 2026)
+**Last Updated:** July 20, 2026  
+**Next Review:** Before the final pre-submission build for v1.0 App Store release
 
 ---
 

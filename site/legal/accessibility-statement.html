@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility Statement — LoyaltyCards</title>
+<meta name="description" content="Current accessibility status and roadmap for the LoyaltyCards and LoyaltyCards Business apps.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec; --warn: #8a5a00; --warnbg: #fff6e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; --warn: #e8b654; --warnbg: #2a2410; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.15rem; margin-top: 2.2em; border-top: 1px solid var(--border); padding-top: 1em; }
+  h3 { font-size: 1rem; margin-top: 1.4em; }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+  ul { padding-left: 1.3em; }
+  li { margin: 0.3em 0; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin: 1.2em 0; }
+  .note { background: var(--warnbg); color: var(--warn); border: 1px solid var(--warn); border-radius: 10px; padding: 14px 16px; margin: 1em 0; font-size: 0.95rem; }
+  a { color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.92rem; }
+  th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>Accessibility Statement</h1>
+  <p class="meta">LoyaltyCards v1.0.2+8 &nbsp;·&nbsp; Last Updated: July 20, 2026 &nbsp;·&nbsp; Compliance Target: WCAG 2.1 Level AA</p>
+
+  <div class="note">A dedicated accessibility/theming audit — including dark-mode contrast coverage — is planned before the final pre-submission build, and this statement will be re-reviewed at that point.</div>
+
+  <p>LoyaltyCards is committed to ensuring digital accessibility for all users, including those with disabilities. We strive to continually improve the user experience for everyone and apply relevant accessibility standards.</p>
+
+  <h2>Current Status</h2>
+  <p><strong>🟡 Partial Compliance.</strong> LoyaltyCards is partially conformant with WCAG 2.1 Level AA — some parts of the application do not yet fully conform.</p>
+
+  <h2>Implemented</h2>
+  <ul>
+    <li>Standard Flutter/Material widgets, inheriting iOS system accessibility features (AssistiveTouch, Voice Control, Switch Control, Zoom, Bold Text, Reduce Motion)</li>
+    <li>Minimum 16px body text, clear heading hierarchy, high-contrast text on backgrounds</li>
+    <li>Primary text meets/exceeds WCAG AAA contrast; buttons meet at least 4.5:1</li>
+    <li>Icons paired with text labels; visible button/focus states; clear navigation structure</li>
+    <li>Minimum 44×44pt touch targets, adequate spacing, large QR tap areas</li>
+    <li>Standard iOS gestures only — no complex or gesture-only actions</li>
+    <li>Face ID / Touch ID with passcode fallback always available; VoiceOver announces authentication prompts</li>
+  </ul>
+
+  <h2>Partial Implementation</h2>
+  <h3>Screen Reader Support (VoiceOver)</h3>
+  <p>Basic support via iOS defaults — button labels, navigation changes, and text fields are read. Gaps: custom widgets may lack semantic labels, QR scanner status isn't clearly announced, stamp counts may be read as separate numbers, and business logos may be described as "image" rather than by business name.</p>
+  <h3>Dynamic Type</h3>
+  <p>Body text scales with system settings; some headings use fixed sizes; QR code size doesn't scale (functional limitation); card layout may break at extreme text sizes (200%+).</p>
+  <h3>Dark Mode</h3>
+  <p>The app follows the device's system light/dark appearance (this is wired up at the theme level), but it was never built as an explicit, designed feature — it's evolved from incremental contrast fixes rather than a full audit. There is no in-app toggle to choose Light/Dark/System independent of the device setting, and coverage across screens is inconsistent. <strong>A full screen-by-screen contrast/readability review is planned before the final pre-submission build</strong> — until that's complete, this statement does not claim full dark mode support.</p>
+
+  <h2>Not Yet Implemented</h2>
+  <ul>
+    <li>Comprehensive semantic labels/grouping on custom widgets; better QR scanner state announcements</li>
+    <li>Automatic announcements for success/error states and loading states (live regions)</li>
+    <li>Color customization, high-contrast override, or option to disable brand colors</li>
+    <li>Zoom/scaling of fixed card layouts; simplified UI mode</li>
+    <li>Audio cues or haptic alternatives to visual indicators (standard iOS haptics on button presses are supported)</li>
+  </ul>
+
+  <h2>Known Accessibility Barriers</h2>
+  <h3>QR Code Scanning (visual requirement)</h3>
+  <p>Users with visual impairments cannot scan QR codes independently, and there's currently no non-visual alternative. Workaround: request assistance from business staff, or have the business scan the customer's QR code and verbally confirm details. Voice-guided scanning and manual code entry are potential future enhancements, not currently scheduled. NFC as a non-visual alternative would require architecture changes and is not on the current product roadmap.</p>
+  <h3>Card Visual Design</h3>
+  <p>Cards use color and layout to convey information, which can be harder for color-blind or screen-reader users. Business name and stamp count are always present as text, mitigating this partially.</p>
+  <h3>Limited Screen Reader Optimization</h3>
+  <p>VoiceOver support relies on iOS defaults rather than custom optimization; navigation flow may not be fully optimal for screen reader users. All buttons have text labels and navigation is linear and predictable as a baseline mitigation.</p>
+  <h3>Dark Mode Coverage Unreviewed</h3>
+  <p>See "Dark Mode" above — some screens may have suboptimal contrast in dark appearance until the planned audit is complete, and users cannot force a mode independent of their device setting.</p>
+
+  <h2>Testing Performed</h2>
+  <p>Manual testing has covered basic VoiceOver navigation, Dynamic Type at system sizes, Reduce Motion, manual WCAG contrast checks, and touch target measurement. No automated accessibility testing or CI/CD checks are in place yet, and no formal audit or testing with users who have disabilities has been performed yet.</p>
+
+  <h2>Roadmap</h2>
+  <h3>Before the final pre-submission build</h3>
+  <ul>
+    <li>Full screen-by-screen dark/light contrast and readability audit (both apps)</li>
+    <li>Decide on an in-app Light/Dark/System override vs. following the system setting only</li>
+    <li>Add Semantics widgets to all interactive elements; optimize VoiceOver announcements and card-detail labels</li>
+    <li>Improve QR scanner accessibility (voice guidance); test with real VoiceOver users</li>
+  </ul>
+  <h3>Under consideration (not committed, post-v1.0)</h3>
+  <ul>
+    <li>Voice-guided card selection; simplified UI mode; customizable high-contrast themes</li>
+    <li>Professional third-party accessibility audit; WCAG 2.1 Level AA certification</li>
+  </ul>
+
+  <h2>Conformance Claims</h2>
+  <table>
+    <tr><th>Level</th><th>Status</th></tr>
+    <tr><td>A</td><td>Partially Conformant</td></tr>
+    <tr><td>AA</td><td>Partially Conformant</td></tr>
+    <tr><td>AAA</td><td>Not Conformant</td></tr>
+  </table>
+  <p>Evaluation Method: self-assessment (manual testing). Next Evaluation: before the final pre-submission build for the v1.0 App Store release.</p>
+
+  <h2>Legal Compliance Context</h2>
+  <p>Relevant standards we track: Americans with Disabilities Act (ADA) Title III and Section 508 in the US; WCAG 2.1 and EN 301 549 internationally; Apple's iOS Human Interface Guidelines and App Store Review Guideline 2.5.18 (Accessibility). We are actively working toward full WCAG 2.1 Level AA compliance.</p>
+
+  <h2>Report an Accessibility Issue</h2>
+  <p>Email: <a href="mailto:ian.hamlet@dotconnected.com">ian.hamlet@dotconnected.com</a> — subject line "Accessibility Issue - [App Name]". Please include which app, device/iOS version, assistive technology used (if any), and a description of the barrier. We aim to respond within 48 hours.</p>
+
+  <p class="meta" style="margin-top:3em;">LoyaltyCards is committed to making our applications accessible to all users. We welcome feedback and will continue improving accessibility with each release.</p>
+</div>
+</body>
+</html>

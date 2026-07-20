@@ -1,7 +1,7 @@
 # Terms of Service
 
 **LoyaltyCards**  
-**Last Updated:** May 23, 2026
+**Last Updated:** July 20, 2026
 
 ---
 
@@ -314,9 +314,9 @@ We reserve the right to discontinue the App at any time without notice.
 
 ## 12. Governing Law
 
-These Terms are governed by the laws of **[Your Jurisdiction]**, without regard to conflict of law principles.
+These Terms are governed by the laws of **England and Wales, United Kingdom**, without regard to conflict of law principles.
 
-Any disputes shall be resolved in the courts of **[Your Jurisdiction]**.
+Any disputes shall be resolved in the courts of **England and Wales, United Kingdom**.
 
 ---
 
@@ -324,8 +324,8 @@ Any disputes shall be resolved in the courts of **[Your Jurisdiction]**.
 
 For legal questions or concerns about these Terms of Service:
 
-**Email:** [Legal Contact Email]  
-**Website:** [Project Website]
+**Email:** ian.hamlet@dotconnected.com  
+**Website:** https://github.com/ian-hamlet/LoyaltyCards
 
 ---
 

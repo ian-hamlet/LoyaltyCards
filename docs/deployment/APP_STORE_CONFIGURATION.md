@@ -57,15 +57,11 @@ This document specifies the configuration requirements for App Store submission,
 ```xml
 <key>NSCameraUsageDescription</key>
 <string>Scan QR codes to issue and redeem loyalty cards</string>
-
-<key>NSPhotoLibraryAddUsageDescription</key>
-<string>Save backup QR codes to your photo library for safekeeping</string>
-
-<key>NSPhotoLibraryUsageDescription</key>
-<string>Access photos to save your business backup QR codes</string>
 ```
 
 **Status:** ✅ Configured and App Store compliant
+
+**Note (verified July 20, 2026):** `NSPhotoLibraryAddUsageDescription` / `NSPhotoLibraryUsageDescription` are documented here in earlier drafts but are **not** present in the actual `Info.plist`, and correctly so — the "Save to Photos" backup flow was removed from the Supplier app (see `CHANGELOG.md` v0.3.0+1 UX Streamlining entry; confirmed no `image_gallery_saver`/photo-library package references remain in `source/supplier_app/lib`). Backup now uses only Print, Email, and Save to Files, none of which require a photo-library permission. Do not re-add these keys unless the feature is reintroduced.
 
 ---
 
@@ -364,6 +360,6 @@ Before submitting to App Store:
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** May 23, 2026  
-**Status:** ✅ Complete and ready for App Store submission
+**Document Version:** 1.1  
+**Last Updated:** July 20, 2026  
+**Status:** ✅ Complete and ready for App Store submission (verified against actual Info.plist and code, v1.0.2+8)

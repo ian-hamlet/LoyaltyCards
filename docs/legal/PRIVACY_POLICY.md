@@ -1,6 +1,6 @@
 # Privacy Policy for LoyaltyCards
 
-**Last Updated:** April 13, 2026  
+**Last Updated:** July 20, 2026  
 **Effective Date:** April 13, 2026
 
 ---
@@ -102,7 +102,6 @@ The following data is created and stored **locally on your device only**:
 - Suppliers can create backup QR codes containing their business configuration
 - These backups are created by YOU and stored where YOU choose:
   - Printed on paper
-  - Saved to your Photos (local or iCloud)
   - Emailed to yourself
   - Saved to Files app
 - We never receive or store your backups
@@ -200,7 +199,7 @@ Since we collect no personal data and all data stays on your device:
 
 If you have questions about this Privacy Policy or LoyaltyCards:
 
-- **Email:** ian.hamlet@dotConnected.com
+- **Email:** ian.hamlet@dotconnected.com
 - **GitHub:** https://github.com/ian-hamlet/LoyaltyCards
 
 Please note: Since we collect no data, we cannot help you recover lost data or access data from your device.

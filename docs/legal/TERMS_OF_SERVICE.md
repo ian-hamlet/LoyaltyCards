@@ -99,6 +99,7 @@ Because data is stored locally:
 **You acknowledge:**
 - **Device Management:** It is your responsibility to manage storage on your device. Excessive accumulation of old cards, redeemed cards, and transaction logs may impact device performance. Regularly review and delete old data as needed.
 - **No centralized tracking:** Without a central server, you cannot track customer behavior across devices
+- **Token-Based Presentation:** The Customer App only stores and presents locally-recorded tokens, stamp counts, and card data — it is not a centrally verified ledger. Just as with a paper loyalty card, you are responsible for checking and verifying the legitimacy of any card, stamp count, or redemption request presented to you before honoring it or issuing any reward. See Section 8.6 for more detail.
 - Cryptographic keys (Secure Mode) are stored only on your device(s)
 - Loss of private keys means inability to manage existing customer cards
 - Multi-device setup requires careful management of key distribution
@@ -238,18 +239,24 @@ The App offers two operation modes with different security profiles:
 THE APP IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:
 - Merchantability
 - Fitness for a particular purpose
-- Accuracy or reliability
+- Accuracy, completeness, or integrity of any data entered, stored, transmitted, or displayed within the App
+- Reliability of any user, business, or device involved in an exchange
 - Uninterrupted or error-free operation
 
 ### 8.2 No Liability
 
-**LoyaltyCards is not liable for:**
-- Loss of data due to device failure, loss, theft, or corruption
+**To the fullest extent permitted by law, LoyaltyCards (and its developer) is not liable for any loss, damage, cost, or claim — direct, indirect, incidental, or consequential — arising from or related to:**
+- Loss of data due to device failure, loss, theft, corruption, or your own action or omission (including failing to create or store a backup)
+- Any input, entry, configuration, or action taken by you, another user, or any third party within the App — including mistakes, typos, misconfiguration, or misunderstanding of how the App works
+- Erroneous, inaccurate, incomplete, corrupted, or falsified app data of any kind, however it arose — whether from an honest user mistake, a technical fault, or deliberate manipulation or tampering by any party
 - Disputes between customers and businesses regarding rewards
-- Fraudulent use of the App by customers or suppliers
+- Fraudulent, dishonest, or abusive use of the App by customers, suppliers, or any other party, including forged, replayed, duplicated, or otherwise manipulated cards, stamps, or QR codes
 - Business decisions to deny redemption or change reward terms
 - Device storage limitations or performance degradation
 - Technical issues preventing stamp collection or redemption
+- Any decision made, or action taken, by you or anyone else in reliance on data shown by the App
+
+**In short: the App is a tool that records and displays whatever data users enter or exchange through it. We do not independently verify that data, and we are not responsible for the consequences of anyone relying on it, entering it incorrectly, or altering it — whether by accident or on purpose.**
 
 ### 8.3 Third-Party Relationships
 
@@ -269,6 +276,15 @@ THE APP IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, IN
 - LoyaltyCards provides tooling and safeguards, but does not guarantee prevention of all fraud or abuse scenarios
 - Participating businesses are responsible for applying operational controls (identity checks, redemption verification, staff judgment)
 - We are not liable for losses arising from edge-case fraud, abuse, social engineering, or operational misuse
+
+### 8.6 User Input and Data Integrity
+
+- All data in the App — business names, stamp counts, reward configurations, transaction and stamp history — is entered, generated, or modified locally by users (customers and suppliers). None of it is centrally verified, audited, or guaranteed by us.
+- You are solely responsible for the accuracy of anything you enter, and for independently verifying data (such as a stamp count or redemption status) before relying on or acting on it.
+- We are not responsible for losses arising from erroneous, corrupted, falsified, or maliciously altered app data, regardless of whether it originated from your own device, another user's device, or a third party.
+- This includes, without limitation: mistyped or misconfigured business settings, accidental or deliberate manipulation of stamp counts, forged or replayed QR codes, and data corrupted by device malfunction, unauthorized app modification, or a jailbroken/rooted device.
+
+**Token-Only Records (Paper Card Analogy):** The Customer App records and presents tokens and locally-stored data about a customer's cards and stamps — it does not maintain a centrally verified ledger of legitimate activity. This is functionally equivalent to a physical paper loyalty card: the business is trusted to check what's presented to them before acting on it. Accordingly, **it is the supplier business's sole responsibility to verify the integrity of any card, stamp count, or redemption request presented by a customer, and to determine the legitimacy of that request before issuing any reward** — in the same way a business would visually inspect a paper card for signs of tampering or reuse. Secure Mode's cryptographic signatures help detect tampering with the token data itself, but this does not replace the business's own judgment about whether a redemption is legitimate (for example, whether the underlying purchases genuinely took place) — that determination remains the supplier's responsibility in both Simple and Secure Mode. We do not make or verify this determination on the business's behalf.
 
 ---
 

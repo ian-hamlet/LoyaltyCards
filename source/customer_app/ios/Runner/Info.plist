@@ -70,5 +70,7 @@
 	<string>Scan QR codes to add and use loyalty cards</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Authenticate with Face ID to protect access to your loyalty cards</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

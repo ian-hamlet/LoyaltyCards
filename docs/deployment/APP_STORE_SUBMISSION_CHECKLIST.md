@@ -312,19 +312,24 @@ Answers decided (all consistent with actual app content), still need entering in
 
 ### 🔐 Export Compliance
 
-Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`), still need entering into ASC:
+Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`):
 
 - [x] **App uses encryption:** YES
   - ECDSA P-256 signatures (pointycastle)
   - SHA-256 hashing (crypto)
 - [x] **Encryption is:** Exempt (standardized encryption, no proprietary algorithms)
 - [x] **CCATS required:** NO (exempt under streamlined encryption)
-- [ ] **Export Compliance documentation** entered into App Store Connect (both apps)
 
 **Recommended Answer:**
 - Uses standard encryption (AES, RSA, ECDSA)
 - No proprietary encryption
 - Qualifies for Encryption Registration exemption
+
+**Incident (2026-07-21):** the manual App Store Connect encryption question was initially answered incorrectly ("No encryption") on the first upload of v1.0.2+8 — factually wrong given the ECDSA/SHA-256 usage above. Root cause: neither app's `Info.plist` declared `ITSAppUsesNonExemptEncryption`, so Xcode/Transporter prompted for a manual answer on every upload instead of self-declaring. **Fixed:** added `ITSAppUsesNonExemptEncryption = false` (the correct value, since the app's encryption qualifies for exemption) to both `Info.plist` files. This makes future uploads self-declare correctly with no manual prompt.
+
+- [x] **Info.plist fix applied** (both apps) — `ITSAppUsesNonExemptEncryption = false`
+- [ ] **Rebuild and re-upload both apps** so the corrected declaration actually applies to the uploaded build (the plist fix only affects builds compiled after the change — the already-uploaded build still carries the wrong answer until replaced)
+- [ ] **Export Compliance documentation** confirmed correct in App Store Connect (both apps) after re-upload
 
 ---
 

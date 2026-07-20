@@ -70,5 +70,7 @@
 	<string>Scan QR codes to issue and redeem loyalty cards</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Authenticate with Face ID to securely access your business private keys for backup and device cloning</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

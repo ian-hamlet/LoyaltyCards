@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Service — LoyaltyCards</title>
+<meta name="description" content="Terms of Service for the LoyaltyCards and LoyaltyCards Business apps.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.15rem; margin-top: 2.2em; border-top: 1px solid var(--border); padding-top: 1em; }
+  h3 { font-size: 1rem; margin-top: 1.5em; color: var(--fg); }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+  ul { padding-left: 1.3em; }
+  li { margin: 0.3em 0; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin: 1.2em 0; }
+  a { color: var(--accent); }
+  .shout { text-transform: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>Terms of Service</h1>
+  <p class="meta">LoyaltyCards &nbsp;·&nbsp; Last Updated: July 20, 2026</p>
+
+  <h2>1. Acceptance of Terms</h2>
+  <p>By downloading, installing, or using the LoyaltyCards application ("the App"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the App.</p>
+  <p>LoyaltyCards consists of two applications:</p>
+  <ul>
+    <li><strong>Customer App</strong>: digital wallet for collecting and managing loyalty card stamps</li>
+    <li><strong>Supplier App</strong>: business tool for issuing cards and managing customer rewards</li>
+  </ul>
+
+  <h2>2. Description of Service</h2>
+  <h3>2.1 Customer App</h3>
+  <p>The Customer App allows users to receive digital loyalty cards from participating businesses, collect stamps by scanning QR codes, track progress toward rewards, redeem completed cards, and view transaction history.</p>
+  <h3>2.2 Supplier App</h3>
+  <p>The Supplier App allows business owners to configure and manage their loyalty program, issue digital loyalty cards, award stamps, validate and redeem completed cards, and view basic usage statistics.</p>
+
+  <h2>3. Privacy &amp; Data Storage</h2>
+  <h3>3.1 Local-Only Data Storage</h3>
+  <p><strong>Important:</strong> LoyaltyCards operates on a local-only architecture. All data is stored exclusively on your device. No cloud storage, no account creation, no data sharing with us or any third party. Data exchange happens directly between customer and supplier devices via QR codes.</p>
+  <h3>3.2 Data You Control</h3>
+  <p><strong>Customer App:</strong> loyalty cards you've collected, stamps and redemption history, transaction logs.</p>
+  <p><strong>Supplier App:</strong> business configuration and branding, cryptographic keys (Secure Mode only), usage statistics.</p>
+  <h3>3.3 Data Backup Responsibility</h3>
+  <p>Because data is stored locally, you are responsible for backing up your device using iOS/Android backup features. Lost devices mean lost loyalty cards (Customer App) or lost business configuration (Supplier App). The Supplier App's backup feature lets businesses create recovery QR codes for disaster recovery; the Customer App has no built-in backup — use device-level backups (iCloud, etc.).</p>
+
+  <h2>4. User Responsibilities</h2>
+  <h3>4.1 Customer Responsibilities</h3>
+  <p><strong>You agree to:</strong> use the App only for legitimate loyalty card collection; not forge, duplicate, or manipulate loyalty cards; not share completed cards for fraudulent redemption; verify card details before redeeming rewards; manage your device storage by deleting old/redeemed cards as needed.</p>
+  <p><strong>You acknowledge:</strong> stamps and rewards are issued by individual businesses, not by LoyaltyCards; reward fulfillment is the sole responsibility of the participating business; LoyaltyCards is not liable for business decisions regarding reward acceptance or denial.</p>
+  <h3>4.2 Supplier Responsibilities</h3>
+  <p><strong>You agree to:</strong> provide accurate business information; honor valid loyalty cards issued by your business; securely store your recovery backup QR code (Secure Mode); verify customer identity and card validity before redeeming rewards; comply with local laws regarding loyalty programs and customer data; manage your app's local storage by pruning old cards, transactions, and logs.</p>
+  <p><strong>You acknowledge:</strong> device storage management is your responsibility; without a central server you cannot track customer behavior across devices; cryptographic keys (Secure Mode) are stored only on your device(s); loss of private keys means inability to manage existing customer cards; multi-device setup requires careful management of key distribution.</p>
+
+  <h2>5. Operation Modes</h2>
+  <p>The App offers two operation modes with different security profiles.</p>
+  <h3>5.1 Simple Mode (Trust-Based)</h3>
+  <p>Faster stamp collection (1 scan), no cryptographic verification, customer can self-redeem. Suitable for low-value rewards. Limitations: relies on supplier visual verification; no cryptographic proof of stamp authenticity. Recommended for coffee shops, small businesses, low-value rewards (under $10).</p>
+  <h3>5.2 Secure Mode (Cryptographic)</h3>
+  <p>Cryptographic signature on every stamp, two-step redemption process, hash chain integrity verification, QR codes expire after 2-5 minutes. Slower (2 scans) and requires key management. Recommended for high-value rewards ($10+), compliance requirements, audit trails.</p>
+  <p><strong>Choosing a mode:</strong> once selected during setup, mode cannot be changed without resetting. Resetting invalidates all existing customer cards. Plan carefully based on your reward value and risk tolerance.</p>
+
+  <h2>6. Service Limitations</h2>
+  <h3>6.1 Device Storage Limits</h3>
+  <p>All cards, stamps, and transactions are stored on your device. Excessive accumulation of data may slow device performance. You are responsible for managing storage — recommendation: delete redeemed cards older than 30 days (customers) and periodically archive old transaction data (suppliers).</p>
+  <h3>6.2 Card Revocation Limitations</h3>
+  <p>Due to the local-only, P2P architecture, individual card revocation is not possible. To revoke cards you must reset your entire business configuration, which invalidates all existing customer cards and requires re-issuing to legitimate customers. Without a central server, there's no way to push revocation notices to customer devices — this is an accepted trade-off for privacy and offline-first operation.</p>
+  <h3>6.3 Multi-Device Card Duplication</h3>
+  <p>Restoring device backups may result in duplicate cards on multiple devices. The Supplier app will warn if a card is redeemed from a different device than it was issued on; suppliers may accept or reject at their discretion (device upgrades and family sharing are legitimate scenarios; duplication for multiple redemptions is not).</p>
+
+  <h2>7. Security &amp; Fraud Prevention</h2>
+  <h3>7.1 Customer Obligations</h3>
+  <p>Do not screenshot QR codes for reuse (Secure Mode stamps expire in 2-5 minutes), share your loyalty cards with others, manipulate device time to bypass rate limits, or create duplicate cards across devices for fraudulent redemption. Violations may result in businesses refusing to honor stamps or rewards, being banned from participating businesses, or legal action.</p>
+  <h3>7.2 Supplier Obligations</h3>
+  <p>Verify customer identity for high-value redemptions, check stamp history for suspicious patterns, review redemption dates, investigate device mismatch warnings, and keep your recovery backup QR code and private keys secure.</p>
+
+  <h2>8. Disclaimers</h2>
+  <p><strong>No Warranty.</strong> The App is provided "as is" without warranty of any kind, express or implied, including merchantability, fitness for a particular purpose, accuracy or reliability, and uninterrupted or error-free operation.</p>
+  <p><strong>No Liability.</strong> LoyaltyCards is not liable for loss of data due to device failure/loss/theft/corruption; disputes between customers and businesses regarding rewards; fraudulent use of the App; business decisions to deny redemption or change reward terms; device storage limitations or performance degradation; or technical issues preventing stamp collection or redemption.</p>
+  <p><strong>Third-Party Relationships.</strong> LoyaltyCards is a software tool; we do not operate loyalty programs and are not a party to any customer-business relationship. Businesses are solely responsible for honoring their loyalty programs; customers must resolve disputes with businesses directly.</p>
+  <p><strong>No Ongoing Support Commitment.</strong> LoyaltyCards may be offered without guaranteed ongoing support, maintenance, or response times. If app workflows are unavailable or unsuitable for a business, paper cards/stamps remain a valid operational alternative.</p>
+  <p><strong>Fraud and Abuse Allocation.</strong> LoyaltyCards provides tooling and safeguards but does not guarantee prevention of all fraud or abuse. Participating businesses are responsible for applying their own operational controls; we are not liable for losses arising from edge-case fraud, abuse, social engineering, or operational misuse.</p>
+
+  <h2>9. Acceptable Use</h2>
+  <p>You agree not to use the App for illegal purposes; hack, reverse engineer, or exploit the App; create automated systems ("bots") to collect stamps; interfere with other users' ability to use the App; or violate applicable laws or regulations. Violations may result in removal from participating businesses, legal action, or termination of your access to the App.</p>
+
+  <h2>10. Modifications to Terms</h2>
+  <p>We reserve the right to modify these Terms at any time. Changes are effective upon posting the updated Terms in the App or on our website. Your continued use of the App after changes constitutes acceptance of the new Terms.</p>
+
+  <h2>11. Termination</h2>
+  <p>You may stop using the App at any time by deleting it from your device — this permanently deletes all local data. We reserve the right to discontinue the App at any time without notice.</p>
+
+  <h2>12. Governing Law</h2>
+  <p>These Terms are governed by the laws of <strong>England and Wales, United Kingdom</strong>, without regard to conflict of law principles. Any disputes shall be resolved in the courts of England and Wales, United Kingdom.</p>
+
+  <h2>13. Contact Information</h2>
+  <p>For legal questions or concerns about these Terms of Service:</p>
+  <p>Email: <a href="mailto:ian.hamlet@dotconnected.com">ian.hamlet@dotconnected.com</a><br>
+  Website: <a href="https://github.com/ian-hamlet/LoyaltyCards">github.com/ian-hamlet/LoyaltyCards</a></p>
+
+  <h2>14. Severability</h2>
+  <p>If any provision of these Terms is found unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary, and the remaining provisions remain in full force and effect.</p>
+
+  <h2>15. Entire Agreement</h2>
+  <p>These Terms constitute the entire agreement between you and LoyaltyCards regarding use of the App, superseding any prior agreements.</p>
+
+  <div class="callout"><span class="shout">By using LoyaltyCards, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.</span></div>
+</div>
+</body>
+</html>

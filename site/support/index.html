@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support — LoyaltyCards</title>
+<meta name="description" content="FAQ, troubleshooting, and contact information for LoyaltyCards and LoyaltyCards Business.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.15rem; margin-top: 2.2em; border-top: 1px solid var(--border); padding-top: 1em; }
+  h3 { font-size: 1rem; margin-top: 1.3em; }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+  ul, ol { padding-left: 1.3em; }
+  li { margin: 0.3em 0; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin: 1.2em 0; }
+  a { color: var(--accent); }
+  dt { font-weight: 600; margin-top: 1em; }
+  dd { margin: 0.2em 0 0.8em; color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>LoyaltyCards Support</h1>
+  <p class="meta">Last Updated: July 20, 2026</p>
+
+  <p>This page covers both apps in the LoyaltyCards system:</p>
+  <ul>
+    <li><strong>LoyaltyCards</strong> — the customer wallet app</li>
+    <li><strong>LoyaltyCards Business</strong> — the supplier/business app</li>
+  </ul>
+  <p>The two apps work together via QR codes. You'll typically need both installed on different devices (customer's phone + business's phone/iPad) to complete a full stamp-collect-redeem cycle.</p>
+
+  <div class="callout">
+    <strong>Contact:</strong> <a href="mailto:ian.hamlet@dotconnected.com">ian.hamlet@dotconnected.com</a><br>
+    <strong>Response Time:</strong> within 24-48 hours (business days, UK time)<br>
+    Please include which app you're using, your device model and iOS version, the app version, and what you were trying to do.
+  </div>
+
+  <h2>Frequently Asked Questions</h2>
+  <dl>
+    <dt>Do I need an account to use LoyaltyCards?</dt>
+    <dd>No. LoyaltyCards is completely account-free. Just install and start scanning QR codes.</dd>
+
+    <dt>Can I use LoyaltyCards without an internet connection?</dt>
+    <dd>Yes. LoyaltyCards works entirely offline. All data is stored locally on your device.</dd>
+
+    <dt>Is my data synced across devices?</dt>
+    <dd>No. For privacy, your data stays on your device only. If you get a new phone, you'll need to re-scan cards from businesses you visit.</dd>
+
+    <dt>What happens if I delete the app?</dt>
+    <dd>All your cards and stamps are permanently deleted from that device. There is no cloud backup. If you have an iOS device backup (iCloud/iTunes) from before deletion, restoring it will bring your data back.</dd>
+
+    <dt>Can I export my cards?</dt>
+    <dd>Not currently. Cards are tied to your device for security and privacy.</dd>
+
+    <dt>What's the difference between Simple and Secure mode?</dt>
+    <dd>Simple Mode is fast, trust-based stamp collection (like a physical punch card). Secure Mode adds cryptographic signatures to every stamp for fraud resistance, at the cost of an extra scanning step.</dd>
+
+    <dt>Can businesses see my personal information?</dt>
+    <dd>No. LoyaltyCards Business never collects your name, email, phone number, or any other personal data. See our <a href="../legal/privacy-policy.html">Privacy Policy</a>.</dd>
+  </dl>
+
+  <h2>Common Issues</h2>
+
+  <h3>QR scanner won't open or won't scan</h3>
+  <ol>
+    <li>Go to iOS Settings → LoyaltyCards (or LoyaltyCards Business) → enable Camera permission.</li>
+    <li>Force-quit and reopen the app.</li>
+    <li>If the camera doesn't work in any app (including the built-in Camera app), this is a device hardware issue — contact Apple Support.</li>
+  </ol>
+
+  <h3>A card doesn't appear after scanning</h3>
+  <ol>
+    <li>Force-quit and reopen the app.</li>
+    <li>Check whether "Hide Redeemed" is filtering it out — look for a filter control near the card list.</li>
+    <li>If it's still missing, please contact us with your device/app version and what the QR code was for.</li>
+  </ol>
+
+  <h3>Stamps aren't being added after a scan</h3>
+  <ul>
+    <li>Stamp QR codes are time-limited for security (roughly 2 minutes). Ask the business to generate a fresh one and scan immediately.</li>
+    <li>There's a short cooldown between stamp scans to prevent accidental duplicates — wait a moment and try again.</li>
+    <li>If the business recently reconfigured their loyalty program, your existing card may need to be re-issued.</li>
+  </ul>
+
+  <h3>Redemption QR is rejected as invalid</h3>
+  <ul>
+    <li>Make sure both the customer and the business are on the latest version of their app.</li>
+    <li>Redemption QR codes are time-limited — generate a fresh one right at the counter rather than in advance.</li>
+  </ul>
+
+  <h3>I lost my cards / business configuration after losing or replacing my device</h3>
+  <p><strong>Customers:</strong> cards cannot be recovered unless you have an iOS device backup from before the loss. Otherwise, please visit the business again to get a new card.</p>
+  <p><strong>Businesses:</strong> if you created a Recovery Backup QR code, you can restore your full business configuration on any device via "Import Business Configuration." Without a backup, please contact us — recovery may still be possible via data in the device's Keychain, but this isn't guaranteed. We strongly recommend creating a Recovery Backup as soon as you set up your business (Settings → Create Recovery Backup).</p>
+
+  <h3>I want to reset the app back to a clean state</h3>
+  <p>The in-app data-reset option is intentionally not available in the App Store release, to prevent accidental data loss. To fully reset: delete the app and reinstall it from the App Store. This permanently erases all local cards/business data on that device, so make sure you have a Recovery Backup first if you're using the Business app.</p>
+
+  <h2>Related Documents</h2>
+  <ul>
+    <li><a href="../legal/privacy-policy.html">Privacy Policy</a></li>
+    <li><a href="../legal/terms-of-service.html">Terms of Service</a></li>
+    <li><a href="../legal/accessibility-statement.html">Accessibility Statement</a></li>
+  </ul>
+
+  <p class="meta" style="margin-top:3em;">LoyaltyCards is provided without a guaranteed ongoing support SLA. We aim to respond promptly, but paper stamp cards remain a valid fallback for any business that prefers not to rely on the app.</p>
+</div>
+</body>
+</html>

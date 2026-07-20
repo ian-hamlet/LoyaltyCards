@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — LoyaltyCards</title>
+<meta name="description" content="LoyaltyCards Privacy Policy: we collect no personal data. Everything stays on your device.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.2rem; margin-top: 2.2em; border-top: 1px solid var(--border); padding-top: 1em; }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+  ul { padding-left: 1.3em; }
+  li { margin: 0.3em 0; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin: 1.2em 0; }
+  .tldr { display: grid; gap: 6px; }
+  a { color: var(--accent); }
+  code { background: var(--card); padding: 1px 5px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>Privacy Policy for LoyaltyCards</h1>
+  <p class="meta">Last Updated: July 20, 2026 &nbsp;·&nbsp; Effective Date: April 13, 2026</p>
+
+  <div class="callout"><strong>The short version: we collect NO personal data. Everything stays on your device.</strong></div>
+
+  <p>LoyaltyCards is committed to protecting your privacy. This Privacy Policy explains our data collection and usage practices for both the <strong>LoyaltyCards</strong> (customer) and <strong>LoyaltyCards Business</strong> (supplier) applications.</p>
+
+  <h2>Data We DO NOT Collect</h2>
+  <p>We do not collect, store, transmit, or process any of the following:</p>
+  <ul>
+    <li>Personal information (name, email, phone number, address)</li>
+    <li>Account credentials (no accounts or login required)</li>
+    <li>Payment information</li>
+    <li>Location data</li>
+    <li>Device identifiers</li>
+    <li>Usage analytics</li>
+    <li>Tracking or advertising data</li>
+    <li>Browsing history</li>
+    <li>Contacts or photos (except when you explicitly save backup QR codes)</li>
+    <li>Any data about you or your usage</li>
+  </ul>
+
+  <h2>How LoyaltyCards Works</h2>
+  <p><strong>Local Storage Only.</strong> All data is stored exclusively on your device using iOS local storage:</p>
+  <ul>
+    <li><strong>Customer App:</strong> Your loyalty cards and stamp history are stored in your device's local database (SQLite)</li>
+    <li><strong>Supplier App:</strong> Your business configuration and transaction history are stored in your device's local database (SQLite)</li>
+  </ul>
+  <p>Your data never leaves your device. We have no servers, no cloud storage, and no data backends.</p>
+
+  <p><strong>Peer-to-Peer Architecture.</strong> LoyaltyCards uses a peer-to-peer (P2P) architecture:</p>
+  <ul>
+    <li>When you scan a QR code, the transaction happens directly between your device and the business's device</li>
+    <li>No data is sent to our servers (we don't have servers)</li>
+    <li>No internet connection is required for the app to function</li>
+    <li>QR codes contain only the minimal data needed for the transaction (business ID, card ID, stamp count)</li>
+  </ul>
+
+  <h2>Data You Create</h2>
+  <p>The following data is created and stored locally on your device only:</p>
+  <p><strong>Customer App:</strong></p>
+  <ul>
+    <li>Loyalty cards you've added by scanning QR codes</li>
+    <li>Stamp counts for each business</li>
+    <li>Transaction timestamps (when you received stamps)</li>
+    <li>Business information (name, color, logo) from scanned QR codes</li>
+  </ul>
+  <p><strong>Supplier App:</strong></p>
+  <ul>
+    <li>Your business name and configuration</li>
+    <li>Cryptographic keys for validating stamps (stored in iOS Keychain)</li>
+    <li>Statistics (number of cards issued, redemptions)</li>
+    <li>Transaction history (anonymous card IDs, timestamps)</li>
+  </ul>
+  <p>None of this data is transmitted to us or any third party.</p>
+
+  <h2>Permissions We Request</h2>
+  <p><strong>Camera Permission</strong></p>
+  <ul>
+    <li>Purpose: Scan QR codes to add loyalty cards, issue stamps, and redeem rewards</li>
+    <li>When: Both apps request camera access when you first try to scan a QR code</li>
+    <li>Data: No camera images are stored or transmitted; we only read QR code data</li>
+  </ul>
+  <p><strong>Backup Methods (Supplier App Only)</strong></p>
+  <ul>
+    <li>Purpose: Save backup QR codes using system share functionality</li>
+    <li>Methods: Print Backup, Share via Email, Save to Files</li>
+    <li>Permissions: No special permissions required — all methods use the standard iOS share sheet</li>
+    <li>Data: Only saves QR code images you choose to save; no data is transmitted to our servers</li>
+  </ul>
+
+  <h2>What Happens to Your Data</h2>
+  <p><strong>If you delete the app:</strong> all loyalty cards, stamp history, or (for suppliers) business configuration and transaction history are permanently deleted from your device. There is no way to recover this data (no cloud backup from us).</p>
+  <p><strong>If you lose your device:</strong> customers lose their loyalty cards (like physical cards). Suppliers lose their business configuration unless a backup QR code was created.</p>
+  <p><strong>Backup feature (Supplier App only):</strong> suppliers can create backup QR codes containing their business configuration. These backups are created by you and stored where you choose — printed on paper, emailed to yourself, or saved to the Files app. We never receive or store your backups. Backups contain your cryptographic keys — keep them secure.</p>
+
+  <h2>Third-Party Services</h2>
+  <p>We use NO third-party services: no analytics, no crash reporting, no advertising networks, no authentication services, no cloud storage, no payment processors, no customer support platforms. The only third-party code we use is the Flutter framework and open-source libraries for QR codes, database, and cryptography — none of which collect data.</p>
+
+  <h2>Children's Privacy</h2>
+  <p>LoyaltyCards does not collect any personal information from anyone, including children under 13. Since we collect no data, COPPA does not apply to our app.</p>
+
+  <h2>GDPR Compliance</h2>
+  <p>LoyaltyCards is compliant with the General Data Protection Regulation (GDPR) by design: we don't have your data, so access/rectification/erasure/portability/objection rights are either not applicable or trivially satisfied by deleting the app. If you are in the EU, your data stays on your device and is never transmitted to us or any other party.</p>
+
+  <h2>California Privacy Rights (CCPA)</h2>
+  <p>LoyaltyCards does not "sell" or "share" personal information (we don't collect any), and does not use personal information for targeted advertising.</p>
+
+  <h2>Data Security</h2>
+  <ul>
+    <li>Device Security: your data is protected by your device's security (passcode, Face ID, Touch ID)</li>
+    <li>Cryptographic Keys: supplier cryptographic keys are stored in iOS Keychain (encrypted by iOS)</li>
+    <li>Local Database: iOS sandboxes app data (other apps cannot access it)</li>
+    <li>No Network Transmission: no data leaves your device, so no network security risks</li>
+  </ul>
+
+  <h2>Your Choices</h2>
+  <p><strong>Customer App:</strong> don't want a loyalty card? Don't scan the QR code. Want to delete a card? Swipe left and tap Delete. Want to delete all your cards? Delete the app.</p>
+  <p><strong>Supplier App:</strong> don't want to use the app? Don't set up a business. Want to delete your business or all data? Delete the app.</p>
+
+  <h2>Changes to This Privacy Policy</h2>
+  <p>We may update this Privacy Policy from time to time. If we make material changes, we will update the "Last Updated" date above and post the updated policy at this same URL. Your continued use of LoyaltyCards after changes constitutes acceptance of the updated policy.</p>
+
+  <h2>Contact</h2>
+  <p>Email: <a href="mailto:ian.hamlet@dotconnected.com">ian.hamlet@dotconnected.com</a><br>
+  GitHub: <a href="https://github.com/ian-hamlet/LoyaltyCards">github.com/ian-hamlet/LoyaltyCards</a></p>
+  <p>Please note: since we collect no data, we cannot help you recover lost data or access data from your device.</p>
+
+  <h2>Summary</h2>
+  <div class="tldr">
+    <div>✅ Zero data collection — we collect nothing about you</div>
+    <div>✅ Local storage only — everything stays on your device</div>
+    <div>✅ No servers — we have no cloud infrastructure</div>
+    <div>✅ No tracking — we don't know you or what you do</div>
+    <div>✅ No accounts — no signup, no login, no password</div>
+    <div>✅ Peer-to-peer — direct device-to-device transactions</div>
+    <div>✅ Privacy by design — impossible for us to access your data</div>
+  </div>
+
+  <h2>Legal</h2>
+  <p>This Privacy Policy constitutes a legal agreement between you and LoyaltyCards. By installing and using LoyaltyCards, you agree to this Privacy Policy. LoyaltyCards is provided "as is" without warranty of any kind.</p>
+
+  <p class="meta" style="margin-top:3em;">LoyaltyCards — Privacy-First Loyalty Cards. No servers. No tracking. No personal data. Ever.</p>
+</div>
+</body>
+</html>

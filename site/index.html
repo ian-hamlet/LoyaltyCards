@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoyaltyCards — Legal &amp; Support</title>
+<meta name="description" content="Privacy Policy, Terms of Service, Accessibility Statement, and Support for the LoyaltyCards and LoyaltyCards Business apps.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 20px 80px; }
+  h1 { font-size: 1.7rem; margin-bottom: 4px; }
+  p.lede { color: var(--muted); margin-top: 0; }
+  .grid { display: grid; gap: 14px; margin-top: 32px; }
+  a.card {
+    display: block; padding: 18px 20px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--fg); text-decoration: none;
+  }
+  a.card:hover { border-color: var(--accent); }
+  a.card strong { display: block; font-size: 1.05rem; margin-bottom: 2px; }
+  a.card span { color: var(--muted); font-size: 0.92rem; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 0.85rem; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>LoyaltyCards</h1>
+    <p class="lede">Privacy-first digital loyalty cards. This page hosts the public policies and support information for both LoyaltyCards (customer) and LoyaltyCards Business (supplier).</p>
+
+    <div class="grid">
+      <a class="card" href="legal/privacy-policy.html">
+        <strong>Privacy Policy</strong>
+        <span>How LoyaltyCards handles data — short version: we collect none of it.</span>
+      </a>
+      <a class="card" href="legal/terms-of-service.html">
+        <strong>Terms of Service</strong>
+        <span>Terms governing use of the Customer and Business apps.</span>
+      </a>
+      <a class="card" href="legal/accessibility-statement.html">
+        <strong>Accessibility Statement</strong>
+        <span>Current accessibility status and roadmap.</span>
+      </a>
+      <a class="card" href="support/">
+        <strong>Support</strong>
+        <span>FAQ, troubleshooting, and how to contact us.</span>
+      </a>
+    </div>
+
+    <footer>
+      LoyaltyCards is provided without a guaranteed ongoing support SLA. Contact: <a href="mailto:ian.hamlet@dotconnected.com">ian.hamlet@dotconnected.com</a>
+    </footer>
+  </div>
+</body>
+</html>

@@ -2,7 +2,7 @@ name: shared
 description: "A new Flutter package project."
 # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
 # source/shared/lib/version.dart: 
-version: 1.0.2+8
+version: 1.0.3+10
 homepage:
 
 environment:

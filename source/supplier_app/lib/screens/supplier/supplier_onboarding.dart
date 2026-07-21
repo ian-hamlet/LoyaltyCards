@@ -265,8 +265,17 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     const SizedBox(width: 8),
                     Tooltip(
                       triggerMode: TooltipTriggerMode.tap,
-                      showDuration: const Duration(seconds: 10),
-                      message: 'Express: Fastest checkout with reusable QR codes for trusted, low-value rewards.\nSecure: Per-scan cryptographic validation for higher-value rewards and stronger fraud resistance.',
+                      showDuration: const Duration(seconds: 15),
+                      message: 'EXPRESS MODE\n'
+                          '• Print reusable QR codes, customers self-serve (~2 sec/visit)\n'
+                          '• No equipment needed at checkout\n'
+                          '• Protection: a cooldown you set (5-60 sec, default 30) between stamps\n'
+                          '• Best for: high-volume, low-value rewards (coffee, fast food)\n\n'
+                          'SECURE MODE\n'
+                          '• You generate every stamp from your device (~5-10 sec/visit)\n'
+                          '• Requires a phone/iPad at checkout\n'
+                          '• Protection: each stamp is cryptographically signed; QR codes expire after 2 minutes and can\'t be reused or forged\n'
+                          '• Best for: high-value rewards where fraud prevention matters most (spas, salons, premium services)',
                       child: Icon(
                         Icons.info_outline,
                         size: 18,
@@ -280,7 +289,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(OperationMode.simple.displayName),
                   subtitle: Text(
-                    OperationMode.simple.description,
+                    OperationMode.simple.recommendedFor,
                     style: const TextStyle(fontSize: 13),
                   ),
                   value: OperationMode.simple,
@@ -294,7 +303,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(OperationMode.secure.displayName),
                   subtitle: Text(
-                    OperationMode.secure.description,
+                    OperationMode.secure.recommendedFor,
                     style: const TextStyle(fontSize: 13),
                   ),
                   value: OperationMode.secure,
@@ -304,7 +313,29 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     setState(() => _selectedMode = value!);
                   },
                 ),
-                
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber[800]),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Choose carefully: switching modes later requires a full business reset, which invalidates every card your customers currently hold. Tap the ⓘ above to compare the two modes, or see the full User Guide for more detail.',
+                          style: TextStyle(fontSize: 12.5, color: Colors.amber[900]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 // REQ-022: Scan Interval Configuration (Simple Mode only)
                 if (_selectedMode == OperationMode.simple) ...[
                   const SizedBox(height: 24),

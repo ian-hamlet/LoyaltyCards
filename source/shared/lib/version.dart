@@ -237,4 +237,4 @@
 
 
 /// # source/shared/lib/version.dart: 
-const String appVersion = '1.0.3+10';
+const String appVersion = '1.0.3+11';

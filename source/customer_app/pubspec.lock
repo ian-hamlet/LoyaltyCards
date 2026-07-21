@@ -670,7 +670,7 @@ packages:
       path: "../shared"
       relative: true
     source: path
-    version: "1.0.3+10"
+    version: "1.0.3+11"
   shared_preferences:
     dependency: "direct main"
     description:

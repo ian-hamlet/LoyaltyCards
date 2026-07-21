@@ -2,8 +2,8 @@
 
 **Quick Start Guide for Businesses & Customers**
 
-Version 1.0.1+7  
-Last Updated: July 3, 2026
+Version 1.0.3+11  
+Last Updated: July 21, 2026
 
 ---
 
@@ -12,7 +12,7 @@ Last Updated: July 3, 2026
 ### Getting Started (30 seconds)
 
 1. **Download the Customer App**
-   - Install from TestFlight (pilot phase)
+   - Download from the App Store
    - No signup required - just open the app
 
 2. **Get Your First Card**
@@ -70,7 +70,7 @@ LoyaltyCards provides optional app-level security for privacy-conscious users.
 #### Your Card Wallet
 
 **Home Screen:**
-- Shows all your loalty cards
+- Shows all your loyalty cards
 - Sort by: Recent, Alphabetical, Progress
 - Search: Find specific business
 - Tap any card to see details
@@ -86,10 +86,10 @@ LoyaltyCards provides optional app-level security for privacy-conscious users.
 
 **Two Ways to Get Stamps:**
 
-**1. Self-Service (Simple Mode businesses):**
+**1. Self-Service (Express Mode businesses):**
 - Scan the "Add Stamp" QR code at checkout
 - Stamp added instantly to your phone
-- Rate limited: 1 stamp per hour per business
+- Rate limited: each business sets its own cooldown between stamps (5-60 seconds, 30 is the default) - if you scan too soon, you'll need to wait
 - No staff interaction needed
 - **Smart Routing:** Don't worry about which card is open - stamps automatically go to the correct business!
 
@@ -97,11 +97,11 @@ LoyaltyCards provides optional app-level security for privacy-conscious users.
 - Staff generates QR code on their device
 - Scan the temporary QR code
 - Stamp validated and added
-- QR expires after 1-2 minutes
+- QR expires after 2 minutes
 
-**Tip:** You'll know which mode a business uses after your first scan. Simple mode = instant, Secure mode = validated.
+**Tip:** You'll know which mode a business uses after your first scan. Express mode = instant, Secure mode = validated.
 
-**💡 Smart Routing Feature (Simple Mode):**
+**💡 Smart Routing Feature (Express Mode):**
 When you scan a stamp QR code, the app automatically finds the correct card for that business - even if you're viewing a different card screen. For example, if you have cards for "Coffee Shop" and "Restaurant", and you scan a "Restaurant" stamp while viewing your "Coffee Shop" card, the stamp will automatically go to your "Restaurant" card. No need to switch cards first!
 
 **🎉 Auto New Card:**
@@ -109,7 +109,7 @@ When a card is completed, a new card is automatically created for the same busin
 
 #### Redeeming Rewards
 
-**Simple Mode:**
+**Express Mode:**
 - Scan the "Redeem" QR code at checkout
 - Card resets immediately
 - New card auto-created
@@ -130,7 +130,7 @@ When a card is completed, a new card is automatically created for the same busin
 **Card Information:**
 - Tap card to see full details
 - View stamp history
-- See business mode (Simple or Secure)
+- See business mode (Express or Secure)
 
 ---
 
@@ -153,7 +153,7 @@ When a card is completed, a new card is automatically created for the same busin
 - If camera view is sideways, use rotation buttons (see above)
 
 **"Stamp not added"**
-- Simple mode: Wait 1 hour (rate limited)
+- Express mode: you may be inside that business's cooldown window (5-60 seconds, set by them) - wait a moment and try again
 - Secure mode: QR may have expired, ask staff for new one
 - Check that you scanned business's QR, not your own
 
@@ -175,7 +175,7 @@ When a card is completed, a new card is automatically created for the same busin
 **"Card not redeeming"**
 - Ensure card is complete (all stamps)
 - In secure mode, staff must scan your card
-- In simple mode, scan the "Redeem" QR code
+- In express mode, scan the "Redeem" QR code
 
 ---
 
@@ -185,13 +185,13 @@ When a card is completed, a new card is automatically created for the same busin
 
 **IMPORTANT: Choose carefully - cannot change later without reset**
 
-#### Simple Mode - Choose if:
+#### Express Mode - Choose if:
 ✅ Low-value rewards ($5-15)  
 ✅ High transaction volume (speed matters)  
 ✅ Regular, trusted customers  
 ✅ Coffee shop, cafe, quick service  
 ✅ Want self-service stamping  
-✅ Don't need detailed audit trail  
+✅ Don't need cryptographic tamper-proofing  
 
 **Benefits:**
 - ⚡ Fastest (2 seconds per transaction)
@@ -199,19 +199,19 @@ When a card is completed, a new card is automatically created for the same busin
 - 💰 No equipment needed
 - 🚀 Zero maintenance
 
-**Trade-off:** Rate limiting only (1 stamp/hour per customer)
+**Trade-off:** Rate limiting only (you set the cooldown, 5-60 seconds per customer)
 
 #### Secure Mode - Choose if:
 ✅ High-value rewards ($50+)  
 ✅ Need fraud prevention  
-✅ Want complete audit trail  
+✅ Want cryptographically tamper-proof records  
 ✅ Luxury goods, services, spa  
 ✅ Lower transaction volume  
 ✅ Control redemption process  
 
 **Benefits:**
 - 🔐 Cryptographically secure
-- 📊 Transaction statistics
+- 📊 Basic lifetime counters (Cards Issued/Stamped/Redeemed - not a detailed transaction log)
 - ✅ Tamper-proof validation
 - 🎫 Supplier-controlled redemption
 
@@ -222,7 +222,7 @@ When a card is completed, a new card is automatically created for the same busin
 ### Initial Setup (5 minutes)
 
 1. **Download Supplier App**
-   - Install from TestFlight (pilot phase)
+   - Download from the App Store
    - Open app on iPhone or iPad
 
 2. **Create Business Profile**
@@ -232,10 +232,10 @@ When a card is completed, a new card is automatically created for the same busin
    - Choose business icon
 
 3. **⚠️ SELECT OPERATION MODE**
-   - **Simple Mode** or **Secure Mode**
+   - **Express Mode** or **Secure Mode**
    - Read descriptions carefully
    - Cannot change without reset
-   - When in doubt: Simple for low-value, Secure for high-value
+   - When in doubt: Express for low-value, Secure for high-value
 
 4. **🔥 CRITICAL: Create Backup** (5 minutes)
    - Tap Settings → Create Recovery Backup
@@ -271,7 +271,7 @@ When a card is completed, a new card is automatically created for the same busin
 
 ### Daily Operations
 
-#### Simple Mode Workflow
+#### Express Mode Workflow
 
 **One-Time Setup:**
 
@@ -284,9 +284,8 @@ When a card is completed, a new card is automatically created for the same busin
    - Tap accordion to expand/collapse configuration
 3. QR code appears on screen
 4. **Save QR Code** using built-in options:
-   - **Save** - Adds to Photos app for printing/reference
    - **Print** - Opens system print dialog for physical copies
-   - **Share** - Email, AirDrop, or share via other apps
+   - **Share QR** - Email, AirDrop, or share via other apps
 5. Post QR code at checkout: "Scan to Add Stamps"
 6. **Generate new QR** anytime settings change (tap refresh icon)
 
@@ -299,7 +298,7 @@ When a card is completed, a new card is automatically created for the same busin
    - Collapsed by default - tap to see options
 3. QR code appears on screen
 4. **Save QR Code** using same options:
-   - Save, Print, or Share buttons
+   - Print or Share QR buttons
 5. Customer scans QR to receive card
 6. Card appears in their wallet with any pre-applied stamps
 
@@ -312,8 +311,8 @@ When a card is completed, a new card is automatically created for the same busin
 
 **Monitoring:**
 - Home screen shows mode-aware interface
-- "How it Works" section shows simple mode instructions
-- Statistics hidden in simple mode (not tracked)
+- "How it Works" section shows express mode instructions
+- Statistics hidden in Express Mode (tracked internally, just not shown - only visible in Secure Mode)
 
 ---
 
@@ -337,7 +336,7 @@ When a card is completed, a new card is automatically created for the same busin
    - Choose number of stamps using slider (1-7)
    - Set optional expiry date
    - Collapsed by default
-3. Time-limited QR appears on screen (valid 5 minutes)
+3. Time-limited QR appears on screen (valid 2 minutes)
 4. Customer scans QR with phone
 5. Cryptographic validation happens automatically
 6. Stamp(s) added if valid
@@ -351,10 +350,10 @@ When a card is completed, a new card is automatically created for the same busin
 6. If invalid: Error message, investigation needed
 
 **Key Points:**
-- QR codes expire (5 minutes) for security
+- Add Stamp QR codes expire after 2 minutes; Issue Card QR codes are valid 5 minutes
 - Tap "Refresh" icon if customer needs more time
 - All optional settings use progressive disclosure (accordions)
-- Statistics tracked: visible on home screen
+- Statistics tracked: visible on home screen (Secure Mode only)
 
 ---
 
@@ -410,11 +409,10 @@ When a card is completed, a new card is automatically created for the same busin
 | Method | Accessibility | Security | Recommendation |
 |--------|--------------|----------|----------------|
 | **Print** | Physical only | High (lock it up) | ⭐⭐⭐⭐⭐ Best |
-| **Photos** | iCloud sync | Medium | ⭐⭐⭐⭐ Good |
 | **Email** | Any device | Low (email insecure) | ⭐⭐⭐ Okay |
 | **Files** | Cloud/local | Medium-High | ⭐⭐⭐⭐ Good |
 
-**Best practice:** Use Print + Photos (redundancy)
+**Best practice:** Use Print + Files (redundancy). Note: an earlier "Save to Photos" option existed in older builds but was removed - backups now use Print, Email, or Files only.
 
 ---
 
@@ -526,7 +524,7 @@ When a card is completed, a new card is automatically created for the same busin
 - Note: Different devices (iPad vs iPhone) may need different settings
 
 **"Customer says stamp didn't work"**
-- Simple mode: They may have scanned within 1 hour (rate limited)
+- Express mode: They may still be inside your cooldown window (whatever you set, 5-60 seconds)
 - Secure mode: QR may have expired, generate new one
 - Check their app shows your business
 
@@ -602,7 +600,7 @@ When a card is completed, a new card is automatically created for the same busin
 
 ✅ **DO:**
 - **Create backup immediately** (before issuing any cards)
-- **Use multiple backup methods** (Print + Photos recommended)
+- **Use multiple backup methods** (Print + Files recommended)
 - Test with personal device first
 - Print clear, large QR codes (3-4 inches)
 - Position QR codes at eye level
@@ -616,7 +614,7 @@ When a card is completed, a new card is automatically created for the same busin
 - Skip the backup step
 - Rely on single backup method only
 - Change mode without planning
-- Delete QR codes (simple mode)
+- Delete QR codes (express mode)
 - Share backup QR code publicly
 - Share clone QR with unauthorized people
 - Leave clone QR displayed after setup complete
@@ -652,17 +650,16 @@ When a card is completed, a new card is automatically created for the same busin
 ## 🆘 Getting Help
 
 **Documentation:**
-- About LoyaltyCards: `/07-Documentation/ABOUT_LOYALTYCARDS.md`
-- Testing Guide: `/source/supplier_app/BACKUP_TESTING_GUIDE.md`
+- [Supplier Setup Guide](supplier-setup-guide.html) - choosing Express vs Secure Mode
+- [Support](../support/) - FAQ, troubleshooting, and contact
 
 **Common Issues:**
 - Review troubleshooting sections above
 - Check app version is current
 - Verify permissions granted
 
-**Pilot Support:**
-- Email support provided to pilot participants
-- Include: App version, device type, screenshot of issue
+**Support:**
+- Contact us via the [Support page](../support/) - include app version, device type, and a screenshot of the issue if possible
 
 ---
 
@@ -683,7 +680,7 @@ When a card is completed, a new card is automatically created for the same busin
 - [ ] Test issue card on personal device
 - [ ] Test add stamp
 - [ ] Test redemption
-- [ ] Print QR codes (simple mode) OR
+- [ ] Print QR codes (express mode) OR
 - [ ] Have device at checkout (secure mode)
 - [ ] Train staff on process
 - [ ] Launch to customers!

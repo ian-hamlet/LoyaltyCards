@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supplier Setup Guide: Express vs Secure Mode — LoyaltyCards</title>
+<meta name="description" content="How to choose between Express Mode and Secure Mode when setting up LoyaltyCards Business.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec; --warn: #8a5a00; --warnbg: #fff6e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; --warn: #e8b654; --warnbg: #2a2410; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.2rem; margin-top: 2.2em; border-top: 1px solid var(--border); padding-top: 1em; }
+  h3 { font-size: 1.05rem; margin-top: 1.5em; }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+  ul, ol { padding-left: 1.3em; }
+  li { margin: 0.35em 0; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin: 1.2em 0; }
+  .note { background: var(--warnbg); color: var(--warn); border: 1px solid var(--warn); border-radius: 10px; padding: 14px 16px; margin: 1em 0; font-size: 0.95rem; }
+  a { color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.92rem; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+  th { background: var(--card); }
+  pre { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 0.88rem; }
+  .modecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 1.2em 0; }
+  .modecard h3 { margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>Supplier Setup Guide: Choosing Your Operation Mode</h1>
+  <p class="meta">For business owners setting up LoyaltyCards on their device &nbsp;·&nbsp; Version 1.0.3+11 &nbsp;·&nbsp; Last Updated: July 21, 2026</p>
+
+  <div class="note"><strong>Choose carefully:</strong> the mode cannot be changed after setup without resetting your business, which deletes all customer data. Take a few minutes to read this before you set up.</div>
+
+  <h2>Initial Setup Overview</h2>
+  <p>When you first open the LoyaltyCards Business app, you'll:</p>
+  <ol>
+    <li>Create your business profile (name, stamps required, branding)</li>
+    <li><strong>Select your Operation Mode</strong> &mdash; the most important decision</li>
+    <li>Create a backup (protects your customer data)</li>
+  </ol>
+
+  <h2>Understanding the Two Operation Modes</h2>
+
+  <div class="modecard">
+    <h3>Express Mode &mdash; Trust-Based, Speed-Focused</h3>
+    <p><strong>Perfect for:</strong> coffee shops, cafes, bakeries, fast food, quick-service restaurants.</p>
+    <p><strong>How it works:</strong> you print QR codes and tape them to your register. Customers scan codes themselves to add stamps &mdash; the codes never expire, print once and use forever. No equipment needed at checkout.</p>
+    <pre>First Visit:     Customer scans "Get Card" QR &rarr; Card appears in app
+Every Visit:     Customer scans "Add Stamp" QR &rarr; Stamp added
+Complete:        Customer scans "Redeem" QR &rarr; Card resets
+Time per visit:  ~2 seconds</pre>
+    <p><strong>Example &mdash; Joe's Coffee Shop:</strong> Joe prints two QR codes and tapes them to the register. Sarah scans once for her stamp (2 seconds), gets her coffee, and leaves &mdash; no interaction with Joe needed.</p>
+    <p><strong>Advantages:</strong> super fast, minimal tech (just printed paper), no equipment, self-service, frictionless.</p>
+    <p><strong>Limitations:</strong> relies on customer honesty (no cryptographic prevention); you set a cooldown between stamps (5&ndash;60 seconds, 30 default) but a determined customer could still scan repeatedly after each cooldown.</p>
+    <p><strong>Fraud prevention:</strong> you set a customer scan cooldown during setup (5&ndash;60 seconds, defaults to 30) enforcing a minimum wait between stamps per business. Honest customers won't notice it during normal visits.</p>
+  </div>
+
+  <div class="modecard">
+    <h3>Secure Mode &mdash; Cryptographically Validated, Fraud-Proof</h3>
+    <p><strong>Perfect for:</strong> luxury goods, spas, salons, premium services, high-value rewards.</p>
+    <p><strong>How it works:</strong> you keep an iPad or phone at checkout. You control the stamping process &mdash; tap a button to generate a time-limited QR, and each stamp is cryptographically signed with your private key. Codes expire after 2 minutes and can't be reused. You scan the customer's card to redeem.</p>
+    <pre>First Visit:     You tap "Issue Card" &rarr; QR appears on your screen
+                 Customer scans &rarr; Card appears in app (2-5 stamps)
+Every Visit:     You tap "Add Stamp" &rarr; Time-limited QR appears
+                 Customer scans &rarr; Stamps added (cryptographically signed)
+                 QR expires after 2 minutes
+Complete:        Customer shows completed card &rarr; You scan to redeem
+                 Card resets in customer's app
+Time per visit:  ~5-10 seconds</pre>
+    <p><strong>Example &mdash; Maria's Luxury Spa:</strong> Massages cost $200, so Maria can't afford fraud. She keeps an iPad at reception, taps "Add Stamp," and a time-limited QR appears for Lisa to scan. The stamp is cryptographically signed &mdash; it can't be faked or copied.</p>
+    <p><strong>Advantages:</strong> cryptographically secure (stamps cannot be forged); basic lifetime counters for Cards Issued/Stamped/Redeemed shown on your home screen (not a detailed per-transaction log or export); tamper-proof hash chain; complete control over when stamps are added and cards redeemed.</p>
+    <p><strong>Limitations:</strong> slightly slower (5&ndash;10 seconds per transaction); requires a device at checkout; QR codes must be refreshed every 2 minutes; you're responsible for backing up your encryption keys.</p>
+  </div>
+
+  <h2>Side-by-Side Comparison</h2>
+  <table>
+    <tr><th>Factor</th><th>Express Mode</th><th>Secure Mode</th></tr>
+    <tr><td>Setup Time</td><td>~5 minutes</td><td>~10 minutes</td></tr>
+    <tr><td>Cost</td><td>Nothing extra</td><td>Tablet/phone for checkout</td></tr>
+    <tr><td>Speed</td><td>~2 seconds</td><td>~5-10 seconds</td></tr>
+    <tr><td>QR Codes</td><td>Printed, static</td><td>Dynamic, expire after 2 min</td></tr>
+    <tr><td>Fraud Risk</td><td>Low (configurable 5-60s rate limit)</td><td>Near zero (cryptographic)</td></tr>
+    <tr><td>Control</td><td>Customer self-service</td><td>You control everything</td></tr>
+    <tr><td>Tamper Evidence</td><td>None</td><td>Cryptographic signatures + hash chain</td></tr>
+    <tr><td>Best Reward Value</td><td>$5-15</td><td>$50+</td></tr>
+    <tr><td>Customer Type</td><td>Regulars you trust</td><td>Anyone, premium clients</td></tr>
+    <tr><td>Complexity</td><td>Simple</td><td>Moderate</td></tr>
+  </table>
+
+  <h2>How to Decide</h2>
+  <h3>Quick Decision Tree</h3>
+  <pre>Q1: What's the reward value?
+  $5-20  -> EXPRESS MODE is better
+  $50+   -> SECURE MODE is better
+
+Q2: Do you need complete control?
+  No, customers can help themselves -> EXPRESS MODE
+  Yes, I control everything          -> SECURE MODE
+
+Q3: How many customers per day?
+  100+ (busy!)          -> EXPRESS MODE (speed matters)
+  5-20 (premium service) -> SECURE MODE (control matters)
+
+Q4: Can you dedicate a device?
+  No                  -> EXPRESS MODE
+  Yes, iPad at register -> SECURE MODE</pre>
+
+  <h3>Decision Framework</h3>
+  <p><strong>Choose Express Mode if:</strong> your rewards are low-value (coffee, $10 discount); you have high transaction volume; your customers are regulars you trust; you want zero setup complexity; you don't want equipment at checkout.</p>
+  <p><strong>Choose Secure Mode if:</strong> your rewards are high-value ($50+); you need complete fraud prevention; you want tamper-proof, cryptographically signed records; you can dedicate a device to the register; you want professional control of the process.</p>
+  <p><strong>Can't decide?</strong> Start with Express Mode (the default), monitor for any fraud attempts, and switch to Secure Mode later if needed &mdash; just remember switching later means a full reset and losing existing customer data.</p>
+
+  <h2>Changing Your Mode</h2>
+  <p><strong>Important:</strong> the operation mode cannot be changed after initial setup without a complete business reset (which deletes all customer data). You can create a second business profile with the other mode if you run multiple programs, or reset and start fresh (losing all customer data). Take the time to choose correctly the first time.</p>
+
+  <h2>Security Notes for Both Modes</h2>
+  <p><strong>Express Mode:</strong> you set a minimum wait between stamp scans during setup (5&ndash;60 seconds, defaults to 30); relies on honest customer behavior; only your staff can issue new cards; all stamps are timestamped.</p>
+  <p><strong>Secure Mode:</strong> each stamp is signed with your private key (cryptographically impossible to forge); stamps form a hash chain so any modification is detected; QR codes expire after 2 minutes; you control redemption with your device; every stamp is timestamped and hash-chained (not a browsable audit log in the app itself).</p>
+  <p><strong>Both modes:</strong> a baseline rate limit between stamp scans (Express Mode: you configure it, 5&ndash;60 seconds; Secure Mode: primarily protected by each QR's own 2-minute expiry); timestamp tracking for all operations; customer data encrypted on your device; no cloud storage or third-party servers.</p>
+
+  <h2>Face ID / Touch ID / Passcode Protection</h2>
+  <p>Two operations require biometric or passcode authentication to protect your private cryptographic keys:</p>
+  <ul>
+    <li><strong>Viewing Recovery Backup QR</strong> (Settings &rarr; Create Recovery Backup) &mdash; the backup QR contains your private keys, especially in Secure Mode, so authentication prevents unauthorized extraction.</li>
+    <li><strong>Creating a Device Clone QR</strong> (Settings &rarr; Clone to Another Device) &mdash; also contains your private keys; the clone QR is valid for 5 minutes and copies your entire business configuration to a new device.</li>
+  </ul>
+  <p>The app uses the strongest method available on your device (Face ID on supported iPhones, Touch ID on supported iPads), with your device passcode always available as a fallback if biometrics aren't set up.</p>
+
+  <h2>After You Choose</h2>
+  <ol>
+    <li><strong>Create a Recovery Backup (critical, either mode):</strong> Settings &rarr; Create Recovery Backup. Requires authentication. Print or save the backup QR securely &mdash; it contains your private keys.</li>
+    <li><strong>Configure your business:</strong> stamps required for a free item (typically 5&ndash;20), brand color, business icon.</li>
+    <li><strong>Express Mode only:</strong> print the QR codes the app provides and tape them to your register or counter. Keep backup printed copies.</li>
+    <li><strong>Secure Mode only:</strong> position your iPad/phone at checkout, keep it charged, and train staff on the tapping process.</li>
+  </ol>
+
+  <h2>Frequently Asked Questions</h2>
+  <p><strong>Can I change modes later?</strong> No, not without resetting your business (deletes all customer data). Choose carefully now.</p>
+  <p><strong>What if I'm not sure which mode?</strong> Start with Express Mode &mdash; it's the default and works well for most small, high-volume businesses.</p>
+  <p><strong>Is Secure Mode really unhackable?</strong> Secure Mode uses ECDSA P-256 cryptography (the same curve used in Bitcoin). Stamps cannot be forged, but always keep your backup secure.</p>
+  <p><strong>Can customers cheat Express Mode?</strong> The scan cooldown you set during setup (5&ndash;60 seconds, defaults to 30) makes mass fraud impractical. It's designed for honest customers in trust-based environments.</p>
+  <p><strong>What if my reward value is between $20-50?</strong> That's the sweet spot where either mode works. Choose based on your comfort level: Express for speed, Secure for control.</p>
+  <p><strong>Can I use both modes?</strong> Not on the same business &mdash; you'd need a second business profile for the other mode.</p>
+
+  <h2>Need Help?</h2>
+  <p>See the full <a href="user-guide.html">User Guide</a> for how the apps work end-to-end, or visit <a href="../support/">Support</a> to get in touch.</p>
+
+  <p class="meta" style="margin-top:3em;">Your choice of operation mode shapes the entire experience for your customers and staff &mdash; take a moment to choose the one that fits your business best.</p>
+</div>
+</body>
+</html>

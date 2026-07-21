@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Guide — LoyaltyCards</title>
+<meta name="description" content="Quick start guide for customers and businesses using LoyaltyCards and LoyaltyCards Business.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.25rem; margin-top: 2.4em; border-top: 1px solid var(--border); padding-top: 1em; }
+  h3 { font-size: 1.05rem; margin-top: 1.6em; }
+  h4 { font-size: 0.98rem; margin-top: 1.2em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.02em; }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+  ul, ol { padding-left: 1.3em; }
+  li { margin: 0.3em 0; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin: 1.2em 0; }
+  a { color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.9rem; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
+  th { background: var(--card); }
+  .qa { background: var(--card); border-radius: 8px; padding: 10px 14px; margin: 0.6em 0; }
+  .qa strong { display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>LoyaltyCards User Guide</h1>
+  <p class="meta">Quick Start Guide for Businesses &amp; Customers &nbsp;·&nbsp; Version 1.0.3+11 &nbsp;·&nbsp; Last Updated: July 21, 2026</p>
+
+  <h2>For Customers</h2>
+  <h3>Getting Started</h3>
+  <ol>
+    <li><strong>Download the Customer App</strong> from the App Store &mdash; no signup required, just open it.</li>
+    <li><strong>Get your first card</strong> &mdash; find a business's QR code at checkout, tap the camera icon, scan the "Get Loyalty Card" code. It appears in your wallet instantly.</li>
+    <li><strong>Collect stamps</strong> &mdash; every visit, scan the business's QR code. Stamps are added automatically.</li>
+    <li><strong>Redeem your reward</strong> &mdash; when a card is complete, show it to staff or scan the redemption QR. A new card is created automatically.</li>
+  </ol>
+  <div class="callout">No account, no email, no personal info needed &mdash; that's the whole point.</div>
+
+  <h3>App Lock (Optional)</h3>
+  <p>LoyaltyCards offers an optional Face ID/Touch ID app lock, available on any device with biometrics or a passcode. It's <strong>off by default</strong> &mdash; most users leave it off for convenience, but you can enable it in Settings &rarr; Security for extra privacy. Passcode fallback is always available.</p>
+
+  <h3>Using the Customer App</h3>
+  <p><strong>Your wallet:</strong> the home screen shows all your cards, sortable by Recent/Alphabetical/Progress, with search. Tap any card for stamp count, progress, stamp history, and business info.</p>
+
+  <h4>Adding Stamps</h4>
+  <p><strong>Express Mode businesses (self-service):</strong> scan the "Add Stamp" QR at checkout, stamp added instantly. Each business sets its own cooldown between stamps (5&ndash;60 seconds, 30 is the default) &mdash; if you scan too soon you'll need to wait. No staff interaction needed. <strong>Smart Routing</strong> automatically finds the right card for the business you scanned, even if a different card is open.</p>
+  <p><strong>Secure Mode businesses (staff-assisted):</strong> staff generates a QR on their device, you scan it, the stamp is validated and added. The QR expires after 2 minutes.</p>
+  <p>When a card is completed, a new card is automatically created for the same business &mdash; if a scan gives you more stamps than needed, the extra go onto the new card.</p>
+
+  <h4>Redeeming Rewards</h4>
+  <p><strong>Express Mode:</strong> scan the "Redeem" QR code at checkout &mdash; card resets immediately, new card auto-created.</p>
+  <p><strong>Secure Mode:</strong> show your completed card to staff, they scan it, validation happens on their device, card resets.</p>
+
+  <h3>Troubleshooting (Customer)</h3>
+  <div class="qa"><strong>Camera orientation is wrong/sideways</strong>Use the 90&deg;/180&deg; rotation buttons on the camera screen. Your preference is saved automatically and applied to every camera going forward &mdash; different devices (iPad vs iPhone) may need different settings.</div>
+  <div class="qa"><strong>Can't scan QR code</strong>Ensure camera permission is granted, good lighting helps, hold the phone steady, try moving closer/farther.</div>
+  <div class="qa"><strong>Stamp not added</strong>Express mode: you may be inside that business's cooldown window (5&ndash;60 seconds, set by them) &mdash; wait a moment and try again. Secure mode: the QR may have expired, ask staff for a new one.</div>
+  <div class="qa"><strong>Lost my cards</strong>Cards are stored locally on your device only. If your phone is lost, cards are lost too (like physical cards) &mdash; no personal data was ever exposed, since none was collected.</div>
+  <div class="qa"><strong>Device mismatch warning when redeeming</strong>Appears if the card was created on a different device (new phone, iCloud restore) &mdash; usually legitimate. The supplier decides whether to proceed.</div>
+
+  <h2>For Businesses (Suppliers)</h2>
+
+  <div class="callout"><strong>Choose carefully:</strong> the operation mode cannot be changed later without a full reset, which invalidates all customer cards.</div>
+
+  <h3>Express Mode &mdash; choose if:</h3>
+  <p>Low-value rewards ($5&ndash;15); high transaction volume; regular, trusted customers; coffee shop/cafe/quick service; want self-service stamping; don't need cryptographic tamper-proofing.</p>
+  <p><strong>Benefits:</strong> fastest (2 seconds/transaction), print QR codes once and use forever, no equipment, zero maintenance. <strong>Trade-off:</strong> rate limiting only (you set the cooldown, 5&ndash;60 seconds).</p>
+
+  <h3>Secure Mode &mdash; choose if:</h3>
+  <p>High-value rewards ($50+); need fraud prevention; want cryptographically tamper-proof records; luxury goods/services/spa; lower transaction volume; want to control redemption.</p>
+  <p><strong>Benefits:</strong> cryptographically secure, basic lifetime counters (Cards Issued/Stamped/Redeemed &mdash; not a detailed transaction log), tamper-proof validation, supplier-controlled redemption. <strong>Trade-off:</strong> requires a device at checkout, slightly slower.</p>
+  <p>See the full <a href="supplier-setup-guide.html">Supplier Setup Guide</a> for a detailed comparison and decision tree.</p>
+
+  <h3>Initial Setup</h3>
+  <ol>
+    <li><strong>Download the Business App</strong> from the App Store.</li>
+    <li><strong>Create your business profile</strong> &mdash; name, stamps required (5&ndash;20), brand color, icon.</li>
+    <li><strong>Select your operation mode</strong> &mdash; read carefully, this can't be changed without a reset.</li>
+    <li><strong>Create a backup (critical)</strong> &mdash; Settings &rarr; Create Recovery Backup, authenticate with Face ID/Touch ID/passcode, then use at least two of: Print, Share via Email, Save to Files. Without a backup, losing your device means every customer card becomes invalid and must be re-issued. With a backup, you restore to a new device and nothing customer-facing changes.</li>
+  </ol>
+
+  <h3>Daily Operations</h3>
+  <p><strong>Express Mode:</strong> generate a reusable "Add Stamp" QR (configure stamp value 1&ndash;7 and optional expiry), print or share it, and post it at checkout. Customers self-serve from there &mdash; nothing further needed from you day to day. Statistics are hidden in Express Mode on the home screen (tracked internally, just not shown).</p>
+  <p><strong>Secure Mode:</strong> tap "Issue Card" to generate a card QR (valid 5 minutes) for new customers. Tap "Add Stamp" for a time-limited QR (valid 2 minutes, 1&ndash;7 stamps) each visit. Tap "Redeem Card" and scan the customer's completed card when they're ready &mdash; validation happens automatically.</p>
+
+  <h3>Business Settings</h3>
+  <p>Gear icon on the home screen: business info, Backup &amp; Recovery (Create Recovery Backup, Clone to Another Device), app version, and a Danger Zone for resetting your business configuration (invalidates all customer cards &mdash; only for starting over).</p>
+
+  <h3>Understanding Your Backup</h3>
+  <p>A backup contains your business name/settings, your cryptographic keys (Secure Mode), and your Business ID. Without it, a lost device means you can no longer validate customer cards. To recover: install the app on a replacement device, tap "Recover Existing Business," and scan your backup QR &mdash; your business is restored with the exact same identity, and all existing customer cards keep working.</p>
+  <table>
+    <tr><th>Method</th><th>Accessibility</th><th>Security</th><th>Recommendation</th></tr>
+    <tr><td>Print</td><td>Physical only</td><td>High (lock it up)</td><td>Best</td></tr>
+    <tr><td>Email</td><td>Any device</td><td>Low (email is inherently less secure)</td><td>Okay</td></tr>
+    <tr><td>Files</td><td>Cloud/local</td><td>Medium-High</td><td>Good</td></tr>
+  </table>
+  <p><strong>Best practice:</strong> use Print + Files for redundancy. No special iOS permissions are required for any of these &mdash; they all use the standard system share sheet or print dialog.</p>
+
+  <h3>Setting Up Additional Devices (Clone)</h3>
+  <p>Useful for multiple checkout stations, or a manager + staff device. On the source device: Settings &rarr; Clone to Another Device, authenticate, and a clone QR appears with a 5-minute countdown. On the new device: "Clone from Another Device," scan the QR, done. Both devices then have identical, fully independent access &mdash; there's no "master" device. The clone QR contains your private keys, so only use this on devices you personally control, and never share it publicly.</p>
+
+  <h3>Troubleshooting (Business)</h3>
+  <div class="qa"><strong>Customer says stamp didn't work</strong>Express mode: they may still be inside your cooldown window (whatever you set, 5&ndash;60 seconds). Secure mode: the QR may have expired &mdash; generate a new one.</div>
+  <div class="qa"><strong>Lost my device</strong>With a backup: get a new device and restore from the backup QR. Without one: you'll need to reset and re-issue all cards.</div>
+  <div class="qa"><strong>Device mismatch warning when redeeming a card</strong>Usually legitimate (new phone, iCloud restore, multiple devices) &mdash; rarely a fraud attempt. Use your judgment; you can proceed or cancel.</div>
+  <div class="qa"><strong>Want to change mode</strong>Not currently possible without a full reset, which invalidates all customer cards.</div>
+  <div class="qa"><strong>Clone QR expired before I could scan it</strong>Generate a new one (Settings &rarr; Clone to Another Device) &mdash; have both devices ready before generating, since the timer is only 5 minutes.</div>
+
+  <h2>Tips &amp; Best Practices</h2>
+  <p><strong>Customers:</strong> add cards as you discover businesses, check progress regularly, redeem promptly. Don't try to rescan the same QR repeatedly (it's rate limited) or screenshot QR codes (they may expire by the time you use the screenshot).</p>
+  <p><strong>Businesses:</strong> create your backup immediately, before issuing any cards. Use more than one backup method. Test the full flow with your own device before launching to real customers. Never share your backup or clone QR publicly or post them on social media.</p>
+
+  <h2>Quick Reference</h2>
+  <table>
+    <tr><th>Customer Action</th><th>Location</th><th>Result</th></tr>
+    <tr><td>Add Card</td><td>Camera icon &rarr; Scan</td><td>New card in wallet</td></tr>
+    <tr><td>Add Stamp</td><td>Scan business QR</td><td>Stamp added</td></tr>
+    <tr><td>Redeem</td><td>Scan redeem QR or show card</td><td>Card resets</td></tr>
+    <tr><td>Delete Card</td><td>Swipe left</td><td>Card removed</td></tr>
+  </table>
+  <table>
+    <tr><th>Supplier Action</th><th>Location</th><th>Result</th></tr>
+    <tr><td>Issue Card</td><td>Home &rarr; Issue Card</td><td>QR for customer</td></tr>
+    <tr><td>Add Stamp</td><td>Home &rarr; Add Stamp</td><td>QR for customer</td></tr>
+    <tr><td>Redeem</td><td>Home &rarr; Redeem Card</td><td>Scan customer</td></tr>
+    <tr><td>Backup</td><td>Settings &rarr; Create Backup</td><td>Save business</td></tr>
+  </table>
+
+  <h2>Getting Help</h2>
+  <p><a href="supplier-setup-guide.html">Supplier Setup Guide</a> for choosing Express vs Secure Mode in depth, or the <a href="../support/">Support page</a> for FAQ, troubleshooting, and contact details.</p>
+
+  <p class="meta" style="margin-top:3em;">Privacy first, no personal data. Local storage only, everything stays on your device. Offline capable. Express or Secure &mdash; choose what fits your business, and back it up.</p>
+</div>
+</body>
+</html>

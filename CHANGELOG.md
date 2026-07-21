@@ -7,7 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.3.0+1] - 2026-04-21 - CURRENT
+## [1.0.3+11] - 2026-07-21 - CURRENT
+
+**Note:** this changelog was not kept up to date between v0.3.0+1 and v1.0.3+11 - every release in between (v1.0.0, v1.0.1+7, v1.0.2+8/9, v1.0.3+10) shipped without an entry here. Not backfilled retroactively; picking up from this release forward. See `docs/deployment/RELEASES.md` and git history for what actually happened in that gap.
+
+**Status:** Built from `develop`, not yet built/uploaded as an IPA. v1.0.3+10 (previous build) was uploaded to TestFlight and confirmed running on physical hardware.
+
+### Changed
+- Supplier onboarding: Express vs Secure Mode selection now shows each mode's `recommendedFor` guidance directly (e.g. "Recommended for coffee shops, restaurants, and low-value rewards with fast checkout") instead of a shorter, vaguer description - no longer requires tapping the info icon to get useful guidance
+- Added a persistent, always-visible warning below the mode selector: switching modes later requires a full business reset, which invalidates every card current customers hold. Previously this was only mentioned in the docs, not surfaced in the app itself at the decision point. The warning now also points to the info icon and the User Guide for more detail.
+- Expanded the tap-to-reveal info tooltip from a two-line summary to a fuller side-by-side comparison covering speed, equipment needed, fraud-protection mechanism, and recommended use case for each mode
+- File: `supplier_app/lib/screens/supplier/supplier_onboarding.dart`
+
+### Fixed
+- Both apps' `Info.plist` now declare `ITSAppUsesNonExemptEncryption = false`, so App Store Connect/Transporter self-declare export compliance correctly instead of prompting for a manual answer (which was answered incorrectly as "No encryption" on the first v1.0.2+8 upload)
+- All 74 app icon files (both apps) had their alpha channel flattened - Apple rejects a transparent large App Store icon
+- `_enableDeleteInRelease`/`_enableResetInRelease` feature flags (customer and supplier Settings screens) now correctly default to `false`, so the "Delete All Data"/"Reset Business Configuration" buttons are hidden in release builds as originally intended
+
+### Documentation
+- Published Privacy Policy, Terms of Service, Accessibility Statement, Support page, User Guide, and Supplier Setup Guide to a public GitHub Pages site (`site/`) - previously the only public presence was an accidental full-repo exposure via Jekyll's default rendering, which has been closed
+- Corrected several stale claims found while reviewing docs for publication: removed a "Save to Photos" backup reference (that flow was removed in v0.3.1), corrected a "1-hour" customer rate limit claim to the actual configurable 5-60 second cooldown (30s default), corrected QR/token expiry claims, renamed "Simple Mode" references to "Express Mode" to match the app's actual display name, and softened oversold "audit trail"/"analytics dashboard" claims to match what's actually shown to users
+- Terms of Service strengthened: explicit disclaimers for user input errors and falsified app data, and an explicit statement that suppliers - not LoyaltyCards - are responsible for verifying presented card/stamp data before issuing rewards (same standard as a paper loyalty card)
+
+---
+
+## [0.3.0+1] - 2026-04-21
 
 **Status:** ✅ Production - Deployed to TestFlight  
 **Release Branch:** releases/v0.3.0-build01

@@ -2,6 +2,9 @@
 
 **For business owners setting up LoyaltyCards on their device**
 
+Version 1.0.3+11  
+Last Updated: July 21, 2026
+
 ---
 
 ## 📱 Initial Setup Overview
@@ -20,7 +23,7 @@ This guide helps you choose the right operation mode for your business.
 
 LoyaltyCards supports two completely different approaches to loyalty cards. **Choose wisely - the mode cannot be changed without resetting your business.**
 
-### **Simple Mode** - Trust-Based, Speed-Focused
+### **Express Mode** - Trust-Based, Speed-Focused
 
 **Perfect for:** Coffee shops, cafes, bakeries, fast food, quick-service restaurants
 
@@ -57,11 +60,11 @@ Joe runs a busy coffee shop. Every customer buys one drink per day. He prints tw
 
 **Limitations:**
 - ⚠️ Relies on customer honesty (no cryptographic prevention)
-- ⚠️ Rate limiting (customers can only get 1 stamp per hour)
-- ⚠️ If a customer is determined to cheat, they could scan multiple times
+- ⚠️ Rate limiting (customers must wait between stamps - you set the cooldown, 5-60 seconds, 30 default)
+- ⚠️ If a customer is determined to cheat, they could still scan repeatedly after each cooldown
 
 **Fraud Prevention:**
-The app enforces a 1-hour rate limit - customers can only get one stamp per hour per business. This prevents rapid-fire stamping but honest customers won't hit this limit during normal visits.
+You set a customer scan cooldown during setup (5-60 seconds, defaults to 30) that enforces a minimum wait between stamps per business. This prevents rapid-fire duplicate scanning but honest customers won't notice it during normal visits.
 
 ---
 
@@ -73,7 +76,7 @@ The app enforces a 1-hour rate limit - customers can only get one stamp per hour
 - You keep an iPad or phone at your checkout desk
 - You control the stamping process - tap a button to generate a time-limited QR
 - Each stamp is cryptographically signed with your private key
-- QR codes expire after 1-2 minutes (can't be reused)
+- QR codes expire after 2 minutes (can't be reused)
 - You scan customer's card to redeem (complete control)
 
 **Customer Journey:**
@@ -92,39 +95,38 @@ Time per visit:  ⏱️ 5-10 seconds
 - ✅ High-value rewards ($50-500+ items like spa services, designer goods)
 - ✅ Luxury environment where fraud prevention is critical
 - ✅ Lower transaction volume (customers visit once a month)
-- ✅ You need complete control and audit trail
+- ✅ You need complete control and tamper-proof records
 - ✅ Premium customers who expect professional service
 
 **Real-World Example - Maria's Luxury Spa:**
-Maria runs a high-end spa. Massages cost $200. She can't afford fraud. She keeps an iPad at reception. When Lisa arrives for a $200 massage, Maria taps "Add Stamp" on the iPad. A time-limited QR code appears. Lisa scans it. The stamp is cryptographically signed - it can't be faked or copied. When Lisa completes her loyalty card after 5 visits ($1,000 spent), Maria scans Lisa's card to redeem. Maria has a complete audit trail for her premium customer.
+Maria runs a high-end spa. Massages cost $200. She can't afford fraud. She keeps an iPad at reception. When Lisa arrives for a $200 massage, Maria taps "Add Stamp" on the iPad. A time-limited QR code appears. Lisa scans it. The stamp is cryptographically signed - it can't be faked or copied. When Lisa completes her loyalty card after 5 visits ($1,000 spent), Maria scans Lisa's card to redeem, confident the record can't have been tampered with.
 
 **Advantages:**
 - 🔐 **Cryptographically secure** - stamps cannot be forged or faked
-- 📊 **Statistics and audit trail** - see validation success, timestamps, everything
+- 📊 **Basic lifetime counters** - Cards Issued/Stamped/Redeemed totals shown on your home screen (Secure Mode only; there's no detailed per-transaction log or export)
 - ✅ **Tamper-proof** - hash chain detects any modification
 - 🎫 **Complete control** - you decide when stamps are added and when cards are redeemed
 - 📝 **Professional** - perfect for high-value or premium environment
-- 💳 **Payment integration ready** - could verify card payments during redemption
 
 **Limitations:**
 - ⏱️ Slightly slower (5-10 seconds per transaction)
 - 📱 Requires device at checkout (iPad/phone stays at desk)
-- 🔄 QR codes expire (must refresh every 1-2 minutes, can't leave one on screen)
+- 🔄 QR codes expire (must refresh every 2 minutes, can't leave one on screen)
 - 🔑 Key management (backup your encryption keys)
 
 ---
 
 ## 📊 Side-by-Side Comparison
 
-| Factor | Simple Mode | Secure Mode |
+| Factor | Express Mode | Secure Mode |
 |--------|-------------|-------------|
 | **Setup Time** | 5 minutes | 10 minutes |
 | **Cost** | Nothing extra | Tablet/phone for checkout |
 | **Speed** | ⚡ 2 seconds | ⏱️ 5-10 seconds |
 | **QR Codes** | Printed, static | Dynamic, expire after 2 min |
-| **Fraud Risk** | Low (1-hour rate limit) | Near zero (cryptographic) |
+| **Fraud Risk** | Low (configurable 5-60s rate limit) | Near zero (cryptographic) |
 | **Control** | Customer self-service | You control everything |
-| **Audit Trail** | Basic | Complete with signatures |
+| **Tamper Evidence** | None | Cryptographic signatures + hash chain |
 | **Best Reward Value** | $5-15 | $50+ |
 | **Customer Type** | Regulars you trust | Anyone, premium clients |
 | **Complexity** | Simple | Moderate |
@@ -137,25 +139,25 @@ Maria runs a high-end spa. Massages cost $200. She can't afford fraud. She keeps
 
 ```
 Q1: What's the reward value?
-├─ $5-20 → SIMPLE MODE is better
+├─ $5-20 → EXPRESS MODE is better
 └─ $50+ → SECURE MODE is better
 
 Q2: Do you need complete control?
-├─ No, customers can help themselves → SIMPLE MODE
+├─ No, customers can help themselves → EXPRESS MODE
 └─ Yes, I control everything → SECURE MODE
 
 Q3: How many customers per day?
-├─ 100+ (busy!) → SIMPLE MODE (speed matters)
+├─ 100+ (busy!) → EXPRESS MODE (speed matters)
 └─ 5-20 (premium service) → SECURE MODE (control matters)
 
 Q4: Can you dedicate a device?
-├─ No → SIMPLE MODE
+├─ No → EXPRESS MODE
 └─ Yes, iPad at register → SECURE MODE
 ```
 
 ### Decision Framework
 
-**Choose SIMPLE MODE if:**
+**Choose EXPRESS MODE if:**
 - Your rewards are low-value (coffee, $10 discount)
 - You have high transaction volume (speed critical)
 - Your customers are regulars you trust
@@ -165,12 +167,12 @@ Q4: Can you dedicate a device?
 **Choose SECURE MODE if:**
 - Your rewards are high-value ($50+)
 - You need complete fraud prevention
-- You want an audit trail and statistics
+- You want tamper-proof, cryptographically signed records
 - You can dedicate a device to the register
 - You want professional control of the process
 
 **Can't Decide?**
-- Start with SIMPLE MODE (default)
+- Start with EXPRESS MODE (default)
 - Monitor for any fraud attempts
 - Switch to SECURE MODE later if needed
 
@@ -190,8 +192,8 @@ However, you can:
 
 ## 🔐 Security Notes for Both Modes
 
-### Simple Mode Security:
-- **Rate Limiting:** 5-second minimum between scans + 1 hour per stamp (prevents rapid fraud)
+### Express Mode Security:
+- **Rate Limiting:** you set a minimum wait between stamp scans during setup (5-60 seconds, defaults to 30) - prevents rapid duplicate fraud
 - **Customer Trust:** Relies on honest behavior (works well for regular, loyal customers)
 - **Physical Control:** Only your staff can issue new cards
 - **Timestamp Tracking:** All stamps are timestamped for your records
@@ -201,11 +203,11 @@ However, you can:
 - **Hash Chain:** Stamps form a chain - any modification is detected
 - **Time-Limited QR Codes:** Stamps expire after 2 minutes, can't be reused
 - **Supplier Verification:** You control redemption with your device
-- **Complete Audit Trail:** Every operation is logged with timestamp
+- **Timestamped Records:** Every stamp is timestamped and hash-chained (not a browsable audit log in the app itself)
 - **Key Backup:** Your private key is protected and backed up
 
 **Both modes include:**
-- ✅ 5-second rate limiting (one scan per 5 seconds)
+- ✅ Baseline rate limiting between stamp scans (Express Mode: you configure it, 5-60 seconds; Secure Mode: primarily protected by each QR's own 2-minute expiry)
 - ✅ Timestamp tracking for all operations
 - ✅ Customer data encrypted on your device
 - ✅ No cloud storage or third-party servers
@@ -257,7 +259,7 @@ The app automatically uses the strongest method available on your device:
 | Device Type | 1st Choice | 2nd Choice | 3rd Choice |
 |-------------|-----------|-----------|-----------|
 | iPhone 12+ | Face ID | - | Passcode |
-| iPhone 11 | - | - | Passcode |
+| iPhone 11 | Face ID | - | Passcode |
 | iPhone 10/X | Face ID | - | Passcode |
 | iPad Pro | Touch ID | - | Passcode |
 | iPad Air | Touch ID | - | Passcode |
@@ -302,7 +304,7 @@ This message is shown when the app first requests Face ID permission. It explain
    - Choose your brand color
    - Select business category/icon
 
-3. **Create QR Codes** (Simple Mode only)
+3. **Create QR Codes** (Express Mode only)
    - Print the QR codes provided by the app
    - Tape them to your register or counter
    - Keep backup printed copies
@@ -320,16 +322,16 @@ This message is shown when the app first requests Face ID permission. It explain
 A: No, not without resetting your business (deletes all customer data). Choose carefully now.
 
 **Q: What if I'm not sure which mode?**  
-A: Start with SIMPLE MODE - it's the default and works for 80% of businesses.
+A: Start with EXPRESS MODE - it's the default and works for 80% of businesses.
 
 **Q: Is Secure Mode really unhackable?**  
 A: Secure Mode uses ECDSA P-256 cryptography (same security as Bitcoin). Stamps cannot be forged, but always keep your backup secure.
 
-**Q: Can customers cheat Simple Mode?**  
-A: The 1-hour rate limit makes mass fraud impractical. It's designed for honest customers in trust-based environments.
+**Q: Can customers cheat Express Mode?**  
+A: The scan cooldown you set during setup (5-60 seconds, defaults to 30) makes mass fraud impractical. It's designed for honest customers in trust-based environments.
 
 **Q: What if my reward value is between $20-50?**  
-A: That's the sweet spot where either mode works. Choose based on your comfort level: Simple for speed, Secure for control.
+A: That's the sweet spot where either mode works. Choose based on your comfort level: Express for speed, Secure for control.
 
 **Q: Can I use both modes?**  
 A: Not on the same business. You'd need to create a second business profile for the other mode.

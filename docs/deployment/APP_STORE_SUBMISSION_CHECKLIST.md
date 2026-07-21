@@ -1,12 +1,14 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v1.0.2+8**  
+**LoyaltyCards v1.0.3+11**  
 **Customer App:** LoyaltyCards - Digital Stamps  
 **Supplier App:** LoyaltyCards Business  
 **Target Release:** TBD  
-**Last Updated:** July 20, 2026
+**Last Updated:** July 21, 2026
 
 **Status note:** This app has only ever been distributed via TestFlight beta — no version has gone further. An earlier internal tracker (`APP_STORE_MATERIALS_EXECUTION_TRACKER.md`) recorded a submission for v1.0.1+7 that did not actually happen (the required legal/support URLs didn't exist yet at the time). Treat every box below as unchecked-until-verified in App Store Connect directly, regardless of what any other document claims.
+
+**Version history since v1.0.2+8** (the version most of this checklist's content was originally verified against): v1.0.2+8's first upload had an incorrect export compliance answer (see the Export Compliance section) and was superseded before submission; v1.0.2+9 was a build-number-only bump to dodge a Transporter conflict; v1.0.3+10 was a proper version bump, **built, uploaded to TestFlight, and confirmed running on physical hardware**; v1.0.3+11 (current) adds clearer Express-vs-Secure Mode guidance to supplier onboarding (see `supplier_onboarding.dart`): the mode selection radio tiles show `recommendedFor` text instead of a shorter description, a persistent always-visible warning explains the mode choice can't be changed without a full reset (and now points to the info icon / User Guide for more detail), and the tap-to-reveal info tooltip was expanded into a fuller side-by-side comparison (speed, equipment, fraud protection, recommended use case). Not yet built/uploaded as of this checklist update.
 
 ---
 
@@ -14,11 +16,11 @@
 
 ### ✅ Code & Build Preparation
 
-- [x] **Final build number incremented** in pubspec.yaml (both apps) — `1.0.2+8`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
-- [x] **Version number confirmed** — v1.0.2+8 is the current `develop`/`main` version (not v1.0.0 — that number is stale from an earlier plan)
-- [x] **All code merged to `main` branch** — `main` and `develop` are equalized as of commit `5aa32c6`
-- [ ] **Release branch created** `releases/v1.0.2-build8` — not yet created
-- [ ] **Archive builds completed**
+- [x] **Final build number incremented** in pubspec.yaml (both apps) — `1.0.3+11`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
+- [x] **Version number confirmed** — v1.0.3+11 is the current `develop`/`main` version
+- [ ] **All code merged to `main` branch** — pending commit for this build (held back per explicit instruction while more changes land)
+- [ ] **Release branch created** `releases/v1.0.3-build11` — not yet created (note: `releases/v1.0.3-build10` already exists as the snapshot for the previous, TestFlight-tested build)
+- [ ] **Archive builds completed** for v1.0.3+11
   ```bash
   cd source/customer_app
   flutter clean && flutter pub get
@@ -30,9 +32,9 @@
   ```
 - [ ] **IPA files uploaded to App Store Connect** via Transporter
 - [ ] **Build processing complete** in App Store Connect (10-15 min wait)
-- [x] **All 264 automated tests passing** (131 shared + 87 customer + 46 supplier), verified 2026-07-20 against current `develop`/`main` — supersedes the "no build warnings" / "no compilation errors" items below as a stronger signal
-- [ ] **No build warnings or errors** — not yet verified via an actual `flutter build ipa --release` (only `flutter test`/`flutter analyze`-level checks done so far)
-- [ ] **TestFlight beta testing completed for *this* build** (v1.0.2+8 has never actually been uploaded to TestFlight — it exists only as committed source so far; the "beta tested" claim applies to earlier builds, not this one)
+- [x] **All 264 automated tests passing** (131 shared + 87 customer + 46 supplier), verified 2026-07-21 against current `develop`/`main` — supersedes the "no build warnings" / "no compilation errors" items below as a stronger signal
+- [x] **`flutter analyze` clean** on the changed onboarding file — no errors, only pre-existing-pattern deprecation info notices
+- [ ] **TestFlight beta testing completed for *this* build** (v1.0.3+11 has not been built/uploaded yet; v1.0.3+10 was tested and confirmed on hardware, but this build has new changes since)
 - [x] **Critical bugs resolved** (zero CRITICAL/HIGH defects open in `DEFECT_TRACKER.md`)
 
 ---

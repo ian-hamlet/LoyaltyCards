@@ -8,7 +8,7 @@
 
 **Status note:** This app has only ever been distributed via TestFlight beta — no version has gone further. An earlier internal tracker (`APP_STORE_MATERIALS_EXECUTION_TRACKER.md`) recorded a submission for v1.0.1+7 that did not actually happen (the required legal/support URLs didn't exist yet at the time). Treat every box below as unchecked-until-verified in App Store Connect directly, regardless of what any other document claims.
 
-**Version history since v1.0.2+8** (the version most of this checklist's content was originally verified against): v1.0.2+8's first upload had an incorrect export compliance answer (see the Export Compliance section) and was superseded before submission; v1.0.2+9 was a build-number-only bump to dodge a Transporter conflict; v1.0.3+10 was a proper version bump, **built, uploaded to TestFlight, and confirmed running on physical hardware**; v1.0.3+11 (current) adds clearer Express-vs-Secure Mode guidance to supplier onboarding (see `supplier_onboarding.dart`): the mode selection radio tiles show `recommendedFor` text instead of a shorter description, a persistent always-visible warning explains the mode choice can't be changed without a full reset (and now points to the info icon / User Guide for more detail), and the tap-to-reveal info tooltip was expanded into a fuller side-by-side comparison (speed, equipment, fraud protection, recommended use case). Not yet built/uploaded as of this checklist update.
+**Version history since v1.0.2+8** (the version most of this checklist's content was originally verified against): v1.0.2+8's first upload had an incorrect export compliance answer (see the Export Compliance section) and was superseded before submission; v1.0.2+9 was a build-number-only bump to dodge a Transporter conflict; v1.0.3+10 was a proper version bump, **built, uploaded to TestFlight, and confirmed running on physical hardware**; v1.0.3+11 (current) adds clearer Express-vs-Secure Mode guidance to supplier onboarding (see `supplier_onboarding.dart`): the mode selection radio tiles show `recommendedFor` text instead of a shorter description, a persistent always-visible warning explains the mode choice can't be changed without a full reset (and now points to the info icon / User Guide for more detail), and the tap-to-reveal info tooltip was expanded into a fuller side-by-side comparison (speed, equipment, fraud protection, recommended use case). Built and uploaded to TestFlight 2026-07-21 (`releases/v1.0.3-build11`); not yet confirmed running on physical hardware.
 
 ---
 
@@ -18,9 +18,9 @@
 
 - [x] **Final build number incremented** in pubspec.yaml (both apps) — `1.0.3+11`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
 - [x] **Version number confirmed** — v1.0.3+11 is the current `develop`/`main` version
-- [ ] **All code merged to `main` branch** — pending commit for this build (held back per explicit instruction while more changes land)
-- [ ] **Release branch created** `releases/v1.0.3-build11` — not yet created (note: `releases/v1.0.3-build10` already exists as the snapshot for the previous, TestFlight-tested build)
-- [ ] **Archive builds completed** for v1.0.3+11
+- [x] **All code merged to `main` branch** — committed and equalized, `main`/`develop` both at `5dcfeb5`
+- [x] **Release branch created** `releases/v1.0.3-build11` — created from `main` at `5dcfeb5`, pushed as a permanent snapshot
+- [x] **Archive builds completed** for v1.0.3+11 — built successfully
   ```bash
   cd source/customer_app
   flutter clean && flutter pub get
@@ -30,11 +30,11 @@
   flutter clean && flutter pub get
   flutter build ipa --release
   ```
-- [ ] **IPA files uploaded to App Store Connect** via Transporter
-- [ ] **Build processing complete** in App Store Connect (10-15 min wait)
+- [x] **IPA files uploaded to App Store Connect** via Transporter — both apps uploaded
+- [ ] **Build processing complete** in App Store Connect (10-15 min wait) — confirm in ASC
 - [x] **All 264 automated tests passing** (131 shared + 87 customer + 46 supplier), verified 2026-07-21 against current `develop`/`main` — supersedes the "no build warnings" / "no compilation errors" items below as a stronger signal
 - [x] **`flutter analyze` clean** on the changed onboarding file — no errors, only pre-existing-pattern deprecation info notices
-- [ ] **TestFlight beta testing completed for *this* build** (v1.0.3+11 has not been built/uploaded yet; v1.0.3+10 was tested and confirmed on hardware, but this build has new changes since)
+- [ ] **TestFlight beta testing completed for *this* build** — v1.0.3+11 built and uploaded to TestFlight 2026-07-21; not yet confirmed tested/running on physical hardware the way v1.0.3+10 was
 - [x] **Critical bugs resolved** (zero CRITICAL/HIGH defects open in `DEFECT_TRACKER.md`)
 
 ---
@@ -587,7 +587,7 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟢 Ready for submission mechanics — legal/support infrastructure, all decisions (pricing: both apps Free, contact phone, copyright), and all 10 screenshots (captured, QA'd, staged locally) are done. The app has been running in TestFlight/demos for a while, so this phase is submission prep, not first-time validation — a final sanity pass on the actual build going up is still sensible but isn't a separate blocker. What's left is mechanical: confirm actual App Store Connect state (app records, Developer Program status), create the release branch, build/upload the IPAs, enter metadata + screenshots into ASC, and submit.  
+**Document Status:** 🟢 v1.0.3+11 built, uploaded to TestFlight, and release-branch-snapshotted (`releases/v1.0.3-build11`). Legal/support infrastructure, all decisions (pricing: both apps Free, contact phone, copyright), and all 10 screenshots (captured, QA'd, staged locally) are done. What's left is mechanical: confirm this build is actually running on physical hardware, confirm App Store Connect processing is complete, enter the already-drafted metadata + screenshots into ASC, and submit for review.  
 **Maintained by:** Development Team  
 **Last Updated:** July 20, 2026
 

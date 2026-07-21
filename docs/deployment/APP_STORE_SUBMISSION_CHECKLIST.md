@@ -8,7 +8,7 @@
 
 **Status note:** This app has only ever been distributed via TestFlight beta — no version has gone further. An earlier internal tracker (`APP_STORE_MATERIALS_EXECUTION_TRACKER.md`) recorded a submission for v1.0.1+7 that did not actually happen (the required legal/support URLs didn't exist yet at the time). Treat every box below as unchecked-until-verified in App Store Connect directly, regardless of what any other document claims.
 
-**Version history since v1.0.2+8** (the version most of this checklist's content was originally verified against): v1.0.2+8's first upload had an incorrect export compliance answer (see the Export Compliance section) and was superseded before submission; v1.0.2+9 was a build-number-only bump to dodge a Transporter conflict; v1.0.3+10 was a proper version bump, **built, uploaded to TestFlight, and confirmed running on physical hardware**; v1.0.3+11 (current) adds clearer Express-vs-Secure Mode guidance to supplier onboarding (see `supplier_onboarding.dart`): the mode selection radio tiles show `recommendedFor` text instead of a shorter description, a persistent always-visible warning explains the mode choice can't be changed without a full reset (and now points to the info icon / User Guide for more detail), and the tap-to-reveal info tooltip was expanded into a fuller side-by-side comparison (speed, equipment, fraud protection, recommended use case). Built and uploaded to TestFlight 2026-07-21 (`releases/v1.0.3-build11`); not yet confirmed running on physical hardware.
+**Version history since v1.0.2+8** (the version most of this checklist's content was originally verified against): v1.0.2+8's first upload had an incorrect export compliance answer (see the Export Compliance section) and was superseded before submission; v1.0.2+9 was a build-number-only bump to dodge a Transporter conflict; v1.0.3+10 was a proper version bump, **built, uploaded to TestFlight, and confirmed running on physical hardware**; v1.0.3+11 (current) adds clearer Express-vs-Secure Mode guidance to supplier onboarding (see `supplier_onboarding.dart`): the mode selection radio tiles show `recommendedFor` text instead of a shorter description, a persistent always-visible warning explains the mode choice can't be changed without a full reset (and now points to the info icon / User Guide for more detail), and the tap-to-reveal info tooltip was expanded into a fuller side-by-side comparison (speed, equipment, fraud protection, recommended use case). **Built, uploaded to TestFlight, and confirmed running on 2 physical devices** 2026-07-21 (`releases/v1.0.3-build11`).
 
 ---
 
@@ -34,7 +34,7 @@
 - [ ] **Build processing complete** in App Store Connect (10-15 min wait) — confirm in ASC
 - [x] **All 264 automated tests passing** (131 shared + 87 customer + 46 supplier), verified 2026-07-21 against current `develop`/`main` — supersedes the "no build warnings" / "no compilation errors" items below as a stronger signal
 - [x] **`flutter analyze` clean** on the changed onboarding file — no errors, only pre-existing-pattern deprecation info notices
-- [ ] **TestFlight beta testing completed for *this* build** — v1.0.3+11 built and uploaded to TestFlight 2026-07-21; not yet confirmed tested/running on physical hardware the way v1.0.3+10 was
+- [x] **TestFlight beta testing completed for *this* build** — v1.0.3+11 built, uploaded to TestFlight, and confirmed running on 2 physical devices, 2026-07-21
 - [x] **Critical bugs resolved** (zero CRITICAL/HIGH defects open in `DEFECT_TRACKER.md`)
 
 ---
@@ -587,7 +587,7 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟢 v1.0.3+11 built, uploaded to TestFlight, and release-branch-snapshotted (`releases/v1.0.3-build11`). Legal/support infrastructure, all decisions (pricing: both apps Free, contact phone, copyright), and all 10 screenshots (captured, QA'd, staged locally) are done. What's left is mechanical: confirm this build is actually running on physical hardware, confirm App Store Connect processing is complete, enter the already-drafted metadata + screenshots into ASC, and submit for review.  
+**Document Status:** 🟢 v1.0.3+11 built, uploaded to TestFlight, release-branch-snapshotted (`releases/v1.0.3-build11`), and confirmed running on 2 physical devices. Legal/support infrastructure, all decisions (pricing: both apps Free, contact phone, copyright), and all 10 screenshots (captured, QA'd, staged locally) are done. What's left is mechanical: confirm App Store Connect processing is complete, enter the already-drafted metadata + screenshots into ASC, and submit for review.  
 **Maintained by:** Development Team  
 **Last Updated:** July 20, 2026
 

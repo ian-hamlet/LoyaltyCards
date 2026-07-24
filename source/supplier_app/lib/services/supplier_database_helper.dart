@@ -9,10 +9,24 @@ import 'package:shared/shared.dart';
 class SupplierDatabaseHelper {
   static final SupplierDatabaseHelper _instance = SupplierDatabaseHelper._internal();
   static Database? _database;
+  static String? _testDatabaseName; // Custom database name for testing
 
   factory SupplierDatabaseHelper() => _instance;
 
   SupplierDatabaseHelper._internal();
+
+  /// Reset singleton instance for testing.
+  /// Call this in test setUp() with a unique database name per test file -
+  /// without it, every test file sharing this singleton hits the same
+  /// on-disk database, and Dart's test runner executing files concurrently
+  /// causes real cross-file interference (races on insert/clearAllData).
+  static Future<void> resetForTesting({String? testDatabaseName}) async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+    _testDatabaseName = testDatabaseName;
+  }
 
   /// Get database instance (creates if doesn't exist)
   /// HP-2: Added timeout protection to prevent indefinite hangs
@@ -43,7 +57,7 @@ class SupplierDatabaseHelper {
   Future<void> _attemptDatabaseRecovery() async {
     try {
       final databasesPath = await getDatabasesPath();
-      final path = join(databasesPath, 'loyalty_cards_supplier.db');
+      final path = join(databasesPath, _testDatabaseName ?? 'loyalty_cards_supplier.db');
       final file = File(path);
       
       if (await file.exists()) {
@@ -61,7 +75,7 @@ class SupplierDatabaseHelper {
   /// Initialize database with schema
   Future<Database> _initDatabase() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, 'loyalty_cards_supplier.db');
+    final path = join(databasesPath, _testDatabaseName ?? 'loyalty_cards_supplier.db');
 
     return await openDatabase(
       path,
@@ -257,7 +271,7 @@ class SupplierDatabaseHelper {
   /// Create a backup copy of the database file
   Future<String> _createDatabaseBackup(int version) async {
     final databasesPath = await getDatabasesPath();
-    final sourcePath = join(databasesPath, 'loyalty_cards_supplier.db');
+    final sourcePath = join(databasesPath, _testDatabaseName ?? 'loyalty_cards_supplier.db');
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final backupPath = join(databasesPath, 'backup_supplier_v${version}_$timestamp.db');
     
@@ -278,7 +292,7 @@ class SupplierDatabaseHelper {
   /// Restore database from backup
   Future<void> _restoreDatabaseBackup(String backupPath) async {
     final databasesPath = await getDatabasesPath();
-    final targetPath = join(databasesPath, 'loyalty_cards_supplier.db');
+    final targetPath = join(databasesPath, _testDatabaseName ?? 'loyalty_cards_supplier.db');
     
     // Close current connection
     if (_database != null) {
@@ -387,7 +401,7 @@ class SupplierDatabaseHelper {
   /// Delete database file (complete reset)
   Future<void> deleteDatabase() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, 'loyalty_cards_supplier.db');
+    final path = join(databasesPath, _testDatabaseName ?? 'loyalty_cards_supplier.db');
     AppLogger.database('Deleting database file: $path');
     await databaseFactory.deleteDatabase(path);
     _database = null;

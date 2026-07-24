@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 import 'operation_mode.dart';
+import '../utils/signature_format.dart';
 
 /// Base class for all QR token types
 abstract class QRToken {
@@ -365,7 +366,15 @@ class StampToken extends QRToken {
   /// unverified stamp rows. Must match the signing side exactly - see
   /// QRTokenGenerator.generateStampToken in supplier_app.
   String getSignatureData() {
-    return '$cardId:$stampNumber:$timestamp:$previousHash:$stampCount:${expiryDate ?? ""}:${scanInterval ?? ""}';
+    return SignatureFormat.stampChainData(
+      cardId: cardId,
+      stampNumber: stampNumber,
+      timestampMs: timestamp,
+      previousHash: previousHash,
+      stampCount: stampCount,
+      expiryDate: expiryDate,
+      scanInterval: scanInterval,
+    );
   }
 
   /// Validate token structure
@@ -543,7 +552,11 @@ class RedemptionToken extends QRToken {
 
   /// Data string used for signature verification
   String getSignatureData() {
-    return '$cardId:$stampsRedeemed:$timestamp';
+    return SignatureFormat.redemptionTokenData(
+      cardId: cardId,
+      stampsRedeemed: stampsRedeemed,
+      timestampMs: timestamp,
+    );
   }
 
   /// Validate token structure

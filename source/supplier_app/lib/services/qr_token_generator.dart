@@ -118,10 +118,17 @@ class QRTokenGenerator {
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
-    // Create signature data for first stamp
-    // V-010 fix: stampCount/expiryDate/scanInterval are now signed - must
-    // match StampToken.getSignatureData() exactly.
-    final signatureData = '$cardId:$stampNumber:$timestamp:$previousHash:$stampCount:${expiryDate ?? ""}:${scanInterval ?? ""}';
+    // Create signature data for first stamp - single source of truth in
+    // SignatureFormat.stampChainData, shared with StampToken.getSignatureData()
+    final signatureData = SignatureFormat.stampChainData(
+      cardId: cardId,
+      stampNumber: stampNumber,
+      timestampMs: timestamp,
+      previousHash: previousHash,
+      stampCount: stampCount,
+      expiryDate: expiryDate,
+      scanInterval: scanInterval,
+    );
     
     // Get private key and sign
     final privateKey = await _keyManager.getPrivateKey(businessId);

@@ -669,8 +669,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       return;
     }
 
-    // Create signature: cardId:stampsRedeemed:timestamp
-    final signatureData = '$cardId:$stamps:${now.millisecondsSinceEpoch}';
+    // Signature data - single source of truth in SignatureFormat.redemptionTokenData,
+    // shared with RedemptionToken.getSignatureData()
+    final signatureData = SignatureFormat.redemptionTokenData(
+      cardId: cardId,
+      stampsRedeemed: stamps,
+      timestampMs: now.millisecondsSinceEpoch,
+    );
     final signature = await keyManager.signData(signatureData, privateKey);
     
     if (signature == null) {

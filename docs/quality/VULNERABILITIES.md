@@ -916,9 +916,10 @@ P2P architecture means:
 - ✅ **CRITICAL — FIXED (2026-07-25, `feature/SecurityReview`):** 3 (V-010, V-011, V-012)
 - ✅ **HIGH — FIXED:** 3 (V-013, V-014, V-016)
 - 📋 **HIGH — BY DESIGN:** 1 (V-015)
-- 🟡 **MEDIUM/LOW/INFORMATIONAL:** 7 (see "Additional Observations" below)
+- ✅ **MEDIUM/LOW/INFORMATIONAL — FIXED:** 3 of 6 (see "Additional Observations" below)
+- 🟡 **MEDIUM/LOW/INFORMATIONAL — documented only:** 3 of 6
 
-**Update 2026-07-25:** All seven findings from this review are now resolved - V-010 through V-014 and V-016 fixed in code, V-015 resolved as an accepted by-design trade-off (consistent with V-001's precedent). `flutter analyze` clean (no errors) and `flutter test` green across all three packages (shared 151, customer_app 87, supplier_app 50) after every fix. See each entry below for exactly what changed.
+**Update 2026-07-25:** All seven main findings from this review are resolved - V-010 through V-014 and V-016 fixed in code, V-015 resolved as an accepted by-design trade-off (consistent with V-001's precedent). Half of the lower-priority observations are also fixed, plus a full missing-test-coverage pass across both apps (329 tests total, up from 179 at the start of this review). `flutter analyze` clean (no errors) and `flutter test` green across all three packages after every change - see each entry below for exactly what changed, and the "Test Coverage Added" section for the full list of new test files.
 
 ---
 
@@ -1126,17 +1127,46 @@ No code changes made. If the in-app/marketing copy anywhere frames the scan cool
 
 ---
 
-### Additional Observations (Medium/Low/Informational — not blocking, tracked for a later pass)
+### Additional Observations (Medium/Low/Informational)
 
-These were found during the same review but are lower priority than V-010–V-016 and are not yet assigned fix-tracking status:
+Found during the same review, lower priority than V-010–V-016. Three of the six were fixed on 2026-07-25 alongside the missing-test-coverage pass below (items 3, 4, 6 per the numbering used when this list was reviewed with the user); the remaining three are documented only, tracked for a later pass.
+
+**Fixed (2026-07-25):**
+
+- ✅ **`SupplierConfigBackup.fromQRString` now wraps parsing in try/catch**, rethrowing as a well-typed `FormatException` with context instead of letting a raw JSON/cast error propagate. Kept the throwing contract (its one caller already handles it) rather than switching to a nullable return, to avoid an unnecessary caller-side restructure. *(shared/lib/models/supplier_config_backup.dart)*
+- ✅ **`flutter_secure_storage`'s iOS Keychain accessibility tightened** from `first_unlock` to `first_unlock_this_device` — this Keychain item no longer migrates via an encrypted iTunes/iCloud device backup/restore, closing a side-channel around the app's own explicit, biometric-gated Recovery Backup / Clone Device QR flow (those flows are unaffected - they re-derive and re-store keys via a scanned QR, independent of this setting). Also verified the "backup save location defaults to public storage" half of this observation: on iOS (this app's actual shipping platform), `saveToFiles` already writes to the app's private sandboxed Documents directory and immediately opens the system share sheet for the user to pick the real destination - the public-directory default is Android-specific code (`/storage/emulated/0/Download`), and this app doesn't currently build/ship for Android. *(supplier_app/lib/services/key_manager.dart)*
+- ✅ **`SignatureFormat` rebuilt from scratch and actually wired in.** Investigation found it was worse than "mostly unused" - every method in it was 100% dead in production, and its only caller (`StampSigner`, a complete alternate stamp-signing implementation) was *also* dead code, never instantiated outside its own test. Worse, `StampSigner.calculateStampHash` used a different hash-chain algorithm than what production actually uses (`previousHash` = the raw prior signature, not a SHA-256 digest of stamp fields) - a real risk if anyone had wired it in later, since it would have silently failed to verify genuine production stamps. Removed `StampSigner` and its test (`stamp_signer_test.dart`, 13 tests - all exercising the abandoned algorithm, not real coverage). Replaced `SignatureFormat` with two accurate methods (`stampChainData`, `redemptionTokenData`) and routed the actual live duplicated string-literals through them: `StampToken`/`RedemptionToken.getSignatureData()` and the corresponding signing code in `qr_token_generator.dart`/`supplier_redeem_card.dart` now share one source of truth instead of hand-duplicated strings that could drift. *(shared/lib/utils/signature_format.dart, shared/lib/models/qr_tokens.dart, supplier_app/lib/services/qr_token_generator.dart, supplier_app/lib/screens/supplier/supplier_redeem_card.dart)*
+
+**Bonus fix found while adding test coverage:** `SupplierDatabaseHelper` had no `resetForTesting`-style test-database-name support (unlike `customer_app`'s `DatabaseHelper`, which already had one). Every supplier_app test touching the database shared the same on-disk singleton file, and Dart's test runner executing files concurrently caused real cross-file interference - confirmed via a reproducible failure (`business_repository_test.dart`'s replay-redemption test failing only when the full suite ran together, never in isolation). Added the same `resetForTesting(testDatabaseName:)` mechanism `DatabaseHelper` already had. *(supplier_app/lib/services/supplier_database_helper.dart)*
+
+**Still documented only, not fixed:**
 
 - **Expiry checked against local device clock, not a trusted source.** The 2-minute stamp / 5-minute issuance expiry windows (`token_validator.dart:52-59, 139-147`) compare `DateTime.now()` (unattested) against the *signed* `token.timestamp` — the timestamp itself can't be forged, but rolling the verifying device's own clock backward shrinks the computed `age` and can make an otherwise-stale token appear fresh. Narrower than V-004's original scope (which addressed forward-clock rate-limit bypass and signature-protected stamp timestamps, both still valid conclusions).
 - **Device-mismatch "Proceed Anyway" applies no *additional* restriction beyond the supplier's own judgment** (`supplier_redeem_card.dart:679-745`) — still advisory/discretionary per V-005's original design. Update: no longer a compounding gap - since V-012/V-013 fixed, the stamp-chain verification and duplicate-redemption check still run on the "proceed anyway" path (the `token` is passed through), so a supplier choosing to proceed despite a device mismatch still can't push through fabricated or already-redeemed stamps, only a genuinely-signed, not-yet-redeemed card from a different device (the actual scenario the warning is meant to flag for human judgment).
-- `SupplierConfigBackup.fromQRString` has no internal try/catch (currently safe only because its one caller wraps it) — latent trap for future call sites.
-- Recovery/clone QR (embeds raw private key) defaults to public Downloads/Files on save; `flutter_secure_storage` uses `KeychainAccessibility.first_unlock` rather than a `*_this_device` variant, making stored keys eligible for restoration via OS-level encrypted backup onto different hardware.
 - Release-build logs include full exception text and, in several `backup_storage_service.dart` paths, stack traces — internal structure/error detail exposure, not confirmed secret leakage.
-- `SignatureFormat` (`shared/lib/utils/signature_format.dart`) is mostly dead/unused; the real signed-data formats are hand-duplicated ad hoc in `qr_tokens.dart` and `qr_token_generator.dart` with different field sets, a maintenance/drift risk independent of the exploits above.
-- No SQL injection anywhere (parameterized queries throughout), no plaintext secrets in `shared_preferences`, path-traversal properly sanitized in file saves, no ATS weakening, no deep-link attack surface, and QR/JSON parsing is empirically resistant to size/depth DoS well beyond real QR code capacity — all confirmed clean, included here for completeness rather than as findings.
+
+No SQL injection anywhere (parameterized queries throughout), no plaintext secrets in `shared_preferences`, path-traversal properly sanitized in file saves, no ATS weakening, no deep-link attack surface, and QR/JSON parsing is empirically resistant to size/depth DoS well beyond real QR code capacity — all confirmed clean.
+
+---
+
+### Test Coverage Added (2026-07-25)
+
+Closed the missing-coverage backlog noted in `docs/project-management/PACKAGE_UPDATE_PLAN.md`'s "Deferred" section:
+
+| Area | New test file | Tests |
+|---|---|---|
+| `customer_app/lib/services/database_helper.dart` | `test/services/database_helper_operations_test.dart` | 4 |
+| `customer_app/lib/services/stamp_repository.dart` | `test/services/stamp_repository_test.dart` | 14 |
+| `customer_app/lib/services/transaction_repository.dart` | `test/services/transaction_repository_test.dart` | 8 |
+| `customer_app/lib/services/qr_token_generator.dart` | `test/services/qr_token_generator_test.dart` | 7 |
+| `supplier_app/lib/services/supplier_database_helper.dart` | `test/services/supplier_database_helper_test.dart` | 5 |
+| `supplier_app/lib/services/qr_token_generator.dart` | `test/services/qr_token_generator_test.dart` | 10 (real end-to-end signing via `flutter_secure_storage`'s official in-memory test fake, not just the model layer) |
+| `supplier_app/lib/screens/supplier/supplier_onboarding.dart` (mode selection UI) | `test/screens/supplier_onboarding_mode_selection_test.dart` | 6 (widget tests) |
+| `supplier_app/lib/services/business_repository.dart` (V-013, added earlier) | `test/services/business_repository_test.dart` | 4 |
+
+Database migration/backup/restore (`_onUpgradeWithSafety`, `_createDatabaseBackup`, etc. in both apps) remains untested - these are private methods only reachable via a real version bump on an existing DB file, and fabricating a fake "old schema" without access to real historical versions would test invented behavior rather than the real migration path. Noted as a known gap, not attempted.
+
+Final count after this pass: `shared` 151 tests, `customer_app` 120 tests, `supplier_app` 58 tests (329 total) — all passing, `flutter analyze` clean across all three packages.
 
 ---
 
@@ -1149,4 +1179,4 @@ All seven findings closed. Final verification: `flutter analyze` clean (no error
 
 **Remaining (not part of this review's scope, tracked separately):** the "Additional Observations" list above (Medium/Low/Informational, not blocking) and the pre-existing `SignatureFormat` drift-risk cleanup noted there.
 
-**Document Version:** 3.0 (2026-07-25, all V-010–V-016 fixes recorded)
+**Document Version:** 4.0 (2026-07-25, all V-010–V-016 fixes + 3 of 6 lower-priority observations + full test coverage pass recorded)

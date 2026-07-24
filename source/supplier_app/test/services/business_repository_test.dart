@@ -14,11 +14,12 @@ void main() {
   databaseFactory = databaseFactoryFfi;
 
   late BusinessRepository repository;
-  final dbHelper = SupplierDatabaseHelper();
+  late SupplierDatabaseHelper dbHelper;
 
   setUp(() async {
+    await SupplierDatabaseHelper.resetForTesting(testDatabaseName: 'test_business_repository.db');
+    dbHelper = SupplierDatabaseHelper();
     repository = BusinessRepository();
-    await dbHelper.clearAllData();
     // redemptions.business_id has a FOREIGN KEY constraint against business.id
     await repository.insertBusiness(Business(
       id: 'business-001',

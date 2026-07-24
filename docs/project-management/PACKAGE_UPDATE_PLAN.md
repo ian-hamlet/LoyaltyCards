@@ -1,8 +1,9 @@
 # Package Update Plan
 
-**Status:** Planning
+**Status:** In progress — Phases 0-1 complete
 **Branch:** `feature/packageUpdate`
 **Date:** 2026-07-24
+**Version:** Not yet assigned. This work has not been bumped to a new version number — a version bump (4 files, per project convention) will be decided once we know whether this ships as its own release or folds into the next feature release (see Recommended plan / Verification checklist).
 **Context:** v1.0.3+11 has been submitted for App Store review. This plan captures a dependency audit of `shared`, `customer_app`, and `supplier_app` done afterward, to evaluate package updates before the next release cycle.
 
 ## Scope
@@ -58,7 +59,8 @@ Two real issues found:
 
 1. **`share_plus` is major-version-capped in `supplier_app`.** Current constraint `^12.0.2` cannot reach 13.3.0 without editing `pubspec.yaml`. This is the one direct dependency with real breaking-change risk — share_plus has changed its `Share.share()` API surface across majors before. Needs its own focused review, not a blanket `flutter pub upgrade --major-versions`. share_plus is used in the supplier app's backup/clone-device flow.
 
-2. **`win32` resolves to two different versions across the apps' dependency graphs** (transitive, not a direct dep): `customer_app` resolves it to 6.0.1→6.3.0; `supplier_app` is stuck at 5.15.0. Root cause: `supplier_app`'s `flutter_secure_storage` (10.0.0) pulls in `flutter_secure_storage_windows` 4.1.0, which caps `win32` at 5.x. Bumping `flutter_secure_storage` to 10.3.1 should pull `flutter_secure_storage_windows` 4.2.2, resolving `win32` up to 6.3.0. Only matters for a Windows build target; irrelevant to the iOS App Store release, but worth closing so the two apps' lockfiles don't silently diverge on a shared plugin family.
+2. **`win32` resolves to two different versions across the apps' dependency graphs** (transitive, not a direct dep): `customer_app` resolves it to 6.0.1→6.3.0; `supplier_app` is stuck at 5.15.0. Root cause: `supplier_app`'s `flutter_secure_storage` (was 10.0.0) pulls in `flutter_secure_storage_windows` 4.1.0, which caps `win32` at 5.x.
+   **Update after Phase 1:** bumping `flutter_secure_storage` to 10.3.1 did *not* resolve this as expected. `flutter pub outdated` still shows `flutter_secure_storage_windows`/`win32` as "Resolvable" to 4.2.2/6.3.0 but not "Upgradable" — something else in the graph (likely `share_plus` 12.x, still pinned pending Phase 2) is holding pub's solver back from taking it via a plain `flutter pub upgrade`. Would need `flutter pub upgrade --major-versions` or a `dependency_overrides` entry to force it. Only matters for a Windows desktop build target, irrelevant to the iOS App Store release — deferred rather than forced. See Phase 3 below.
 
 No other cross-package conflicts — nothing failing to resolve, no two direct deps demanding incompatible transitive versions.
 
@@ -66,7 +68,7 @@ No other cross-package conflicts — nothing failing to resolve, no two direct d
 
 Checked every direct dependency in both apps' `pubspec.yaml` against actual `import 'package:...'` usage in `lib/`. Found genuinely dead direct dependencies — declared, but nothing in the app imports them:
 
-### `customer_app` — 5 unused direct dependencies
+### `customer_app` — 5 unused direct dependencies (removed in Phase 0)
 
 | Package | Declared as | Evidence |
 |---|---|---|
@@ -76,7 +78,7 @@ Checked every direct dependency in both apps' `pubspec.yaml` against actual `imp
 | `google_fonts` | `^8.0.2` | No import anywhere, no `fontFamily`/`GoogleFonts.*` usage in `main.dart` or theme setup. App uses the default Material font. |
 | `cupertino_icons` | `^1.0.6` | No `CupertinoIcons.*` usage anywhere — confirmed the app uses Material `Icons.*` exclusively (66 usages). Standard leftover from the Flutter project template. |
 
-### `supplier_app` — 2 unused direct dependencies
+### `supplier_app` — 2 unused direct dependencies (removed in Phase 0)
 
 | Package | Declared as | Evidence |
 |---|---|---|
@@ -97,24 +99,44 @@ Reviewed each direct dependency against what's currently the de facto standard c
 
 No other replacement candidates identified — the existing package choices are already aligned with ecosystem standards.
 
+## Part 5: Lint findings and test coverage (post-Phase 1 review)
+
+After Phase 1, `flutter analyze` was run across all three packages and categorized (179 total issues: 35 shared, 44 customer_app, 100 supplier_app). Most were mechanical/cosmetic (unused imports, `withOpacity`→`withValues`, doc-comment formatting, `use_super_parameters`) and are **deferred** — see below. A few were real, and have been fixed:
+
+### Fixed now
+
+- **`stamp_signer_test.dart` had a broken `setUp()`.** Written as a bare `setUp() { ... }` function declaration instead of `setUp(() { ... });` — never actually registered with the `test` package, so `stampSigner`/`keyManager` were never reset between tests. One-line fix (`supplier_app/test/services/stamp_signer_test.dart`).
+- **Two `dead_code`/`dead_null_aware_expression` findings in `shared/lib/models/supplier_config_backup.dart:52,90`** (`business.privateKey ?? ''`) — confirmed `Business.privateKey` is a non-nullable `String`, so the fallback was genuinely unreachable. Removed.
+- **Two `unreachable_switch_default` findings** (`shared/lib/exceptions/backup_exception.dart`, `supplier_app/lib/models/backup_result.dart`) — both enum switches already had an explicit `case ... unknown:` covering every value; the trailing `default:` was dead. Removed.
+- **New direct test for `shared/lib/utils/crypto_utils.dart`** (`shared/test/utils/crypto_utils_test.dart`, 9 tests) — this is the actual ECDSA P-256/SHA-256 signature verification declared to Apple in the export-compliance packet, and it previously had no dedicated coverage (only indirect, and buggy, coverage via the `stamp_signer_test.dart` issue above). New tests generate real key pairs and signatures via `pointycastle` (mirroring `KeyManager`'s exact wire encoding) and cover: valid signature accepted, tampered data rejected, wrong public key rejected, empty/truncated/corrupted signature rejected without throwing, malformed public key rejected without throwing, determinism.
+- **12 genuinely unguarded `use_build_context_synchronously` sites in `supplier_app/lib/screens/supplier/recovery_backup_screen.dart`** (`_generateBackup`, `_printBackup`, `_shareViaEmail`, `_saveToFiles`) — unlike every other flagged site in the app (which already had a `mounted` check, just not in the exact idiom the linter fully trusts), these four methods called `setState`/`AppFeedback.error`/`AppFeedback.success` after an `await` with **no** `mounted` check at all. This is the backup/recovery QR screen — if the user navigated away mid-generation or mid-export, this could throw a "setState() called after dispose()" or use-after-unmount error. Added `if (!mounted) return;` guards after each await, in both the success and catch paths.
+- **1 more genuine gap in `supplier_app/lib/screens/supplier/supplier_redeem_card.dart:735`** — used `context` after an awaited `showDialog` with no guard. Fixed the same way.
+
+Verified after each fix: `flutter analyze` — no errors in any package (shared: 35→30 issues, supplier_app: 100→88 issues, customer_app unchanged at 44 — all remaining issues are the deferred cosmetic category below); `flutter test` — all green (shared 140 including the 9 new crypto tests, customer_app 87, supplier_app 46).
+
+### Deferred — revisit after first pass at package updates (Phases 2-3)
+
+- **Remaining `use_build_context_synchronously` info-level findings** (4 in supplier_app, 6 in customer_app) — every remaining site was checked individually and already has a `mounted`/`if (mounted)` guard; the linter's stricter idiom preference (wanting `context.mounted` or a specific guard-clause shape) isn't flagging a live risk. Low priority.
+- **Bulk cosmetic lint cleanup** — unused imports/fields/variables, `deprecated_member_use` (`withOpacity`→`withValues()`, plus the `Share`/`shareXFiles`→`SharePlus` ones that overlap with Phase 2's share_plus migration), `use_super_parameters`, doc-comment formatting, unnecessary string-interpolation braces, `prefer_final_fields`, empty statements, non-null assertions, `asset_directory_does_not_exist`. Zero functional risk, good for a single batch pass later.
+- **New test coverage for**: `shared` has no other gaps as critical as `crypto_utils.dart` was. `customer_app`: `database_helper.dart` (path/migration/backup/restore), `stamp_repository.dart`, `transaction_repository.dart`, `qr_token_generator.dart` (would be a good place to pin the 2-minute/5-minute expiry constants that have caused doc-drift all session). `supplier_app`: `supplier_database_helper.dart`, `business_repository.dart`, `qr_token_generator.dart`, and the brand-new `supplier_onboarding.dart` mode-selection UI (v1.0.3+11) which currently has zero coverage of any kind.
+
 ## Recommended plan
 
-1. **Phase 0 — remove unused dependencies.** Delete the 5 unused declarations from `customer_app/pubspec.yaml` and 2 from `supplier_app/pubspec.yaml` (Part 3). Run `flutter pub get` in each, then `flutter analyze` to confirm nothing was silently relying on a transitive re-export. Zero functional risk; do this first since it shrinks what Phase 1 needs to touch.
-2. **Phase 1 — low-risk patch/minor bumps.** Everything in the Part 1 tables above except `share_plus`. Run `flutter pub upgrade` in each of the three packages, then `flutter analyze` and `flutter test` in each. Low regression risk; safe to batch together.
-3. **Phase 2 — `share_plus` major bump (supplier_app only).** Review the v12→v13 changelog/breaking changes first, update the call site(s) in the backup/clone-device flow if the API changed, bump the pubspec constraint, then manually re-test that flow on a physical device (matches the pattern already used for other supplier_app screenshots/testing this cycle).
-4. **Phase 3 — `win32` cleanup.** Falls out automatically once `flutter_secure_storage` is bumped in Phase 1; no separate action expected, just confirm via `flutter pub deps` after Phase 1 that `win32` now resolves to 6.3.0 in `supplier_app` too.
+1. ✅ **Phase 0 — remove unused dependencies.** Deleted the 5 unused declarations from `customer_app/pubspec.yaml` and 2 from `supplier_app/pubspec.yaml` (Part 3). `flutter pub get` clean in both, `flutter analyze` produced no errors (pre-existing lint warnings only, unrelated to this change), `flutter test` passed in both (customer_app: 87 tests, supplier_app: 46 tests). Not yet committed.
+2. ✅ **Phase 1 — low-risk patch/minor bumps.** Ran `flutter pub upgrade` in `shared` (1 dependency changed — most dev deps were already at their max resolvable version, matching the earlier audit), `customer_app` (35 dependencies changed, including `sqflite` 2.4.2→2.4.3 and `uuid` 4.5.3→4.6.0 as planned), and `supplier_app` (47 dependencies changed, including `flutter_secure_storage` 10.0.0→10.3.1, `pdf`, `printing`, `sqflite`, `uuid`; `share_plus` correctly stayed pinned at 12.0.2). `flutter analyze`: no errors in any of the three (pre-existing lint warnings only — 35/44/100 issues respectively, unchanged from baseline). `flutter test`: all green — `shared` 131, `customer_app` 87, `supplier_app` 46. Not yet committed. Surfaced one correction to Part 2's `win32` note — see above.
+3. ⬜ **Phase 2 — `share_plus` major bump (supplier_app only).** Review the v12→v13 changelog/breaking changes first, update the call site(s) in the backup/clone-device flow if the API changed, bump the pubspec constraint, then manually re-test that flow on a physical device (matches the pattern already used for other supplier_app screenshots/testing this cycle). Note: `flutter analyze` already surfaces several pre-existing `deprecated_member_use` warnings in `backup_storage_service.dart` pointing at `Share`/`shareXFiles` → `SharePlus`/`SharePlus.instance.share()` — a preview of what this phase's migration touches.
+4. ⬜ **Phase 3 — `win32` cleanup.** Does **not** fall out automatically as originally assumed (see Part 2 update above) — needs `flutter pub upgrade --major-versions` or a `dependency_overrides` entry, evaluated after Phase 2 since `share_plus` is a likely contributor to the solver holding it back. Windows-only impact; low priority for this release.
 
 ## Verification checklist
 
-- [ ] Unused dependencies removed from both `pubspec.yaml` files, `flutter analyze` clean immediately after (before any version bumps)
-- [ ] `flutter analyze` clean in `shared`, `customer_app`, `supplier_app`
-- [ ] `flutter test` green in all three
+- [x] Unused dependencies removed from both `pubspec.yaml` files, `flutter analyze` clean immediately after (before any version bumps)
+- [x] `flutter analyze` clean (no errors) in `shared`, `customer_app`, `supplier_app` — re-confirmed after Phase 1
+- [x] `flutter test` green in `shared` (131), `customer_app` (87), `supplier_app` (46) — re-confirm after Phase 2
 - [ ] Manual smoke test: customer scan/redeem flow, supplier issue/stamp flow (both Express and Secure mode)
 - [ ] Supplier backup/clone-device flow re-tested on physical device after the `share_plus` bump specifically
-- [ ] `flutter pub deps` confirms `win32` resolves consistently across both apps
-- [ ] Version bump (4 files, per project convention) if this work ships as its own release rather than folding into the next feature release
+- [ ] `flutter pub deps` confirms `win32` resolves consistently across both apps *(deferred — see Phase 3)*
+- [ ] Version number decided and bumped (4 files, per project convention) once scope of this release is finalized — see Version note at top
 
 ## Out of scope for this pass
 
-- No code changes have been made yet — this document is planning only.
 - Not evaluating Flutter SDK version itself (a separate "new version of Flutter is available" notice appeared during this audit but wasn't investigated).

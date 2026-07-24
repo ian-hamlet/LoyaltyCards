@@ -40,11 +40,7 @@ dependencies:
   uuid: ^4.3.0
   intl: ^0.20.2
   shared_preferences: ^2.3.3
-  
-  # UI
-  cupertino_icons: ^1.0.6
-  google_fonts: ^8.0.2
-  
+
   # Backup Storage Options
   share_plus: ^12.0.2           # Share via email/files (updated for testing)
   printing: ^5.13.4             # Print PDF functionality

@@ -130,16 +130,18 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       final qrBytes = await BackupStorageService.generateQRImageBytes(backup);
       AppLogger.debug('QR image generated: ${qrBytes.length} bytes', 'Backup');
 
+      if (!mounted) return;
       setState(() {
         _backup = backup;
         _qrImageBytes = qrBytes;
         _isGenerating = false;
       });
-      
+
       AppLogger.debug('✅ Backup generation complete', 'Backup');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to generate backup: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       setState(() => _isGenerating = false);
       AppFeedback.error(context, 'Failed to generate backup: $e');
     }
@@ -163,6 +165,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       );
 
       AppLogger.debug('printBackup returned: ${result.isSuccess}', 'Backup');
+      if (!mounted) return;
 
       if (result.isSuccess) {
         setState(() => _completedMethods.add('print'));
@@ -175,6 +178,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _printBackup: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       AppFeedback.error(context, 'Print error: $e');
     }
   }
@@ -209,6 +213,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       );
 
       AppLogger.debug('shareViaEmail returned: ${result.isSuccess}', 'Backup');
+      if (!mounted) return;
 
       if (result.isSuccess) {
         setState(() => _completedMethods.add('email'));
@@ -221,6 +226,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _shareViaEmail: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       AppFeedback.error(context, 'Share error: $e');
     }
   }
@@ -254,6 +260,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       );
 
       AppLogger.debug('saveToFiles returned: ${result.isSuccess}', 'Backup');
+      if (!mounted) return;
 
       if (result.isSuccess) {
         setState(() => _completedMethods.add('files'));
@@ -266,6 +273,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _saveToFiles: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       AppFeedback.error(context, 'Save error: $e');
     }
   }

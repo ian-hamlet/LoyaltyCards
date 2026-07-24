@@ -12,10 +12,10 @@ void main() {
     StampSigner stampSigner = StampSigner();
     KeyManager keyManager = KeyManager();
 
-    setUp() {
+    setUp(() {
       stampSigner = StampSigner();
       keyManager = KeyManager();
-    }
+    });
 
     test('stamp hash is deterministic', () {
       final timestamp = DateTime.now();

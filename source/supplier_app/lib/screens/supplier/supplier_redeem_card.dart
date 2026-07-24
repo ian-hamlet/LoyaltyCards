@@ -731,7 +731,9 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         );
       },
     );
-    
+
+    if (!mounted) return;
+
     if (result == true) {
       // User chose to proceed despite mismatch
       AppLogger.warning('Supplier chose to proceed with device mismatch', 'Security');

@@ -1,9 +1,9 @@
 # Package Update Plan
 
-**Status:** In progress — Phases 0-3 complete (code-side); physical-device re-test of supplier backup/clone flow still outstanding
+**Status:** Phases 0-3 complete and physical-device verified. Manually tested on `Ians iPhone` (customer_app) and `Ians IPad Pro (2)` (supplier_app) — Flutter SDK 3.44.8, both apps freshly rebuilt (`flutter clean` + `pod install --repo-update`) after the version bump. Recovery Backup flow (Print/Share/Save-to-Files/generation — the screen with the actual `mounted`-guard code changes) and normal issue/stamp/redeem flows confirmed working in both Express and Secure mode on both apps. Remaining work is optional cleanup only (see Part 5 "Deferred") — no blockers left.
 **Branch:** `feature/packageUpdate`
 **Date:** 2026-07-24
-**Version:** Not yet assigned. This work has not been bumped to a new version number — a version bump (4 files, per project convention) will be decided once we know whether this ships as its own release or folds into the next feature release (see Recommended plan / Verification checklist).
+**Version:** 1.1.0+12 (minor bump, not patch — deliberately chosen to stay distinguishable from v1.0.3+11, currently submitted for App Store review, in case of rollback). All 4 files updated: `customer_app/pubspec.yaml`, `supplier_app/pubspec.yaml`, `shared/pubspec.yaml`, `shared/lib/version.dart`. Also logged in `CHANGELOG.md`.
 **Context:** v1.0.3+11 has been submitted for App Store review. This plan captures a dependency audit of `shared`, `customer_app`, and `supplier_app` done afterward, to evaluate package updates before the next release cycle.
 
 ## Scope
@@ -132,10 +132,10 @@ Verified after each fix: `flutter analyze` — no errors in any package (shared:
 - [x] Unused dependencies removed from both `pubspec.yaml` files, `flutter analyze` clean immediately after (before any version bumps)
 - [x] `flutter analyze` clean (no errors) in `shared`, `customer_app`, `supplier_app` — re-confirmed after Phase 1 and Phase 2
 - [x] `flutter test` green in `shared` (140), `customer_app` (87), `supplier_app` (46) — re-confirmed after Phase 2
-- [ ] Manual smoke test: customer scan/redeem flow, supplier issue/stamp flow (both Express and Secure mode)
-- [ ] Supplier backup/clone-device flow re-tested on physical device after the `share_plus` bump specifically — **outstanding, needs you**
+- [x] Manual smoke test: customer scan/redeem flow, supplier issue/stamp flow (both Express and Secure mode) — confirmed on `Ians iPhone` / `Ians IPad Pro (2)`
+- [x] Supplier backup/clone-device flow re-tested on physical device after the `share_plus` bump specifically — Recovery Backup screen confirmed working end-to-end: Face ID authentication gate → backup generation → Print, on `Ians IPad Pro (2)`
 - [x] `flutter pub deps`/`pubspec.lock` confirms `win32` resolves consistently across both apps — resolved itself in Phase 2
-- [ ] Version number decided and bumped (4 files, per project convention) once scope of this release is finalized — see Version note at top
+- [x] Version number decided and bumped (4 files, per project convention) — 1.1.0+12
 
 ## Out of scope for this pass
 

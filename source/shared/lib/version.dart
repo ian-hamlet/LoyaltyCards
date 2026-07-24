@@ -236,5 +236,21 @@
 /// # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
 
 
-/// # source/shared/lib/version.dart: 
-const String appVersion = '1.0.3+11';
+/// Version 1.1.0 - Package Update Pass
+///
+/// Build 12 Changes:
+/// - Dependency maintenance on feature/packageUpdate (not yet merged to develop/main):
+///   * Removed 7 unused direct dependencies (path_provider, intl, pointycastle,
+///     google_fonts, cupertino_icons across customer_app/supplier_app)
+///   * Minor/patch bumps across shared/customer_app/supplier_app
+///   * share_plus 12.0.2 -> 13.3.0 (supplier_app), no API changes required
+///   * Flutter SDK 3.44.1 -> 3.44.8, Dart 3.12.1 -> 3.12.2
+///   * Fixed 13 missing `mounted` guards in recovery_backup_screen.dart /
+///     supplier_redeem_card.dart (real BuildContext-after-await gaps)
+///   * Added direct test coverage for CryptoUtils.verifySignature (previously untested)
+/// - Minor version bump (not a patch) to keep this distinguishable from the
+///   1.0.3+11 build submitted for App Store review, in case of rollback
+/// - Test Coverage: shared 140, customer_app 87, supplier_app 46 - all passing
+
+/// # source/shared/lib/version.dart:
+const String appVersion = '1.1.0+12';

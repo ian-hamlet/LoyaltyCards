@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.3+11] - 2026-07-21 - CURRENT
+## [1.1.0+12] - 2026-07-24 - CURRENT
+
+**Status:** Built on `feature/packageUpdate` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) deliberately used to keep this build distinguishable from v1.0.3+11, which is currently submitted for App Store review - if review requires a revert, v1.0.3+11 remains a clean, separately-versioned target.
+
+### Changed
+- Dependency maintenance pass across `shared`, `customer_app`, `supplier_app` - see `docs/project-management/PACKAGE_UPDATE_PLAN.md` for full detail
+- Removed 7 unused direct dependencies that had no matching import anywhere in the codebase: `path_provider`, `intl`, `pointycastle`, `google_fonts`, `cupertino_icons` (customer_app); `google_fonts`, `cupertino_icons` (supplier_app)
+- Minor/patch version bumps across all three packages (sqflite, uuid, mobile_scanner, local_auth, flutter_secure_storage, pdf, printing, etc.)
+- `share_plus` 12.0.2 -> 13.3.0 (supplier_app) - reviewed the full changelog across the range; only breaking change was a minimum SDK/platform floor already met by this project, no API changes required
+- Flutter SDK 3.44.1 -> 3.44.8, Dart 3.12.1 -> 3.12.2 (local toolchain, not a repo file change)
+
+### Fixed
+- `stamp_signer_test.dart` had a broken `setUp()` written as a bare function declaration instead of a registered callback - it never actually ran, so test state was never reset between tests
+- Two dead null-aware fallbacks (`business.privateKey ?? ''`) removed after confirming the field is non-nullable
+- Two unreachable `switch` `default` clauses removed (enum switches were already exhaustive)
+- 13 genuine `BuildContext`-used-after-`await`-with-no-`mounted`-check gaps fixed in `recovery_backup_screen.dart` (backup/recovery QR generation, print, email, save-to-files) and `supplier_redeem_card.dart` (device-mismatch confirmation) - these could have thrown "setState() called after dispose()" style errors if a user navigated away mid-operation
+
+### Added
+- Direct unit test coverage for `CryptoUtils.verifySignature` (`shared/test/utils/crypto_utils_test.dart`, 9 tests) - the ECDSA P-256/SHA-256 signature verification declared to Apple in the App Review export compliance packet previously had no dedicated test coverage
+
+---
+
+## [1.0.3+11] - 2026-07-21
 
 **Note:** this changelog was not kept up to date between v0.3.0+1 and v1.0.3+11 - every release in between (v1.0.0, v1.0.1+7, v1.0.2+8/9, v1.0.3+10) shipped without an entry here. Not backfilled retroactively; picking up from this release forward. See `docs/deployment/RELEASES.md` and git history for what actually happened in that gap.
 

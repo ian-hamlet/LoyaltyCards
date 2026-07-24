@@ -92,9 +92,14 @@ class _AppLockWrapperState extends State<AppLockWrapper> {
         AppLogger.warning('Authentication failed, app locked', 'Security');
       }
     } catch (e) {
+      // V-014 fix: fail closed, not open. This catch previously unlocked
+      // the app on ANY exception - a SharedPreferences read failure or a
+      // local_auth platform-channel error would bypass authentication
+      // entirely. There's already a proper "App Locked" retry screen for
+      // this state, so failing closed costs nothing but a retry tap.
       AppLogger.error('Error checking auth requirement: $e', tag: 'Security');
       setState(() {
-        _isAuthenticated = true; // Fail open for better UX
+        _isAuthenticated = false;
         _isAuthenticating = false;
       });
     }

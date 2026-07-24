@@ -206,6 +206,25 @@ class BusinessRepository {
     );
   }
 
+  /// V-013: Check whether this card has already been redeemed on this
+  /// device, before signing off on another reward.
+  ///
+  /// Each stamp-collection cycle gets a brand-new cardId
+  /// ('${businessId}_${timestamp}') when a card is created - a cardId is
+  /// never reused for a customer's next card, so "has this cardId ever
+  /// appeared in the redemptions table" is a safe, correct check that
+  /// won't block legitimate repeat business.
+  Future<bool> hasBeenRedeemed(String cardId) async {
+    final db = await _dbHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery(
+        'SELECT COUNT(*) FROM redemptions WHERE card_id = ?',
+        [cardId],
+      ),
+    );
+    return (count ?? 0) > 0;
+  }
+
   /// Get count of redemptions
   Future<int> getRedemptionCount() async {
     final db = await _dbHelper.database;

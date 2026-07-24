@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
@@ -143,6 +145,35 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
       final business = backup.toBusiness();
       AppLogger.debug('Business ID: ${business.id}', 'Import');
 
+      // Step 4.5 (V-016): Require explicit confirmation before trusting this
+      // backup. Its signature only proves internal consistency (the HKDF key
+      // is derived from the privateKey field inside the same payload it
+      // signs), NOT that it's the business the user actually expects to
+      // restore - anyone can mint a "validly signed" backup for a fictitious
+      // business. Surfacing the name/key fingerprint and requiring a tap
+      // stops a silently-substituted backup from being trusted automatically.
+      try {
+        await _scannerController.stop();
+      } catch (e) {
+        AppLogger.warning('Error stopping camera before confirmation: $e', 'Import');
+      }
+
+      if (!mounted) return;
+      final confirmed = await _confirmImport(business);
+      if (!mounted) return;
+      if (!confirmed) {
+        AppLogger.info('Business import cancelled by user at confirmation step', 'Import');
+        setState(() {
+          _isProcessing = false;
+        });
+        try {
+          await _scannerController.start();
+        } catch (e) {
+          AppLogger.warning('Error restarting camera after cancelled import: $e', 'Import');
+        }
+        return;
+      }
+
       // Step 6: Store private key
       AppLogger.crypto('Storing private key securely');
       final privateKey = _keyManager.decodePrivateKey(backup.privateKey);
@@ -209,6 +240,72 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
         AppFeedback.error(context, 'Import failed: $userMessage');
       }
     }
+  }
+
+  /// V-016: Short, non-reversible fingerprint of the public key so the user
+  /// has something concrete to compare against what they expect to see,
+  /// without showing an overwhelming raw base64 blob.
+  String _publicKeyFingerprint(String publicKeyEncoded) {
+    final digest = sha256.convert(utf8.encode(publicKeyEncoded));
+    final hex = digest.toString().toUpperCase();
+    final groups = <String>[];
+    for (int i = 0; i < 16; i += 4) {
+      groups.add(hex.substring(i, i + 4));
+    }
+    return groups.join(' ');
+  }
+
+  /// V-016: Show what's about to be imported and require an explicit tap
+  /// before trusting it. A backup's signature only proves it's internally
+  /// consistent, not that it's genuinely the business the user expects.
+  Future<bool> _confirmImport(Business business) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Confirm Business Restore'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('You\'re about to restore:'),
+            const SizedBox(height: 12),
+            Text(
+              business.name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 12),
+            const Text('Key fingerprint:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            SelectableText(
+              _publicKeyFingerprint(business.publicKey),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Only proceed if this is a business you set up yourself, or one your business partner shared with you directly. Anyone can create a backup QR that claims any business name.',
+              style: TextStyle(fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Restore This Business'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   @override

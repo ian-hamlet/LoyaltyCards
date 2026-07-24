@@ -610,6 +610,18 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       return;
     }
 
+    // V-013: refuse to redeem a card that's already been redeemed. Previously
+    // nothing checked this - the only "already redeemed" state was the
+    // isRedeemed flag on the customer's own device, which they fully
+    // control (e.g. a restored pre-redemption local backup resets it).
+    final alreadyRedeemed = await businessRepo.hasBeenRedeemed(cardId);
+    if (!mounted) return;
+    if (alreadyRedeemed) {
+      AppLogger.warning('Redemption rejected - card $cardId already redeemed', 'Security');
+      _showError('This card has already been redeemed.');
+      return;
+    }
+
     // V-012: independently verify the customer's claimed stamps before
     // signing off on a reward. Previously this flow trusted `stamps`
     // (the customer's self-reported count) outright, with no cryptographic

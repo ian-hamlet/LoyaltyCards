@@ -1,6 +1,6 @@
 # Package Update Plan
 
-**Status:** In progress — Phases 0-1 complete
+**Status:** In progress — Phases 0-3 complete (code-side); physical-device re-test of supplier backup/clone flow still outstanding
 **Branch:** `feature/packageUpdate`
 **Date:** 2026-07-24
 **Version:** Not yet assigned. This work has not been bumped to a new version number — a version bump (4 files, per project convention) will be decided once we know whether this ships as its own release or folds into the next feature release (see Recommended plan / Verification checklist).
@@ -124,17 +124,17 @@ Verified after each fix: `flutter analyze` — no errors in any package (shared:
 
 1. ✅ **Phase 0 — remove unused dependencies.** Deleted the 5 unused declarations from `customer_app/pubspec.yaml` and 2 from `supplier_app/pubspec.yaml` (Part 3). `flutter pub get` clean in both, `flutter analyze` produced no errors (pre-existing lint warnings only, unrelated to this change), `flutter test` passed in both (customer_app: 87 tests, supplier_app: 46 tests). Not yet committed.
 2. ✅ **Phase 1 — low-risk patch/minor bumps.** Ran `flutter pub upgrade` in `shared` (1 dependency changed — most dev deps were already at their max resolvable version, matching the earlier audit), `customer_app` (35 dependencies changed, including `sqflite` 2.4.2→2.4.3 and `uuid` 4.5.3→4.6.0 as planned), and `supplier_app` (47 dependencies changed, including `flutter_secure_storage` 10.0.0→10.3.1, `pdf`, `printing`, `sqflite`, `uuid`; `share_plus` correctly stayed pinned at 12.0.2). `flutter analyze`: no errors in any of the three (pre-existing lint warnings only — 35/44/100 issues respectively, unchanged from baseline). `flutter test`: all green — `shared` 131, `customer_app` 87, `supplier_app` 46. Not yet committed. Surfaced one correction to Part 2's `win32` note — see above.
-3. ⬜ **Phase 2 — `share_plus` major bump (supplier_app only).** Review the v12→v13 changelog/breaking changes first, update the call site(s) in the backup/clone-device flow if the API changed, bump the pubspec constraint, then manually re-test that flow on a physical device (matches the pattern already used for other supplier_app screenshots/testing this cycle). Note: `flutter analyze` already surfaces several pre-existing `deprecated_member_use` warnings in `backup_storage_service.dart` pointing at `Share`/`shareXFiles` → `SharePlus`/`SharePlus.instance.share()` — a preview of what this phase's migration touches.
-4. ⬜ **Phase 3 — `win32` cleanup.** Does **not** fall out automatically as originally assumed (see Part 2 update above) — needs `flutter pub upgrade --major-versions` or a `dependency_overrides` entry, evaluated after Phase 2 since `share_plus` is a likely contributor to the solver holding it back. Windows-only impact; low priority for this release.
+3. ✅ **Phase 2 — `share_plus` major bump (supplier_app only).** Fetched the actual pub.dev changelog for every version between 12.0.2 and 13.3.0: the only breaking change across all of them is raised minimum SDK/platform requirements (Flutter ≥3.41.6, Dart ≥3.11.0, iOS ≥13.0, macOS ≥10.15) introduced in 13.0.0 — no changes to the `Share`/`shareXFiles`/`SharePlus`/`sharePositionOrigin` API surface at all, and 13.3.0 specifically improves iPad `sharePositionOrigin` handling (exactly what `backup_storage_service.dart` uses). Confirmed the project already meets every minimum (Flutter 3.44.1, Dart 3.12.1, iOS deployment target already 13.0, macOS already 10.15) — so this was a pure version-constraint bump with zero required code changes. Bumped `share_plus: ^12.0.2` → `^13.3.0`, `flutter pub get` resolved cleanly (5 dependencies changed), `flutter analyze` no errors (same pre-existing `Share`/`shareXFiles`→`SharePlus` deprecation info-warnings as before the bump — those were already deprecated in 12.x and still function; migrating off them is optional cleanup, folded into the deferred bulk lint cleanup above, not required), `flutter test` all 46 green. Not yet committed. **Manual re-test of the backup/clone-device flow on a physical device is still needed from you** — I can't drive that interaction myself.
+4. ✅ **Phase 3 — `win32` cleanup.** Confirmed: bumping `share_plus` past 12.x freed the solver, and `win32`/`flutter_secure_storage_windows` resolved themselves automatically during the Phase 2 `pub get` — no separate `--major-versions`/`dependency_overrides` action needed after all. Verified both apps' `pubspec.lock` now pin the identical `win32` version (matching sha256).
 
 ## Verification checklist
 
 - [x] Unused dependencies removed from both `pubspec.yaml` files, `flutter analyze` clean immediately after (before any version bumps)
-- [x] `flutter analyze` clean (no errors) in `shared`, `customer_app`, `supplier_app` — re-confirmed after Phase 1
-- [x] `flutter test` green in `shared` (131), `customer_app` (87), `supplier_app` (46) — re-confirm after Phase 2
+- [x] `flutter analyze` clean (no errors) in `shared`, `customer_app`, `supplier_app` — re-confirmed after Phase 1 and Phase 2
+- [x] `flutter test` green in `shared` (140), `customer_app` (87), `supplier_app` (46) — re-confirmed after Phase 2
 - [ ] Manual smoke test: customer scan/redeem flow, supplier issue/stamp flow (both Express and Secure mode)
-- [ ] Supplier backup/clone-device flow re-tested on physical device after the `share_plus` bump specifically
-- [ ] `flutter pub deps` confirms `win32` resolves consistently across both apps *(deferred — see Phase 3)*
+- [ ] Supplier backup/clone-device flow re-tested on physical device after the `share_plus` bump specifically — **outstanding, needs you**
+- [x] `flutter pub deps`/`pubspec.lock` confirms `win32` resolves consistently across both apps — resolved itself in Phase 2
 - [ ] Version number decided and bumped (4 files, per project convention) once scope of this release is finalized — see Version note at top
 
 ## Out of scope for this pass

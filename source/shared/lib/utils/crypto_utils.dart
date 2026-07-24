@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:pointycastle/export.dart';
+import '../models/qr_tokens.dart';
 import '../models/verification_result.dart';
 import 'app_logger.dart';
 
@@ -128,6 +129,61 @@ class CryptoUtils {
       AppLogger.error('Signature verification exception: $e', stackTrace: stack);
       return VerificationResult.failure('verification_error: ${e.runtimeType}');
     }
+  }
+
+  /// Verify a full redemption stamp chain (V-012 fix)
+  ///
+  /// The redemption flow previously trusted the customer's self-reported
+  /// `stampsCollected` count with no cryptographic check at all - this is
+  /// what actually catches a fabricated/tampered redemption request before
+  /// the supplier signs off on a reward.
+  ///
+  /// Reconstructs each stamp's originally-signed data as
+  /// `cardId:stampNumber:timestamp:previousHash:stampCount:expiryDate:scanInterval`
+  /// and verifies it against the business's public key, walking the hash
+  /// chain (each stamp's previousHash is the prior stamp's signature).
+  ///
+  /// Secure Mode issuance (`supplier_stamp_card.dart`'s
+  /// `_generateAndShowStamp`) never sets stampCount/expiryDate/scanInterval,
+  /// so every genuine Secure Mode stamp was signed with the constant
+  /// defaults (stampCount=1, expiryDate=null, scanInterval=null) - those are
+  /// hardcoded here rather than transmitted, since the customer's device
+  /// can't be trusted to report them honestly.
+  static VerificationResult verifyRedemptionStampChain({
+    required String cardId,
+    required List<RedemptionStampProof> stampProofs,
+    required String businessPublicKey,
+  }) {
+    if (stampProofs.isEmpty) {
+      return VerificationResult.failure('no_stamps_to_verify');
+    }
+
+    String previousHash = '';
+    for (int i = 0; i < stampProofs.length; i++) {
+      final proof = stampProofs[i];
+      final stampNumber = i + 1;
+      final signatureData =
+          '$cardId:$stampNumber:${proof.timestamp}:$previousHash:1::';
+
+      final result = verifySignature(
+        data: signatureData,
+        signatureBase64: proof.signature,
+        publicKeyEncoded: businessPublicKey,
+      );
+
+      if (!result.isValid) {
+        AppLogger.error(
+          'Redemption stamp $stampNumber failed verification: ${result.failureReason}',
+        );
+        return VerificationResult.failure(
+          'stamp_${stampNumber}_invalid: ${result.failureReason}',
+        );
+      }
+
+      previousHash = proof.signature;
+    }
+
+    return VerificationResult.success();
   }
 
   /// Decode public key from custom base64-encoded format

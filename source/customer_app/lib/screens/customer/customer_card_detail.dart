@@ -82,14 +82,22 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       AppLogger.qr('Card is COMPLETE - generating REDEMPTION QR');
       AppLogger.qr('Including ${_stamps.length} stamps for redemption');
       
-      final signatures = _stamps.map((s) => s.signature).toList();
-      
+      // V-012: include each stamp's timestamp alongside its signature -
+      // must match RedemptionStampProof / QRTokenGenerator.generateRedemptionRequest,
+      // since the supplier reconstructs the signed data from these fields.
+      final stampProofs = _stamps
+          .map((s) => {
+                'signature': s.signature,
+                'timestamp': s.timestamp.millisecondsSinceEpoch,
+              })
+          .toList();
+
       final qrData = {
         'type': 'redemption_request',
         'cardId': _card!.id,
         'businessId': _card!.businessId,
         'stampsCollected': _card!.stampsCollected,
-        'stampSignatures': signatures,
+        'stampProofs': stampProofs,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'cardDeviceId': _card!.deviceId, // V-005: Device where card was created
         'currentDeviceId': _currentDeviceId, // V-005: Device showing redemption QR (cached)

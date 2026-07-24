@@ -110,20 +110,27 @@ class QRTokenGenerator {
       
       AppLogger.qr('Generating redemption request for card ${card.id} with ${stamps.length} stamps');
       
-      // Extract all stamp signatures
-      final signatures = stamps.map((s) => s.signature).toList();
-      
+      // V-012: include each stamp's timestamp alongside its signature so the
+      // supplier can reconstruct the exact signed data and verify it -
+      // signatures alone weren't enough to do that.
+      final proofs = stamps
+          .map((s) => RedemptionStampProof(
+                signature: s.signature,
+                timestamp: s.timestamp.millisecondsSinceEpoch,
+              ))
+          .toList();
+
       // Validate all signatures are present
-      if (signatures.any((sig) => sig.isEmpty)) {
+      if (proofs.any((p) => p.signature.isEmpty)) {
         AppLogger.error('Found stamps with empty signatures', tag: 'QR');
         throw QRGenerationException('Stamp data incomplete: missing signatures');
       }
-      
+
       return RedemptionRequestToken(
         cardId: card.id,
         businessId: card.businessId,
         stampsCollected: card.stampsCollected,
-        stampSignatures: signatures,
+        stampProofs: proofs,
         timestamp: timestamp,
       );
     } catch (e, stackTrace) {

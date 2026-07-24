@@ -6,6 +6,8 @@
 **Assessor:** Development Team  
 **Scope:** iOS application security audit
 
+**⚠️ See also:** [2026-07-25 Security Review](#2026-07-25-security-review--signature-coverage--redemption-verification) at the bottom of this document, performed after v1.0.3+11 was submitted for App Store review. It found that Secure Mode's core cryptographic guarantee has gaps this original assessment did not test for — specifically, several fields critical to fraud prevention (`stampCount`, card `mode`) are not covered by the ECDSA signature, and the redemption flow's signature-verification code path is dead/unreferenced. This materially qualifies the "VERIFIED OK" conclusions on V-003 and V-004, and the "crypto protection" framing in V-005, below. Read the new section for current status before relying on this document's original April 2026 sign-off.
+
 ---
 
 ## Executive Summary
@@ -898,3 +900,233 @@ P2P architecture means:
 
 **Document Version:** 1.0  
 **Next Review:** After TestFlight pilot testing or before App Store submission
+
+---
+
+## 2026-07-25 Security Review — Signature Coverage & Redemption Verification
+
+**LoyaltyCards v1.1.0+12 (branch `feature/SecurityReview`, forked from `feature/packageUpdate`)**
+**Assessment Date:** July 25, 2026
+**Assessor:** AI-assisted review (4 parallel focused analyses — cryptography/key management, data storage/SQL, business logic/authentication, platform config/input validation), each finding independently verified by direct code reading before being recorded here.
+**Trigger:** Requested after v1.0.3+11 was submitted for App Store review, as a general robustness/vulnerability pass separate from the dependency-update work on `feature/packageUpdate`.
+**Scope:** Full-app review, not limited to a specific feature — this is the first review of this depth since the April 2026 assessment above, and the first to specifically trace what data each ECDSA signature actually covers versus what's checked at each verification point.
+
+### Status Overview
+
+- ✅ **CRITICAL — FIXED (2026-07-25, `feature/SecurityReview`):** 3 (V-010, V-011, V-012)
+- 🔴 **HIGH — OPEN:** 4 (V-013, V-014, V-015, V-016)
+- 🟡 **MEDIUM/LOW/INFORMATIONAL:** 7 (see "Additional Observations" below)
+
+**Update 2026-07-25:** V-010, V-011, and V-012 (the critical trio) are fixed and verified — `flutter analyze` clean (no errors) and `flutter test` green across all three packages (shared 151, customer_app 87, supplier_app 46) after the fixes. See each entry below for exactly what changed. V-013 through V-016 remain open, planned as the next phase.
+
+---
+
+### V-010: Unsigned `stampCount` Enables Single-Scan Full-Card Completion in Secure Mode
+
+**Severity:** CRITICAL
+**Status:** ✅ FIXED (2026-07-25)
+**Affected Component:** Customer App - Secure Mode stamp crediting
+**Relationship to prior findings:** Distinct mechanism from **V-003** (QR Screenshot Reuse). V-003 verified that replaying the *same* `stampId` is safely absorbed by the database's primary-key `ConflictAlgorithm.replace`. This finding is not about replaying a stamp ID — it's about tampering a field on a single, otherwise-genuine, never-before-seen stamp token so that ONE legitimate scan mints many new, uniquely-IDed stamp rows. V-003's mitigation does not apply here.
+
+**Description:**
+`StampToken.getSignatureData()` (`shared/lib/models/qr_tokens.dart:354-356`) signs only `'$cardId:$stampNumber:$timestamp:$previousHash'`. The `stampCount` field (how many stamps this single token should grant — a REQ-022 "multi-denomination" feature) is **not part of the signed data**. `TokenValidator.validateStampToken` does check `stampCount <= stampsRequired` (`token_validator.dart:113`), but only as an upper bound — it does not, and cannot, detect that `stampCount` was changed after signing, because the signature itself never covered it.
+
+`qr_scanner_screen.dart:475-512` then runs unconditionally (regardless of `card.mode`): if `token.stampCount > 1`, it inserts `stampCount - 1` additional `Stamp` rows, each reusing `token.signature` verbatim with **no further per-stamp verification**.
+
+**Concrete exploit:**
+1. A customer receives one genuine, correctly-signed Secure Mode `StampToken` from a supplier (`stampCount` defaults to 1 for normal single-stamp issuance).
+2. The customer extracts the QR's raw JSON (any QR decoder, or by decoding a screenshot), changes `"stampCount": 1` to `"stampCount": <stampsRequired>`, and re-encodes it as a QR.
+3. Scans it with their own device. `TokenValidator` verifies the ECDSA signature — which still checks out, since `stampCount` was never signed — and passes the `stampCount <= stampsRequired` bound.
+4. The app inserts `stampsRequired` stamp rows, all citing the one genuine signature, completing the card from a single real interaction.
+
+**Impact:** Full defeat of Secure Mode's core anti-fraud claim ("each stamp is cryptographically signed... can't be reused or forged," per the in-app onboarding copy) for any card, using only a QR decoder/encoder — no cryptography, key material, or supplier-device access required.
+
+**Fix Implemented (2026-07-25):**
+- `StampToken.getSignatureData()` now signs `cardId:stampNumber:timestamp:previousHash:stampCount:expiryDate:scanInterval` instead of stopping at `previousHash`. Matching change on the signing side in `qr_token_generator.dart` (`generateStampToken`), so tampering `stampCount` post-signing now invalidates the ECDSA signature.
+- Confirmed via direct code inspection (`supplier_stamp_card.dart`) that Secure Mode issuance (`_generateAndShowStamp`) never sets `stampCount`/`expiryDate`/`scanInterval` — those are exclusively a Simple/Express Mode (REQ-022) feature. Added a second, independent layer of defense: `qr_scanner_screen.dart` now explicitly rejects any Secure Mode token with `stampCount != 1` outright, rather than relying solely on the signature catching it.
+- Both defenses verified with new tests in `shared/test/qr_tokens_test.dart` (exact-string assertion + a test proving tampering `stampCount` changes the signed data) proving the fix actually closes the gap, not just that the code compiles.
+
+**Files Modified:**
+- `shared/lib/models/qr_tokens.dart` (`StampToken.getSignatureData()`)
+- `supplier_app/lib/services/qr_token_generator.dart` (`generateStampToken`)
+- `customer_app/lib/screens/customer/qr_scanner_screen.dart` (reject `stampCount != 1` in the Secure Mode branch)
+- `shared/test/qr_tokens_test.dart` (new regression tests)
+
+**Resolution:** ✅ FIXED - Signature now covers `stampCount`; Secure Mode additionally hard-rejects any token where it isn't exactly 1.
+
+---
+
+### V-011: Unsigned Card `mode` Field Enables Secure→Simple Downgrade at Issuance
+
+**Severity:** CRITICAL
+**Status:** ✅ FIXED (2026-07-25)
+**Affected Component:** Customer App - Card issuance and mode-gated validation
+
+**Description:**
+`CardIssueToken.getSignatureData()` (`shared/lib/models/qr_tokens.dart:167-170`) signs `'$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardIdValue:$timestamp'` — `mode` is absent. `card.mode` is read from this token once at issuance and persisted to the local DB; every later stamp/redemption decision correctly trusts that *stored* value rather than re-reading mode from each new scan (`qr_scanner_screen.dart:390`) — which is the right architectural pattern in general, but it means the one moment `mode` is trusted from an external, attacker-reachable source (the issuance token) is also unprotected by the signature.
+
+**Concrete exploit:**
+1. Attacker obtains any validly-signed `CardIssueToken` for a Secure Mode business (their own scan, a shared screenshot, a photographed display QR).
+2. Edits `"mode":"secure"` → `"mode":"simple"` in the JSON. The signature still verifies — `mode` was never part of what it covers.
+3. Scans the edited token. The resulting card is permanently created in Simple/Express mode on that device.
+4. Every future stamp for that card now takes the `else` branch at `qr_scanner_screen.dart:403` ("skip crypto"), which only checks `stampCount <= stampsRequired` and (if present) an unsigned `expiryDate` — it will accept fully self-fabricated stamp tokens with garbage `signature`/`previousHash` values.
+
+**Impact:** A one-time, offline edit permanently strips all cryptographic protection from a card, with no further interaction with a real supplier device needed after the initial (possibly legitimately obtained) issuance token.
+
+**Fix Implemented (2026-07-25):**
+- `CardIssueToken.getSignatureData()` now signs `...timestamp:mode` (using `mode.toStorageString()`) instead of stopping at `timestamp`. The signing side (`qr_token_generator.dart`'s `generateCardIssueToken`) already called `token.getSignatureData()` directly rather than duplicating the string, so it picked up the fix automatically with no separate change needed there.
+- Verified with new tests in `shared/test/qr_tokens_test.dart` (exact-string assertion + a test proving changing `mode` after construction changes the signed data).
+
+**Files Modified:**
+- `shared/lib/models/qr_tokens.dart` (`CardIssueToken.getSignatureData()`)
+- `shared/test/qr_tokens_test.dart` (new regression tests)
+
+**Resolution:** ✅ FIXED - Signature now covers `mode`; a post-signing edit from `secure` to `simple` invalidates the signature and is rejected at verification.
+
+---
+
+### V-012: Redemption Never Verifies Stamp Signatures — Verification Code Exists But Is Dead
+
+**Severity:** CRITICAL
+**Status:** ✅ FIXED (2026-07-25)
+**Affected Component:** Supplier App - Redemption flow
+**Relationship to prior findings:** This directly undermines the "Secure Mode adds crypto protection" framing used in the analysis for **V-004** and **V-005** above — that framing assumed the redemption step itself checks stamp signatures. It doesn't.
+
+**Description:**
+`TokenValidator.validateRedemptionRequest()` (`customer_app/lib/services/token_validator.dart:229`) exists, is correctly implemented, and would re-derive each stamp's signing data and verify it against the business's public key — but it is **never called anywhere in the codebase** (confirmed via `grep -rn "validateRedemptionRequest("` across both app trees — the only hit is the function's own definition).
+
+The actual redemption path, `supplier_redeem_card.dart:536-669` (`_processCardQR` → `_showSecureModeRedemptionConfirmation`), parses the customer-supplied `RedemptionRequestToken`, logs `"Signatures to verify: ${token.stampSignatures.length}"` (line 553, suggesting verification was intended), checks only `hasDeviceMismatch()`, and immediately signs a new `RedemptionToken` for `token.stampsCollected` — the customer's self-reported count. Confirmed via direct grep of the file: zero calls to `verifySignature`, `CryptoUtils`, or any `KeyManager.verify*` method anywhere in `supplier_redeem_card.dart`.
+
+**Concrete exploit:** Combined with V-010/V-011, a customer can fabricate a "complete" card entirely offline (no real stamps ever collected) and present it for redemption. The supplier's device has no independent cryptographic check to catch this — it trusts the customer's claimed `stampsCollected` count outright. Even without V-010/V-011, a customer could set `stampSignatures` to an arbitrary list of junk strings satisfying only `RedemptionRequestToken.isValid()`'s length/non-empty checks (`qr_tokens.dart:417-429`) and redeem successfully.
+
+**Impact:** The redemption step — the one that actually costs the business a reward — currently performs no cryptographic verification at all, regardless of Secure Mode's other protections working correctly or not.
+
+**Fix Implemented (2026-07-25):**
+
+The originally-recommended fix (wire up the existing `validateRedemptionRequest`) turned out not to be viable as-is: that function lives in `customer_app`, which `supplier_app` cannot import (separate Flutter packages, only `shared` is common to both), and it expects full `List<Stamp>` objects with timestamps that the supplier never actually receives — `RedemptionRequestToken` only ever transmitted bare signature strings (`stampSignatures: List<String>`), not enough data to reconstruct what was signed. A real fix required a small protocol change:
+
+1. Added `RedemptionStampProof { signature, timestamp }` to `shared/lib/models/qr_tokens.dart` and changed `RedemptionRequestToken.stampSignatures: List<String>` → `stampProofs: List<RedemptionStampProof>`, so the supplier receives enough data (signature + timestamp per stamp) to reconstruct each stamp's original signed string. `fromJson` still accepts the old `stampSignatures` key as a fallback (timestamp defaults to 0), but such tokens will always fail verification, not silently succeed - there are no production tokens of the old shape to migrate, this is just defensive parsing.
+2. Added `CryptoUtils.verifyRedemptionStampChain()` to `shared/lib/utils/crypto_utils.dart` - a new shared function (callable from both apps) that walks the stamp chain, reconstructing `cardId:stampNumber:timestamp:previousHash:1::` for each stamp (the constant `1::` suffix reflects that genuine Secure Mode stamps always have `stampCount=1, expiryDate=null, scanInterval=null` baked in per the V-010 fix - confirmed by inspecting `supplier_stamp_card.dart`, which never sets those fields for Secure Mode issuance) and verifying against the business's public key.
+3. Wired this into `supplier_redeem_card.dart`'s `_showSecureModeRedemptionConfirmation`: for Secure Mode businesses, redemption now requires a `RedemptionRequestToken` with a fully-verifying stamp chain, or it's rejected outright. The legacy `LOYALTYCARD:REDEEM:` string format (which carries no signatures at all) is now rejected for Secure Mode businesses specifically, since it can't be verified - it remains accepted only where `business.mode != secure` (Express/Simple Mode's honor-based system, per V-001, is unaffected).
+4. Updated both places that build a `RedemptionRequestToken` on the customer side (`customer_app/lib/services/qr_token_generator.dart` and a second, independent inline JSON builder in `customer_app/lib/screens/customer/customer_card_detail.dart`) to include each stamp's timestamp.
+5. Removed the old, dead, subtly-inconsistent `TokenValidator.validateRedemptionRequest()` from `customer_app` (it used `stamp.timestamp` directly in a string interpolation rather than `.millisecondsSinceEpoch` - another latent bug that never surfaced only because the function was never called).
+6. Added 6 new direct tests for `verifyRedemptionStampChain` in `shared/test/utils/crypto_utils_test.dart`: genuine chain accepted, fabricated chain rejected, genuine-stamps-plus-one-fabricated-stamp rejected, wrong `cardId` rejected, wrong business public key rejected, reordered stamps rejected, empty list rejected outright rather than vacuously passing.
+
+**Files Modified:**
+- `shared/lib/models/qr_tokens.dart` (`RedemptionStampProof` new class, `RedemptionRequestToken.stampProofs`)
+- `shared/lib/utils/crypto_utils.dart` (`verifyRedemptionStampChain`)
+- `supplier_app/lib/screens/supplier/supplier_redeem_card.dart` (verification wired into the real redemption flow, both direct and device-mismatch "proceed anyway" call sites; also added a `mounted` guard on the same async gap while touching this method)
+- `customer_app/lib/services/qr_token_generator.dart` (`generateRedemptionRequest` builds `stampProofs`)
+- `customer_app/lib/screens/customer/customer_card_detail.dart` (`_generateCardQR`'s inline duplicate updated to match)
+- `customer_app/lib/services/token_validator.dart` (dead `validateRedemptionRequest` removed)
+- `shared/test/qr_tokens_test.dart`, `shared/test/utils/crypto_utils_test.dart` (updated/new tests)
+
+**Resolution:** ✅ FIXED - Secure Mode redemption now cryptographically verifies every claimed stamp before the supplier signs off on a reward; a fabricated or replayed redemption request is rejected rather than trusted.
+
+---
+
+### V-013: No Duplicate-Redemption Protection
+
+**Severity:** HIGH
+**Status:** 🔴 OPEN
+**Affected Component:** Supplier App - Redemption flow, Business Repository
+**Relationship to prior findings:** Extends **V-005** (Multi-Device Card Duplication). V-005 added *detection/warning* for device mismatches at redemption time, with supplier discretion to proceed. This finding is different: there is no check at all — on any device, matching or not — for whether a given card's stamps have already been redeemed before.
+
+**Description:**
+`BusinessRepository.logRedemption()` (`business_repository.dart:190`) only *writes* a redemption record; nothing queries prior redemptions for a `cardId` before a new `RedemptionToken` is signed. The only "already redeemed" state that exists is the `isRedeemed` flag on the *customer's own* local `Card` record — which the customer fully controls (e.g., a restored pre-redemption local DB backup resets it to `false`).
+
+**Concrete exploit:** A customer redeems a card normally, then restores an earlier local backup (or otherwise resets `isRedeemed` on their device) and re-presents the same, genuinely-signed stamp data for a second redemption. Nothing on the supplier side has a record to check it against.
+
+**Recommended Fix:** Supplier-side ledger of redeemed `cardId`s (or a redemption nonce/signature the supplier tracks locally) checked before signing a new `RedemptionToken`, independent of device-mismatch detection.
+
+**Files requiring changes:**
+- `supplier_app/lib/services/business_repository.dart` (add a redemption-history check)
+- `supplier_app/lib/screens/supplier/supplier_redeem_card.dart` (call it before confirming)
+
+---
+
+### V-014: Biometric App-Lock Fails Open on Any Exception
+
+**Severity:** HIGH
+**Status:** 🔴 OPEN
+**Affected Component:** Customer App - App-lock authentication gate
+**Relationship to prior findings:** Different from **V-002** (which added biometric gating to the Supplier App's backup/clone screens, and remains correctly fail-closed there). This is the separate, customer-facing app-lock toggle in `main.dart`.
+
+**Description:**
+`_checkAuthRequirement()` (`customer_app/lib/main.dart:65-99`) wraps both the `SharedPreferences` read (`require_app_lock`) and the `_biometricAuth.authenticate()` call in a single `try`. The `catch` block explicitly does:
+```dart
+} catch (e) {
+  AppLogger.error('Error checking auth requirement: $e', tag: 'Security');
+  setState(() {
+    _isAuthenticated = true; // Fail open for better UX
+    _isAuthenticating = false;
+  });
+```
+Any exception — a `SharedPreferences` plugin error, a `local_auth` platform-channel failure, or `authenticate()` throwing instead of returning `false` — unlocks the app with **no successful authentication**. `BiometricAuthService.authenticate()` itself is correctly fail-closed on every internal path; this bug is isolated to this one caller.
+
+**Recommended Fix:** Split the `try` so a `SharedPreferences` failure or an `authenticate()` exception both resolve to `_isAuthenticated = false` (fail closed), with a user-facing retry option rather than a silent unlock.
+
+**Files requiring changes:**
+- `customer_app/lib/main.dart` (`_checkAuthRequirement`)
+
+---
+
+### V-015: Scan-Cooldown Rate Limiting Is Fully Client-Side, Per-Device, and Keyed to Untrusted Data
+
+**Severity:** HIGH
+**Status:** 🔴 OPEN
+**Affected Component:** Customer App - Rate limiting
+**Relationship to prior findings:** Adjacent to **V-001** (Simple Mode Self-Redemption, accepted by-design trust model) but distinct — V-001 is about the redemption honor system; this is specifically about the supplier-configured scan cooldown (5-60s, REQ-022) being technically bypassable, which the in-app copy presents as a real fraud "protection" rather than an honor-system convenience.
+
+**Description:**
+`canReceiveStamp` (`customer_app/lib/services/rate_limiter.dart:32-79`) checks only the *local* `stamps` table for that `cardId` on that device, and uses `scanInterval` from the token itself as the effective cooldown — a field that, like `stampCount` (V-010), is not part of any signed payload.
+
+**Concrete exploits:**
+- **Two-device bypass:** A static, reusable Express Mode stamp QR scanned from two separate app installs each sees an empty local history — the configured cooldown never engages across devices for the same physical visit.
+- **Forged interval:** An attacker-crafted token can set `"scanInterval": 0`, removing the cooldown entirely on their own device.
+
+**Recommended Fix:** Acceptable as a documented Express Mode trade-off (similar framing to V-001) if the in-app/marketing copy is adjusted to not overstate it as fraud protection; if a technical fix is wanted, `scanInterval` should be signed and/or the cooldown should be enforced from `businessId + cardId`-scoped history the supplier reviews, not solely the customer's own device state.
+
+**Files requiring changes:** `customer_app/lib/services/rate_limiter.dart`, or documentation/marketing copy in `supplier_onboarding.dart` and the User Guide if treated as accepted trade-off instead.
+
+---
+
+### V-016: Recovery Backup Signature Is Self-Certifying, Not Authenticating
+
+**Severity:** HIGH
+**Status:** 🔴 OPEN
+**Affected Component:** Supplier App - Backup/restore (`SupplierConfigBackup`)
+**Relationship to prior findings:** Different angle from **V-002** (Private Key Extraction, fixed via biometric gating on the *legitimate owner's* device). This finding is about the backup format itself being importable by anyone, from anywhere, regardless of biometric gating on the originating device.
+
+**Description:**
+`SupplierConfigBackup`'s integrity signature (`shared/lib/models/supplier_config_backup.dart:124-141`) is an HMAC whose key is derived (HKDF) from the `privateKey` field — which is itself part of the same signed payload. Since the algorithm is public, anyone can generate a fresh key pair, embed arbitrary `businessName`/`stampsRequired`/`operationMode` values, compute a signature that validates, and produce a backup QR that `import_business_screen.dart` will accept — it only checks "no existing business already configured on this device," not that the imported identity matches anything previously trusted.
+
+**Impact:** Lower severity than V-010/V-011/V-012 in isolation (it lets someone impersonate a *fictitious* business, not steal a real one's key), but worth fixing since it means the backup format provides no actual authentication guarantee — only structural integrity (the fields weren't corrupted in transit).
+
+**Recommended Fix:** This is a harder architectural problem for a P2P/no-server design (there's no independent authority to authenticate against). Lowest-effort improvement: surface a clear warning on import showing the business name/public key being imported and requiring explicit user confirmation it's expected, rather than silently trusting any scanned backup.
+
+**Files requiring changes:** `supplier_app/lib/screens/supplier/import_business_screen.dart` (add confirmation step); `shared/lib/models/supplier_config_backup.dart` if a structural fix is pursued later.
+
+---
+
+### Additional Observations (Medium/Low/Informational — not blocking, tracked for a later pass)
+
+These were found during the same review but are lower priority than V-010–V-016 and are not yet assigned fix-tracking status:
+
+- **Expiry checked against local device clock, not a trusted source.** The 2-minute stamp / 5-minute issuance expiry windows (`token_validator.dart:52-59, 139-147`) compare `DateTime.now()` (unattested) against the *signed* `token.timestamp` — the timestamp itself can't be forged, but rolling the verifying device's own clock backward shrinks the computed `age` and can make an otherwise-stale token appear fresh. Narrower than V-004's original scope (which addressed forward-clock rate-limit bypass and signature-protected stamp timestamps, both still valid conclusions).
+- **Device-mismatch "Proceed Anyway" applies no additional restriction** (`supplier_redeem_card.dart:679-745`) — already understood as advisory/discretionary per V-005's original design, noted here only because it compounds with V-012/V-013 (no independent technical backstop at all if a supplier proceeds).
+- `SupplierConfigBackup.fromQRString` has no internal try/catch (currently safe only because its one caller wraps it) — latent trap for future call sites.
+- Recovery/clone QR (embeds raw private key) defaults to public Downloads/Files on save; `flutter_secure_storage` uses `KeychainAccessibility.first_unlock` rather than a `*_this_device` variant, making stored keys eligible for restoration via OS-level encrypted backup onto different hardware.
+- Release-build logs include full exception text and, in several `backup_storage_service.dart` paths, stack traces — internal structure/error detail exposure, not confirmed secret leakage.
+- `SignatureFormat` (`shared/lib/utils/signature_format.dart`) is mostly dead/unused; the real signed-data formats are hand-duplicated ad hoc in `qr_tokens.dart` and `qr_token_generator.dart` with different field sets, a maintenance/drift risk independent of the exploits above.
+- No SQL injection anywhere (parameterized queries throughout), no plaintext secrets in `shared_preferences`, path-traversal properly sanitized in file saves, no ATS weakening, no deep-link attack surface, and QR/JSON parsing is empirically resistant to size/depth DoS well beyond real QR code capacity — all confirmed clean, included here for completeness rather than as findings.
+
+---
+
+### Fix Plan
+
+**Phase 1 (complete, 2026-07-25):** V-010, V-011, V-012 — the three that combined into a complete offline bypass of Secure Mode. All fixed and verified (`flutter analyze` clean, `flutter test` green: shared 151, customer_app 87, supplier_app 46). Not yet committed to git as of this writing - see branch `feature/SecurityReview`.
+**Phase 2 (next):** V-013, V-014, V-015, V-016.
+Each fix will get direct unit test coverage (matching the pattern already established for `CryptoUtils.verifySignature` and now `verifyRedemptionStampChain`), `flutter analyze`/`flutter test` verification, and this document updated with fix details and file lists once complete — following the same format as V-001–V-009 above.
+
+**Document Version:** 2.1 (2026-07-25 addendum, Phase 1 fixes recorded)

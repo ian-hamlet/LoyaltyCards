@@ -243,4 +243,138 @@ void main() {
       expect(second.isValid, isTrue);
     });
   });
+
+  group('CryptoUtils.verifyRedemptionStampChain', () {
+    late AsymmetricKeyPair<PublicKey, PrivateKey> keyPair;
+    late String publicKeyEncoded;
+
+    setUp(() {
+      keyPair = _generateKeyPair();
+      publicKeyEncoded = _encodePublicKey(keyPair.publicKey as ECPublicKey);
+    });
+
+    /// Signs a stamp the same way genuine Secure Mode issuance does after
+    /// the V-010 fix: stampCount=1, expiryDate=null, scanInterval=null are
+    /// baked into every real Secure Mode stamp (see supplier_stamp_card.dart
+    /// - it never sets these REQ-022/Simple-Mode-only fields).
+    String _signChainStamp({
+      required String cardId,
+      required int stampNumber,
+      required int timestamp,
+      required String previousHash,
+    }) {
+      final data = '$cardId:$stampNumber:$timestamp:$previousHash:1::';
+      return _sign(data, keyPair.privateKey as ECPrivateKey);
+    }
+
+    List<RedemptionStampProof> _genuineChain(String cardId, int count) {
+      final proofs = <RedemptionStampProof>[];
+      String previousHash = '';
+      for (int i = 1; i <= count; i++) {
+        final timestamp = 1749600000000 + i;
+        final signature = _signChainStamp(
+          cardId: cardId,
+          stampNumber: i,
+          timestamp: timestamp,
+          previousHash: previousHash,
+        );
+        proofs.add(RedemptionStampProof(signature: signature, timestamp: timestamp));
+        previousHash = signature;
+      }
+      return proofs;
+    }
+
+    test('accepts a genuine, fully-signed stamp chain', () {
+      final proofs = _genuineChain('card-001', 5);
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-001',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isTrue);
+    });
+
+    test('rejects a chain with a fabricated signature (V-012 core case)', () {
+      // No real stamps were ever issued - customer fabricates the whole
+      // redemption request from scratch, as V-012 describes.
+      final fabricated = [
+        RedemptionStampProof(signature: 'not-a-real-signature', timestamp: 1),
+        RedemptionStampProof(signature: 'also-fake', timestamp: 2),
+      ];
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-001',
+        stampProofs: fabricated,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+    });
+
+    test('rejects when a genuine stamp is appended with a fabricated one', () {
+      final proofs = _genuineChain('card-001', 2)
+        ..add(RedemptionStampProof(signature: 'fabricated-extra-stamp', timestamp: 999));
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-001',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+      expect(result.failureReason, contains('stamp_3'));
+    });
+
+    test('rejects a genuine chain verified against a different cardId', () {
+      final proofs = _genuineChain('card-001', 3);
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-999', // customer claims a different card
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+    });
+
+    test('rejects a genuine chain verified against the wrong business public key', () {
+      final proofs = _genuineChain('card-001', 3);
+      final otherKeyPair = _generateKeyPair();
+      final wrongPublicKey = _encodePublicKey(otherKeyPair.publicKey as ECPublicKey);
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-001',
+        stampProofs: proofs,
+        businessPublicKey: wrongPublicKey,
+      );
+
+      expect(result.isValid, isFalse);
+    });
+
+    test('rejects reordered stamps (breaks the hash chain)', () {
+      final proofs = _genuineChain('card-001', 3);
+      final reordered = [proofs[1], proofs[0], proofs[2]];
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-001',
+        stampProofs: reordered,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+    });
+
+    test('rejects an empty stamp list rather than vacuously succeeding', () {
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-001',
+        stampProofs: [],
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+      expect(result.failureReason, 'no_stamps_to_verify');
+    });
+  });
 }

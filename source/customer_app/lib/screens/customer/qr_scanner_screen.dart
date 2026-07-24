@@ -400,6 +400,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         _showScanError(validation.error ?? 'Invalid stamp');
         return;
       }
+
+      // V-010: REQ-022 multi-denomination (stampCount) is a Simple/Express
+      // Mode feature only - Secure Mode issuance never sets it above 1
+      // (see supplier_stamp_card.dart's _generateAndShowStamp). A Secure
+      // Mode token with stampCount != 1 can now only mean the field was
+      // tampered post-signing (the signature covers it, so this would also
+      // fail the check above) or a bug - reject outright either way, since
+      // the crediting loop below would otherwise mint multiple stamp rows
+      // from a single scan.
+      if (token.stampCount != 1) {
+        AppLogger.error(
+          'Secure Mode token has stampCount=${token.stampCount}, expected 1 - rejecting',
+          tag: 'Security',
+        );
+        _showScanError('Invalid stamp token');
+        return;
+      }
     } else {
       // REQ-022: Simple mode - validate expiry date and stamp count (skip crypto)
       AppLogger.debug('Simple mode: Validating expiry and stamp count only', 'Token');

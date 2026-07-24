@@ -550,7 +550,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         AppLogger.qr('Redemption token parsed successfully');
         AppLogger.qr('Card ID: ${token.cardId}');
         AppLogger.qr('Stamps collected: ${token.stampsCollected}');
-        AppLogger.qr('Signatures to verify: ${token.stampSignatures.length}');
+        AppLogger.qr('Signatures to verify: ${token.stampProofs.length}');
         
         // V-005: Check for device mismatch
         if (token.hasDeviceMismatch()) {
@@ -560,8 +560,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           _showDeviceMismatchWarning(context, token);
           return;
         }
-        
-        _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+
+        _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
         return;
       } else if (json['type'] == 'card_stamp_request') {
         // Customer is showing a stamp request QR, not a redemption QR
@@ -593,14 +593,58 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     }
   }
 
-  void _showSecureModeRedemptionConfirmation(BuildContext context, String cardId, int stamps) async {
+  void _showSecureModeRedemptionConfirmation(
+    BuildContext context,
+    String cardId,
+    int stamps, {
+    RedemptionRequestToken? token,
+  }) async {
     // Get business info to sign the redemption token
     final businessRepo = BusinessRepository();
     final business = await businessRepo.getBusiness();
-    
+
+    if (!mounted) return;
+
     if (business == null) {
       _showError('Business not configured');
       return;
+    }
+
+    // V-012: independently verify the customer's claimed stamps before
+    // signing off on a reward. Previously this flow trusted `stamps`
+    // (the customer's self-reported count) outright, with no cryptographic
+    // check at all - a fabricated or replayed redemption request would be
+    // signed just as readily as a genuine one.
+    //
+    // Express/Simple Mode is intentionally honor-based (no stamp signatures
+    // exist to check - see V-001), so verification only applies to Secure
+    // Mode businesses.
+    if (business.mode == OperationMode.secure) {
+      if (token == null) {
+        AppLogger.error(
+          'Secure Mode redemption via unsigned/legacy format rejected for card $cardId',
+          tag: 'Security',
+        );
+        _showError('This redemption method isn\'t supported for Secure Mode. Ask the customer to update their app.');
+        return;
+      }
+
+      final chainResult = CryptoUtils.verifyRedemptionStampChain(
+        cardId: cardId,
+        stampProofs: token.stampProofs,
+        businessPublicKey: business.publicKey,
+      );
+
+      if (!chainResult.isValid) {
+        AppLogger.error(
+          'Redemption rejected - stamp chain verification failed for card $cardId: ${chainResult.failureReason}',
+          tag: 'Security',
+        );
+        _showError('Unable to verify this card\'s stamps. Redemption denied.');
+        return;
+      }
+
+      AppLogger.business('Redemption stamp chain verified ($stamps stamps)');
     }
 
     // Generate redemption token
@@ -737,7 +781,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     if (result == true) {
       // User chose to proceed despite mismatch
       AppLogger.warning('Supplier chose to proceed with device mismatch', 'Security');
-      _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+      _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
     } else {
       // User cancelled
       AppLogger.warning('Supplier cancelled redemption due to device mismatch', 'Security');

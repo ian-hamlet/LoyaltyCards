@@ -215,10 +215,11 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                               }
                                             : null,
                                         icon: const Icon(Icons.remove_circle),
+                                        tooltip: 'Decrease initial stamp count',
                                       ),
                                       Text(
-                                        _initialStampCount == 0 
-                                            ? 'No stamps' 
+                                        _initialStampCount == 0
+                                            ? 'No stamps'
                                             : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
                                         style: const TextStyle(
                                           fontSize: 24,
@@ -236,6 +237,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                               }
                                             : null,
                                         icon: const Icon(Icons.add_circle),
+                                        tooltip: 'Increase initial stamp count',
                                       ),
                                     ],
                                   ),

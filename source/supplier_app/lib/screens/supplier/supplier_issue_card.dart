@@ -49,6 +49,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
 
     try {
       final business = await _businessRepo.getBusiness();
+      if (!mounted) return;
       if (business == null) {
         setState(() {
           _errorMessage = 'Business not found. Please complete onboarding.';
@@ -72,6 +73,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         _loggedCardIds.add(token.cardId!);
       }
 
+      if (!mounted) return;
       setState(() {
         _business = business;
         _token = token;
@@ -83,6 +85,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         _startCountdown();
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error generating token: $e';
         _isLoading = false;

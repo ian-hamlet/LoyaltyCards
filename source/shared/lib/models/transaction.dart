@@ -1,3 +1,5 @@
+import '../utils/app_logger.dart';
+
 /// Represents a transaction in the loyalty card system
 enum TransactionType {
   pickup, // Customer picked up a new card
@@ -35,13 +37,30 @@ class Transaction {
   }
 
   /// Create from JSON (from database)
+  ///
+  /// Q-009 fix: previously used `.firstWhere` with no `orElse`, so a single
+  /// unrecognized `type` value (schema drift, a manually-edited row, a
+  /// future renamed/removed enum case) threw an uncaught StateError - and
+  /// since callers `.map().toList()` this eagerly, one bad row crashed the
+  /// *entire* transaction list load, not just that row. Now defaults
+  /// safely (matching OperationModeExtension.fromString's existing
+  /// pattern) and logs a warning instead.
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    final rawType = json['type'];
+    final type = TransactionType.values.firstWhere(
+      (e) => e.name == rawType,
+      orElse: () {
+        AppLogger.warning(
+          'Unrecognized TransactionType "$rawType" for transaction ${json['id']} - defaulting to stamp',
+          'Transaction',
+        );
+        return TransactionType.stamp;
+      },
+    );
     return Transaction(
       id: json['id'] as String,
       cardId: json['card_id'] as String,
-      type: TransactionType.values.firstWhere(
-        (e) => e.name == json['type'],
-      ),
+      type: type,
       timestamp: DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int),
       businessName: json['business_name'] as String,
       details: json['details'] as String?,

@@ -62,8 +62,13 @@ class TransactionRepository {
   }
 
   /// Insert a new transaction
-  Future<void> insertTransaction(models.Transaction transaction) async {
-    final db = await _dbHelper.database;
+  ///
+  /// Q-003: accepts an optional [executor] (a `Transaction` from
+  /// `db.transaction()`) so it can participate in the same atomic
+  /// transaction as the stamp insert it logs. Defaults to a plain
+  /// connection when not provided.
+  Future<void> insertTransaction(models.Transaction transaction, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
     await db.insert(
       'transactions',
       transaction.toJson(),

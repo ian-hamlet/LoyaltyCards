@@ -81,4 +81,78 @@ void main() {
       await expectLater(dbHelper.deleteDatabase(), completes);
     });
   });
+
+  group('DatabaseHelper.runInTransaction (Q-003)', () {
+    Future<void> insertTestCard(String id) async {
+      final db = await dbHelper.database;
+      await db.insert('cards', {
+        'id': id,
+        'business_id': 'business-1',
+        'business_name': 'Test Business',
+        'business_public_key': 'test-key',
+        'stamps_required': 10,
+        'stamps_collected': 0,
+        'brand_color': '#FF0000',
+        'logo_index': 0,
+        'mode': 'secure',
+        'created_at': DateTime.now().millisecondsSinceEpoch,
+        'updated_at': DateTime.now().millisecondsSinceEpoch,
+        'is_redeemed': 0,
+      });
+    }
+
+    test('all writes inside a successful transaction are committed together', () async {
+      await insertTestCard('card-1');
+
+      await dbHelper.runInTransaction((txn) async {
+        await txn.insert('stamps', {
+          'id': 'stamp-1',
+          'card_id': 'card-1',
+          'stamp_number': 1,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'signature': 'sig-1',
+        });
+        await txn.insert('stamps', {
+          'id': 'stamp-2',
+          'card_id': 'card-1',
+          'stamp_number': 2,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'signature': 'sig-2',
+        });
+      });
+
+      final db = await dbHelper.database;
+      final stamps = await db.query('stamps', where: 'card_id = ?', whereArgs: ['card-1']);
+      expect(stamps.length, 2);
+    });
+
+    test('a write followed by a thrown exception rolls back everything in that transaction', () async {
+      await insertTestCard('card-1');
+
+      await expectLater(
+        dbHelper.runInTransaction((txn) async {
+          // Simulates the real qr_scanner_screen.dart flow: insert a stamp
+          // successfully, then hit a failure partway through (e.g. a
+          // second stamp's signature check failing) and throw.
+          await txn.insert('stamps', {
+            'id': 'stamp-1',
+            'card_id': 'card-1',
+            'stamp_number': 1,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'signature': 'sig-1',
+          });
+          throw Exception('simulated mid-transaction failure');
+        }),
+        throwsA(isA<Exception>()),
+      );
+
+      final db = await dbHelper.database;
+      final stamps = await db.query('stamps', where: 'card_id = ?', whereArgs: ['card-1']);
+      expect(
+        stamps,
+        isEmpty,
+        reason: 'the successfully-inserted stamp-1 row must be rolled back along with the rest of the transaction',
+      );
+    });
+  });
 }

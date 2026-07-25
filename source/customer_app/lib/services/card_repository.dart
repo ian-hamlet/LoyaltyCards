@@ -121,8 +121,13 @@ class CardRepository {
   }
 
   /// Update stamp count for a card
-  Future<void> updateStampCount(String cardId, int newCount) async {
-    final db = await _dbHelper.database;
+  ///
+  /// Q-003: accepts an optional [executor] (a `Transaction` from
+  /// `db.transaction()`) so this can be the final step of an atomic stamp
+  /// credit alongside the stamp insert and transaction log. Defaults to a
+  /// plain connection when not provided.
+  Future<void> updateStampCount(String cardId, int newCount, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
     await db.update(
       'cards',
       {

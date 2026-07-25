@@ -201,6 +201,22 @@ void main() {
 
         expect(decoded.id, uuidTxn.id);
       });
+
+      test('Q-009: fromJson defaults safely instead of throwing on an unrecognized type', () {
+        final json = {
+          'id': 'txn-legacy',
+          'card_id': 'card-1',
+          'type': 'card_issued', // not a real TransactionType.name value
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'business_name': 'Test Business',
+          'details': null,
+        };
+
+        final decoded = Transaction.fromJson(json);
+
+        expect(decoded.type, TransactionType.stamp);
+        expect(decoded.id, 'txn-legacy');
+      });
     });
 
     group('Chronological Ordering', () {

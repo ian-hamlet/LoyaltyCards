@@ -61,8 +61,13 @@ class StampRepository {
   }
 
   /// Insert a new stamp
-  Future<void> insertStamp(Stamp stamp) async {
-    final db = await _dbHelper.database;
+  ///
+  /// Q-003: accepts an optional [executor] (a `Transaction` from
+  /// `db.transaction()`) so multi-step stamp crediting can be wrapped in a
+  /// single atomic transaction instead of separate, independently-failable
+  /// writes. Defaults to a plain connection when not provided.
+  Future<void> insertStamp(Stamp stamp, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
     await db.insert(
       'stamps',
       stamp.toJson(),

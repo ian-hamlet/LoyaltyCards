@@ -63,6 +63,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                   ? '${token.lastStampHash.substring(0, 20)}...'
                   : token.lastStampHash);
           AppLogger.qr('Token lastStampHash = "$hashPreview"');
+          if (!mounted) return;
           setState(() {
             _qrData = token.toQRString();
             _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
@@ -84,6 +85,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
           AppLogger.qr('Redemption token generated');
           AppLogger.qr('Card ID = ${token.cardId}');
           AppLogger.qr('Stamps = ${token.stampsCollected}');
+          if (!mounted) return;
           setState(() {
             _qrData = token.toQRString();
             _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
@@ -94,7 +96,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
       }
     } catch (e, stackTrace) {
       AppLogger.error('QR Display ERROR', error: e, stackTrace: stackTrace, tag: 'QR');
-      
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         // Use user-friendly message if available

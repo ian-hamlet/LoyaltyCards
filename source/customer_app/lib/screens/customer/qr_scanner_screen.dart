@@ -474,123 +474,144 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       deviceId: deviceId, // V-005: Track device where stamp was collected
     );
 
-    await stampRepo.insertStamp(stamp);
-    AppLogger.database('Main stamp saved to DB');
-    
     // Log stamp transaction
     final transactionRepo = TransactionRepository(DatabaseHelper());
-    final stampTransaction = models.Transaction(
-      id: const Uuid().v4(),
-      cardId: card.id,
-      type: TransactionType.stamp,
-      timestamp: DateTime.now(),
-      businessName: card.businessName,
-      details: 'Stamp #$stampNumber earned',
-    );
-    await transactionRepo.insertTransaction(stampTransaction);
-    
+    final dbHelper = DatabaseHelper();
+
     // REQ-022: Process multi-denomination stamps (Simple Mode)
     int totalStampsAdded = 1;
-    if (token.stampCount > 1) {
-      AppLogger.qr('REQ-022: Processing ${token.stampCount - 1} additional stamps from multi-denomination token');
-      
-      for (int i = 2; i <= token.stampCount; i++) {
-        final additionalStampNumber = stamps.length + i;
-        final additionalStampId = '${card.id}_stamp_$additionalStampNumber';
-        
-        AppLogger.debug('Adding denomination stamp $i of ${token.stampCount}', 'Stamp');
-        
-        final additionalStamp = Stamp(
-          id: additionalStampId,
-          cardId: card.id,
-          stampNumber: additionalStampNumber,
-          timestamp: DateTime.now().add(Duration(milliseconds: i)), // Slight offset
-          signature: token.signature, // Same signature for all in simple mode
-          previousHash: null, // Simple mode doesn't use hash chains
-          deviceId: deviceId,
-        );
-        
-        await stampRepo.insertStamp(additionalStamp);
-        totalStampsAdded++;
-        AppLogger.database('  Multi-denomination stamp $i saved to DB');
-        
-        // Log stamp transaction
-        final addlStampTransaction = models.Transaction(
+
+    // Q-003 fix: wrap every stamp/transaction-log insert for this crediting
+    // event in one atomic transaction. Previously these were separate
+    // writes - a failure partway through (e.g. an additional stamp's
+    // signature legitimately failing verification mid-loop) could leave
+    // stamp rows persisted with no matching transaction log entry, or vice
+    // versa, desyncing the card's stampsCollected count from the actual
+    // stamps table. This also fixes an acknowledged gap in the original
+    // code ("we've already added some stamps... you might want to
+    // implement a transaction rollback here") - throwing
+    // _StampCreditingAborted now genuinely rolls back everything inserted
+    // earlier in this same event, instead of leaving partial state.
+    try {
+      await dbHelper.runInTransaction((txn) async {
+        await stampRepo.insertStamp(stamp, executor: txn);
+        AppLogger.database('Main stamp saved to DB');
+
+        final stampTransaction = models.Transaction(
           id: const Uuid().v4(),
-          cardId: card.id,
+          cardId: card!.id,
           type: TransactionType.stamp,
           timestamp: DateTime.now(),
           businessName: card.businessName,
-          details: 'Stamp #$additionalStampNumber earned (multi-denomination)',
+          details: 'Stamp #$stampNumber earned',
         );
-        await transactionRepo.insertTransaction(addlStampTransaction);
-      }
-      AppLogger.qr('REQ-022: All ${token.stampCount} stamps processed');
-    }
-    
-    // Process additional stamps if present (Secure Mode)
-    if (token.additionalStamps.isNotEmpty) {
-      AppLogger.qr('Processing ${token.additionalStamps.length} Additional Stamps ===');
-      String currentPreviousHash = token.signature; // First additional stamp uses main stamp's signature
+        await transactionRepo.insertTransaction(stampTransaction, executor: txn);
 
-      for (var additionalStamp in token.additionalStamps) {
-        AppLogger.qr('Additional Stamp #${additionalStamp.stampNumber}:');
-        final prevHashPreview = currentPreviousHash.length > 20 ? '${currentPreviousHash.substring(0, 20)}...' : currentPreviousHash;
-        final addlSigPreview = additionalStamp.signature.length > 20 ? '${additionalStamp.signature.substring(0, 20)}...' : additionalStamp.signature;
-        AppLogger.qr('  previousHash: "$prevHashPreview"');
-        AppLogger.qr('  signature: "$addlSigPreview"');
-        
-        // Verify stamp signature (skip in simple mode) (CR-1.4)
-        if (card.mode == OperationMode.secure) {
-          final signatureData = '${card.id}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
-          final verificationResult = KeyManager.verifySignature(
-            signatureData,
-            additionalStamp.signature,
-            card.businessPublicKey,
-          );
+        if (token.stampCount > 1) {
+          AppLogger.qr('REQ-022: Processing ${token.stampCount - 1} additional stamps from multi-denomination token');
 
-          if (!verificationResult.isValid) {
-            AppLogger.error('Additional stamp signature verification failed: ${verificationResult.failureReason}');
-            _showScanError('Invalid stamp signature: ${verificationResult.failureReason}');
-            // Note: We've already added some stamps. In production, you might want
-            // to implement a transaction rollback here.
-            return;
+          for (int i = 2; i <= token.stampCount; i++) {
+            final additionalStampNumber = stamps.length + i;
+            final additionalStampId = '${card.id}_stamp_$additionalStampNumber';
+
+            AppLogger.debug('Adding denomination stamp $i of ${token.stampCount}', 'Stamp');
+
+            final additionalStamp = Stamp(
+              id: additionalStampId,
+              cardId: card.id,
+              stampNumber: additionalStampNumber,
+              timestamp: DateTime.now().add(Duration(milliseconds: i)), // Slight offset
+              signature: token.signature, // Same signature for all in simple mode
+              previousHash: null, // Simple mode doesn't use hash chains
+              deviceId: deviceId,
+            );
+
+            await stampRepo.insertStamp(additionalStamp, executor: txn);
+            totalStampsAdded++;
+            AppLogger.database('  Multi-denomination stamp $i saved to DB');
+
+            // Log stamp transaction
+            final addlStampTransaction = models.Transaction(
+              id: const Uuid().v4(),
+              cardId: card.id,
+              type: TransactionType.stamp,
+              timestamp: DateTime.now(),
+              businessName: card.businessName,
+              details: 'Stamp #$additionalStampNumber earned (multi-denomination)',
+            );
+            await transactionRepo.insertTransaction(addlStampTransaction, executor: txn);
           }
-          AppLogger.qr('  Signature verified OK');
-        } else {
-          AppLogger.debug('  Simple mode: Skipping signature validation');
+          AppLogger.qr('REQ-022: All ${token.stampCount} stamps processed');
         }
 
-        // Create and save stamp
-        final additionalStampRecord = Stamp(
-          id: '${card.id}_stamp_${additionalStamp.stampNumber}',
-          cardId: card.id,
-          stampNumber: additionalStamp.stampNumber,
-          timestamp: DateTime.fromMillisecondsSinceEpoch(additionalStamp.timestamp),
-          signature: additionalStamp.signature,
-          previousHash: currentPreviousHash.isEmpty ? null : currentPreviousHash,
-          deviceId: deviceId, // V-005: Track device where stamp was collected
-        );
+        // Process additional stamps if present (Secure Mode)
+        if (token.additionalStamps.isNotEmpty) {
+          AppLogger.qr('Processing ${token.additionalStamps.length} Additional Stamps ===');
+          String currentPreviousHash = token.signature; // First additional stamp uses main stamp's signature
 
-        await stampRepo.insertStamp(additionalStampRecord);
-        totalStampsAdded++;
-        AppLogger.database('  Additional stamp saved to DB');
-        
-        // Log stamp transaction
-        final addlStampTransaction = models.Transaction(
-          id: const Uuid().v4(),
-          cardId: card.id,
-          type: TransactionType.stamp,
-          timestamp: DateTime.now(),
-          businessName: card.businessName,
-          details: 'Stamp #${additionalStamp.stampNumber} earned',
-        );
-        await transactionRepo.insertTransaction(addlStampTransaction);
-        
-        // Next stamp's previous hash is this stamp's signature
-        currentPreviousHash = additionalStamp.signature;
-      }
-      AppLogger.qr('All Additional Stamps Processed');
+          for (var additionalStamp in token.additionalStamps) {
+            AppLogger.qr('Additional Stamp #${additionalStamp.stampNumber}:');
+            final prevHashPreview = currentPreviousHash.length > 20 ? '${currentPreviousHash.substring(0, 20)}...' : currentPreviousHash;
+            final addlSigPreview = additionalStamp.signature.length > 20 ? '${additionalStamp.signature.substring(0, 20)}...' : additionalStamp.signature;
+            AppLogger.qr('  previousHash: "$prevHashPreview"');
+            AppLogger.qr('  signature: "$addlSigPreview"');
+
+            // Verify stamp signature (skip in simple mode) (CR-1.4)
+            if (card.mode == OperationMode.secure) {
+              final signatureData = '${card.id}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
+              final verificationResult = KeyManager.verifySignature(
+                signatureData,
+                additionalStamp.signature,
+                card.businessPublicKey,
+              );
+
+              if (!verificationResult.isValid) {
+                AppLogger.error('Additional stamp signature verification failed: ${verificationResult.failureReason}');
+                // Q-003 fix: throw to roll back the whole transaction
+                // (including any stamps already inserted earlier in this
+                // loop), instead of leaving partial state.
+                throw _StampCreditingAborted('Invalid stamp signature: ${verificationResult.failureReason}');
+              }
+              AppLogger.qr('  Signature verified OK');
+            } else {
+              AppLogger.debug('  Simple mode: Skipping signature validation');
+            }
+
+            // Create and save stamp
+            final additionalStampRecord = Stamp(
+              id: '${card.id}_stamp_${additionalStamp.stampNumber}',
+              cardId: card.id,
+              stampNumber: additionalStamp.stampNumber,
+              timestamp: DateTime.fromMillisecondsSinceEpoch(additionalStamp.timestamp),
+              signature: additionalStamp.signature,
+              previousHash: currentPreviousHash.isEmpty ? null : currentPreviousHash,
+              deviceId: deviceId, // V-005: Track device where stamp was collected
+            );
+
+            await stampRepo.insertStamp(additionalStampRecord, executor: txn);
+            totalStampsAdded++;
+            AppLogger.database('  Additional stamp saved to DB');
+
+            // Log stamp transaction
+            final addlStampTransaction = models.Transaction(
+              id: const Uuid().v4(),
+              cardId: card.id,
+              type: TransactionType.stamp,
+              timestamp: DateTime.now(),
+              businessName: card.businessName,
+              details: 'Stamp #${additionalStamp.stampNumber} earned',
+            );
+            await transactionRepo.insertTransaction(addlStampTransaction, executor: txn);
+
+            // Next stamp's previous hash is this stamp's signature
+            currentPreviousHash = additionalStamp.signature;
+          }
+          AppLogger.qr('All Additional Stamps Processed');
+        }
+      });
+    } on _StampCreditingAborted catch (e) {
+      _showScanError(e.message);
+      return;
     }
     
     // Check for card completion or overflow
@@ -635,7 +656,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         
         // Move overflow stamps to existing card
         final allStamps = await stampRepo.getStampsByCard(card.id);
-        final stampsToMove = allStamps.skip(allStamps.length - overflow).take(stampsToExistingCard).toList();
+        final stampsToMove = allStamps.skip(_safeSkipCount(allStamps.length, overflow)).take(stampsToExistingCard).toList();
         
         AppLogger.database('Moving ${stampsToMove.length} stamps to existing card ${existingCard.id}...');
         
@@ -690,7 +711,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           AppLogger.business('Created new card: $newCardId with $remainingOverflow stamps');
           
           // Move remaining overflow stamps to new card
-          final remainingStamps = allStamps.skip(allStamps.length - remainingOverflow).toList();
+          final remainingStamps = allStamps.skip(_safeSkipCount(allStamps.length, remainingOverflow)).toList();
           AppLogger.database('Moving ${remainingStamps.length} remaining stamps to new card...');
           
           for (var i = 0; i < remainingStamps.length; i++) {
@@ -765,7 +786,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.database('Total stamps in original card: ${allStamps.length}');
         
         // Take the last 'overflow' stamps and move them to new card
-        final stampsToMove = allStamps.skip(allStamps.length - overflow).toList();
+        final stampsToMove = allStamps.skip(_safeSkipCount(allStamps.length, overflow)).toList();
         AppLogger.database('Moving ${stampsToMove.length} stamps to new card...');
         
         for (var i = 0; i < stampsToMove.length; i++) {
@@ -1123,3 +1144,19 @@ enum QRScanMode {
   addCard,
   receiveStamp,
 }
+
+/// Q-003: thrown inside the stamp-crediting transaction to trigger a real
+/// rollback (instead of a bare early return that leaves already-inserted
+/// stamps in place), then caught outside the transaction to show the error.
+class _StampCreditingAborted implements Exception {
+  final String message;
+  _StampCreditingAborted(this.message);
+}
+
+/// Q-006: `Iterable.skip()` throws `RangeError` for a negative count.
+/// `length - wanted` can go negative if the actual stamp-row count is out
+/// of sync with the expected overflow amount (e.g. legacy data, or a
+/// previous crediting event that didn't fully complete) - clamping avoids
+/// crashing the overflow-move flow on desynced data, moving as many stamps
+/// as actually exist instead.
+int _safeSkipCount(int length, int wanted) => (length - wanted).clamp(0, length);

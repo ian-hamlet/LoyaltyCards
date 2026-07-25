@@ -51,15 +51,41 @@ class AppLockWrapper extends StatefulWidget {
   State<AppLockWrapper> createState() => _AppLockWrapperState();
 }
 
-class _AppLockWrapperState extends State<AppLockWrapper> {
+class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObserver {
   bool _isAuthenticated = false;
   bool _isAuthenticating = true;
+  bool _requireAppLock = false; // Cached from prefs, used by didChangeAppLifecycleState
   final BiometricAuthService _biometricAuth = BiometricAuthService();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkAuthRequirement();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Q-001 fix: previously _checkAuthRequirement only ran once at cold
+  // launch, so once authenticated the app stayed unlocked for the rest of
+  // the process - backgrounding and returning showed cards with no
+  // re-prompt. Now: re-lock when backgrounded (if app lock is enabled),
+  // and re-authenticate automatically on return.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.paused && _requireAppLock && _isAuthenticated) {
+      setState(() {
+        _isAuthenticated = false;
+      });
+    } else if (state == AppLifecycleState.resumed && !_isAuthenticated && !_isAuthenticating) {
+      _checkAuthRequirement();
+    }
   }
 
   Future<void> _checkAuthRequirement() async {
@@ -67,6 +93,8 @@ class _AppLockWrapperState extends State<AppLockWrapper> {
       // Check if app lock is enabled
       final prefs = await SharedPreferences.getInstance();
       final bool requireAuth = prefs.getBool('require_app_lock') ?? false;
+      if (!mounted) return;
+      _requireAppLock = requireAuth;
 
       if (!requireAuth) {
         // App lock disabled, proceed normally
@@ -82,6 +110,7 @@ class _AppLockWrapperState extends State<AppLockWrapper> {
       final authenticated = await _biometricAuth.authenticate(
         reason: 'Unlock LoyaltyCards to view your cards',
       );
+      if (!mounted) return;
 
       setState(() {
         _isAuthenticated = authenticated;
@@ -98,6 +127,7 @@ class _AppLockWrapperState extends State<AppLockWrapper> {
       // entirely. There's already a proper "App Locked" retry screen for
       // this state, so failing closed costs nothing but a retry tap.
       AppLogger.error('Error checking auth requirement: $e', tag: 'Security');
+      if (!mounted) return;
       setState(() {
         _isAuthenticated = false;
         _isAuthenticating = false;

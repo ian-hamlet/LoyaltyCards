@@ -38,11 +38,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   Future<void> _loadBusiness() async {
     try {
       final business = await _businessRepo.getBusiness();
+      if (!mounted) return;
       setState(() {
         _business = business;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }

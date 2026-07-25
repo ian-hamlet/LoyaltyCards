@@ -32,6 +32,13 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   bool _isLoading = true;
   String? _currentDeviceId; // V-005: Cache device ID for QR generation
 
+  // Q-007: cache the generated QR string instead of calling _generateCardQR()
+  // directly in build() - that embeds a live timestamp, so any incidental
+  // rebuild (rotation, an unrelated setState elsewhere on screen) produced
+  // a visibly different QR code even though nothing the user did changed.
+  // Recomputed only when card/stamp data is actually reloaded.
+  String? _cachedQRData;
+
   @override
   void initState() {
     super.initState();
@@ -53,18 +60,22 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       for (var stamp in stamps) {
         AppLogger.debug('  Stamp #${stamp.stampNumber} at ${stamp.timestamp}', 'CardDetail');
       }
-      
+
+      if (!mounted) return;
       setState(() {
         _card = card;
         _stamps = stamps;
         _isLoading = false;
+        // _generateCardQR() reads _card/_stamps, which were just assigned
+        // above in this same synchronous callback, so this reflects the
+        // freshly-loaded data.
+        _cachedQRData = _generateCardQR();
       });
     } catch (e) {
       AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
+      if (!mounted) return;
       setState(() => _isLoading = false);
-      if (mounted) {
-        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load card'));
-      }
+      AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load card'));
     }
   }
 
@@ -593,7 +604,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                     border: Border.all(color: Colors.grey[300]!),
                   ),
                   child: QrImageView(
-                    data: _generateCardQR(),
+                    data: _cachedQRData ?? _generateCardQR(),
                     version: QrVersions.auto,
                     size: QRCodeSize.calculate(context) * 0.95, // 95% size (TEST-010 - Compact QR Layout)
                     backgroundColor: Colors.white,
@@ -918,7 +929,12 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       
       // Check for existing card with available space before creating new card
       final existingCard = await _cardRepo.findCardWithSpace(_card!.businessId);
-      
+      // Q-004 fix: track whether a new card was actually created so the
+      // success dialog below can say so accurately - it previously claimed
+      // "a new card has been added" unconditionally, even when an existing
+      // under-filled card was reused instead.
+      bool newCardCreated = false;
+
       if (existingCard != null) {
         AppLogger.business('Found existing card with space: ${existingCard.id}');
         AppLogger.business('  Existing card has ${existingCard.stampsCollected}/${existingCard.stampsRequired} stamps');
@@ -944,6 +960,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         
         await _cardRepo.insertCard(newCard);
         AppLogger.database('New card auto-created: $newCardId');
+        newCardCreated = true;
       }
       
       // Reload card data
@@ -1005,31 +1022,36 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[200]!),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.auto_awesome, color: Colors.blue[700], size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'A new card has been added to your wallet automatically',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue[900],
+                // Q-004 fix: only shown when a new card was actually
+                // created - previously shown unconditionally even when an
+                // existing under-filled card was reused instead.
+                if (newCardCreated) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue[200]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_awesome, color: Colors.blue[700], size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'A new card has been added to your wallet automatically',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue[900],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
             actions: [

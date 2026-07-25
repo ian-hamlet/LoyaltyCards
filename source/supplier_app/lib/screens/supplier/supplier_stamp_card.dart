@@ -51,10 +51,11 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   Future<void> _loadBusiness() async {
     try {
       final business = await _businessRepo.getBusiness();
+      if (!mounted) return;
       setState(() {
         _business = business;
       });
-      
+
       // Auto-generate QR for simple mode
       if (business?.mode == OperationMode.simple) {
         // Small delay to ensure widget is built
@@ -64,6 +65,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error loading business: $e';
       });
@@ -148,6 +150,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 
       // Log card activity (tracks unique cards using the system)
       await _businessRepo.logCardActivity(token.cardId, _business!.id);
+      if (!mounted) return;
 
       // Check timestamp (must be < 1 minute old)
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -177,6 +180,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         _showStampCountSelector(token, previousHash);
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error processing QR: $e';
         _isProcessing = false;
@@ -385,11 +389,12 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         AppLogger.debug('Generated $_stampCount-stamp token for ${_business!.name}', 'StampToken');
       }
     } catch (e) {
+      AppLogger.error('Failed to generate simple mode token: $e', tag: 'StampToken');
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error generating stamp: $e';
         _isProcessing = false;
       });
-      AppLogger.error('Failed to generate simple mode token: $e', tag: 'StampToken');
     }
   }
 

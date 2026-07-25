@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -241,6 +242,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                       child: MobileScanner(
                         controller: cameraController,
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error) => ScannerPermissionErrorView(error: error),
                         onDetect: (capture) {
                           if (_isProcessing) return;
                     
@@ -468,6 +470,15 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     );
   }
 
+  /// Test-only entry point for [_processManualRedemption] - see
+  /// [processCardQRForTesting] for why a direct call is needed instead of
+  /// driving this through the UI. Note: as of this writing, no visible
+  /// button in the Simple Mode build actually calls
+  /// [_showRedemptionConfirmation]/[_processManualRedemption] - flagged
+  /// separately, this wrapper still exercises the underlying logic.
+  @visibleForTesting
+  Future<void> processManualRedemptionForTesting() => _processManualRedemption();
+
   Future<void> _processManualRedemption() async {
     setState(() => _isProcessing = true);
 
@@ -534,6 +545,14 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       }
     }
   }
+
+  /// Test-only entry point for [_processCardQR] - lets widget tests
+  /// simulate "a QR was scanned" without a real camera (mobile_scanner
+  /// can't produce detection events in the test environment). Since this
+  /// State class is private, call it dynamically:
+  /// `(tester.state(find.byType(SupplierRedeemCard)) as dynamic).processCardQRForTesting(qrData)`.
+  @visibleForTesting
+  void processCardQRForTesting(String qrData) => _processCardQR(qrData);
 
   void _processCardQR(String qrData) {
     setState(() {

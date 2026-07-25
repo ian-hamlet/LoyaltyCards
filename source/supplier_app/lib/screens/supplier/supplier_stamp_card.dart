@@ -949,6 +949,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                       child: MobileScanner(
                         controller: _cameraController,
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error) => ScannerPermissionErrorView(error: error),
                         onDetect: (capture) {
                           if (_isProcessing) return;
                     

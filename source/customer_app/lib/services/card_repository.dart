@@ -51,8 +51,11 @@ class CardRepository {
   }
 
   /// Get all cards for a specific business
-  Future<List<models.Card>> getCardsByBusiness(String businessId) async {
-    final db = await _dbHelper.database;
+  ///
+  /// Accepts an optional [executor] so this can participate in a shared
+  /// `db.transaction()` - see [updateStampCount] for why this matters.
+  Future<List<models.Card>> getCardsByBusiness(String businessId, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       'cards',
       where: 'business_id = ?',
@@ -64,12 +67,15 @@ class CardRepository {
   }
 
   /// Insert a new card
-  Future<void> insertCard(models.Card card) async {
+  ///
+  /// Accepts an optional [executor] so this can participate in a shared
+  /// `db.transaction()` - see [updateStampCount] for why this matters.
+  Future<void> insertCard(models.Card card, {DatabaseExecutor? executor}) async {
     // Runtime validation (works in ALL build modes)
     _validateCard(card);
-    
-    final db = await _dbHelper.database;
-    
+
+    final db = executor ?? await _dbHelper.database;
+
     try {
       await db.insert(
         'cards',
@@ -205,11 +211,14 @@ class CardRepository {
   /// Find an existing non-redeemed card with available space for stamps
   /// Returns the card with the MOST stamps if multiple cards exist
   /// Returns null if no cards with available space exist
-  Future<models.Card?> findCardWithSpace(String businessId) async {
+  ///
+  /// Accepts an optional [executor] so this can participate in a shared
+  /// `db.transaction()` - see [updateStampCount] for why this matters.
+  Future<models.Card?> findCardWithSpace(String businessId, {DatabaseExecutor? executor}) async {
     AppLogger.database('Searching for cards with available space for business: $businessId');
-    
+
     // Get all cards for this business
-    final allCards = await getCardsByBusiness(businessId);
+    final allCards = await getCardsByBusiness(businessId, executor: executor);
     AppLogger.database('Found ${allCards.length} total cards for business');
     
     // Filter to non-redeemed cards with available space

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:shared/shared.dart';
@@ -63,6 +64,16 @@ class DatabaseHelper {
     }
   }
   
+  /// Test-only accessor for [_attemptDatabaseRecovery] (Q-002).
+  ///
+  /// The real trigger for recovery is a 10-second open timeout, which isn't
+  /// reliably or quickly reproducible in a test environment. This calls the
+  /// exact same recovery logic directly so tests can verify the actual
+  /// delete-vs-preserve decision (based on the SQLite file header) without
+  /// needing to simulate a hang.
+  @visibleForTesting
+  Future<void> attemptDatabaseRecoveryForTesting() => _attemptDatabaseRecovery();
+
   /// Attempt to recover from corrupted database
   ///
   /// Q-002 fix: this previously deleted the database file unconditionally

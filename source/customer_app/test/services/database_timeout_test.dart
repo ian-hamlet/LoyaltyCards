@@ -63,6 +63,62 @@ void main() {
   });
 
   group('TEST-002: Database Recovery Mechanism', () {
+    test('Q-002: recovery deletes a file without a valid SQLite header', () async {
+      const dbName = 'test_q002_invalid_header.db';
+      await DatabaseHelper.resetForTesting(testDatabaseName: dbName);
+      final dbHelper = DatabaseHelper();
+
+      final databasesPath = await databaseFactory.getDatabasesPath();
+      final dbPath = '$databasesPath/$dbName';
+      final file = File(dbPath);
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(List<int>.filled(32, 0)); // garbage, not "SQLite format 3\0"
+      expect(await file.exists(), true);
+
+      await dbHelper.attemptDatabaseRecoveryForTesting();
+
+      expect(
+        await file.exists(),
+        false,
+        reason: 'a file whose header does not match "SQLite format 3\\0" should be deleted during recovery',
+      );
+
+      await DatabaseHelper.resetForTesting();
+    });
+
+    test(
+      'Q-002: recovery preserves a file with a valid SQLite header instead of deleting it unconditionally',
+      () async {
+        // This is the exact regression Q-002 fixed: recovery previously
+        // deleted the database file on ANY open timeout, even if the file
+        // was intact and the timeout was caused by something else (a slow
+        // device, a transient OS-level lock) - causing total, unrecoverable
+        // data loss in a P2P app with no server backup.
+        const dbName = 'test_q002_valid_header.db';
+        await DatabaseHelper.resetForTesting(testDatabaseName: dbName);
+        final dbHelper = DatabaseHelper();
+
+        // Create a genuine, intact SQLite database at this path.
+        final db = await dbHelper.database;
+        await db.close();
+
+        final databasesPath = await databaseFactory.getDatabasesPath();
+        final dbPath = '$databasesPath/$dbName';
+        final file = File(dbPath);
+        expect(await file.exists(), true);
+
+        await dbHelper.attemptDatabaseRecoveryForTesting();
+
+        expect(
+          await file.exists(),
+          true,
+          reason: 'a file with a valid SQLite header must survive recovery, even though the caller still sees a TimeoutException',
+        );
+
+        await DatabaseHelper.resetForTesting();
+      },
+    );
+
     test('should delete corrupted database file during recovery', () async {
       await DatabaseHelper.resetForTesting(testDatabaseName: 'test_corrupted.db');
       final dbHelper = DatabaseHelper();

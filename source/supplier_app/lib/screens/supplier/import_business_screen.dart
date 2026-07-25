@@ -336,6 +336,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     child: MobileScanner(
                       controller: _scannerController,
                       fit: BoxFit.contain,
+                      errorBuilder: (context, error) => ScannerPermissionErrorView(error: error),
                       onDetect: (capture) {
                         final List<Barcode> barcodes = capture.barcodes;
                         for (final barcode in barcodes) {

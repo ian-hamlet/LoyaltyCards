@@ -181,6 +181,33 @@ Both database helpers: `_cleanupOldBackups` is only called in the migration *suc
 **Status:** 📋 OPEN — LOW severity, out of scope for this pass
 Migration backup/restore only close the cached `_database` field if non-null — during first-cold-boot upgrade that field is still `null` (set only after `_initDatabase()` returns), so the connection mid-`onUpgrade` may not be closed before the backup file copy runs underneath it. Flagged as lower-confidence pending a closer read of sqflite's exact connection lifecycle here.
 
+### Q-013: Simple/Express Mode's manual redemption confirmation flow is unreachable dead code
+**Status:** 📋 CLOSED — verified intentional, no fix needed
+
+Discovered via `flutter analyze` while adding widget test coverage for
+`supplier_redeem_card.dart`: `_showRedemptionConfirmation()` and
+`_buildStep()` are flagged `unused_element` — nothing in the widget tree
+calls them. The Simple Mode branch of the screen renders only an info card
+and instructions; there's no button wired to the manual redemption
+confirmation dialog, so `_processManualRedemption()` (which would call
+`BusinessRepository.logRedemption()`) can never run through the UI as it
+currently stands.
+
+**Why this isn't a bug:** Simple/Express Mode redemption is self-service by
+design (see `docs/technical/SECURITY_MODEL.md`) — the customer marks their
+own card redeemed locally, and the supplier's actual check is visual (glance
+at the phone, hand over the reward), not a data-entry step. There's also
+nothing for a confirmation dialog to verify: Express Mode has no per-card
+signatures or identity, so one card looks the same as any other other than
+trust.
+
+**Decision (developer, 2026-07-26):** Express Mode deliberately does **not**
+track cards-issued/cards-redeemed statistics. The unreachable button and its
+`logRedemption()` call are consistent with that choice, not an oversight —
+left as dead code, no wiring-up planned. If this decision changes later, the
+code path already exists (`_processManualRedemption`); it would just need a
+button wired to `_showRedemptionConfirmation()`.
+
 ---
 
 ## What's already solid (verified, not just claimed)

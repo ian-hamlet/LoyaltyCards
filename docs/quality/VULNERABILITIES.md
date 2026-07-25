@@ -1050,7 +1050,15 @@ The originally-recommended fix (wire up the existing `validateRedemptionRequest`
 - `supplier_app/lib/screens/supplier/supplier_redeem_card.dart` (check wired into the confirmation flow)
 - `supplier_app/test/services/business_repository_test.dart` (new)
 
-**Resolution:** ✅ FIXED - A card that's already been redeemed on this device is now rejected outright, independent of device-mismatch detection.
+**Resolution:** ✅ FIXED, per-device - A card that's already been redeemed on *this* device is rejected outright, independent of device-mismatch detection. See the residual limitation below for what "per-device" means in practice.
+
+**Residual limitation (accepted by design, 2026-07-26):** `hasBeenRedeemed()` only ever sees the queried device's own local `redemptions` table. `SupplierConfigBackup` (used by both Clone Device and Recovery Backup) carries the business's identity and ECDSA key pair but never the `redemptions` table, so a cloned or recovered device starts with an empty redemption history while every card issued under that business's key remains fully valid. A card redeemed on one device could be re-presented and redeemed again on another device (or a recovered replacement) sharing the same business identity.
+
+This is **deliberately left as-is, not fixed**, after explicit discussion (2026-07-26):
+- Clone Device exists specifically so shop assistants can use their own devices *without* a shared database — that's the intended design, not an oversight. A shared redemption ledger would require moving away from the P2P/no-server architecture entirely (ongoing storage costs, defeating the "free to run" model this app is built around).
+- Any point-in-time fix (embedding a redemption snapshot/watermark in the backup/clone payload) is stale the moment a new redemption happens on the other device — which is precisely the scenario Clone Device is meant to support (two registers operating *concurrently*). It would add real complexity for close to no protection in the case that matters most.
+- This mirrors the physical stamp-card equivalent exactly: nothing stops the same completed paper card being presented at two independently-operated registers either. The app is intentionally not trying to provide a stronger guarantee than the paper original for this scenario — see `docs/technical/SECURITY_MODEL.md`'s "Redemption Tracking Across Cloned Devices" section.
+- **Mitigation:** both `clone_device_screen.dart` and `recovery_backup_screen.dart` now show an explicit in-app notice ("Redemption Records Are Not Shared" / "...Not Included") at the point of generating the QR, so this is a disclosed, known limitation rather than a silent one.
 
 ---
 

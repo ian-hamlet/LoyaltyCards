@@ -30,9 +30,35 @@ The LoyaltyCards application requires a method to exchange stamp transaction dat
 - Works on all iOS and Android versions
 - Reliable in various lighting conditions
 
-### Enhanced Implementation: NFC (Future Phase)
+### Enhanced Implementation: NFC — Not Viable on iOS as Originally Envisioned
 
-NFC tap-to-stamp will be added in a future phase for devices that support it, providing faster "bump" interaction.
+**Update 2026-07-25:** this was originally scoped as a future-phase "bump two
+phones together" speed improvement, parallel to Android's NFC peer-to-peer
+capability. On investigation, that's not achievable on iOS for a
+third-party app. Apple's Core NFC framework only lets an app *read* a
+passive NFC tag — there is no general API for a third-party app to make an
+iPhone *act as* an NFC tag/peer that another iPhone can read, unlike
+Android (which has historically supported Host Card Emulation and NFC
+peer-to-peer for exactly this). The one iOS capability that resembles
+device-to-device NFC, "Tap to Pay on iPhone," is a narrow, separately
+Apple-approved merchant-acquiring feature for accepting contactless
+card/Apple Pay payments — it's not a general data channel and doesn't fit
+exchanging a signed loyalty token between two phones.
+
+The only NFC capability actually available to this app on iOS is reading a
+static, passive NFC tag (e.g., a sticker at a register). That doesn't fit
+Secure Mode's model either: Secure Mode needs a fresh, signed payload per
+stamp, and a passive tag can only hold static data — the same limitation
+Express Mode's reusable QR code already has (which is why Express Mode
+stamps aren't cryptographically verified in the first place). It also
+wouldn't meaningfully help the accessibility case this was being considered
+for (see [REVIEW_ROLES.md](../../quality/REVIEW_ROLES.md), Accessibility
+section, QR-scanner finding), since Secure Mode's live signing step would
+still need to happen somewhere.
+
+**Conclusion:** NFC tap-to-stamp is dropped from the roadmap, not just
+deprioritized. QR code exchange remains the only P2P transport for this
+architecture on iOS.
 
 ### Optional Backup: Encrypted Cloud Storage
 
@@ -339,7 +365,8 @@ const previousHash = stamps.length > 0
 **Cost**: $0 infrastructure
 
 ### Phase 2: Enhanced UX
-- NFC tap-to-stamp (where supported)
+- ~~NFC tap-to-stamp (where supported)~~ — dropped 2026-07-25, not viable on
+  iOS for a third-party app; see "Enhanced Implementation: NFC" above
 - Improved QR scanning (continuous scan mode)
 - Enhanced visual feedback
 - Push notifications (local only, no backend)
@@ -385,5 +412,5 @@ const previousHash = stamps.length > 0
 ---
 
 **Document Owner**: Architecture Team  
-**Last Updated**: 2026-03-30  
+**Last Updated**: 2026-07-25 (NFC section corrected — not viable on iOS)  
 **Next Review**: After Phase 1 MVP completion

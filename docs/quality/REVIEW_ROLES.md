@@ -24,8 +24,21 @@ which raises confidence these are real:
    business identity and keys but never the `redemptions`/`stamp_history`
    tables, so a cloned or recovered supplier device starts with an empty
    redemption ledger while every previously-issued, previously-redeemed card
-   remains fully cryptographically valid. This is the single highest-priority
-   fix to come out of this round.
+   remains fully cryptographically valid.
+   **Update 2026-07-26: resolved as accepted-by-design, not fixed in code.**
+   Clone Device's whole purpose is letting staff use their own devices
+   *without* a shared database — a real fix would mean adding server-side
+   or cross-device sync state, against the app's no-infrastructure design
+   for its small-business target market. A point-in-time snapshot fix
+   wouldn't help anyway, since it's stale the instant a new redemption
+   happens on the other device — precisely the concurrent-use case Clone
+   Device exists for. This mirrors a physical paper stamp card's identical
+   risk at two independently-staffed registers. Mitigation implemented
+   instead: explicit in-app disclosure on both `clone_device_screen.dart`
+   and `recovery_backup_screen.dart` at the point the QR is generated. Full
+   writeup: [SECURITY_MODEL.md](../technical/SECURITY_MODEL.md)'s
+   "Redemption Tracking Across Cloned Devices" section and
+   [VULNERABILITIES.md](VULNERABILITIES.md)'s V-013 entry.
 2. **A hashed device identifier is generated, stored, and P2P-transmitted via
    QR, undisclosed in the Privacy Policy.** Found independently by both the
    App Store Compliance review (as Critical, framed as an App Review
@@ -81,10 +94,9 @@ sufficiency verdict per case.
   (two concurrent registers) makes this reachable without any device-loss
   event at all. **Also flagged independently by Offline/Multi-Device
   Consistency, below — see the convergence note at the top of this doc.**
-  Recommend: either embed a redemption watermark/digest in the backup
-  payload, or at minimum surface an explicit warning on both Clone and
-  Recovery flows that past redemptions aren't carried over. Not currently
-  documented anywhere as a residual risk.
+  **Update 2026-07-26: resolved as accepted-by-design** (disclosure only,
+  no watermark/snapshot mechanism built) — see the top-of-doc convergence
+  note for the full reasoning.
 - **[Medium] "Supplier visual verification" mitigation has no supporting UI.**
   SECURITY_MODEL.md credits the supplier with reviewing stamp timestamps
   before redeeming, but `supplier_redeem_card.dart` never renders per-stamp
@@ -196,6 +208,16 @@ around the P2P/no-backend architecture being misread as something it isn't.
   the hashed device ID and its P2P-only fraud-prevention purpose in the
   Privacy Policy, and correct the App Privacy questionnaire answers before
   submission — the feature itself is legitimate and shouldn't be removed.
+  **Update 2026-07-25: fixed.** `docs/legal/PRIVACY_POLICY.md` and the
+  published `site/legal/privacy-policy.html` now disclose the device signal
+  (new "Anti-Fraud Device Signal" section), and
+  `APP_REVIEW_PACKET_v1_0_2_8.md`'s suggested App Privacy answers were
+  corrected (customer app: declare Device ID, App Functionality purpose, not
+  linked to identity, not used for tracking). **Still open:** App Store
+  Connect's own App Privacy questionnaire was filled in before this finding
+  and needs the same correction made by hand in ASC — tracked as a reminder
+  in `docs/deployment/APP_STORE_SUBMISSION_CHECKLIST.md`, since nothing in
+  this repo can update ASC directly.
 - **[Medium] App Review / metadata packets are stale** —
   `APP_REVIEW_PACKET_v1_0_2_8.md` and the metadata packet don't reflect two
   version bumps since (`1.0.3+10`, `1.1.0+12`), including the device-ID
@@ -242,9 +264,12 @@ desired behavior.
   Rated Critical here (vs. High in the Fraud/Abuse review) because Clone
   Device's own stated purpose — two concurrent registers sharing a business
   — makes this reachable in completely ordinary, non-adversarial use, not
-  just after a device-loss event. Recommend downgrading V-013's "FIXED"
-  status to "fixed per-device" until addressed, and see the shared
-  recommendation under Fraud/Abuse above.
+  just after a device-loss event. **Update 2026-07-26: resolved as
+  accepted-by-design.** V-013's status corrected to "fixed per-device" in
+  VULNERABILITIES.md, with the full rationale recorded there and in
+  SECURITY_MODEL.md's new "Redemption Tracking Across Cloned Devices"
+  section — see the top-of-doc convergence note. In-app disclosure added to
+  both Clone Device and Recovery Backup screens instead of a data-model fix.
 - **[High] Card-split/overflow stamp-move logic still performs many
   un-transacted delete+insert writes**, unlike the credit path Q-003 already
   fixed (`qr_scanner_screen.dart:635-830`). When a scan pushes a card past
@@ -253,9 +278,13 @@ desired behavior.
   un-transacted delete-then-insert. A force-quit or transient DB error
   mid-loop permanently loses stamp rows while the count field claims they
   exist — a genuine data-loss bug reproducible by a normal OS-initiated app
-  kill, not an adversarial scenario. Recommend extending the same
-  `runInTransaction`/`executor` pattern Q-003 introduced to cover this
-  entire block.
+  kill, not an adversarial scenario.
+  **Update 2026-07-25: fixed.** The entire mark-complete/move-stamps/
+  create-new-card sequence is now wrapped in one `dbHelper
+  .runInTransaction`, with `executor` support added to
+  `getCardsByBusiness`/`findCardWithSpace`/`insertCard`/`getStampsByCard`/
+  `deleteStamp`. Verified via `flutter analyze` (clean) and the full
+  124-test customer_app suite (all passing).
 - Checked with no new findings: `device_id` remains purely advisory,
   customer-side only, never blocking (matches documented design — and is
   the direct reason nothing tracks "which device redeemed this," i.e. the
@@ -331,6 +360,16 @@ verified by running each package fresh.**
   the `_looksLikeValidSqliteFile` header check would silently reintroduce
   unconditional data-wipe-on-timeout, arguably the highest-stakes fix in the
   codebase, with nothing to catch it.
+  **Update 2026-07-25: fixed.** Added `DatabaseHelper
+  .attemptDatabaseRecoveryForTesting()`, a `@visibleForTesting` accessor
+  that calls the real `_attemptDatabaseRecovery()` directly so tests don't
+  need to trigger an actual 10-second timeout. Two new regression tests:
+  one confirms a file without a valid SQLite header gets deleted, the other
+  confirms a file *with* a valid header survives recovery — the exact
+  behavior Q-002 fixed. Verified passing via `flutter test`. The other 6
+  unrelated TODO stubs in this file (log capture, timeout-simulation,
+  disk-full, locked-database) are separate, lower-priority gaps and remain
+  open.
 - **[Critical] `SupplierConfigBackup` has zero test coverage** — the
   HMAC-SHA256/HKDF signing and `fromJson`/`fromQRString` parsing for both
   Clone Device and Recovery Backup QR payloads is entirely untested, despite
@@ -413,7 +452,9 @@ short or empty if nothing has drifted.
   never reaches a server or the developer): add a carve-out sentence
   explaining the one-way-hashed per-device identifier and its fraud-
   prevention purpose, and revisit the App Review Packet's "Data Not
-  Collected" answer before submission.
+  Collected" answer before submission. **Update 2026-07-25: fixed** — see
+  the identical note under App Store / Platform Compliance, above (this is
+  the same underlying issue, found independently by both roles).
 - **[Low] Accessibility Statement's hardcoded version number is stale**
   ("v1.0.2+8" vs. current `1.1.0+12`) — documentation-currency gap only, not
   contradicted by any code behavior. Bump as part of the next pre-submission

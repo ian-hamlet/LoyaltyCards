@@ -42,9 +42,21 @@ class AppLogger {
   }
 
   /// Log error message with optional error object and stack trace
+  ///
+  /// The [stackTrace] is only included in debug builds. `error`-level calls
+  /// stay active in release builds (only the *minimum* logged severity is
+  /// gated by kDebugMode, not what an error call includes), and this app
+  /// has no remote crash-reporting pipeline - these logs only ever reach
+  /// the local OS unified log. A stack trace there is internal-structure
+  /// exposure (class/method names) to anyone with brief physical access to
+  /// an unlocked device, for debugging value that's mostly theoretical
+  /// without an established way to actually collect it from real users.
+  /// The error [message] itself (often a caught exception's toString())
+  /// still logs in both modes - it's useful support context and reveals
+  /// far less.
   static void error(String message, {dynamic error, StackTrace? stackTrace, String? tag}) {
     final msg = tag != null ? '[$tag] $message' : message;
-    _logger.e(msg, error: error, stackTrace: stackTrace);
+    _logger.e(msg, error: error, stackTrace: kDebugMode ? stackTrace : null);
   }
 
   /// Log version information (always logged, even in release builds)

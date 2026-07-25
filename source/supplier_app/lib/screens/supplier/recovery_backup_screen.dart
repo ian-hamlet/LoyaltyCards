@@ -430,6 +430,52 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
 
                   SizedBox(height: 24),
 
+                  // Redemption tracking notice - restoring onto a
+                  // replacement device does not carry over which rewards
+                  // were already redeemed on the original device, since
+                  // there's no shared server/database (see docs/technical/
+                  // SECURITY_MODEL.md's "Redemption Tracking Across Cloned
+                  // Devices" section for the full rationale).
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.receipt_long_outlined, color: Colors.amber.shade900),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Redemption Records Are Not Included',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amber.shade900,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'A device restored from this backup won\'t know which rewards were already redeemed before the backup was made - verify manually if a card looks like it should already be redeemed.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.amber.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 24),
+
                   // Instructions
                   Text(
                     'Save This Backup:',

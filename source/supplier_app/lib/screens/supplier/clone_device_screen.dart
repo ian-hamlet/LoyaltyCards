@@ -401,6 +401,51 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
 
                       const SizedBox(height: 24),
 
+                      // Redemption tracking notice - each device keeps its
+                      // own independent redemption record, since there's no
+                      // shared server/database (see docs/technical/
+                      // SECURITY_MODEL.md's "Redemption Tracking Across
+                      // Cloned Devices" section for the full rationale).
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.amber.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.receipt_long_outlined, color: Colors.amber.shade900),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Redemption Records Are Not Shared',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.amber.shade900,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'This device won\'t know which rewards were already redeemed on your other device(s) - treat it as a second till, not a mirror. Verify with staff if a customer\'s card looks like it should already be redeemed.',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.amber.shade900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
                       // Regenerate button
                       SizedBox(
                         width: double.infinity,

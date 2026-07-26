@@ -7,7 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.1.0+12] - 2026-07-24 - CURRENT
+## [1.3.0+13] - 2026-07-26 - CURRENT
+
+**Status:** Built on `feature/uireview` (forked from `feature/SecurityReview`, not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) to keep this distinguishable from v1.1.0+12 in case of rollback.
+
+### Fixed
+- `RenderFlex` overflow on mini-FAB camera controls (Flip/90°/180°) across `qr_scanner_screen.dart`, `supplier_redeem_card.dart`, `supplier_stamp_card.dart`, `import_business_screen.dart`
+- Business name/status text in the customer card list wrapping letter-by-letter at large accessibility text sizes when squeezed by a fixed-size badge - added `maxLines`/ellipsis
+- Several full-width button labels (e.g. "Recover from Backup", "Clone from Another Device", "Scan to Add Stamp") left-justifying their second line when wrapped instead of centering with the rest of the button
+- Stamp-count numbers on the card detail progress grid were fixed-pixel-sized and could overflow their circles at large text scale - replaced collected-stamp numbers with a scale-safe checkmark icon
+
+### Added
+- `ScaleCapped` widget (`shared/lib/widgets/scale_capped.dart`) to cap ambient text scale on supplementary labels (FAB labels, chip text, REDEEMED/COMPLETE badges) that previously grew unboundedly at large accessibility text sizes, rather than wrapping or truncating
+- Haptic feedback on QR scan success/failure across customer and supplier scan flows
+
+### Changed
+- Reworded the customer card-list filter chip from a dynamic "Hiding/Showing Redeemed Cards" label to a fixed "Show Redeemed" label using `FilterChip`'s built-in selected state
+- Shortened several verbose instructional strings (e.g. "Show this QR code to redeem your card and get your reward" -> "Show this QR code to redeem your reward"; dropped "Token" from scan button labels)
+
+## [1.1.0+12] - 2026-07-24
 
 **Status:** Built on `feature/packageUpdate` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) deliberately used to keep this build distinguishable from v1.0.3+11, which is currently submitted for App Store review - if review requires a revert, v1.0.3+11 remains a clean, separately-versioned target.
 

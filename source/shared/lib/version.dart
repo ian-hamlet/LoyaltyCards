@@ -252,5 +252,26 @@
 ///   1.0.3+11 build submitted for App Store review, in case of rollback
 /// - Test Coverage: shared 140, customer_app 87, supplier_app 46 - all passing
 
+/// Version 1.3.0 - Dynamic Type / Layout Overflow Fixes
+///
+/// Build 13 Changes:
+/// - Fix RenderFlex overflow on mini-FAB camera controls (Flip/90°/180°)
+///   across qr_scanner_screen.dart, supplier_redeem_card.dart,
+///   supplier_stamp_card.dart, import_business_screen.dart
+/// - Add ScaleCapped widget (shared/lib/widgets/scale_capped.dart) to cap
+///   ambient text scale on supplementary labels (FAB labels, chip text,
+///   REDEEMED/COMPLETE badges) that previously grew unboundedly at large
+///   accessibility text sizes
+/// - Replace fixed-pixel stamp-count numbers with a scale-safe checkmark
+///   icon on collected stamps
+/// - Add maxLines/ellipsis to customer card-list business name and status
+///   text to stop letter-by-letter wrap when squeezed by a badge at large
+///   text sizes
+/// - Center button labels when they wrap to multiple lines (several
+///   full-width buttons across both apps)
+/// - Reword "Show Redeemed" chip and shorten several instructional strings
+/// - Add haptic feedback on QR scan success/failure
+/// - Test Coverage: shared 152, customer_app 124, supplier_app 66 - all passing
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '1.1.0+12';
+const String appVersion = '1.3.0+13';

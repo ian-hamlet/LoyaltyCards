@@ -279,8 +279,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip_camera_ios, size: 20, color: Colors.green),
-                      Text('Flip', style: TextStyle(fontSize: 10, color: Colors.green)),
+                      Icon(Icons.flip_camera_ios, size: 16, color: Colors.green),
+                      Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green)),
                     ],
                   ),
                 ),
@@ -300,8 +300,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.green),
-                      Text('90°', style: TextStyle(fontSize: 10, color: Colors.green)),
+                      Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.green),
+                      Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green)),
                     ],
                   ),
                 ),
@@ -321,8 +321,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip, size: 20, color: Colors.green),
-                      Text('180°', style: TextStyle(fontSize: 10, color: Colors.green)),
+                      Icon(Icons.flip, size: 16, color: Colors.green),
+                      Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green)),
                     ],
                   ),
                 ),
@@ -441,7 +441,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           FilledButton.icon(
             onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.check_circle),
-            label: const Text('Confirm Redemption'),
+            label: const Text('Confirm Redemption', textAlign: TextAlign.center),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.green[600],
             ),

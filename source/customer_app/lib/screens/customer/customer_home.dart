@@ -237,11 +237,17 @@ class _CustomerHomeState extends State<CustomerHome> {
                 spacing: AppSpacing.sm,
                 children: [
                   FilterChip(
-                    label: Text(_hideRedeemed ? 'Hiding Redeemed Cards' : 'Showing Redeemed Cards'),
-                    selected: _hideRedeemed,
-                    onSelected: (value) {
+                    // Label stays constant; the chip's own selected/
+                    // unselected treatment (a standard Material pattern)
+                    // carries the state, instead of switching between two
+                    // full sentences - shorter, and avoids the text
+                    // overflowing the chip at large accessibility text
+                    // sizes.
+                    label: const ScaleCapped(child: Text('Show Redeemed')),
+                    selected: !_hideRedeemed,
+                    onSelected: (showRedeemed) {
                       Haptics.light();
-                      _setHideRedeemed(value);
+                      _setHideRedeemed(!showRedeemed);
                     },
                     avatar: Icon(
                       _hideRedeemed ? Icons.visibility_off : Icons.visibility,
@@ -285,7 +291,7 @@ class _CustomerHomeState extends State<CustomerHome> {
           _loadCards(); // Reload after returning
         },
         icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Scan your shop\'s QR code'),
+        label: const ScaleCapped(child: Text('Scan your shop\'s QR code')),
       ),
     );
   }
@@ -451,6 +457,9 @@ class _LoyaltyCardWidget extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 card.businessName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: false,
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -476,12 +485,15 @@ class _LoyaltyCardWidget extends StatelessWidget {
                               : card.isComplete
                                   ? AppStrings.stampReadyToRedeem
                                   : '${card.stampsRequired - card.stampsCollected} more to go',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
                           style: TextStyle(
                             fontSize: 14,
-                            color: card.isRedeemed 
+                            color: card.isRedeemed
                                 ? Colors.grey[600]
-                                : card.isComplete 
-                                    ? Colors.green 
+                                : card.isComplete
+                                    ? Colors.green
                                     : Colors.grey[600],
                             fontWeight: card.isComplete && !card.isRedeemed ? FontWeight.w600 : FontWeight.normal,
                           ),
@@ -496,12 +508,23 @@ class _LoyaltyCardWidget extends StatelessWidget {
                         color: Colors.grey[700],
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
-                        'REDEEMED',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                      // Scale-capped: this badge previously grew
+                      // unboundedly with text scale and, since Row lays out
+                      // fixed-size children before handing the rest to the
+                      // Expanded name/status column, an oversized badge
+                      // left almost no width for that column - forcing
+                      // even short words to wrap letter-by-letter. The
+                      // status text next to it already says "REDEEMED",
+                      // so this badge is supplementary, not the only
+                      // source of that information.
+                      child: const ScaleCapped(
+                        child: Text(
+                          'REDEEMED',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     )
@@ -512,12 +535,15 @@ class _LoyaltyCardWidget extends StatelessWidget {
                         color: BrandColors.success,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
-                        'COMPLETE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                      // Scale-capped for the same reason as REDEEMED above.
+                      child: const ScaleCapped(
+                        child: Text(
+                          'COMPLETE',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),

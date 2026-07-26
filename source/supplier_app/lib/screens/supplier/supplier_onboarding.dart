@@ -615,7 +615,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     );
                   },
                   icon: Icon(Icons.restore, size: 24),
-                  label: Text('Recover from Backup'),
+                  label: Text('Recover from Backup', textAlign: TextAlign.center),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.all(16),
                     side: BorderSide(color: Colors.blue, width: 2),
@@ -648,7 +648,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     );
                   },
                   icon: Icon(Icons.device_hub, size: 24),
-                  label: Text('Clone from Another Device'),
+                  label: Text('Clone from Another Device', textAlign: TextAlign.center),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.all(16),
                     side: BorderSide(color: Colors.green, width: 2),

@@ -452,7 +452,10 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                         child: OutlinedButton.icon(
                           onPressed: _generateCloneQR,
                           icon: const Icon(Icons.refresh),
-                          label: const Text('Generate New QR (resets timer)'),
+                          label: const Text(
+                            'Generate New QR (resets timer)',
+                            textAlign: TextAlign.center,
+                          ),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             foregroundColor: Colors.blue,

@@ -280,6 +280,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ],
@@ -332,7 +333,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                           child: FilledButton.icon(
                             onPressed: _showRedemptionConfirmation,
                             icon: const Icon(Icons.card_giftcard),
-                            label: const Text('Redeem Reward'),
+                            label: const Text('Redeem Reward', textAlign: TextAlign.center),
                             style: FilledButton.styleFrom(
                               backgroundColor: Colors.green[600],
                               padding: const EdgeInsets.all(16),
@@ -359,7 +360,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                               }
                             },
                             icon: const Icon(Icons.qr_code_scanner),
-                            label: const Text('Scan to Add Stamp'),
+                            label: const Text('Scan to Add Stamp', textAlign: TextAlign.center),
                             style: FilledButton.styleFrom(
                               padding: const EdgeInsets.all(16),
                             ),
@@ -516,7 +517,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   child: Text(
                     _card!.isComplete
-                        ? 'Show this QR code to redeem your card and get your reward'
+                        ? 'Show this QR code to redeem your reward'
                         : 'Show this QR code to collect stamps',
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                     textAlign: TextAlign.center,
@@ -638,9 +639,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                             }
                           },
                           icon: const Icon(Icons.qr_code_scanner),
-                          label: Text(_card!.isComplete 
-                            ? 'Scan Redemption Token' 
-                            : 'Scan Stamp Token'),
+                          label: ScaleCapped(
+                            child: Text(_card!.isComplete
+                              ? 'Scan Redemption'
+                              : 'Scan Stamp'),
+                          ),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.all(16),
                           ),
@@ -700,7 +703,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               }
             },
             icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Scan Confirmation'),
+            label: const ScaleCapped(child: Text('Scan Confirmation')),
             backgroundColor: Colors.green[600],
           )
         : null,
@@ -751,7 +754,6 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             : baseStampSize;
 
         final stampSize = sizeToFitTarget.clamp(minStampSize, baseStampSize);
-        final stampFontSize = (stampSize * 0.36).clamp(10.0, 13.0);
 
         return Wrap(
           alignment: WrapAlignment.center,
@@ -761,6 +763,14 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
           children: List.generate(_card!.stampsRequired, (index) {
             final isCollected = index < _card!.stampsCollected;
 
+            // No per-stamp number: it was fixed-pixel-sized independent of
+            // the ambient text scale, so at large accessibility text sizes
+            // it visibly overflowed its circle while the circle itself
+            // stayed the same size. The "N of M stamps collected" text
+            // above already conveys progress and scales correctly, so
+            // dropping the numbers here loses no information - just a
+            // plain filled/checked circle for collected, an empty outline
+            // for upcoming.
             return Container(
               width: stampSize,
               height: stampSize,
@@ -774,16 +784,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               ),
               child: isCollected
                   ? Icon(Icons.check, color: brandColor, size: stampSize * 0.56)
-                  : Center(
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: stampFontSize,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  : null,
             );
           }),
         );

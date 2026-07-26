@@ -119,7 +119,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
         ? 'Card has been redeemed'
         : widget.mode == QRDisplayMode.stampRequest
             ? 'Show this QR code to ${widget.card.businessName} to receive a stamp'
-            : 'Show this QR code to redeem your card and get your reward';
+            : 'Show this QR code to redeem your reward';
 
     return Scaffold(
       appBar: AppBar(

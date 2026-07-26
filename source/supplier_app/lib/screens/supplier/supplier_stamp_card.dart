@@ -997,8 +997,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip_camera_ios, size: 20, color: Colors.blue),
-                      Text('Flip', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      Icon(Icons.flip_camera_ios, size: 16, color: Colors.blue),
+                      Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
                     ],
                   ),
                 ),
@@ -1018,8 +1018,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
-                      Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.blue),
+                      Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
                     ],
                   ),
                 ),
@@ -1039,8 +1039,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip, size: 20, color: Colors.blue),
-                      Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      Icon(Icons.flip, size: 16, color: Colors.blue),
+                      Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
                     ],
                   ),
                 ),

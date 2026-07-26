@@ -565,7 +565,14 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     try {
       // Try parsing as JSON token first (new format)
       final json = jsonDecode(qrData) as Map<String, dynamic>;
-      
+
+      // Immediate feedback that a readable code was recognized, distinct
+      // from whether the scan ultimately succeeds - the main non-visual
+      // signal that the camera registered anything at all. _showError
+      // below (and the legacy-format fallback in the catch block) covers
+      // all rejection paths.
+      Haptics.success();
+
       if (json['type'] == 'redemption_request') {
         final token = RedemptionRequestToken.fromJson(json);
         AppLogger.qr('Redemption token parsed successfully');
@@ -605,6 +612,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           final cardId = parts[2];
           final stamps = int.tryParse(parts[3]) ?? 0;
           AppLogger.qr('Legacy redemption format detected');
+          Haptics.success();
           _showSecureModeRedemptionConfirmation(context, cardId, stamps);
           return;
         }
@@ -751,10 +759,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   }
 
   void _showError(String message) {
+    Haptics.error();
     setState(() {
       _isProcessing = false;
     });
-    
+
     AppFeedback.error(context, message);
   }
   

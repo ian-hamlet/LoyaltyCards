@@ -123,6 +123,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       final token = QRToken.fromQRString(qrData);
 
       if (token is! CardStampRequestToken) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'Invalid QR code. Please scan a stamp request QR.';
           _isProcessing = false;
@@ -130,8 +131,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         return;
       }
 
+      // A readable, correctly-typed code was recognized - the main
+      // non-visual signal that the camera registered anything at all,
+      // distinct from whether the request is ultimately accepted below.
+      Haptics.success();
+
       // Validate token
       if (!token.isValid()) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'Invalid token format';
           _isProcessing = false;
@@ -141,6 +148,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 
       // Check business ID matches
       if (token.businessId != _business!.id) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'This card belongs to a different business';
           _isProcessing = false;
@@ -156,6 +164,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       final now = DateTime.now().millisecondsSinceEpoch;
       final age = now - token.timestamp;
       if (age > 60 * 1000) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'QR code expired. Customer needs to generate a new one.';
           _isProcessing = false;
@@ -181,6 +190,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       }
     } catch (e) {
       if (!mounted) return;
+      Haptics.error();
       setState(() {
         _errorMessage = 'Error processing QR: $e';
         _isProcessing = false;
@@ -333,6 +343,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   }
 
   void _showError(String message) {
+    Haptics.error();
     setState(() {
       _errorMessage = message;
       _isProcessing = false;

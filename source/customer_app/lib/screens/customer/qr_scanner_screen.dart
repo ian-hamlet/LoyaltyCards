@@ -117,6 +117,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         return;
       }
 
+      // Immediate feedback that a readable code was recognized, distinct
+      // from whether the scan ultimately succeeds - this is the main
+      // signal a non-visual user has that the camera actually registered
+      // anything at all, since there's no other non-visual affordance on
+      // this screen. _showScanError below covers all rejection paths.
+      Haptics.success();
+
       switch (widget.mode) {
         case QRScanMode.addCard:
           await _handleCardIssue(token);
@@ -131,6 +138,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   void _showScanError(String message) {
+    Haptics.error();
     setState(() {
       _errorMessage = message;
       _isProcessing = false;

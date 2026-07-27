@@ -288,7 +288,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.flip_camera_ios, size: 16, color: Colors.green),
-                      Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green)),
+                      ScaleCapped(child: Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green))),
                     ],
                   ),
                 ),
@@ -309,7 +309,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.green),
-                      Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green)),
+                      ScaleCapped(child: Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green))),
                     ],
                   ),
                 ),
@@ -330,7 +330,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.flip, size: 16, color: Colors.green),
-                      Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green)),
+                      ScaleCapped(child: Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green))),
                     ],
                   ),
                 ),
@@ -791,7 +791,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             children: [
               Icon(Icons.warning, color: Colors.orange, size: 28),
               SizedBox(width: 12),
-              Text('Device Mismatch'),
+              Expanded(child: Text('Device Mismatch')),
             ],
           ),
           content: Column(

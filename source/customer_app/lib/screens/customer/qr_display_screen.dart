@@ -319,13 +319,15 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                                     size: 18,
                                   ),
                                   const SizedBox(width: 6),
-                                  const Text(
-                                    'COMPLETE',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
+                                  const ScaleCapped(
+                                    child: Text(
+                                      'COMPLETE',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                      ),
                                     ),
                                   ),
                                 ],

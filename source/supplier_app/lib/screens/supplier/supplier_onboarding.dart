@@ -222,11 +222,14 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       icon: const Icon(Icons.remove_circle),
                       tooltip: 'Decrease stamps required',
                     ),
-                    Text(
-                      '$_stampsRequired stamps',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        '$_stampsRequired stamps',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -377,11 +380,14 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                         icon: const Icon(Icons.remove_circle),
                         tooltip: 'Decrease scan cooldown',
                       ),
-                      Text(
-                        '$_scanIntervalSeconds seconds',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          '$_scanIntervalSeconds seconds',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       IconButton(

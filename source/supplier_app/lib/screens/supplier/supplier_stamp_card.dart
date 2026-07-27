@@ -508,7 +508,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                     childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     title: const Text(
-                      'Token Configuration',
+                      'Stamp Setup',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -573,11 +573,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                     : null,
                                 icon: const Icon(Icons.remove_circle),
                               ),
-                              Text(
-                                _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Text(
+                                  _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               IconButton(
@@ -998,7 +1001,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.flip_camera_ios, size: 16, color: Colors.blue),
-                      Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                      ScaleCapped(child: Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1019,7 +1022,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.blue),
-                      Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                      ScaleCapped(child: Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1040,7 +1043,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.flip, size: 16, color: Colors.blue),
-                      Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                      ScaleCapped(child: Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1312,16 +1315,18 @@ class _StampTokenScreenState extends State<_StampTokenScreen> {
                           : Colors.orange.shade700,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      _remainingTime != null
-                          ? 'Expires in: ${_formatDuration(_remainingTime!)}'
-                          : 'Valid for 2 min',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _remainingTime != null && _remainingTime!.inMinutes < 1
-                            ? Colors.red.shade900
-                            : Colors.orange.shade900,
-                        fontWeight: FontWeight.w500,
+                    Flexible(
+                      child: Text(
+                        _remainingTime != null
+                            ? 'Expires in: ${_formatDuration(_remainingTime!)}'
+                            : 'Valid for 2 min',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _remainingTime != null && _remainingTime!.inMinutes < 1
+                              ? Colors.red.shade900
+                              : Colors.orange.shade900,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],

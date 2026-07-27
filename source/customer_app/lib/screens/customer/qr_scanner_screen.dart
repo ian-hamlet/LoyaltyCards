@@ -1066,7 +1066,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.flip_camera_ios, size: 16, color: Colors.blue),
-                      Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                      ScaleCapped(child: Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1087,7 +1087,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.blue),
-                      Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                      ScaleCapped(child: Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1108,7 +1108,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.flip, size: 16, color: Colors.blue),
-                      Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                      ScaleCapped(child: Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),

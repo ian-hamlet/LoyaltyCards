@@ -294,7 +294,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
           children: [
             Icon(Icons.warning, color: Colors.orange),
             SizedBox(width: 8),
-            Text('No Backup Created'),
+            Expanded(child: Text('No Backup Created')),
           ],
         ),
         content: Text(

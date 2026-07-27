@@ -229,13 +229,15 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                         size: _card!.isRedeemed ? 16 : 18,
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        _card!.isRedeemed ? 'REDEEMED' : 'COMPLETE',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: _card!.isRedeemed ? 14 : 16,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 2,
+                                      ScaleCapped(
+                                        child: Text(
+                                          _card!.isRedeemed ? 'REDEEMED' : 'COMPLETE',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: _card!.isRedeemed ? 14 : 16,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 2,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -499,13 +501,15 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                     size: 16,
                                   ),
                                   const SizedBox(width: 6),
-                                  const Text(
-                                    'REDEEMED',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
+                                  const ScaleCapped(
+                                    child: Text(
+                                      'REDEEMED',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                      ),
                                     ),
                                   ),
                                 ],

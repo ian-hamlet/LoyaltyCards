@@ -152,11 +152,11 @@ class _SupplierHomeState extends State<SupplierHome> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildStat('Issued', _issuedCards),
+                          Expanded(child: _buildStat('Issued', _issuedCards)),
                           Container(width: 1, height: 40, color: Colors.white30),
-                          _buildStat('Stamped', _activeCards),
+                          Expanded(child: _buildStat('Stamped', _activeCards)),
                           Container(width: 1, height: 40, color: Colors.white30),
-                          _buildStat('Redeemed', _redemptions),
+                          Expanded(child: _buildStat('Redeemed', _redemptions)),
                         ],
                       ),
                     ],
@@ -359,11 +359,13 @@ class _SupplierHomeState extends State<SupplierHome> {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              child: ScaleCapped(
+                child: Text(
+                  number,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

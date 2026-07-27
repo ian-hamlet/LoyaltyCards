@@ -289,31 +289,34 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                                     : Colors.orange.shade700,
                               ),
                               const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Expires in: ${_formatDuration(_remainingTime!)}',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: _remainingTime!.inMinutes < 2
-                                          ? Colors.red.shade900
-                                          : Colors.orange.shade900,
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Expires in: ${_formatDuration(_remainingTime!)}',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: _remainingTime!.inMinutes < 2
+                                            ? Colors.red.shade900
+                                            : Colors.orange.shade900,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    _remainingTime!.inMinutes < 2
-                                        ? 'Expiring soon!'
-                                        : 'Valid for 5 minutes',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: _remainingTime!.inMinutes < 2
-                                          ? Colors.red.shade700
-                                          : Colors.orange.shade700,
+                                    Text(
+                                      _remainingTime!.inMinutes < 2
+                                          ? 'Expiring soon!'
+                                          : 'Valid for 5 minutes',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: _remainingTime!.inMinutes < 2
+                                            ? Colors.red.shade700
+                                            : Colors.orange.shade700,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -480,12 +483,14 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+            child: ScaleCapped(
+              child: Text(
+                number,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

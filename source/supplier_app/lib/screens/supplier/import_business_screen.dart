@@ -267,31 +267,37 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.orange),
             SizedBox(width: 8),
-            Text('Confirm Business Restore'),
+            Expanded(child: Text('Confirm Business Restore')),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('You\'re about to restore:'),
-            const SizedBox(height: 12),
-            Text(
-              business.name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 12),
-            const Text('Key fingerprint:', style: TextStyle(fontSize: 12, color: Colors.grey)),
-            SelectableText(
-              _publicKeyFingerprint(business.publicKey),
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Only proceed if this is a business you set up yourself, or one your business partner shared with you directly. Anyone can create a backup QR that claims any business name.',
-              style: TextStyle(fontSize: 13),
-            ),
-          ],
+        // AlertDialog's content doesn't scroll on its own - at large
+        // accessibility text sizes this Column (especially the warning
+        // paragraph) can be taller than the screen, clipping its bottom
+        // instead of the dialog growing, since it has no scrollable ancestor.
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('You\'re about to restore:'),
+              const SizedBox(height: 12),
+              Text(
+                business.name,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 12),
+              const Text('Key fingerprint:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              SelectableText(
+                _publicKeyFingerprint(business.publicKey),
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Only proceed if this is a business you set up yourself, or one your business partner shared with you directly. Anyone can create a backup QR that claims any business name.',
+                style: TextStyle(fontSize: 13),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -372,7 +378,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.flip_camera_ios, size: 16, color: Colors.blue),
-                        Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                        ScaleCapped(child: Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                       ],
                     ),
                   ),
@@ -395,7 +401,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.blue),
-                        Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                        ScaleCapped(child: Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                       ],
                     ),
                   ),
@@ -418,7 +424,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.flip, size: 16, color: Colors.blue),
-                        Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue)),
+                        ScaleCapped(child: Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                       ],
                     ),
                   ),
@@ -489,6 +495,13 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.blue.shade700, width: 2),
                   ),
+                  // ScaleCapped on both lines: this banner is bottom-anchored
+                  // (Positioned bottom: 100, no top constraint) and grows
+                  // upward as its text wraps to more lines - at large
+                  // accessibility text sizes it could grow tall enough to
+                  // cover the scan target square above it. Capping keeps it
+                  // a predictable size regardless of system text setting,
+                  // same rationale as other supplementary/instructional text.
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -497,12 +510,14 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                           Icon(Icons.qr_code_scanner, color: Colors.white, size: 28),
                           SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              'Scan Recovery or Clone QR',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                            child: ScaleCapped(
+                              child: Text(
+                                'Scan Recovery or Clone QR',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -514,11 +529,13 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                           Icon(Icons.info_outline, color: Colors.white70, size: 18),
                           SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              'Works with both recovery backups and clone QR codes',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
+                            child: ScaleCapped(
+                              child: Text(
+                                'Works with both recovery backups and clone QR codes',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),

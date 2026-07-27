@@ -131,12 +131,36 @@ class _CustomerHomeState extends State<CustomerHome> {
     });
   }
 
-  Future<void> _deleteCard(models.Card card) async {
+  // Deleting a card with real progress on it (stamps collected, or complete
+  // and ready to redeem) loses something the customer actually earned, not
+  // just an empty placeholder - the confirmation should say so explicitly
+  // instead of a generic "Delete this card?" that reads the same whether
+  // there's anything at stake or not. Shared by both delete entry points
+  // (long-press/menu and swipe-to-delete) so the wording can't drift
+  // between them.
+  Future<bool> _confirmDelete(models.Card card) async {
+    final String title;
+    final String message;
+
+    if (card.isComplete && !card.isRedeemed) {
+      title = 'Delete Completed Card?';
+      message = '"${card.businessName}" is complete and ready to redeem. '
+          'Deleting it now means losing your reward - are you sure?';
+    } else if (card.stampsCollected > 0 && !card.isRedeemed) {
+      title = 'Delete Card With Stamps?';
+      message = '"${card.businessName}" has ${card.stampsCollected} of '
+          '${card.stampsRequired} stamps collected. Deleting it will lose '
+          'this progress - are you sure?';
+    } else {
+      title = 'Delete Card?';
+      message = 'Delete "${card.businessName}" card?';
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Card'),
-        content: Text('Delete "${card.businessName}" card?'),
+        title: Text(title),
+        content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -151,7 +175,13 @@ class _CustomerHomeState extends State<CustomerHome> {
       ),
     );
 
-    if (confirmed == true) {
+    return confirmed == true;
+  }
+
+  Future<void> _deleteCard(models.Card card) async {
+    final confirmed = await _confirmDelete(card);
+
+    if (confirmed) {
       Haptics.medium();
       await _cardRepo.deleteCard(card.id);
       await _loadCards();
@@ -360,26 +390,7 @@ class _CustomerHomeState extends State<CustomerHome> {
               padding: const EdgeInsets.only(right: 20),
               child: const Icon(Icons.delete, color: Colors.white),
             ),
-            confirmDismiss: (direction) async {
-              return await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Card?'),
-                  content: Text('Delete "${card.businessName}"?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      child: const Text('Delete'),
-                    ),
-                  ],
-                ),
-              );
-            },
+            confirmDismiss: (direction) => _confirmDelete(card),
             onDismissed: (direction) async {
               Haptics.medium();
               await _cardRepo.deleteCard(card.id);

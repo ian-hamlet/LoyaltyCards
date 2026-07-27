@@ -587,7 +587,18 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         AppLogger.qr('Card ID: ${token.cardId}');
         AppLogger.qr('Stamps collected: ${token.stampsCollected}');
         AppLogger.qr('Signatures to verify: ${token.stampProofs.length}');
-        
+
+        // Structural check, including stampProofs.length == stampsCollected -
+        // without this, verifyRedemptionStampChain only confirms that
+        // whichever proofs WERE submitted are individually valid, never
+        // that their count actually backs the claimed stampsCollected used
+        // below to sign the reward.
+        if (!token.isValid()) {
+          AppLogger.error('Redemption rejected - malformed/inconsistent token for card ${token.cardId}', tag: 'Security');
+          _showError('Invalid redemption request.');
+          return;
+        }
+
         // V-005: Check for device mismatch
         if (token.hasDeviceMismatch()) {
           AppLogger.warning('Device mismatch detected!', 'Security');
@@ -690,6 +701,20 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           tag: 'Security',
         );
         _showError('Unable to verify this card\'s stamps. Redemption denied.');
+        return;
+      }
+
+      // The chain check above only confirms the submitted proofs are
+      // individually genuine and unique - it says nothing about whether
+      // that's actually enough to complete THIS business's card. Without
+      // this, a customer with a few genuinely-earned stamps on a card
+      // that needs many more could still get a full reward signed.
+      if (token.stampsCollected < business.stampsRequired) {
+        AppLogger.error(
+          'Redemption rejected - card $cardId claims ${token.stampsCollected} stamps but business requires ${business.stampsRequired}',
+          tag: 'Security',
+        );
+        _showError('This card isn\'t complete yet.');
         return;
       }
 

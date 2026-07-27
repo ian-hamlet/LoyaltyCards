@@ -174,6 +174,18 @@ class CryptoUtils {
       return VerificationResult.failure('no_stamps_to_verify');
     }
 
+    // Each signature represents one genuinely-earned stamp. Without this
+    // check, the same real proof (optionally citing "moved" original
+    // context) could be repeated N times in the submitted list, and each
+    // copy would independently verify successfully - laundering one real
+    // stamp into an arbitrarily large claimed count.
+    final seenSignatures = <String>{};
+    for (final proof in stampProofs) {
+      if (!seenSignatures.add(proof.signature)) {
+        return VerificationResult.failure('duplicate_stamp_signature');
+      }
+    }
+
     String previousHash = '';
     for (int i = 0; i < stampProofs.length; i++) {
       final proof = stampProofs[i];

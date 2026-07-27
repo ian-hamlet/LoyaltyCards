@@ -511,5 +511,73 @@ void main() {
 
       expect(result.isValid, isTrue);
     });
+
+    test('rejects a redemption request that repeats the same genuine proof to inflate the count', () {
+      // The exact laundering attack this check exists to close: a customer
+      // genuinely earns ONE real stamp, then submits it multiple times
+      // (each independently a perfectly valid signature) to claim a card
+      // is complete when only one stamp was ever actually issued.
+      final genuineSignature = _signChainStamp(
+        cardId: 'card-001',
+        stampNumber: 1,
+        timestamp: 1749600000001,
+        previousHash: '',
+      );
+
+      final proofs = List.generate(
+        5,
+        (_) => RedemptionStampProof(signature: genuineSignature, timestamp: 1749600000001),
+      );
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-001',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+      expect(result.failureReason, 'duplicate_stamp_signature');
+    });
+
+    test('rejects duplicate proofs even when each independently claims a different (fabricated) original card', () {
+      // Guards against a narrower variant: duplicating a genuine proof
+      // while giving each copy a different originalCardId/originalStampNumber
+      // claim, hoping the per-proof originalContext check masks the reuse.
+      // The signature itself is still the same real artifact being reused,
+      // so this must still be rejected regardless of what original context
+      // each copy claims.
+      final genuineSignature = _signChainStamp(
+        cardId: 'card-source',
+        stampNumber: 1,
+        timestamp: 1749600000001,
+        previousHash: '',
+      );
+
+      final proofs = [
+        RedemptionStampProof(
+          signature: genuineSignature,
+          timestamp: 1749600000001,
+          originalCardId: 'card-source',
+          originalStampNumber: 1,
+          originalPreviousHash: '',
+        ),
+        RedemptionStampProof(
+          signature: genuineSignature,
+          timestamp: 1749600000001,
+          originalCardId: 'card-source',
+          originalStampNumber: 1,
+          originalPreviousHash: '',
+        ),
+      ];
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-dest',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+      expect(result.failureReason, 'duplicate_stamp_signature');
+    });
   });
 }

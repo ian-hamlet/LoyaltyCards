@@ -229,9 +229,176 @@ void main() {
       // For now, we just verify the validation method exists and runs
       final dbHelper = DatabaseHelper();
       final db = await dbHelper.database;
-      
+
       // The database should validate successfully when properly created
       expect(db, isNotNull);
+    });
+  });
+
+  group('v7 -> v8 Migration (original stamp context columns)', () {
+    const testDbName = 'test_database_migration_v7_v8.db';
+    late String testDbPath;
+
+    setUp(() async {
+      await DatabaseHelper.resetForTesting(testDatabaseName: testDbName);
+      final databasesPath = await getDatabasesPath();
+      testDbPath = join(databasesPath, testDbName);
+      if (await File(testDbPath).exists()) {
+        await File(testDbPath).delete();
+      }
+    });
+
+    tearDown(() async {
+      await DatabaseHelper().close();
+      if (await File(testDbPath).exists()) {
+        await File(testDbPath).delete();
+      }
+      final databasesPath = await getDatabasesPath();
+      final directory = Directory(databasesPath);
+      final backupFiles = directory
+          .listSync()
+          .whereType<File>()
+          .where((file) => basename(file.path).startsWith('backup_'))
+          .toList();
+      for (final backup in backupFiles) {
+        await backup.delete();
+      }
+    });
+
+    test('existing v7 stamp rows survive the upgrade with original-context columns defaulting to NULL', () async {
+      // Step 1: build a real v7 database by hand - the same shape
+      // DatabaseHelper._onCreate produced before the v8 migration added
+      // original_card_id/original_stamp_number/original_previous_hash to
+      // stamps. Deliberately duplicated here rather than importing private
+      // helpers, since the whole point is to simulate an install that
+      // predates today's code.
+      final v7Db = await databaseFactory.openDatabase(
+        testDbPath,
+        options: OpenDatabaseOptions(
+          version: 7,
+          onCreate: (db, version) async {
+            await db.execute('''
+              CREATE TABLE cards (
+                id TEXT PRIMARY KEY,
+                business_id TEXT NOT NULL,
+                business_name TEXT NOT NULL,
+                business_public_key TEXT NOT NULL,
+                stamps_required INTEGER NOT NULL,
+                stamps_collected INTEGER NOT NULL,
+                brand_color TEXT NOT NULL,
+                logo_index INTEGER NOT NULL DEFAULT 0,
+                mode TEXT NOT NULL DEFAULT 'secure',
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                is_redeemed INTEGER NOT NULL DEFAULT 0,
+                redeemed_at INTEGER,
+                device_id TEXT
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE stamps (
+                id TEXT PRIMARY KEY,
+                card_id TEXT NOT NULL,
+                stamp_number INTEGER NOT NULL,
+                timestamp INTEGER NOT NULL,
+                signature TEXT NOT NULL,
+                previous_hash TEXT,
+                device_id TEXT,
+                FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE transactions (
+                id TEXT PRIMARY KEY,
+                card_id TEXT NOT NULL,
+                type TEXT NOT NULL,
+                timestamp INTEGER NOT NULL,
+                business_name TEXT NOT NULL,
+                details TEXT,
+                FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE app_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+              )
+            ''');
+          },
+        ),
+      );
+
+      await v7Db.insert('cards', {
+        'id': 'card-v7-1',
+        'business_id': 'business-v7-1',
+        'business_name': 'Pre-Migration Business',
+        'business_public_key': 'test-key',
+        'stamps_required': 5,
+        'stamps_collected': 1,
+        'brand_color': '#123456',
+        'logo_index': 0,
+        'mode': 'secure',
+        'created_at': 1749600000000,
+        'updated_at': 1749600000000,
+        'is_redeemed': 0,
+      });
+      await v7Db.insert('stamps', {
+        'id': 'card-v7-1_stamp_1',
+        'card_id': 'card-v7-1',
+        'stamp_number': 1,
+        'timestamp': 1749600000001,
+        'signature': 'genuine-pre-migration-signature',
+        'previous_hash': null,
+        'device_id': 'device-abc',
+      });
+      await v7Db.close();
+
+      // Step 2: open the same file through the real DatabaseHelper, which
+      // requests the app's current target version - sqflite sees on-disk
+      // user_version=7 vs target=8 and runs the real onUpgrade path
+      // (_onUpgradeWithSafety -> _onUpgrade) rather than onCreate.
+      final dbHelper = DatabaseHelper();
+      final upgradedDb = await dbHelper.database;
+
+      expect(upgradedDb.isOpen, isTrue);
+      expect(await upgradedDb.getVersion(), 8);
+
+      // The pre-existing card and stamp row must survive untouched.
+      final cards = await upgradedDb.query('cards', where: 'id = ?', whereArgs: ['card-v7-1']);
+      expect(cards.length, 1);
+      expect(cards.first['business_name'], 'Pre-Migration Business');
+
+      final stamps = await upgradedDb.query('stamps', where: 'id = ?', whereArgs: ['card-v7-1_stamp_1']);
+      expect(stamps.length, 1);
+      expect(stamps.first['signature'], 'genuine-pre-migration-signature');
+
+      // The three new columns must exist and default to NULL for a stamp
+      // that predates the concept of a "moved" stamp - this is the
+      // condition verifyRedemptionStampChain's `wasMoved` branch depends on
+      // to correctly treat pre-migration stamps as never-moved.
+      expect(stamps.first.containsKey('original_card_id'), isTrue);
+      expect(stamps.first.containsKey('original_stamp_number'), isTrue);
+      expect(stamps.first.containsKey('original_previous_hash'), isTrue);
+      expect(stamps.first['original_card_id'], isNull);
+      expect(stamps.first['original_stamp_number'], isNull);
+      expect(stamps.first['original_previous_hash'], isNull);
+
+      // A freshly-inserted post-migration stamp can now populate them.
+      await upgradedDb.insert('stamps', {
+        'id': 'card-v7-1_stamp_2',
+        'card_id': 'card-v7-1',
+        'stamp_number': 1,
+        'timestamp': 1749600000002,
+        'signature': 'moved-stamp-signature',
+        'previous_hash': null,
+        'device_id': 'device-abc',
+        'original_card_id': 'card-source',
+        'original_stamp_number': 6,
+        'original_previous_hash': 'source-prev-hash',
+      });
+      final movedStamp = await upgradedDb.query('stamps', where: 'id = ?', whereArgs: ['card-v7-1_stamp_2']);
+      expect(movedStamp.first['original_card_id'], 'card-source');
+      expect(movedStamp.first['original_stamp_number'], 6);
     });
   });
 }

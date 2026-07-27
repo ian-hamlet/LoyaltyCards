@@ -375,30 +375,27 @@ class _SupplierHomeState extends State<SupplierHome> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            // ScaleCapped on both lines: the number circle beside this is a
-            // fixed 28x28 - at large accessibility text sizes this
-            // instructional text would otherwise grow tall enough that the
-            // circle (pinned to the top of the row) reads as misaligned
-            // relative to a much-taller first line.
+            // This is primary instructional content, not supplementary -
+            // it should scale freely for accessibility (ScaleCapped was
+            // removed from here; it was capping title/description just to
+            // keep the fixed 28x28 number circle looking visually aligned,
+            // which isn't a good enough reason to cap primary content -
+            // see ScaleCapped's own doc comment).
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ScaleCapped(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                ScaleCapped(
-                  child: Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
                   ),
                 ),
               ],

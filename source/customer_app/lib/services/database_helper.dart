@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:shared/shared.dart';
@@ -23,6 +24,19 @@ class DatabaseHelper {
       _database = null;
     }
     _testDatabaseName = testDatabaseName;
+  }
+
+  /// Run [action] inside a single atomic SQLite transaction.
+  ///
+  /// Q-003: multi-step writes that must succeed or fail together (e.g.
+  /// crediting a stamp: insert the stamp row, log a transaction, update the
+  /// card's stampsCollected count) should go through this rather than
+  /// separate top-level `db.insert`/`update` calls - otherwise a failure
+  /// partway through leaves the database in an inconsistent state (stamp
+  /// rows exist but the count was never incremented).
+  Future<T> runInTransaction<T>(Future<T> Function(DatabaseExecutor txn) action) async {
+    final db = await database;
+    return db.transaction((txn) => action(txn));
   }
 
   /// Get database instance (creates if doesn't exist)
@@ -50,23 +64,73 @@ class DatabaseHelper {
     }
   }
   
+  /// Test-only accessor for [_attemptDatabaseRecovery] (Q-002).
+  ///
+  /// The real trigger for recovery is a 10-second open timeout, which isn't
+  /// reliably or quickly reproducible in a test environment. This calls the
+  /// exact same recovery logic directly so tests can verify the actual
+  /// delete-vs-preserve decision (based on the SQLite file header) without
+  /// needing to simulate a hang.
+  @visibleForTesting
+  Future<void> attemptDatabaseRecoveryForTesting() => _attemptDatabaseRecovery();
+
   /// Attempt to recover from corrupted database
+  ///
+  /// Q-002 fix: this previously deleted the database file unconditionally
+  /// on ANY open timeout - a slow/throttled device or a transient OS-level
+  /// file lock (not actual corruption) would cause total, unrecoverable
+  /// data loss, since this is a P2P app with no server backup. Now checks
+  /// the SQLite file header first (cheap, doesn't require opening a
+  /// connection, so it can't hang the way the failed open did) and only
+  /// deletes if the file doesn't even look like a valid SQLite database.
+  /// A merely slow/locked-but-intact file is left alone; the caller still
+  /// sees the TimeoutException and can retry, but the user's data survives.
   Future<void> _attemptDatabaseRecovery() async {
     try {
       final databasesPath = await getDatabasesPath();
       final dbName = _testDatabaseName ?? AppConstants.databaseName;
       final path = join(databasesPath, dbName);
       final file = File(path);
-      
+
       if (await file.exists()) {
-        await file.delete();
-        AppLogger.warning('Deleted corrupted database file: $path', 'Database');
+        if (await _looksLikeValidSqliteFile(file)) {
+          AppLogger.warning(
+            'Database open timed out, but the file has a valid SQLite header - '
+            'treating as slow/locked rather than corrupted. Not deleting.',
+            'Database',
+          );
+        } else {
+          await file.delete();
+          AppLogger.warning('Deleted corrupted database file (invalid header): $path', 'Database');
+        }
       }
-      
+
       // Reset database instance to allow recreation
       _database = null;
     } catch (e, stack) {
       AppLogger.error('Database recovery failed: $e', error: e, stackTrace: stack, tag: 'Database');
+    }
+  }
+
+  /// Checks the SQLite file header magic bytes ("SQLite format 3\0")
+  /// without opening a database connection - a cheap, non-blocking
+  /// corruption signal that can't hang the way a real open attempt can.
+  static Future<bool> _looksLikeValidSqliteFile(File file) async {
+    const header = 'SQLite format 3\x00';
+    RandomAccessFile? raf;
+    try {
+      raf = await file.open();
+      final bytes = await raf.read(header.length);
+      if (bytes.length < header.length) return false;
+      for (int i = 0; i < header.length; i++) {
+        if (bytes[i] != header.codeUnitAt(i)) return false;
+      }
+      return true;
+    } catch (e) {
+      // Can't even read the file - treat as invalid/corrupted.
+      return false;
+    } finally {
+      await raf?.close();
     }
   }
 
@@ -123,6 +187,9 @@ class DatabaseHelper {
         signature TEXT NOT NULL,
         previous_hash TEXT,
         device_id TEXT,
+        original_card_id TEXT,
+        original_stamp_number INTEGER,
+        original_previous_hash TEXT,
         FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
       )
     ''');
@@ -250,6 +317,28 @@ class DatabaseHelper {
         // Don't fail migration if indexes already exist or can't be created
       }
     }
+
+    // Migration from v7 to v8: Add original stamp context columns
+    //
+    // A stamp moved between cards by the overflow-splitting logic keeps its
+    // original signature (which can't be recomputed without the supplier's
+    // private key) but is assigned a new stamp_number/previous_hash to fit
+    // its new position - these columns preserve what it was actually signed
+    // for, so redemption verification can check the signature against the
+    // right data instead of always assuming a stamp's current position.
+    if (oldVersion < 8) {
+      AppLogger.database('Migration v7 → v8: Adding original stamp context columns to stamps table');
+      await db.execute('''
+        ALTER TABLE stamps ADD COLUMN original_card_id TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE stamps ADD COLUMN original_stamp_number INTEGER
+      ''');
+      await db.execute('''
+        ALTER TABLE stamps ADD COLUMN original_previous_hash TEXT
+      ''');
+      AppLogger.database('Migration complete: original stamp context columns added');
+    }
   }
 
   /// Safety wrapper for database migrations with backup and rollback
@@ -291,6 +380,21 @@ class DatabaseHelper {
         try {
           await _restoreDatabaseBackup(backupPath);
           AppLogger.database('Successfully rolled back to v$oldVersion');
+
+          // Q-008 fix: this cleanup previously only ran on the success
+          // path, so every failed-then-rolled-back migration attempt left
+          // another backup_v*_<timestamp>.db file on disk permanently - a
+          // device stuck retrying the same failing upgrade across app
+          // launches would accumulate them indefinitely. Prune to the
+          // latest here too, matching the success path's behavior. Wrapped
+          // separately so a cleanup failure doesn't mask the real
+          // rollback-succeeded exception below.
+          try {
+            await _cleanupOldBackups(keepLatest: 1);
+          } catch (cleanupError) {
+            AppLogger.warning('Backup cleanup after rollback failed (non-fatal): $cleanupError', 'Database');
+          }
+
           throw Exception('Migration failed and rolled back to v$oldVersion. Error: $e');
         } catch (rollbackError, rollbackStack) {
           AppLogger.error('Rollback FAILED: $rollbackError', error: rollbackError, stackTrace: rollbackStack);
@@ -308,9 +412,19 @@ class DatabaseHelper {
   }
 
   /// Create a backup copy of the database file
+  ///
+  /// Q-010 fix: this previously hardcoded AppConstants.databaseName instead
+  /// of respecting _testDatabaseName (which _initDatabase/
+  /// _attemptDatabaseRecovery in this same file already did correctly) -
+  /// so any migration test using a custom test DB name silently backed up
+  /// the production filename instead (usually nonexistent), an error
+  /// swallowed by the outer "continue migration even if backup fails" catch.
+  /// This meant the migration safety net was never actually exercised by
+  /// any test.
   Future<String> _createDatabaseBackup(int version) async {
     final databasesPath = await getDatabasesPath();
-    final sourcePath = join(databasesPath, AppConstants.databaseName);
+    final dbName = _testDatabaseName ?? AppConstants.databaseName;
+    final sourcePath = join(databasesPath, dbName);
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final backupPath = join(databasesPath, 'backup_v${version}_$timestamp.db');
     
@@ -331,7 +445,8 @@ class DatabaseHelper {
   /// Restore database from backup
   Future<void> _restoreDatabaseBackup(String backupPath) async {
     final databasesPath = await getDatabasesPath();
-    final targetPath = join(databasesPath, AppConstants.databaseName);
+    final dbName = _testDatabaseName ?? AppConstants.databaseName;
+    final targetPath = join(databasesPath, dbName);
     
     // Close current connection
     if (_database != null) {

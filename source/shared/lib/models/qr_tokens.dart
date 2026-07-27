@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 import 'operation_mode.dart';
+import '../utils/signature_format.dart';
 
 /// Base class for all QR token types
 abstract class QRToken {
@@ -161,12 +162,18 @@ class CardIssueToken extends QRToken {
   }
 
   /// Data string used for signature verification
-  /// 
+  ///
   /// Always includes cardId (empty string if null) for consistency.
-  /// Format: businessId:businessName:publicKey:stampsRequired:brandColor:cardId:timestamp
+  /// Format: businessId:businessName:publicKey:stampsRequired:brandColor:cardId:timestamp:mode
+  ///
+  /// V-011 fix: mode is now part of the signed data. Previously it was
+  /// excluded, so a Secure Mode issuance token could have its mode field
+  /// edited to "simple" after signing (signature still verified) and
+  /// permanently downgrade the resulting card to skip all future
+  /// signature/hash-chain checks.
   String getSignatureData() {
     final cardIdValue = cardId ?? '';
-    return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardIdValue:$timestamp';
+    return '$businessId:$businessName:$publicKey:$stampsRequired:$brandColor:$cardIdValue:$timestamp:${mode.toStorageString()}';
   }
 
   /// Validate token structure
@@ -351,8 +358,23 @@ class StampToken extends QRToken {
   }
 
   /// Data string used for signature verification
+  ///
+  /// V-010 fix: stampCount, expiryDate, and scanInterval are now part of the
+  /// signed data. Previously these were excluded, so tampering with
+  /// stampCount after signing (e.g. changing 1 -> stampsRequired) did not
+  /// invalidate the signature, letting one legitimate scan mint many
+  /// unverified stamp rows. Must match the signing side exactly - see
+  /// QRTokenGenerator.generateStampToken in supplier_app.
   String getSignatureData() {
-    return '$cardId:$stampNumber:$timestamp:$previousHash';
+    return SignatureFormat.stampChainData(
+      cardId: cardId,
+      stampNumber: stampNumber,
+      timestampMs: timestamp,
+      previousHash: previousHash,
+      stampCount: stampCount,
+      expiryDate: expiryDate,
+      scanInterval: scanInterval,
+    );
   }
 
   /// Validate token structure
@@ -367,12 +389,66 @@ class StampToken extends QRToken {
   }
 }
 
+/// A single stamp's signature plus the timestamp it was originally signed
+/// with (V-012 fix). The bare signature alone isn't enough for the supplier
+/// to reconstruct what was signed - `timestamp` is required to rebuild
+/// `cardId:stampNumber:timestamp:previousHash:...` for verification at
+/// redemption time.
+class RedemptionStampProof {
+  final String signature;
+  final int timestamp;
+
+  // Set only when this stamp was relocated from another card by the
+  // overflow-splitting logic - see Stamp's matching fields. When present,
+  // the supplier must verify this proof's signature against this original
+  // context instead of its position in this proof list, since that's what
+  // the signature actually covers.
+  final String? originalCardId;
+  final int? originalStampNumber;
+  final String? originalPreviousHash;
+
+  RedemptionStampProof({
+    required this.signature,
+    required this.timestamp,
+    this.originalCardId,
+    this.originalStampNumber,
+    this.originalPreviousHash,
+  });
+
+  factory RedemptionStampProof.fromJson(Map<String, dynamic> json) {
+    return RedemptionStampProof(
+      signature: json['signature'] as String,
+      timestamp: json['timestamp'] as int,
+      originalCardId: json['originalCardId'] as String?,
+      originalStampNumber: json['originalStampNumber'] as int?,
+      originalPreviousHash: json['originalPreviousHash'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final map = {
+      'signature': signature,
+      'timestamp': timestamp,
+    };
+    if (originalCardId != null) {
+      map['originalCardId'] = originalCardId!;
+    }
+    if (originalStampNumber != null) {
+      map['originalStampNumber'] = originalStampNumber!;
+    }
+    if (originalPreviousHash != null) {
+      map['originalPreviousHash'] = originalPreviousHash!;
+    }
+    return map;
+  }
+}
+
 /// Token for customer to request redemption from supplier
 class RedemptionRequestToken extends QRToken {
   final String cardId;
   final String businessId;
   final int stampsCollected;
-  final List<String> stampSignatures;
+  final List<RedemptionStampProof> stampProofs;
   final String? cardDeviceId; // V-005: Device where card was created
   final String? currentDeviceId; // V-005: Device showing redemption QR
 
@@ -380,20 +456,34 @@ class RedemptionRequestToken extends QRToken {
     required this.cardId,
     required this.businessId,
     required this.stampsCollected,
-    required this.stampSignatures,
+    required this.stampProofs,
     required int timestamp,
     this.cardDeviceId,
     this.currentDeviceId,
   }) : super(type: 'redemption_request', timestamp: timestamp);
 
   factory RedemptionRequestToken.fromJson(Map<String, dynamic> json) {
+    // V-012: accept legacy 'stampSignatures' (bare strings, no timestamp)
+    // for backward compatibility with pre-fix tokens, but these can never
+    // pass verification since timestamp is required to reconstruct the
+    // signed data - they'll be rejected at the verification step, not here.
+    final proofsJson = json['stampProofs'] as List<dynamic>?;
+    final List<RedemptionStampProof> proofs;
+    if (proofsJson != null) {
+      proofs = proofsJson
+          .map((e) => RedemptionStampProof.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } else {
+      final legacySignatures = json['stampSignatures'] as List<dynamic>? ?? [];
+      proofs = legacySignatures
+          .map((e) => RedemptionStampProof(signature: e as String, timestamp: 0))
+          .toList();
+    }
     return RedemptionRequestToken(
       cardId: json['cardId'] as String,
       businessId: json['businessId'] as String,
       stampsCollected: json['stampsCollected'] as int,
-      stampSignatures: (json['stampSignatures'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      stampProofs: proofs,
       timestamp: json['timestamp'] as int,
       cardDeviceId: json['cardDeviceId'] as String?,
       currentDeviceId: json['currentDeviceId'] as String?,
@@ -407,7 +497,7 @@ class RedemptionRequestToken extends QRToken {
       'cardId': cardId,
       'businessId': businessId,
       'stampsCollected': stampsCollected,
-      'stampSignatures': stampSignatures,
+      'stampProofs': stampProofs.map((p) => p.toJson()).toList(),
       'timestamp': timestamp,
       'cardDeviceId': cardDeviceId,
       'currentDeviceId': currentDeviceId,
@@ -422,7 +512,7 @@ class RedemptionRequestToken extends QRToken {
     if (stampsCollected < 1) {
       return false;
     }
-    if (stampSignatures.length != stampsCollected) {
+    if (stampProofs.length != stampsCollected) {
       return false;
     }
     return true;
@@ -487,7 +577,11 @@ class RedemptionToken extends QRToken {
 
   /// Data string used for signature verification
   String getSignatureData() {
-    return '$cardId:$stampsRedeemed:$timestamp';
+    return SignatureFormat.redemptionTokenData(
+      cardId: cardId,
+      stampsRedeemed: stampsRedeemed,
+      timestampMs: timestamp,
+    );
   }
 
   /// Validate token structure

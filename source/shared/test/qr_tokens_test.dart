@@ -90,19 +90,25 @@ void main() {
         cardId: 'card-123',
         businessId: 'business-123',
         stampsCollected: 10,
-        stampSignatures: ['sig1', 'sig2', 'sig3'],
+        stampProofs: [
+          RedemptionStampProof(signature: 'sig1', timestamp: 1234567890001),
+          RedemptionStampProof(signature: 'sig2', timestamp: 1234567890002),
+          RedemptionStampProof(signature: 'sig3', timestamp: 1234567890003),
+        ],
         timestamp: 1234567890000,
       );
 
       final json = token.toJson();
       expect(json['type'], 'redemption_request');
       expect(json['stampsCollected'], 10);
-      expect(json['stampSignatures'], hasLength(3));
+      expect(json['stampProofs'], hasLength(3));
 
       final decoded = RedemptionRequestToken.fromJson(json);
       expect(decoded.cardId, token.cardId);
       expect(decoded.stampsCollected, token.stampsCollected);
-      expect(decoded.stampSignatures, hasLength(3));
+      expect(decoded.stampProofs, hasLength(3));
+      expect(decoded.stampProofs[0].signature, 'sig1');
+      expect(decoded.stampProofs[0].timestamp, 1234567890001);
     });
 
     test('QRToken.fromQRString - returns null for invalid JSON', () {
@@ -220,7 +226,11 @@ void main() {
         cardId: 'card-123',
         businessId: 'business-123',
         stampsCollected: 3,
-        stampSignatures: ['sig1', 'sig2', 'sig3'],
+        stampProofs: [
+          RedemptionStampProof(signature: 'sig1', timestamp: 1),
+          RedemptionStampProof(signature: 'sig2', timestamp: 2),
+          RedemptionStampProof(signature: 'sig3', timestamp: 3),
+        ],
         timestamp: 1234567890000,
       );
 
@@ -232,7 +242,11 @@ void main() {
         cardId: 'card-123',
         businessId: 'business-123',
         stampsCollected: 5,
-        stampSignatures: ['sig1', 'sig2', 'sig3'], // Only 3 signatures
+        stampProofs: [
+          RedemptionStampProof(signature: 'sig1', timestamp: 1),
+          RedemptionStampProof(signature: 'sig2', timestamp: 2),
+          RedemptionStampProof(signature: 'sig3', timestamp: 3),
+        ], // Only 3 proofs
         timestamp: 1234567890000,
       );
 
@@ -277,6 +291,99 @@ void main() {
       expect(signatureData, contains('5'));
       expect(signatureData, contains('1234567890000'));
       expect(signatureData, contains('prev-hash-123'));
+    });
+
+    // V-010/V-011 regression tests: prove stampCount and mode are actually
+    // covered by the signature now, so tampering either one after signing
+    // invalidates it rather than silently passing through.
+
+    test('V-010: StampToken signature data is exact, includes stampCount/expiry/scanInterval', () {
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 5,
+        previousHash: 'prev-hash-123',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        stampCount: 3,
+        expiryDate: 999,
+        scanInterval: 30,
+      );
+
+      expect(
+        token.getSignatureData(),
+        'card-123:5:1234567890000:prev-hash-123:3:999:30',
+      );
+    });
+
+    test('V-010: changing stampCount after construction changes the signed data', () {
+      final base = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        stampCount: 1,
+      );
+      final tampered = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        stampCount: 10, // attacker inflates a single-stamp token
+      );
+
+      expect(base.getSignatureData(), isNot(equals(tampered.getSignatureData())));
+    });
+
+    test('V-011: CardIssueToken signature data is exact, includes mode', () {
+      final token = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 10,
+        brandColor: '#FF5733',
+        mode: OperationMode.secure,
+        signature: 'test-signature',
+        cardId: 'card-123',
+        timestamp: 1234567890000,
+      );
+
+      expect(
+        token.getSignatureData(),
+        'business-123:Test Coffee:test-public-key:10:#FF5733:card-123:1234567890000:secure',
+      );
+    });
+
+    test('V-011: changing mode after construction changes the signed data', () {
+      final secure = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 10,
+        brandColor: '#FF5733',
+        mode: OperationMode.secure,
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+      final downgraded = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 10,
+        brandColor: '#FF5733',
+        mode: OperationMode.simple, // attacker downgrades post-signing
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+
+      expect(secure.getSignatureData(), isNot(equals(downgraded.getSignatureData())));
     });
   });
 

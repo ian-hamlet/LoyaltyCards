@@ -49,6 +49,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
 
     try {
       final business = await _businessRepo.getBusiness();
+      if (!mounted) return;
       if (business == null) {
         setState(() {
           _errorMessage = 'Business not found. Please complete onboarding.';
@@ -72,6 +73,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         _loggedCardIds.add(token.cardId!);
       }
 
+      if (!mounted) return;
       setState(() {
         _business = business;
         _token = token;
@@ -83,6 +85,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         _startCountdown();
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error generating token: $e';
         _isLoading = false;
@@ -158,11 +161,13 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                               children: [
                                 Icon(Icons.bolt, color: Colors.amber[700], size: 20),
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'Quick Start Stamps',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                const Expanded(
+                                  child: Text(
+                                    'Quick Start Stamps',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -212,14 +217,18 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                               }
                                             : null,
                                         icon: const Icon(Icons.remove_circle),
+                                        tooltip: 'Decrease initial stamp count',
                                       ),
-                                      Text(
-                                        _initialStampCount == 0 
-                                            ? 'No stamps' 
-                                            : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
-                                        style: const TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
+                                      Expanded(
+                                        child: Text(
+                                          _initialStampCount == 0
+                                              ? 'No stamps'
+                                              : (_initialStampCount == 1 ? '1 stamp' : '$_initialStampCount stamps'),
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                       IconButton(
@@ -233,6 +242,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                               }
                                             : null,
                                         icon: const Icon(Icons.add_circle),
+                                        tooltip: 'Increase initial stamp count',
                                       ),
                                     ],
                                   ),
@@ -365,20 +375,22 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                           : colorScheme.onSecondaryContainer,
                                     ),
                                     const SizedBox(width: 6),
-                                    Text(
-                                      _business!.mode == OperationMode.simple
-                                          ? 'Reusable QR (no expiry)'
-                                          : (_remainingTime != null
-                                              ? 'Expires in: ${_formatDuration(_remainingTime!)}'
-                                              : 'Valid 5 min (expires ${_getExpiryTime()})'),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: _business!.mode == OperationMode.simple
-                                            ? colorScheme.onPrimaryContainer
-                                            : (_remainingTime != null && _remainingTime!.inMinutes < 2
-                                                ? colorScheme.error
-                                                : colorScheme.onSecondaryContainer),
-                                        fontWeight: FontWeight.w500,
+                                    Flexible(
+                                      child: Text(
+                                        _business!.mode == OperationMode.simple
+                                            ? 'Reusable QR (no expiry)'
+                                            : (_remainingTime != null
+                                                ? 'Expires in: ${_formatDuration(_remainingTime!)}'
+                                                : 'Valid 5 min (expires ${_getExpiryTime()})'),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: _business!.mode == OperationMode.simple
+                                              ? colorScheme.onPrimaryContainer
+                                              : (_remainingTime != null && _remainingTime!.inMinutes < 2
+                                                  ? colorScheme.error
+                                                  : colorScheme.onSecondaryContainer),
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ),
                                     if (_business!.mode == OperationMode.secure) ...[

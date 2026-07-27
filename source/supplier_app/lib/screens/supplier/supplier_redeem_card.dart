@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -28,6 +29,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   bool _isLoading = true;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
+  // Without this, onDetect fires on every camera frame that decodes the
+  // still-in-view QR code - resetting _isProcessing immediately on error
+  // let the same code get reprocessed and rejected several times in a row
+  // while the camera was still being aimed, showing the same error repeatedly.
+  DateTime? _cooldownUntil;
+  static const Duration _errorCooldownDuration = Duration(seconds: 2);
+
   @override
   void initState() {
     super.initState();
@@ -38,11 +46,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   Future<void> _loadBusiness() async {
     try {
       final business = await _businessRepo.getBusiness();
+      if (!mounted) return;
       setState(() {
         _business = business;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }
@@ -239,8 +249,10 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                       child: MobileScanner(
                         controller: cameraController,
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error) => ScannerPermissionErrorView(error: error),
                         onDetect: (capture) {
                           if (_isProcessing) return;
+                          if (_cooldownUntil != null && DateTime.now().isBefore(_cooldownUntil!)) return;
                     
                     final List<Barcode> barcodes = capture.barcodes;
                     for (final barcode in barcodes) {
@@ -275,8 +287,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip_camera_ios, size: 20, color: Colors.green),
-                      Text('Flip', style: TextStyle(fontSize: 10, color: Colors.green)),
+                      Icon(Icons.flip_camera_ios, size: 16, color: Colors.green),
+                      ScaleCapped(child: Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green))),
                     ],
                   ),
                 ),
@@ -296,8 +308,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.green),
-                      Text('90°', style: TextStyle(fontSize: 10, color: Colors.green)),
+                      Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.green),
+                      ScaleCapped(child: Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green))),
                     ],
                   ),
                 ),
@@ -317,8 +329,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip, size: 20, color: Colors.green),
-                      Text('180°', style: TextStyle(fontSize: 10, color: Colors.green)),
+                      Icon(Icons.flip, size: 16, color: Colors.green),
+                      ScaleCapped(child: Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.green))),
                     ],
                   ),
                 ),
@@ -437,7 +449,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           FilledButton.icon(
             onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.check_circle),
-            label: const Text('Confirm Redemption'),
+            label: const Text('Confirm Redemption', textAlign: TextAlign.center),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.green[600],
             ),
@@ -465,6 +477,15 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       ],
     );
   }
+
+  /// Test-only entry point for [_processManualRedemption] - see
+  /// [processCardQRForTesting] for why a direct call is needed instead of
+  /// driving this through the UI. Note: as of this writing, no visible
+  /// button in the Simple Mode build actually calls
+  /// [_showRedemptionConfirmation]/[_processManualRedemption] - flagged
+  /// separately, this wrapper still exercises the underlying logic.
+  @visibleForTesting
+  Future<void> processManualRedemptionForTesting() => _processManualRedemption();
 
   Future<void> _processManualRedemption() async {
     setState(() => _isProcessing = true);
@@ -533,6 +554,14 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     }
   }
 
+  /// Test-only entry point for [_processCardQR] - lets widget tests
+  /// simulate "a QR was scanned" without a real camera (mobile_scanner
+  /// can't produce detection events in the test environment). Since this
+  /// State class is private, call it dynamically:
+  /// `(tester.state(find.byType(SupplierRedeemCard)) as dynamic).processCardQRForTesting(qrData)`.
+  @visibleForTesting
+  void processCardQRForTesting(String qrData) => _processCardQR(qrData);
+
   void _processCardQR(String qrData) {
     setState(() {
       _isProcessing = true;
@@ -544,13 +573,20 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     try {
       // Try parsing as JSON token first (new format)
       final json = jsonDecode(qrData) as Map<String, dynamic>;
-      
+
+      // Immediate feedback that a readable code was recognized, distinct
+      // from whether the scan ultimately succeeds - the main non-visual
+      // signal that the camera registered anything at all. _showError
+      // below (and the legacy-format fallback in the catch block) covers
+      // all rejection paths.
+      Haptics.success();
+
       if (json['type'] == 'redemption_request') {
         final token = RedemptionRequestToken.fromJson(json);
         AppLogger.qr('Redemption token parsed successfully');
         AppLogger.qr('Card ID: ${token.cardId}');
         AppLogger.qr('Stamps collected: ${token.stampsCollected}');
-        AppLogger.qr('Signatures to verify: ${token.stampSignatures.length}');
+        AppLogger.qr('Signatures to verify: ${token.stampProofs.length}');
         
         // V-005: Check for device mismatch
         if (token.hasDeviceMismatch()) {
@@ -560,8 +596,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           _showDeviceMismatchWarning(context, token);
           return;
         }
-        
-        _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+
+        _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
         return;
       } else if (json['type'] == 'card_stamp_request') {
         // Customer is showing a stamp request QR, not a redemption QR
@@ -584,6 +620,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           final cardId = parts[2];
           final stamps = int.tryParse(parts[3]) ?? 0;
           AppLogger.qr('Legacy redemption format detected');
+          Haptics.success();
           _showSecureModeRedemptionConfirmation(context, cardId, stamps);
           return;
         }
@@ -593,14 +630,70 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     }
   }
 
-  void _showSecureModeRedemptionConfirmation(BuildContext context, String cardId, int stamps) async {
+  void _showSecureModeRedemptionConfirmation(
+    BuildContext context,
+    String cardId,
+    int stamps, {
+    RedemptionRequestToken? token,
+  }) async {
     // Get business info to sign the redemption token
     final businessRepo = BusinessRepository();
     final business = await businessRepo.getBusiness();
-    
+
+    if (!mounted) return;
+
     if (business == null) {
       _showError('Business not configured');
       return;
+    }
+
+    // V-013: refuse to redeem a card that's already been redeemed. Previously
+    // nothing checked this - the only "already redeemed" state was the
+    // isRedeemed flag on the customer's own device, which they fully
+    // control (e.g. a restored pre-redemption local backup resets it).
+    final alreadyRedeemed = await businessRepo.hasBeenRedeemed(cardId);
+    if (!mounted) return;
+    if (alreadyRedeemed) {
+      AppLogger.warning('Redemption rejected - card $cardId already redeemed', 'Security');
+      _showError('This card has already been redeemed.');
+      return;
+    }
+
+    // V-012: independently verify the customer's claimed stamps before
+    // signing off on a reward. Previously this flow trusted `stamps`
+    // (the customer's self-reported count) outright, with no cryptographic
+    // check at all - a fabricated or replayed redemption request would be
+    // signed just as readily as a genuine one.
+    //
+    // Express/Simple Mode is intentionally honor-based (no stamp signatures
+    // exist to check - see V-001), so verification only applies to Secure
+    // Mode businesses.
+    if (business.mode == OperationMode.secure) {
+      if (token == null) {
+        AppLogger.error(
+          'Secure Mode redemption via unsigned/legacy format rejected for card $cardId',
+          tag: 'Security',
+        );
+        _showError('This redemption method isn\'t supported for Secure Mode. Ask the customer to update their app.');
+        return;
+      }
+
+      final chainResult = CryptoUtils.verifyRedemptionStampChain(
+        cardId: cardId,
+        stampProofs: token.stampProofs,
+        businessPublicKey: business.publicKey,
+      );
+
+      if (!chainResult.isValid) {
+        AppLogger.error(
+          'Redemption rejected - stamp chain verification failed for card $cardId: ${chainResult.failureReason}',
+          tag: 'Security',
+        );
+        _showError('Unable to verify this card\'s stamps. Redemption denied.');
+        return;
+      }
+
+      AppLogger.business('Redemption stamp chain verified ($stamps stamps)');
     }
 
     // Generate redemption token
@@ -613,8 +706,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       return;
     }
 
-    // Create signature: cardId:stampsRedeemed:timestamp
-    final signatureData = '$cardId:$stamps:${now.millisecondsSinceEpoch}';
+    // Signature data - single source of truth in SignatureFormat.redemptionTokenData,
+    // shared with RedemptionToken.getSignatureData()
+    final signatureData = SignatureFormat.redemptionTokenData(
+      cardId: cardId,
+      stampsRedeemed: stamps,
+      timestampMs: now.millisecondsSinceEpoch,
+    );
     final signature = await keyManager.signData(signatureData, privateKey);
     
     if (signature == null) {
@@ -669,10 +767,12 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   }
 
   void _showError(String message) {
+    Haptics.error();
     setState(() {
       _isProcessing = false;
+      _cooldownUntil = DateTime.now().add(_errorCooldownDuration);
     });
-    
+
     AppFeedback.error(context, message);
   }
   
@@ -691,7 +791,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             children: [
               Icon(Icons.warning, color: Colors.orange, size: 28),
               SizedBox(width: 12),
-              Text('Device Mismatch'),
+              Expanded(child: Text('Device Mismatch')),
             ],
           ),
           content: Column(
@@ -731,11 +831,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         );
       },
     );
-    
+
+    if (!mounted) return;
+
     if (result == true) {
       // User chose to proceed despite mismatch
       AppLogger.warning('Supplier chose to proceed with device mismatch', 'Security');
-      _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected);
+      _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
     } else {
       // User cancelled
       AppLogger.warning('Supplier cancelled redemption due to device mismatch', 'Security');

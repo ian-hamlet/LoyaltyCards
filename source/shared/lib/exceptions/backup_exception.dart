@@ -39,7 +39,6 @@ class BackupException implements Exception {
       case BackupFailureReason.platformNotSupported:
         return 'This backup method is not supported on your device.';
       case BackupFailureReason.unknown:
-      default:
         return message;
     }
   }

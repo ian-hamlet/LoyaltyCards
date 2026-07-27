@@ -242,17 +242,19 @@ class HowItWorks extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: Text(
-              '$stepNumber',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            child: ScaleCapped(
+              child: Text(
+                '$stepNumber',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
         ),
-        
+
         const SizedBox(width: AppSpacing.md),
         
         // Content

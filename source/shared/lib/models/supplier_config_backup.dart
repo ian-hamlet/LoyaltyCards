@@ -49,7 +49,7 @@ class SupplierConfigBackup {
       version: 1,
       businessId: business.id,
       businessName: business.name,
-      privateKey: business.privateKey ?? '',
+      privateKey: business.privateKey,
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
@@ -87,7 +87,7 @@ class SupplierConfigBackup {
       version: 1,
       businessId: business.id,
       businessName: business.name,
-      privateKey: business.privateKey ?? '',
+      privateKey: business.privateKey,
       publicKey: business.publicKey,
       stampsRequired: business.stampsRequired,
       brandColor: business.brandColor,
@@ -215,9 +215,23 @@ class SupplierConfigBackup {
   }
 
   /// Create from QR string
+  ///
+  /// Throws [FormatException] if [qrData] isn't valid JSON, isn't a JSON
+  /// object, or is missing/has wrongly-typed required fields. Callers MUST
+  /// wrap this in a try/catch - this parses untrusted external input (a
+  /// scanned QR code), not a trusted internal format.
   static SupplierConfigBackup fromQRString(String qrData) {
-    final json = jsonDecode(qrData) as Map<String, dynamic>;
-    return fromJson(json);
+    try {
+      final decoded = jsonDecode(qrData);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Backup QR data is not a JSON object');
+      }
+      return fromJson(decoded);
+    } on FormatException {
+      rethrow;
+    } catch (e) {
+      throw FormatException('Invalid or corrupted backup QR data: $e');
+    }
   }
 
   /// Verify signature is valid

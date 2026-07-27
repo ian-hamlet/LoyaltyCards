@@ -51,10 +51,11 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   Future<void> _loadBusiness() async {
     try {
       final business = await _businessRepo.getBusiness();
+      if (!mounted) return;
       setState(() {
         _business = business;
       });
-      
+
       // Auto-generate QR for simple mode
       if (business?.mode == OperationMode.simple) {
         // Small delay to ensure widget is built
@@ -64,6 +65,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error loading business: $e';
       });
@@ -121,6 +123,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       final token = QRToken.fromQRString(qrData);
 
       if (token is! CardStampRequestToken) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'Invalid QR code. Please scan a stamp request QR.';
           _isProcessing = false;
@@ -128,8 +131,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         return;
       }
 
+      // A readable, correctly-typed code was recognized - the main
+      // non-visual signal that the camera registered anything at all,
+      // distinct from whether the request is ultimately accepted below.
+      Haptics.success();
+
       // Validate token
       if (!token.isValid()) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'Invalid token format';
           _isProcessing = false;
@@ -139,6 +148,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 
       // Check business ID matches
       if (token.businessId != _business!.id) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'This card belongs to a different business';
           _isProcessing = false;
@@ -148,11 +158,13 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 
       // Log card activity (tracks unique cards using the system)
       await _businessRepo.logCardActivity(token.cardId, _business!.id);
+      if (!mounted) return;
 
       // Check timestamp (must be < 1 minute old)
       final now = DateTime.now().millisecondsSinceEpoch;
       final age = now - token.timestamp;
       if (age > 60 * 1000) {
+        Haptics.error();
         setState(() {
           _errorMessage = 'QR code expired. Customer needs to generate a new one.';
           _isProcessing = false;
@@ -177,6 +189,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         _showStampCountSelector(token, previousHash);
       }
     } catch (e) {
+      if (!mounted) return;
+      Haptics.error();
       setState(() {
         _errorMessage = 'Error processing QR: $e';
         _isProcessing = false;
@@ -329,6 +343,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   }
 
   void _showError(String message) {
+    Haptics.error();
     setState(() {
       _errorMessage = message;
       _isProcessing = false;
@@ -385,11 +400,12 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         AppLogger.debug('Generated $_stampCount-stamp token for ${_business!.name}', 'StampToken');
       }
     } catch (e) {
+      AppLogger.error('Failed to generate simple mode token: $e', tag: 'StampToken');
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error generating stamp: $e';
         _isProcessing = false;
       });
-      AppLogger.error('Failed to generate simple mode token: $e', tag: 'StampToken');
     }
   }
 
@@ -492,7 +508,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                     childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     title: const Text(
-                      'Token Configuration',
+                      'Stamp Setup',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -557,11 +573,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                     : null,
                                 icon: const Icon(Icons.remove_circle),
                               ),
-                              Text(
-                                _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Text(
+                                  _stampCount == 1 ? '1 stamp' : '$_stampCount stamps',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               IconButton(
@@ -944,6 +963,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                       child: MobileScanner(
                         controller: _cameraController,
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error) => ScannerPermissionErrorView(error: error),
                         onDetect: (capture) {
                           if (_isProcessing) return;
                     
@@ -980,8 +1000,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip_camera_ios, size: 20, color: Colors.blue),
-                      Text('Flip', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      Icon(Icons.flip_camera_ios, size: 16, color: Colors.blue),
+                      ScaleCapped(child: Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1001,8 +1021,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
-                      Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.blue),
+                      ScaleCapped(child: Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1022,8 +1042,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.flip, size: 20, color: Colors.blue),
-                      Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                      Icon(Icons.flip, size: 16, color: Colors.blue),
+                      ScaleCapped(child: Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                     ],
                   ),
                 ),
@@ -1295,16 +1315,18 @@ class _StampTokenScreenState extends State<_StampTokenScreen> {
                           : Colors.orange.shade700,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      _remainingTime != null
-                          ? 'Expires in: ${_formatDuration(_remainingTime!)}'
-                          : 'Valid for 2 min',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _remainingTime != null && _remainingTime!.inMinutes < 1
-                            ? Colors.red.shade900
-                            : Colors.orange.shade900,
-                        fontWeight: FontWeight.w500,
+                    Flexible(
+                      child: Text(
+                        _remainingTime != null
+                            ? 'Expires in: ${_formatDuration(_remainingTime!)}'
+                            : 'Valid for 2 min',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _remainingTime != null && _remainingTime!.inMinutes < 1
+                              ? Colors.red.shade900
+                              : Colors.orange.shade900,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],

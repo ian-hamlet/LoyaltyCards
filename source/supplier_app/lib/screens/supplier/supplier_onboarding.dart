@@ -220,12 +220,16 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                             }
                           : null,
                       icon: const Icon(Icons.remove_circle),
+                      tooltip: 'Decrease stamps required',
                     ),
-                    Text(
-                      '$_stampsRequired stamps',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        '$_stampsRequired stamps',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -236,6 +240,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                             }
                           : null,
                       icon: const Icon(Icons.add_circle),
+                      tooltip: 'Increase stamps required',
                     ),
                   ],
                 ),
@@ -373,12 +378,16 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                               }
                             : null,
                         icon: const Icon(Icons.remove_circle),
+                        tooltip: 'Decrease scan cooldown',
                       ),
-                      Text(
-                        '$_scanIntervalSeconds seconds',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          '$_scanIntervalSeconds seconds',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       IconButton(
@@ -389,6 +398,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                               }
                             : null,
                         icon: const Icon(Icons.add_circle),
+                        tooltip: 'Increase scan cooldown',
                       ),
                     ],
                   ),
@@ -420,34 +430,40 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   runSpacing: 12,
                   children: BrandColors.cardColorOptions.map((color) {
                     final isSelected = color == _selectedColor;
-                    return GestureDetector(
-                      onTap: () {
-                        Haptics.selection();
-                        setState(() => _selectedColor = color);
-                      },
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: BrandColors.fromHex(color),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isSelected ? Colors.black : Colors.transparent,
-                            width: 3,
+                    final colorName = BrandColors.cardColorNames[color] ?? color;
+                    return Semantics(
+                      label: colorName,
+                      button: true,
+                      selected: isSelected,
+                      child: GestureDetector(
+                        onTap: () {
+                          Haptics.selection();
+                          setState(() => _selectedColor = color);
+                        },
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: BrandColors.fromHex(color),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? Colors.black : Colors.transparent,
+                              width: 3,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
                           ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ]
+                          child: isSelected
+                              ? const Icon(Icons.check, color: Colors.white)
                               : null,
                         ),
-                        child: isSelected
-                            ? const Icon(Icons.check, color: Colors.white)
-                            : null,
                       ),
                     );
                   }).toList(),
@@ -605,7 +621,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     );
                   },
                   icon: Icon(Icons.restore, size: 24),
-                  label: Text('Recover from Backup'),
+                  label: Text('Recover from Backup', textAlign: TextAlign.center),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.all(16),
                     side: BorderSide(color: Colors.blue, width: 2),
@@ -638,7 +654,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     );
                   },
                   icon: Icon(Icons.device_hub, size: 24),
-                  label: Text('Clone from Another Device'),
+                  label: Text('Clone from Another Device', textAlign: TextAlign.center),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.all(16),
                     side: BorderSide(color: Colors.green, width: 2),

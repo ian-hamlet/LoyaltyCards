@@ -20,7 +20,7 @@ class AppConstants {
   
   // Database
   static const String databaseName = 'loyalty_cards.db';
-  static const int databaseVersion = 7; // Customer app schema version (v0.3.0+: Added performance indexes)
+  static const int databaseVersion = 8; // Customer app schema version (v8: Added original stamp context columns for overflow-moved stamps)
   static const int supplierDatabaseVersion = 5; // Supplier app schema version (v5: Added scan_interval_seconds)
   
   // QR Code Settings
@@ -128,6 +128,21 @@ class BrandColors {
     '#9C27B0', // Purple
     '#795548', // Brown
   ];
+
+  // Human-readable names for cardColorOptions, for screen-reader labels on
+  // the color-swatch picker (color itself carries no accessible information).
+  static const Map<String, String> cardColorNames = {
+    '#673AB7': 'Deep Purple',
+    '#3F51B5': 'Indigo',
+    '#2196F3': 'Blue',
+    '#009688': 'Teal',
+    '#4CAF50': 'Green',
+    '#FF9800': 'Orange',
+    '#FF5722': 'Deep Orange',
+    '#E91E63': 'Pink',
+    '#9C27B0': 'Purple',
+    '#795548': 'Brown',
+  };
   
   /// Convert hex string to Color
   /// 

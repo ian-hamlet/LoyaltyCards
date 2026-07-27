@@ -225,60 +225,11 @@ class TokenValidator {
     return ValidationResult(isValid: true);
   }
 
-  /// Validate a Redemption Request Token (supplier side)
-  static Future<ValidationResult> validateRedemptionRequest({
-    required RedemptionRequestToken token,
-    required String expectedBusinessId,
-    required String businessPublicKey,
-    required List<Stamp> stamps,
-  }) async {
-    // Check basic structure
-    if (!token.isValid()) {
-      return ValidationResult(
-        isValid: false,
-        error: 'Invalid token structure',
-      );
-    }
-
-    // Check business ID matches
-    if (token.businessId != expectedBusinessId) {
-      return ValidationResult(
-        isValid: false,
-        error: 'Card belongs to different business',
-      );
-    }
-
-    // Check stamp count matches
-    if (stamps.length != token.stampsCollected) {
-      return ValidationResult(
-        isValid: false,
-        error: 'Stamp count mismatch',
-      );
-    }
-
-    // Verify all stamp signatures
-    for (int i = 0; i < stamps.length; i++) {
-      final stamp = stamps[i];
-      final expectedPrevHash = i > 0 ? stamps[i - 1].signature : '';
-      
-      final signatureData = '${token.cardId}:${i + 1}:${stamp.timestamp}:$expectedPrevHash';
-      final verificationResult = KeyManager.verifySignature(
-        signatureData,
-        stamp.signature,
-        businessPublicKey,
-      );
-
-      if (!verificationResult.isValid) {
-        AppLogger.error('Redemption stamp ${i + 1} signature verification failed: ${verificationResult.failureReason}', tag: 'Token');
-        return ValidationResult(
-          isValid: false,
-          error: 'Invalid signature on stamp ${i + 1}: ${verificationResult.failureReason}',
-        );
-      }
-    }
-
-    return ValidationResult(isValid: true);
-  }
+  // V-012: redemption verification now lives in shared/lib/utils/crypto_utils.dart
+  // as CryptoUtils.verifyRedemptionStampChain, called from the supplier app's
+  // redemption flow (where verification actually needs to happen - the
+  // previous validateRedemptionRequest here was unreachable dead code, since
+  // customer_app and supplier_app can't import each other's services).
 }
 
 /// Result of token validation

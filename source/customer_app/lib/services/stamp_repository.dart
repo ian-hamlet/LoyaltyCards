@@ -20,8 +20,13 @@ class StampRepository {
   }
 
   /// Get all stamps for a specific card
-  Future<List<Stamp>> getStampsByCard(String cardId) async {
-    final db = await _dbHelper.database;
+  ///
+  /// Accepts an optional [executor] so this can be called from within an
+  /// active `db.transaction()` - sqflite requires every read/write during a
+  /// transaction to go through its `Transaction` object, not the top-level
+  /// `Database`, or it can deadlock against the transaction's own lock.
+  Future<List<Stamp>> getStampsByCard(String cardId, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       'stamps',
       where: 'card_id = ?',
@@ -61,8 +66,13 @@ class StampRepository {
   }
 
   /// Insert a new stamp
-  Future<void> insertStamp(Stamp stamp) async {
-    final db = await _dbHelper.database;
+  ///
+  /// Q-003: accepts an optional [executor] (a `Transaction` from
+  /// `db.transaction()`) so multi-step stamp crediting can be wrapped in a
+  /// single atomic transaction instead of separate, independently-failable
+  /// writes. Defaults to a plain connection when not provided.
+  Future<void> insertStamp(Stamp stamp, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
     await db.insert(
       'stamps',
       stamp.toJson(),
@@ -93,8 +103,11 @@ class StampRepository {
   }
 
   /// Delete a specific stamp
-  Future<void> deleteStamp(String id) async {
-    final db = await _dbHelper.database;
+  ///
+  /// Accepts an optional [executor] - see [getStampsByCard] for why this
+  /// matters when called from within a `db.transaction()`.
+  Future<void> deleteStamp(String id, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
     await db.delete(
       'stamps',
       where: 'id = ?',

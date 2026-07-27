@@ -10,9 +10,15 @@ import 'package:shared/shared.dart';
 /// Uses ECDSA (Elliptic Curve Digital Signature Algorithm) with secp256r1 curve
 class KeyManager {
   static final KeyManager _instance = KeyManager._internal();
+  // `first_unlock_this_device` (not `first_unlock`) - this Keychain item
+  // does not migrate via an encrypted iTunes/iCloud device backup/restore,
+  // closing a side-channel around the app's own explicit, biometric-gated
+  // Recovery Backup / Clone Device QR flow. Those flows are unaffected -
+  // they re-derive and re-store keys on the new device via a scanned QR,
+  // independent of this OS-level accessibility setting.
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
   );
 
   factory KeyManager() => _instance;

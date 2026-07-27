@@ -8,6 +8,22 @@ class Stamp {
   final String? previousHash; // Hash of previous stamp for blockchain-like verification
   final String? deviceId; // Device ID where stamp was collected (V-005 multi-device detection)
 
+  // Set only when this stamp was relocated from another card by the
+  // overflow-splitting logic (a card completed with stamps left over,
+  // spilling onto a new/existing card). The stamp's signature is a fixed
+  // cryptographic commitment to the exact (cardId, stampNumber,
+  // previousHash) it was originally signed with - it can't be recomputed
+  // for a new position without the supplier's private key, so these fields
+  // preserve that original context for redemption verification to check
+  // the signature against, instead of the stamp's current (post-move)
+  // position. Populated only by the app's own internal move logic, never
+  // from anything a scanned QR token or user action controls - trusting
+  // these fields is safe only because there's no path for the current
+  // card to claim an arbitrary origin the app didn't itself record.
+  final String? originalCardId;
+  final int? originalStampNumber;
+  final String? originalPreviousHash;
+
   Stamp({
     required this.id,
     required this.cardId,
@@ -16,6 +32,9 @@ class Stamp {
     required this.signature,
     this.previousHash,
     this.deviceId,
+    this.originalCardId,
+    this.originalStampNumber,
+    this.originalPreviousHash,
   });
 
   /// Convert to JSON for persistence
@@ -28,6 +47,9 @@ class Stamp {
       'signature': signature,
       'previous_hash': previousHash,
       'device_id': deviceId,
+      'original_card_id': originalCardId,
+      'original_stamp_number': originalStampNumber,
+      'original_previous_hash': originalPreviousHash,
     };
   }
 
@@ -41,6 +63,9 @@ class Stamp {
       signature: json['signature'] as String,
       previousHash: json['previous_hash'] as String?,
       deviceId: json['device_id'] as String?,
+      originalCardId: json['original_card_id'] as String?,
+      originalStampNumber: json['original_stamp_number'] as int?,
+      originalPreviousHash: json['original_previous_hash'] as String?,
     );
   }
 
@@ -53,6 +78,9 @@ class Stamp {
     String? signature,
     String? previousHash,
     String? deviceId,
+    String? originalCardId,
+    int? originalStampNumber,
+    String? originalPreviousHash,
   }) {
     return Stamp(
       id: id ?? this.id,
@@ -62,6 +90,9 @@ class Stamp {
       signature: signature ?? this.signature,
       previousHash: previousHash ?? this.previousHash,
       deviceId: deviceId ?? this.deviceId,
+      originalCardId: originalCardId ?? this.originalCardId,
+      originalStampNumber: originalStampNumber ?? this.originalStampNumber,
+      originalPreviousHash: originalPreviousHash ?? this.originalPreviousHash,
     );
   }
 

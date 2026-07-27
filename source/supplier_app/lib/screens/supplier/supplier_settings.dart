@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
+import '../../services/biometric_auth_service.dart';
 import 'supplier_onboarding.dart';
 import 'recovery_backup_screen.dart';
 import 'clone_device_screen.dart';
@@ -23,10 +25,100 @@ class SupplierSettings extends StatefulWidget {
 class _SupplierSettingsState extends State<SupplierSettings> {
   final BusinessRepository _businessRepo = BusinessRepository();
   final KeyManager _keyManager = KeyManager();
+  final BiometricAuthService _biometricAuth = BiometricAuthService();
 
   /// Check if dangerous reset button should be shown
   /// True in debug mode OR if explicitly enabled for TestFlight testing
   bool get _showResetButton => kDebugMode || _enableResetInRelease;
+
+  bool _requireAppLock = false;
+  bool _biometricAvailable = false;
+  String _authMethodName = 'Biometric';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSecuritySettings();
+  }
+
+  Future<void> _loadSecuritySettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final available = await _biometricAuth.isAvailable();
+      final authName = await _biometricAuth.getAuthMethodName();
+
+      if (!mounted) return;
+      setState(() {
+        _requireAppLock = prefs.getBool('require_app_lock') ?? false;
+        _biometricAvailable = available;
+        _authMethodName = authName;
+      });
+    } catch (e) {
+      AppLogger.error('Error loading security settings', error: e, tag: 'Settings');
+      if (!mounted) return;
+      setState(() {
+        _requireAppLock = false; // Safe default
+        _biometricAvailable = false;
+        _authMethodName = 'Passcode';
+      });
+    }
+  }
+
+  Future<void> _toggleAppLock(bool value) async {
+    if (value) {
+      if (!_biometricAvailable) {
+        if (mounted) {
+          AppFeedback.error(
+            context,
+            'Biometric authentication is not available on this device',
+          );
+        }
+        return;
+      }
+
+      final result = await _biometricAuth.authenticate(
+        reason: 'Verify authentication to enable app lock',
+      );
+
+      if (!result.isSuccess) {
+        if (mounted) {
+          AppFeedback.error(context, 'Authentication failed');
+        }
+        return;
+      }
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('require_app_lock', value);
+
+      setState(() {
+        _requireAppLock = value;
+      });
+
+      if (mounted) {
+        AppFeedback.success(
+          context,
+          value ? 'App lock enabled' : 'App lock disabled',
+        );
+      }
+
+      AppLogger.info('App lock ${value ? 'enabled' : 'disabled'}', 'Security');
+    } catch (e) {
+      AppLogger.error('Error toggling app lock', error: e, tag: 'Settings');
+
+      setState(() {
+        _requireAppLock = !value;
+      });
+
+      if (mounted) {
+        AppFeedback.error(
+          context,
+          'Could not save app lock setting. Please try again.',
+        );
+      }
+    }
+  }
 
   Future<void> _confirmAndResetBusiness() async {
     final confirmed = await showDialog<bool>(
@@ -166,6 +258,43 @@ class _SupplierSettingsState extends State<SupplierSettings> {
               style: const TextStyle(fontSize: 11),
             ),
           ),
+
+          const Divider(height: 32),
+
+          // Security Section
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Security',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.fingerprint),
+            title: Text('Lock App with $_authMethodName'),
+            subtitle: Text(
+              _biometricAvailable
+                  ? 'Require authentication to open app'
+                  : 'Biometric authentication not available',
+            ),
+            value: _requireAppLock,
+            onChanged: _biometricAvailable ? _toggleAppLock : null,
+          ),
+          if (_requireAppLock)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'Authentication will be required each time you open the app',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
 
           const Divider(height: 32),
 

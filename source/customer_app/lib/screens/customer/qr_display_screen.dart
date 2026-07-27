@@ -63,6 +63,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                   ? '${token.lastStampHash.substring(0, 20)}...'
                   : token.lastStampHash);
           AppLogger.qr('Token lastStampHash = "$hashPreview"');
+          if (!mounted) return;
           setState(() {
             _qrData = token.toQRString();
             _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
@@ -84,6 +85,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
           AppLogger.qr('Redemption token generated');
           AppLogger.qr('Card ID = ${token.cardId}');
           AppLogger.qr('Stamps = ${token.stampsCollected}');
+          if (!mounted) return;
           setState(() {
             _qrData = token.toQRString();
             _qrGeneratedTime = DateTime.now().millisecondsSinceEpoch;
@@ -94,7 +96,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
       }
     } catch (e, stackTrace) {
       AppLogger.error('QR Display ERROR', error: e, stackTrace: stackTrace, tag: 'QR');
-      
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         // Use user-friendly message if available
@@ -117,7 +119,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
         ? 'Card has been redeemed'
         : widget.mode == QRDisplayMode.stampRequest
             ? 'Show this QR code to ${widget.card.businessName} to receive a stamp'
-            : 'Show this QR code to redeem your card and get your reward';
+            : 'Show this QR code to redeem your reward';
 
     return Scaffold(
       appBar: AppBar(
@@ -317,13 +319,15 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                                     size: 18,
                                   ),
                                   const SizedBox(width: 6),
-                                  const Text(
-                                    'COMPLETE',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
+                                  const ScaleCapped(
+                                    child: Text(
+                                      'COMPLETE',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                      ),
                                     ),
                                   ),
                                 ],

@@ -130,16 +130,18 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       final qrBytes = await BackupStorageService.generateQRImageBytes(backup);
       AppLogger.debug('QR image generated: ${qrBytes.length} bytes', 'Backup');
 
+      if (!mounted) return;
       setState(() {
         _backup = backup;
         _qrImageBytes = qrBytes;
         _isGenerating = false;
       });
-      
+
       AppLogger.debug('✅ Backup generation complete', 'Backup');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to generate backup: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       setState(() => _isGenerating = false);
       AppFeedback.error(context, 'Failed to generate backup: $e');
     }
@@ -163,6 +165,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       );
 
       AppLogger.debug('printBackup returned: ${result.isSuccess}', 'Backup');
+      if (!mounted) return;
 
       if (result.isSuccess) {
         setState(() => _completedMethods.add('print'));
@@ -175,6 +178,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _printBackup: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       AppFeedback.error(context, 'Print error: $e');
     }
   }
@@ -209,6 +213,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       );
 
       AppLogger.debug('shareViaEmail returned: ${result.isSuccess}', 'Backup');
+      if (!mounted) return;
 
       if (result.isSuccess) {
         setState(() => _completedMethods.add('email'));
@@ -221,6 +226,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _shareViaEmail: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       AppFeedback.error(context, 'Share error: $e');
     }
   }
@@ -254,6 +260,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       );
 
       AppLogger.debug('saveToFiles returned: ${result.isSuccess}', 'Backup');
+      if (!mounted) return;
 
       if (result.isSuccess) {
         setState(() => _completedMethods.add('files'));
@@ -266,6 +273,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     } catch (e, stackTrace) {
       AppLogger.error('Exception in _saveToFiles: $e', tag: 'Backup');
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
+      if (!mounted) return;
       AppFeedback.error(context, 'Save error: $e');
     }
   }
@@ -286,7 +294,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
           children: [
             Icon(Icons.warning, color: Colors.orange),
             SizedBox(width: 8),
-            Text('No Backup Created'),
+            Expanded(child: Text('No Backup Created')),
           ],
         ),
         content: Text(
@@ -419,6 +427,52 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                         ],
                       ),
                     ),
+
+                  SizedBox(height: 24),
+
+                  // Redemption tracking notice - restoring onto a
+                  // replacement device does not carry over which rewards
+                  // were already redeemed on the original device, since
+                  // there's no shared server/database (see docs/technical/
+                  // SECURITY_MODEL.md's "Redemption Tracking Across Cloned
+                  // Devices" section for the full rationale).
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.receipt_long_outlined, color: Colors.amber.shade900),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Redemption Records Are Not Included',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amber.shade900,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'A device restored from this backup won\'t know which rewards were already redeemed before the backup was made - verify manually if a card looks like it should already be redeemed.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.amber.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                   SizedBox(height: 24),
 

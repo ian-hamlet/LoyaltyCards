@@ -1,6 +1,6 @@
 # Privacy Policy for LoyaltyCards
 
-**Last Updated:** July 20, 2026  
+**Last Updated:** July 25, 2026  
 **Effective Date:** April 13, 2026
 
 ---
@@ -21,7 +21,7 @@ We do not collect, store, transmit, or process any of the following:
 - ❌ Account credentials (no accounts or login required)
 - ❌ Payment information
 - ❌ Location data
-- ❌ Device identifiers
+- ❌ Device identifiers *(one narrow exception for Secure Mode redemption fraud-prevention — see "Anti-Fraud Device Signal" below)*
 - ❌ Usage analytics
 - ❌ Tracking or advertising data
 - ❌ Browsing history
@@ -39,7 +39,7 @@ All data is stored **exclusively on your device** using iOS local storage:
 - **Customer App:** Your loyalty cards and stamp history are stored in your device's local database (SQLite)
 - **Supplier App:** Your business configuration and transaction history are stored in your device's local database (SQLite)
 
-**Your data never leaves your device.** We have no servers, no cloud storage, and no data backends.
+**Your data never reaches us.** We have no servers, no cloud storage, and no data backends — the only place your data ever goes is directly to another device during a QR exchange, described below.
 
 ### Peer-to-Peer Architecture
 
@@ -48,7 +48,17 @@ LoyaltyCards uses a peer-to-peer (P2P) architecture:
 - When you scan a QR code, the transaction happens directly between your device and the business's device
 - No data is sent to our servers (we don't have servers)
 - No internet connection is required for the app to function
-- QR codes contain only the minimal data needed for the transaction (business ID, card ID, stamp count)
+- QR codes contain only the minimal data needed for the transaction (business ID, card ID, stamp count, and — for Secure Mode redemptions only — a one-way-hashed device signal, see below)
+
+### Anti-Fraud Device Signal (Secure Mode Redemption Only)
+
+One narrow exception to "we don't collect device identifiers": when you redeem a Secure Mode loyalty card, the redemption QR code includes a one-way-hashed identifier derived from your device. This lets the business detect if the same card is being redeemed from an unusually large number of different devices — a fraud-prevention signal, similar to a cashier checking a physical stamp card for signs of it being passed around or copied.
+
+- This value is generated on your device and cannot be reversed to identify your device or you personally
+- It travels only within that single QR exchange, directly to the business's device processing that redemption
+- It is never transmitted to us, to any server, or to any third party
+- It is not used for tracking, advertising, or any purpose beyond this one fraud check
+- It is not used in Express Mode, which has no per-stamp or redemption verification at all
 
 ---
 
@@ -177,7 +187,7 @@ Since we collect no personal data and all data stays on your device:
 - **Device Security:** Your data is protected by your device's security (passcode, Face ID, Touch ID)
 - **Cryptographic Keys:** Supplier cryptographic keys are stored in iOS Keychain (encrypted by iOS)
 - **Local Database:** iOS sandboxes app data (other apps cannot access it)
-- **No Network Transmission:** No data leaves your device, so no network security risks
+- **No Network Transmission:** No data is sent over the internet or to any server — all QR exchanges happen directly between devices in physical proximity, not over a network
 
 ---
 

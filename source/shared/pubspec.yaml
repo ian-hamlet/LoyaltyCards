@@ -2,7 +2,7 @@ name: shared
 description: "A new Flutter package project."
 # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
 # source/shared/lib/version.dart: 
-version: 1.0.3+11
+version: 1.6.0+17
 homepage:
 
 environment:
@@ -15,9 +15,19 @@ dependencies:
   
   # Cryptography for signature verification
   pointycastle: ^4.0.0
-  
+
   # Structured logging
   logger: ^2.5.0
+
+  # Opens the OS Settings app for the user, used by ScannerPermissionErrorView
+  # to recover from a denied camera permission without needing the heavier
+  # permission_handler package (mobile_scanner already handles the actual
+  # permission request/check).
+  app_settings: ^6.1.1
+
+  # For ScannerPermissionErrorView's MobileScannerException/error-code types -
+  # kept in sync with the version customer_app/supplier_app depend on directly.
+  mobile_scanner: ^7.2.0
 
 dev_dependencies:
   flutter_test:

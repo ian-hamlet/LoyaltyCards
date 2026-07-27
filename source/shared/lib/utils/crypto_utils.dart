@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:pointycastle/export.dart';
+import '../models/qr_tokens.dart';
 import '../models/verification_result.dart';
 import 'app_logger.dart';
+import 'signature_format.dart';
 
 /// Shared cryptographic utilities for signature verification
 /// 
@@ -128,6 +130,83 @@ class CryptoUtils {
       AppLogger.error('Signature verification exception: $e', stackTrace: stack);
       return VerificationResult.failure('verification_error: ${e.runtimeType}');
     }
+  }
+
+  /// Verify a full redemption stamp chain (V-012 fix)
+  ///
+  /// The redemption flow previously trusted the customer's self-reported
+  /// `stampsCollected` count with no cryptographic check at all - this is
+  /// what actually catches a fabricated/tampered redemption request before
+  /// the supplier signs off on a reward.
+  ///
+  /// Reconstructs each stamp's originally-signed data using
+  /// SignatureFormat.stampChainData and verifies it against the business's
+  /// public key, walking the hash chain (each stamp's previousHash is the
+  /// prior stamp's signature - this walk is unaffected by moved stamps,
+  /// since a normal stamp's own previousHash is always genuinely "whatever
+  /// signature preceded it on its card", regardless of whether that prior
+  /// stamp was itself moved there).
+  ///
+  /// A stamp relocated between cards by the overflow-splitting logic
+  /// (`qr_scanner_screen.dart`'s card-completion handling) keeps its
+  /// original signature, which covers its *original* (cardId, stampNumber,
+  /// previousHash), not its current position - `proof.originalCardId`
+  /// (etc.) carries that original context when set, and verification uses
+  /// it instead of this stamp's position in the current card/proof list.
+  /// Trusting client-reported "original context" would otherwise let a
+  /// signature legitimately earned on one card be replayed onto another -
+  /// this is safe here only because these fields are populated solely by
+  /// the app's own move logic, never from anything a scanned QR token or
+  /// user action controls.
+  ///
+  /// Secure Mode issuance (`supplier_stamp_card.dart`'s
+  /// `_generateAndShowStamp`) never sets stampCount/expiryDate/scanInterval,
+  /// so every genuine Secure Mode stamp was signed with the constant
+  /// defaults (stampCount=1, expiryDate=null, scanInterval=null) - those are
+  /// hardcoded here rather than transmitted, since the customer's device
+  /// can't be trusted to report them honestly.
+  static VerificationResult verifyRedemptionStampChain({
+    required String cardId,
+    required List<RedemptionStampProof> stampProofs,
+    required String businessPublicKey,
+  }) {
+    if (stampProofs.isEmpty) {
+      return VerificationResult.failure('no_stamps_to_verify');
+    }
+
+    String previousHash = '';
+    for (int i = 0; i < stampProofs.length; i++) {
+      final proof = stampProofs[i];
+      final stampNumber = i + 1;
+
+      final wasMoved = proof.originalCardId != null;
+      final signatureData = SignatureFormat.stampChainData(
+        cardId: wasMoved ? proof.originalCardId! : cardId,
+        stampNumber: wasMoved ? proof.originalStampNumber! : stampNumber,
+        timestampMs: proof.timestamp,
+        previousHash: wasMoved ? (proof.originalPreviousHash ?? '') : previousHash,
+        stampCount: 1,
+      );
+
+      final result = verifySignature(
+        data: signatureData,
+        signatureBase64: proof.signature,
+        publicKeyEncoded: businessPublicKey,
+      );
+
+      if (!result.isValid) {
+        AppLogger.error(
+          'Redemption stamp $stampNumber failed verification: ${result.failureReason}',
+        );
+        return VerificationResult.failure(
+          'stamp_${stampNumber}_invalid: ${result.failureReason}',
+        );
+      }
+
+      previousHash = proof.signature;
+    }
+
+    return VerificationResult.success();
   }
 
   /// Decode public key from custom base64-encoded format

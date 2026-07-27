@@ -69,12 +69,34 @@ Rationale:
 
 ## App Privacy (Data Collection) Suggested Answers
 
-- Does this app collect user data: No
+**Updated 2026-07-25** — a role-based review (see
+[docs/quality/REVIEW_ROLES.md](../quality/REVIEW_ROLES.md), App Store /
+Platform Compliance section) found the previous "Data Not Collected" answer
+below doesn't account for a hashed device identifier the customer app
+transmits P2P during Secure Mode redemption (added by the V-005 anti-fraud
+fix — see [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)'s
+"Anti-Fraud Device Signal" section for the full description). Apple's data-
+collection definition covers data transmitted to *any* party, not just to a
+server, so this should be declared rather than answered "No."
+
+- Does this app collect user data: **Yes** (customer app only — see below;
+  supplier app remains "No")
+- Data type to declare: **Device ID**
+  - Linked to identity: **No**
+  - Used for tracking: **No**
+  - Purpose: **App Functionality** (fraud prevention — detecting the same
+    loyalty card being redeemed from an unusual number of different
+    devices)
 - Does this app track users across apps/sites: No
 - Third-party advertising SDKs: No
 
 Suggested label:
-Data Not Collected
+~~Data Not Collected~~ **Data Not Linked to You** (customer app) /
+**Data Not Collected** (supplier app, unchanged)
+
+☐ **Not yet entered into App Store Connect** — the questionnaire there was
+filled in before this finding (see submission checklist). Needs updating
+before next submission of the customer app.
 
 ---
 

@@ -31,6 +31,8 @@ export 'exceptions/backup_exception.dart';
 export 'widgets/feedback.dart';
 export 'widgets/loading_overlay.dart';
 export 'widgets/skeleton_loader.dart';
+export 'widgets/scanner_permission_error_view.dart';
+export 'widgets/scale_capped.dart';
 
 // Export version
 export 'version.dart';

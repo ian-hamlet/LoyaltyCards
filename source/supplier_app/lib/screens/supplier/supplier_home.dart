@@ -152,11 +152,11 @@ class _SupplierHomeState extends State<SupplierHome> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildStat('Issued', _issuedCards),
+                          Expanded(child: _buildStat('Issued', _issuedCards)),
                           Container(width: 1, height: 40, color: Colors.white30),
-                          _buildStat('Stamped', _activeCards),
+                          Expanded(child: _buildStat('Stamped', _activeCards)),
                           Container(width: 1, height: 40, color: Colors.white30),
-                          _buildStat('Redeemed', _redemptions),
+                          Expanded(child: _buildStat('Redeemed', _redemptions)),
                         ],
                       ),
                     ],
@@ -255,19 +255,19 @@ class _SupplierHomeState extends State<SupplierHome> {
                       ),
                       const SizedBox(height: 12),
                       _buildInfoItem(
-                        '1.',
+                        '1',
                         'Issue Card',
                         'Show QR code for customer to scan and add your loyalty card',
                       ),
                       _buildInfoItem(
-                        '2.',
+                        '2',
                         _business!.mode == OperationMode.simple ? 'Generate QR' : 'Stamp Card',
-                        _business!.mode == OperationMode.simple 
+                        _business!.mode == OperationMode.simple
                             ? 'Create printable QR codes that customers scan to receive stamps'
                             : 'Scan customer\'s card QR to add a cryptographically signed stamp',
                       ),
                       _buildInfoItem(
-                        '3.',
+                        '3',
                         'Redeem',
                         _business!.mode == OperationMode.simple
                             ? 'Customer shows a completed card and you confirm redemption'
@@ -334,11 +334,14 @@ class _SupplierHomeState extends State<SupplierHome> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 14,
+        ScaleCapped(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
           ),
         ),
       ],
@@ -359,32 +362,43 @@ class _SupplierHomeState extends State<SupplierHome> {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              child: ScaleCapped(
+                child: Text(
+                  number,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
+            // ScaleCapped on both lines: the number circle beside this is a
+            // fixed 28x28 - at large accessibility text sizes this
+            // instructional text would otherwise grow tall enough that the
+            // circle (pinned to the top of the row) reads as misaligned
+            // relative to a much-taller first line.
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                ScaleCapped(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                ScaleCapped(
+                  child: Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ),
               ],

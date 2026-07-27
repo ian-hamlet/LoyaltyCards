@@ -236,5 +236,131 @@
 /// # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
 
 
-/// # source/shared/lib/version.dart: 
-const String appVersion = '1.0.3+11';
+/// Version 1.1.0 - Package Update Pass
+///
+/// Build 12 Changes:
+/// - Dependency maintenance on feature/packageUpdate (not yet merged to develop/main):
+///   * Removed 7 unused direct dependencies (path_provider, intl, pointycastle,
+///     google_fonts, cupertino_icons across customer_app/supplier_app)
+///   * Minor/patch bumps across shared/customer_app/supplier_app
+///   * share_plus 12.0.2 -> 13.3.0 (supplier_app), no API changes required
+///   * Flutter SDK 3.44.1 -> 3.44.8, Dart 3.12.1 -> 3.12.2
+///   * Fixed 13 missing `mounted` guards in recovery_backup_screen.dart /
+///     supplier_redeem_card.dart (real BuildContext-after-await gaps)
+///   * Added direct test coverage for CryptoUtils.verifySignature (previously untested)
+/// - Minor version bump (not a patch) to keep this distinguishable from the
+///   1.0.3+11 build submitted for App Store review, in case of rollback
+/// - Test Coverage: shared 140, customer_app 87, supplier_app 46 - all passing
+
+/// Version 1.3.0 - Dynamic Type / Layout Overflow Fixes
+///
+/// Build 13 Changes:
+/// - Fix RenderFlex overflow on mini-FAB camera controls (Flip/90°/180°)
+///   across qr_scanner_screen.dart, supplier_redeem_card.dart,
+///   supplier_stamp_card.dart, import_business_screen.dart
+/// - Add ScaleCapped widget (shared/lib/widgets/scale_capped.dart) to cap
+///   ambient text scale on supplementary labels (FAB labels, chip text,
+///   REDEEMED/COMPLETE badges) that previously grew unboundedly at large
+///   accessibility text sizes
+/// - Replace fixed-pixel stamp-count numbers with a scale-safe checkmark
+///   icon on collected stamps
+/// - Add maxLines/ellipsis to customer card-list business name and status
+///   text to stop letter-by-letter wrap when squeezed by a badge at large
+///   text sizes
+/// - Center button labels when they wrap to multiple lines (several
+///   full-width buttons across both apps)
+/// - Reword "Show Redeemed" chip and shorten several instructional strings
+/// - Add haptic feedback on QR scan success/failure
+/// - Test Coverage: shared 152, customer_app 124, supplier_app 66 - all passing
+
+/// Version 1.4.0 - Secure Mode Redemption Integrity Fixes
+///
+/// Build 14 Changes:
+/// - Fix Secure Mode redemption always failing for a card that ever
+///   received an overflow-split stamp from another card completing -
+///   the moved stamp's signature covered its original position, not its
+///   new one, so redemption verification always rejected it
+/// - Add original_card_id/original_stamp_number/original_previous_hash
+///   columns (DB v7->v8 migration) recording a moved stamp's true
+///   signing context, populated only by internal move logic
+/// - Fix Secure Mode multi-stamp grants ("additional stamps") signed with
+///   a shorter, non-canonical string that always failed redemption
+///   verification even though accepted fine when first scanned
+/// - Fix a card being auto-completed overwriting its own just-applied
+///   completed stamp count back to its stale pre-scan value when no
+///   other card genuinely had space (findCardWithSpace matched itself)
+/// - Route QR validation error messages through the existing
+///   ErrorMessageMapper instead of showing raw technical strings
+/// - Add scan-error cooldown to the supplier redemption scanner to stop
+///   repeated error popups from one scan attempt while aiming the camera
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
+/// Version 1.5.0 - Further Dynamic Type / Layout Overflow Fixes
+///
+/// Build 15 Changes:
+/// - Fix RenderFlex/overlap overflow found across supplier screens at
+///   large-but-not-max accessibility text sizes: "Quick Start Stamps" /
+///   "Reusable QR (no expiry)" text (supplier_issue_card.dart), stepper
+///   counters between +/- buttons (supplier_issue_card.dart,
+///   supplier_onboarding.dart, supplier_stamp_card.dart), REDEEMED/COMPLETE
+///   badges in narrow rotated bars (customer_card_detail.dart,
+///   qr_display_screen.dart), Issued/Stamped/Redeemed stat columns
+///   clipping the rightmost counter (supplier_home.dart)
+/// - Upgrade mini-FAB camera control labels (Flip/90°/180°) from a smaller
+///   base font to ScaleCapped, since the smaller font alone still
+///   overflowed at large-but-not-max scale (all 4 files)
+/// - Apply ScaleCapped to numbered-circle widgets that don't scale with
+///   their fixed-size container (how_it_works.dart in both apps,
+///   supplier_home.dart, clone_device_screen.dart)
+/// - Fix import_business_screen.dart: "Confirm Business Restore" dialog
+///   now scrolls instead of clipping its bottom paragraph; blue
+///   instructional banner over the scanner is scale-capped so it can't
+///   grow tall enough to cover the scan target
+/// - Wrap 3 AlertDialog titles (import_business_screen.dart,
+///   recovery_backup_screen.dart, supplier_redeem_card.dart) so they wrap
+///   instead of overflowing the dialog's narrower width
+/// - Fix clone_device_screen.dart "Expires in: ..." info box overflow
+/// - Rename "Token Configuration" to "Stamp Setup" on the supplier stamp
+///   issuance screen
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
+/// Version 1.6.0 - Supplier App-Wide Lock, Card-List Alignment Fixes
+///
+/// Build 16 Changes:
+/// - Fix customer app: AppLockWrapper's app-lock preference was only
+///   refreshed at cold launch or while already locked - toggling app lock
+///   ON in Settings mid-session (while already authenticated) never
+///   re-locked on the next background/foreground until the app was fully
+///   killed and relaunched. Now re-reads the preference fresh on every
+///   background.
+/// - Add the same optional app-wide biometric lock to the supplier app
+///   (previously it only gated individual actions like viewing backup/
+///   clone QR codes, with no app-wide lock option at all) - new
+///   AppLockWrapper in main.dart, new Security section in
+///   supplier_settings.dart, same fresh-read-on-background fix applied
+///   from the start
+/// - Fix customer_card_detail.dart: "N of N stamps" badge (shown once a
+///   card is complete/redeemed) overflowing at large-but-not-max
+///   accessibility text sizes
+/// - Fix supplier_home.dart: Issued/Stamped/Redeemed stat labels wrapping
+///   mid-word ("Stamp/ed", "Redee/med") at large text sizes, throwing the
+///   numbers above them out of alignment since the columns became
+///   different heights: labels now scale-capped, which keeps them
+///   single-line and the columns equal height
+/// - Fix supplier_home.dart: dropped the redundant period after step
+///   numbers in the info panel ("1." -> "1"), and scale-capped the
+///   title/description text so it stays proportional to the fixed-size
+///   number circle beside it at large text sizes
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
+/// Build 17 Changes:
+/// - Require device authentication (Face ID/Touch ID/passcode) before an
+///   import_business_screen.dart restore actually commits - previously
+///   only a tap-through confirmation dialog stood between an idle,
+///   unconfigured device and having a scanned backup/clone QR silently
+///   installed as its business identity. Covers both the recovery-backup
+///   and clone-QR flows, since they share the same import code path.
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
+/// # source/shared/lib/version.dart:
+const String appVersion = '1.6.0+17';

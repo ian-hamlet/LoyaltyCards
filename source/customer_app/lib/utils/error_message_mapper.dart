@@ -57,7 +57,7 @@ class ErrorMessageMapper {
     }
     
     if (errorStr.contains('signature')) {
-      return 'Security verification failed. QR code may be invalid.';
+      return "This QR code couldn't be verified. It may be outdated, damaged, or printed by an older version of the app - ask the business for a fresh one.";
     }
     
     // Check for format errors

@@ -32,6 +32,13 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   bool _isLoading = true;
   String? _currentDeviceId; // V-005: Cache device ID for QR generation
 
+  // Q-007: cache the generated QR string instead of calling _generateCardQR()
+  // directly in build() - that embeds a live timestamp, so any incidental
+  // rebuild (rotation, an unrelated setState elsewhere on screen) produced
+  // a visibly different QR code even though nothing the user did changed.
+  // Recomputed only when card/stamp data is actually reloaded.
+  String? _cachedQRData;
+
   @override
   void initState() {
     super.initState();
@@ -53,18 +60,22 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       for (var stamp in stamps) {
         AppLogger.debug('  Stamp #${stamp.stampNumber} at ${stamp.timestamp}', 'CardDetail');
       }
-      
+
+      if (!mounted) return;
       setState(() {
         _card = card;
         _stamps = stamps;
         _isLoading = false;
+        // _generateCardQR() reads _card/_stamps, which were just assigned
+        // above in this same synchronous callback, so this reflects the
+        // freshly-loaded data.
+        _cachedQRData = _generateCardQR();
       });
     } catch (e) {
       AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
+      if (!mounted) return;
       setState(() => _isLoading = false);
-      if (mounted) {
-        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load card'));
-      }
+      AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load card'));
     }
   }
 
@@ -82,14 +93,30 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       AppLogger.qr('Card is COMPLETE - generating REDEMPTION QR');
       AppLogger.qr('Including ${_stamps.length} stamps for redemption');
       
-      final signatures = _stamps.map((s) => s.signature).toList();
-      
+      // V-012: include each stamp's timestamp alongside its signature -
+      // must match RedemptionStampProof / QRTokenGenerator.generateRedemptionRequest,
+      // since the supplier reconstructs the signed data from these fields.
+      //
+      // originalCardId/originalStampNumber/originalPreviousHash: only set
+      // for a stamp that was relocated here by the overflow-splitting
+      // logic - its signature covers that original context, not its
+      // current position, so the supplier needs this to verify it.
+      final stampProofs = _stamps
+          .map((s) => {
+                'signature': s.signature,
+                'timestamp': s.timestamp.millisecondsSinceEpoch,
+                if (s.originalCardId != null) 'originalCardId': s.originalCardId,
+                if (s.originalStampNumber != null) 'originalStampNumber': s.originalStampNumber,
+                if (s.originalPreviousHash != null) 'originalPreviousHash': s.originalPreviousHash,
+              })
+          .toList();
+
       final qrData = {
         'type': 'redemption_request',
         'cardId': _card!.id,
         'businessId': _card!.businessId,
         'stampsCollected': _card!.stampsCollected,
-        'stampSignatures': signatures,
+        'stampProofs': stampProofs,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'cardDeviceId': _card!.deviceId, // V-005: Device where card was created
         'currentDeviceId': _currentDeviceId, // V-005: Device showing redemption QR (cached)
@@ -202,13 +229,15 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                         size: _card!.isRedeemed ? 16 : 18,
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        _card!.isRedeemed ? 'REDEEMED' : 'COMPLETE',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: _card!.isRedeemed ? 14 : 16,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 2,
+                                      ScaleCapped(
+                                        child: Text(
+                                          _card!.isRedeemed ? 'REDEEMED' : 'COMPLETE',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: _card!.isRedeemed ? 14 : 16,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 2,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -261,6 +290,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ],
@@ -313,7 +343,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                           child: FilledButton.icon(
                             onPressed: _showRedemptionConfirmation,
                             icon: const Icon(Icons.card_giftcard),
-                            label: const Text('Redeem Reward'),
+                            label: const Text('Redeem Reward', textAlign: TextAlign.center),
                             style: FilledButton.styleFrom(
                               backgroundColor: Colors.green[600],
                               padding: const EdgeInsets.all(16),
@@ -340,7 +370,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                               }
                             },
                             icon: const Icon(Icons.qr_code_scanner),
-                            label: const Text('Scan to Add Stamp'),
+                            label: const Text('Scan to Add Stamp', textAlign: TextAlign.center),
                             style: FilledButton.styleFrom(
                               padding: const EdgeInsets.all(16),
                             ),
@@ -471,13 +501,15 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                     size: 16,
                                   ),
                                   const SizedBox(width: 6),
-                                  const Text(
-                                    'REDEEMED',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
+                                  const ScaleCapped(
+                                    child: Text(
+                                      'REDEEMED',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -497,7 +529,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   child: Text(
                     _card!.isComplete
-                        ? 'Show this QR code to redeem your card and get your reward'
+                        ? 'Show this QR code to redeem your reward'
                         : 'Show this QR code to collect stamps',
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                     textAlign: TextAlign.center,
@@ -585,7 +617,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                     border: Border.all(color: Colors.grey[300]!),
                   ),
                   child: QrImageView(
-                    data: _generateCardQR(),
+                    data: _cachedQRData ?? _generateCardQR(),
                     version: QrVersions.auto,
                     size: QRCodeSize.calculate(context) * 0.95, // 95% size (TEST-010 - Compact QR Layout)
                     backgroundColor: Colors.white,
@@ -619,9 +651,11 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                             }
                           },
                           icon: const Icon(Icons.qr_code_scanner),
-                          label: Text(_card!.isComplete 
-                            ? 'Scan Redemption Token' 
-                            : 'Scan Stamp Token'),
+                          label: ScaleCapped(
+                            child: Text(_card!.isComplete
+                              ? 'Scan Redemption'
+                              : 'Scan Stamp'),
+                          ),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.all(16),
                           ),
@@ -681,7 +715,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               }
             },
             icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Scan Confirmation'),
+            label: const ScaleCapped(child: Text('Scan Confirmation')),
             backgroundColor: Colors.green[600],
           )
         : null,
@@ -701,12 +735,14 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         children: [
           const Icon(Icons.star, color: Colors.white, size: 20),
           const SizedBox(width: 8),
-          Text(
-            '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Flexible(
+            child: Text(
+              '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -732,7 +768,6 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             : baseStampSize;
 
         final stampSize = sizeToFitTarget.clamp(minStampSize, baseStampSize);
-        final stampFontSize = (stampSize * 0.36).clamp(10.0, 13.0);
 
         return Wrap(
           alignment: WrapAlignment.center,
@@ -742,6 +777,14 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
           children: List.generate(_card!.stampsRequired, (index) {
             final isCollected = index < _card!.stampsCollected;
 
+            // No per-stamp number: it was fixed-pixel-sized independent of
+            // the ambient text scale, so at large accessibility text sizes
+            // it visibly overflowed its circle while the circle itself
+            // stayed the same size. The "N of M stamps collected" text
+            // above already conveys progress and scales correctly, so
+            // dropping the numbers here loses no information - just a
+            // plain filled/checked circle for collected, an empty outline
+            // for upcoming.
             return Container(
               width: stampSize,
               height: stampSize,
@@ -755,16 +798,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
               ),
               child: isCollected
                   ? Icon(Icons.check, color: brandColor, size: stampSize * 0.56)
-                  : Center(
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: stampFontSize,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  : null,
             );
           }),
         );
@@ -910,7 +944,12 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       
       // Check for existing card with available space before creating new card
       final existingCard = await _cardRepo.findCardWithSpace(_card!.businessId);
-      
+      // Q-004 fix: track whether a new card was actually created so the
+      // success dialog below can say so accurately - it previously claimed
+      // "a new card has been added" unconditionally, even when an existing
+      // under-filled card was reused instead.
+      bool newCardCreated = false;
+
       if (existingCard != null) {
         AppLogger.business('Found existing card with space: ${existingCard.id}');
         AppLogger.business('  Existing card has ${existingCard.stampsCollected}/${existingCard.stampsRequired} stamps');
@@ -936,6 +975,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         
         await _cardRepo.insertCard(newCard);
         AppLogger.database('New card auto-created: $newCardId');
+        newCardCreated = true;
       }
       
       // Reload card data
@@ -997,31 +1037,36 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[200]!),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.auto_awesome, color: Colors.blue[700], size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'A new card has been added to your wallet automatically',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue[900],
+                // Q-004 fix: only shown when a new card was actually
+                // created - previously shown unconditionally even when an
+                // existing under-filled card was reused instead.
+                if (newCardCreated) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue[200]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_awesome, color: Colors.blue[700], size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'A new card has been added to your wallet automatically',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue[900],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
             actions: [

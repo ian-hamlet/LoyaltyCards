@@ -117,9 +117,18 @@ class QRTokenGenerator {
     int? scanInterval, // REQ-022
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    
-    // Create signature data for first stamp
-    final signatureData = '$cardId:$stampNumber:$timestamp:$previousHash';
+
+    // Create signature data for first stamp - single source of truth in
+    // SignatureFormat.stampChainData, shared with StampToken.getSignatureData()
+    final signatureData = SignatureFormat.stampChainData(
+      cardId: cardId,
+      stampNumber: stampNumber,
+      timestampMs: timestamp,
+      previousHash: previousHash,
+      stampCount: stampCount,
+      expiryDate: expiryDate,
+      scanInterval: scanInterval,
+    );
     
     // Get private key and sign
     final privateKey = await _keyManager.getPrivateKey(businessId);
@@ -144,7 +153,20 @@ class QRTokenGenerator {
       for (int i = 1; i <= additionalStampCount; i++) {
         final additionalStampNumber = stampNumber + i;
         final additionalTimestamp = timestamp + i; // Slight offset
-        final additionalSignatureData = '$cardId:$additionalStampNumber:$additionalTimestamp:$currentPreviousHash';
+        // Must match SignatureFormat.stampChainData exactly - this used to
+        // be a hand-rolled shorter string missing the stampCount/expiryDate/
+        // scanInterval suffix, which matched the (also-wrong) receipt-time
+        // check in qr_scanner_screen.dart but not the canonical format
+        // crypto_utils.dart reconstructs at redemption time, so every
+        // additional stamp failed redemption verification even though it
+        // was accepted fine when first scanned.
+        final additionalSignatureData = SignatureFormat.stampChainData(
+          cardId: cardId,
+          stampNumber: additionalStampNumber,
+          timestampMs: additionalTimestamp,
+          previousHash: currentPreviousHash,
+          stampCount: 1,
+        );
         final additionalSignature = await _keyManager.signData(additionalSignatureData, privateKey);
         
         if (additionalSignature == null) {

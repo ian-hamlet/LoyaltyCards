@@ -343,6 +343,51 @@ QR code displayed
 
 ---
 
+## 🔁 Redemption Tracking Across Cloned Devices
+
+**Decided 2026-07-26, documented here as an accepted architectural limitation
+— not an open bug.**
+
+Clone Device lets a supplier set up a second (or third) device for the same
+business, deliberately without a shared database — a shop assistant uses
+their own phone as a second till, independent of the main register. Recovery
+Backup restores a business's identity onto a replacement device after loss.
+Both carry the business's identity and cryptographic key pair, but neither
+carries the `redemptions` table. This means:
+
+- A card redeemed on one device isn't automatically known to be redeemed on
+  another device sharing the same business identity (via Clone) or a
+  replacement device (via Recovery).
+- Both screens now display an explicit in-app notice about this at the
+  point of generating the QR, so it's a disclosed limitation, not a silent
+  one.
+
+**Why this isn't being "fixed":**
+
+- A shared ledger across devices needs either a server or an ongoing sync
+  mechanism between devices - both add real cost and complexity (storage,
+  maintenance) to an app whose entire value proposition for small
+  businesses is "free to run, no infrastructure." That tradeoff isn't worth
+  it for this app's target market (small, single-location-or-few-staff
+  establishments, not enterprise multi-location chains).
+- Embedding a point-in-time snapshot of redemptions in the backup/clone
+  payload doesn't actually help the primary use case: Clone Device is meant
+  for two devices operating *concurrently*, so any snapshot is stale the
+  moment a new redemption happens on the other device after the QR was
+  generated.
+- **This is exactly the same risk a physical paper stamp card has.** Nothing
+  stops the same completed paper card being presented at two independently
+  staffed registers either — the business handles that through staff
+  familiarity with regular customers, the same trust model this app already
+  leans on for Express Mode (see L-001/L-002 above). This app is
+  deliberately not trying to provide a stronger guarantee here than the
+  paper original it's replacing.
+
+See [VULNERABILITIES.md](../quality/VULNERABILITIES.md)'s V-013 entry for
+the full technical detail and discussion history.
+
+---
+
 ## 📋 Security Audit Log
 
 | Issue | Severity | Status | Resolution |

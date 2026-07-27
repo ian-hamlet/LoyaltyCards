@@ -280,9 +280,23 @@ Answers decided (all consistent with actual app content), still need entering in
 
 - [x] **Privacy Policy URL:** live — https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
   - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
-- [x] **Privacy Policy content accurate** — reviewed 2026-07-20, stale "Save to Photos" reference removed
-- [x] **No data collection statement** clearly stated
+- [x] **Privacy Policy content accurate** — reviewed 2026-07-25, added disclosure of the
+  hashed device identifier used for Secure Mode redemption fraud-prevention
+  (see "Anti-Fraud Device Signal" section) — previously undisclosed, found by
+  the App Store Compliance + Legal/Privacy reviews in
+  [docs/quality/REVIEW_ROLES.md](../quality/REVIEW_ROLES.md)
 - [x] **GDPR compliant** (privacy-first design)
+- [ ] **⚠️ REMINDER — App Store Connect's App Privacy questionnaire was
+  already filled in (marked "Data Not Collected") before the above finding.**
+  It needs to be revisited for the **customer app** to declare **Device ID**
+  (Purpose: App Functionality/fraud prevention, Linked to identity: No, Used
+  for tracking: No) before the next submission — see the corrected suggested
+  answers in
+  [APP_REVIEW_PACKET_v1_0_2_8.md](APP_REVIEW_PACKET_v1_0_2_8.md#app-privacy-data-collection-suggested-answers).
+  The supplier app's answer is unaffected. **This is a manual App Store
+  Connect UI change — nothing in this repo can do it; it must be done by
+  hand in App Store Connect → App Privacy before the next build is
+  submitted.**
 - [ ] Paste this URL into App Store Connect (App Privacy section, both apps)
 
 ---
@@ -495,7 +509,7 @@ Please test both apps together following the demo instructions.
 - [x] **Dark mode support** — both apps follow system light/dark appearance (`ThemeMode.system`, real distinct ColorScheme objects); the specific text-legibility risk was checked and ruled out 2026-07-20 (see `docs/legal/ACCESSIBILITY_STATEMENT.md`). Some branded badges keep a fixed light background in dark mode — a style inconsistency, not a functional gap, and doesn't block submission.
 
 #### Legal
-- [x] **Privacy policy accurate** and accessible — live at https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html, reviewed 2026-07-20
+- [x] **Privacy policy accurate** and accessible — live at https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html, reviewed 2026-07-25 (see the App Store Connect reminder under "Privacy Policy" above — the *policy* is now accurate, but the separately-entered ASC questionnaire still needs updating)
 - [x] **Terms of service** available — live at https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html, strengthened 2026-07-20
 - [x] **No copyright infringement** (all content original or licensed)
 - [x] **Complies with export regulations** — standard cryptography only, see Export Compliance section above

@@ -1,8 +1,11 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
+import '../../services/biometric_auth_service.dart';
 import '../../utils/error_message_mapper.dart';
 import 'supplier_home.dart';
 import 'package:pointycastle/ecc/api.dart';
@@ -23,6 +26,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
   final MobileScannerController _scannerController = MobileScannerController();
   final BusinessRepository _businessRepo = BusinessRepository();
   final KeyManager _keyManager = KeyManager();
+  final BiometricAuthService _biometricAuth = BiometricAuthService();
   
   bool _isProcessing = false;
   bool _scanCompleted = false; // Track if scan succeeded to prevent multiple scans
@@ -143,6 +147,69 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
       final business = backup.toBusiness();
       AppLogger.debug('Business ID: ${business.id}', 'Import');
 
+      // Step 4.5 (V-016): Require explicit confirmation before trusting this
+      // backup. Its signature only proves internal consistency (the HKDF key
+      // is derived from the privateKey field inside the same payload it
+      // signs), NOT that it's the business the user actually expects to
+      // restore - anyone can mint a "validly signed" backup for a fictitious
+      // business. Surfacing the name/key fingerprint and requiring a tap
+      // stops a silently-substituted backup from being trusted automatically.
+      try {
+        await _scannerController.stop();
+      } catch (e) {
+        AppLogger.warning('Error stopping camera before confirmation: $e', 'Import');
+      }
+
+      if (!mounted) return;
+      final confirmed = await _confirmImport(business);
+      if (!mounted) return;
+      if (!confirmed) {
+        AppLogger.info('Business import cancelled by user at confirmation step', 'Import');
+        setState(() {
+          _isProcessing = false;
+        });
+        try {
+          await _scannerController.start();
+        } catch (e) {
+          AppLogger.warning('Error restarting camera after cancelled import: $e', 'Import');
+        }
+        return;
+      }
+
+      // Step 5.5: Require device authentication before committing the
+      // import. This installs a new private key onto the device - without
+      // this, anyone with physical access to an idle, unconfigured device
+      // sitting on this screen could scan their own backup QR and tap
+      // through the confirmation dialog to hijack it, since a dialog tap
+      // alone doesn't prove it's the device owner acting.
+      final biometricAvailable = await _biometricAuth.isAvailable();
+      if (!biometricAvailable) {
+        AppLogger.warning('Biometric authentication not available - blocking import', 'Import');
+        if (!mounted) return;
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'Device authentication (Face ID, Touch ID, or passcode) is required to restore a business, but isn\'t available on this device.';
+        });
+        return;
+      }
+
+      final authResult = await _biometricAuth.authenticate(
+        reason: 'Authenticate to restore ${business.name}',
+      );
+      if (!mounted) return;
+      if (!authResult.isSuccess) {
+        AppLogger.warning('Authentication failed at import step: ${authResult.status}', 'Import');
+        setState(() {
+          _isProcessing = false;
+        });
+        try {
+          await _scannerController.start();
+        } catch (e) {
+          AppLogger.warning('Error restarting camera after failed auth: $e', 'Import');
+        }
+        return;
+      }
+
       // Step 6: Store private key
       AppLogger.crypto('Storing private key securely');
       final privateKey = _keyManager.decodePrivateKey(backup.privateKey);
@@ -211,6 +278,78 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
     }
   }
 
+  /// V-016: Short, non-reversible fingerprint of the public key so the user
+  /// has something concrete to compare against what they expect to see,
+  /// without showing an overwhelming raw base64 blob.
+  String _publicKeyFingerprint(String publicKeyEncoded) {
+    final digest = sha256.convert(utf8.encode(publicKeyEncoded));
+    final hex = digest.toString().toUpperCase();
+    final groups = <String>[];
+    for (int i = 0; i < 16; i += 4) {
+      groups.add(hex.substring(i, i + 4));
+    }
+    return groups.join(' ');
+  }
+
+  /// V-016: Show what's about to be imported and require an explicit tap
+  /// before trusting it. A backup's signature only proves it's internally
+  /// consistent, not that it's genuinely the business the user expects.
+  Future<bool> _confirmImport(Business business) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            SizedBox(width: 8),
+            Expanded(child: Text('Confirm Business Restore')),
+          ],
+        ),
+        // AlertDialog's content doesn't scroll on its own - at large
+        // accessibility text sizes this Column (especially the warning
+        // paragraph) can be taller than the screen, clipping its bottom
+        // instead of the dialog growing, since it has no scrollable ancestor.
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('You\'re about to restore:'),
+              const SizedBox(height: 12),
+              Text(
+                business.name,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 12),
+              const Text('Key fingerprint:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              SelectableText(
+                _publicKeyFingerprint(business.publicKey),
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Only proceed if this is a business you set up yourself, or one your business partner shared with you directly. Anyone can create a backup QR that claims any business name.',
+                style: TextStyle(fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Restore This Business'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -239,6 +378,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     child: MobileScanner(
                       controller: _scannerController,
                       fit: BoxFit.contain,
+                      errorBuilder: (context, error) => ScannerPermissionErrorView(error: error),
                       onDetect: (capture) {
                         final List<Barcode> barcodes = capture.barcodes;
                         for (final barcode in barcodes) {
@@ -273,8 +413,8 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.flip_camera_ios, size: 20, color: Colors.blue),
-                        Text('Flip', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                        Icon(Icons.flip_camera_ios, size: 16, color: Colors.blue),
+                        ScaleCapped(child: Text('Flip', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                       ],
                     ),
                   ),
@@ -296,8 +436,8 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.rotate_90_degrees_cw, size: 20, color: Colors.blue),
-                        Text('90°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                        Icon(Icons.rotate_90_degrees_cw, size: 16, color: Colors.blue),
+                        ScaleCapped(child: Text('90°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                       ],
                     ),
                   ),
@@ -319,8 +459,8 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.flip, size: 20, color: Colors.blue),
-                        Text('180°', style: TextStyle(fontSize: 10, color: Colors.blue)),
+                        Icon(Icons.flip, size: 16, color: Colors.blue),
+                        ScaleCapped(child: Text('180°', style: TextStyle(fontSize: 8, height: 1.0, color: Colors.blue))),
                       ],
                     ),
                   ),
@@ -391,6 +531,13 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.blue.shade700, width: 2),
                   ),
+                  // ScaleCapped on both lines: this banner is bottom-anchored
+                  // (Positioned bottom: 100, no top constraint) and grows
+                  // upward as its text wraps to more lines - at large
+                  // accessibility text sizes it could grow tall enough to
+                  // cover the scan target square above it. Capping keeps it
+                  // a predictable size regardless of system text setting,
+                  // same rationale as other supplementary/instructional text.
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -399,12 +546,14 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                           Icon(Icons.qr_code_scanner, color: Colors.white, size: 28),
                           SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              'Scan Recovery or Clone QR',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                            child: ScaleCapped(
+                              child: Text(
+                                'Scan Recovery or Clone QR',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -416,11 +565,13 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                           Icon(Icons.info_outline, color: Colors.white70, size: 18),
                           SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              'Works with both recovery backups and clone QR codes',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
+                            child: ScaleCapped(
+                              child: Text(
+                                'Works with both recovery backups and clone QR codes',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),

@@ -117,6 +117,9 @@ class QRTokenGenerator {
           .map((s) => RedemptionStampProof(
                 signature: s.signature,
                 timestamp: s.timestamp.millisecondsSinceEpoch,
+                originalCardId: s.originalCardId,
+                originalStampNumber: s.originalStampNumber,
+                originalPreviousHash: s.originalPreviousHash,
               ))
           .toList();
 

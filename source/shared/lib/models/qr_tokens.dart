@@ -398,23 +398,48 @@ class RedemptionStampProof {
   final String signature;
   final int timestamp;
 
+  // Set only when this stamp was relocated from another card by the
+  // overflow-splitting logic - see Stamp's matching fields. When present,
+  // the supplier must verify this proof's signature against this original
+  // context instead of its position in this proof list, since that's what
+  // the signature actually covers.
+  final String? originalCardId;
+  final int? originalStampNumber;
+  final String? originalPreviousHash;
+
   RedemptionStampProof({
     required this.signature,
     required this.timestamp,
+    this.originalCardId,
+    this.originalStampNumber,
+    this.originalPreviousHash,
   });
 
   factory RedemptionStampProof.fromJson(Map<String, dynamic> json) {
     return RedemptionStampProof(
       signature: json['signature'] as String,
       timestamp: json['timestamp'] as int,
+      originalCardId: json['originalCardId'] as String?,
+      originalStampNumber: json['originalStampNumber'] as int?,
+      originalPreviousHash: json['originalPreviousHash'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    final map = {
       'signature': signature,
       'timestamp': timestamp,
     };
+    if (originalCardId != null) {
+      map['originalCardId'] = originalCardId!;
+    }
+    if (originalStampNumber != null) {
+      map['originalStampNumber'] = originalStampNumber!;
+    }
+    if (originalPreviousHash != null) {
+      map['originalPreviousHash'] = originalPreviousHash!;
+    }
+    return map;
   }
 }
 

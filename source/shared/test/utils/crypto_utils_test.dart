@@ -376,5 +376,140 @@ void main() {
       expect(result.isValid, isFalse);
       expect(result.failureReason, 'no_stamps_to_verify');
     });
+
+    test('accepts a stamp relocated from another card via its original context', () {
+      // Simulates the overflow-splitting scenario: this stamp was genuinely
+      // signed as stamp #6 on 'card-source' (chained to some prior stamp's
+      // signature there), then moved onto 'card-dest' as its stamp #1. Its
+      // signature only verifies against the original data, not its new
+      // position - originalCardId/originalStampNumber/originalPreviousHash
+      // is exactly what lets that still verify correctly.
+      final sourcePreviousHash = _signChainStamp(
+        cardId: 'card-source',
+        stampNumber: 5,
+        timestamp: 1749600000005,
+        previousHash: '',
+      );
+      final movedSignature = _signChainStamp(
+        cardId: 'card-source',
+        stampNumber: 6,
+        timestamp: 1749600000006,
+        previousHash: sourcePreviousHash,
+      );
+
+      final proofs = [
+        RedemptionStampProof(
+          signature: movedSignature,
+          timestamp: 1749600000006,
+          originalCardId: 'card-source',
+          originalStampNumber: 6,
+          originalPreviousHash: sourcePreviousHash,
+        ),
+      ];
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-dest',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isTrue);
+    });
+
+    test('rejects a moved stamp whose claimed original context is wrong', () {
+      // Genuinely signed as card-source stamp #6, but the redemption
+      // request claims it was originally stamp #7 - the signature won't
+      // match that fabricated claim.
+      final movedSignature = _signChainStamp(
+        cardId: 'card-source',
+        stampNumber: 6,
+        timestamp: 1749600000006,
+        previousHash: '',
+      );
+
+      final proofs = [
+        RedemptionStampProof(
+          signature: movedSignature,
+          timestamp: 1749600000006,
+          originalCardId: 'card-source',
+          originalStampNumber: 7, // wrong - was actually signed as #6
+          originalPreviousHash: '',
+        ),
+      ];
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-dest',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+    });
+
+    test('rejects reusing a stamp genuinely earned on one card by claiming it as another card\'s own', () {
+      // The exact replay this design must prevent: a signature genuinely
+      // earned as card-source's own stamp #1, presented on card-dest's
+      // redemption WITHOUT any originalCardId - i.e. claiming it was
+      // directly earned there, positionally, rather than moved. Since its
+      // signature covers card-source (not card-dest), positional
+      // verification against card-dest must fail.
+      final signature = _signChainStamp(
+        cardId: 'card-source',
+        stampNumber: 1,
+        timestamp: 1749600000001,
+        previousHash: '',
+      );
+
+      final proofs = [
+        RedemptionStampProof(signature: signature, timestamp: 1749600000001),
+      ];
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-dest',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isFalse);
+    });
+
+    test('accepts a mixed chain: a moved stamp followed by a normally-earned one', () {
+      // Stamp 1 arrived via the overflow move (signed for card-source #3).
+      // Stamp 2 was earned normally, directly on card-dest afterwards, so
+      // its previousHash is genuinely the moved stamp's signature - the
+      // chain walk must keep using proof.signature between iterations
+      // regardless of whether the preceding stamp was itself moved.
+      final movedSignature = _signChainStamp(
+        cardId: 'card-source',
+        stampNumber: 3,
+        timestamp: 1749600000003,
+        previousHash: '',
+      );
+      final normalSignature = _signChainStamp(
+        cardId: 'card-dest',
+        stampNumber: 2,
+        timestamp: 1749600000010,
+        previousHash: movedSignature,
+      );
+
+      final proofs = [
+        RedemptionStampProof(
+          signature: movedSignature,
+          timestamp: 1749600000003,
+          originalCardId: 'card-source',
+          originalStampNumber: 3,
+          originalPreviousHash: '',
+        ),
+        RedemptionStampProof(signature: normalSignature, timestamp: 1749600000010),
+      ];
+
+      final result = CryptoUtils.verifyRedemptionStampChain(
+        cardId: 'card-dest',
+        stampProofs: proofs,
+        businessPublicKey: publicKeyEncoded,
+      );
+
+      expect(result.isValid, isTrue);
+    });
   });
 }

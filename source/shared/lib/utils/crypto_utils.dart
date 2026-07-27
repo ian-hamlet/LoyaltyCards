@@ -4,6 +4,7 @@ import 'package:pointycastle/export.dart';
 import '../models/qr_tokens.dart';
 import '../models/verification_result.dart';
 import 'app_logger.dart';
+import 'signature_format.dart';
 
 /// Shared cryptographic utilities for signature verification
 /// 
@@ -138,10 +139,25 @@ class CryptoUtils {
   /// what actually catches a fabricated/tampered redemption request before
   /// the supplier signs off on a reward.
   ///
-  /// Reconstructs each stamp's originally-signed data as
-  /// `cardId:stampNumber:timestamp:previousHash:stampCount:expiryDate:scanInterval`
-  /// and verifies it against the business's public key, walking the hash
-  /// chain (each stamp's previousHash is the prior stamp's signature).
+  /// Reconstructs each stamp's originally-signed data using
+  /// SignatureFormat.stampChainData and verifies it against the business's
+  /// public key, walking the hash chain (each stamp's previousHash is the
+  /// prior stamp's signature - this walk is unaffected by moved stamps,
+  /// since a normal stamp's own previousHash is always genuinely "whatever
+  /// signature preceded it on its card", regardless of whether that prior
+  /// stamp was itself moved there).
+  ///
+  /// A stamp relocated between cards by the overflow-splitting logic
+  /// (`qr_scanner_screen.dart`'s card-completion handling) keeps its
+  /// original signature, which covers its *original* (cardId, stampNumber,
+  /// previousHash), not its current position - `proof.originalCardId`
+  /// (etc.) carries that original context when set, and verification uses
+  /// it instead of this stamp's position in the current card/proof list.
+  /// Trusting client-reported "original context" would otherwise let a
+  /// signature legitimately earned on one card be replayed onto another -
+  /// this is safe here only because these fields are populated solely by
+  /// the app's own move logic, never from anything a scanned QR token or
+  /// user action controls.
   ///
   /// Secure Mode issuance (`supplier_stamp_card.dart`'s
   /// `_generateAndShowStamp`) never sets stampCount/expiryDate/scanInterval,
@@ -162,8 +178,15 @@ class CryptoUtils {
     for (int i = 0; i < stampProofs.length; i++) {
       final proof = stampProofs[i];
       final stampNumber = i + 1;
-      final signatureData =
-          '$cardId:$stampNumber:${proof.timestamp}:$previousHash:1::';
+
+      final wasMoved = proof.originalCardId != null;
+      final signatureData = SignatureFormat.stampChainData(
+        cardId: wasMoved ? proof.originalCardId! : cardId,
+        stampNumber: wasMoved ? proof.originalStampNumber! : stampNumber,
+        timestampMs: proof.timestamp,
+        previousHash: wasMoved ? (proof.originalPreviousHash ?? '') : previousHash,
+        stampCount: 1,
+      );
 
       final result = verifySignature(
         data: signatureData,

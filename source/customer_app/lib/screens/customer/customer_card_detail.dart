@@ -96,10 +96,18 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       // V-012: include each stamp's timestamp alongside its signature -
       // must match RedemptionStampProof / QRTokenGenerator.generateRedemptionRequest,
       // since the supplier reconstructs the signed data from these fields.
+      //
+      // originalCardId/originalStampNumber/originalPreviousHash: only set
+      // for a stamp that was relocated here by the overflow-splitting
+      // logic - its signature covers that original context, not its
+      // current position, so the supplier needs this to verify it.
       final stampProofs = _stamps
           .map((s) => {
                 'signature': s.signature,
                 'timestamp': s.timestamp.millisecondsSinceEpoch,
+                if (s.originalCardId != null) 'originalCardId': s.originalCardId,
+                if (s.originalStampNumber != null) 'originalStampNumber': s.originalStampNumber,
+                if (s.originalPreviousHash != null) 'originalPreviousHash': s.originalPreviousHash,
               })
           .toList();
 

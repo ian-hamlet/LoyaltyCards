@@ -707,6 +707,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             final previousHash = existingStamps.isNotEmpty ? existingStamps.last.signature : null;
 
             // Create on existing card
+            //
+            // originalCardId/originalStampNumber/originalPreviousHash: the
+            // signature carried over unchanged below was signed against
+            // oldStamp's position on its OLD card, not this new one - it
+            // can't be recomputed here (only the supplier's private key
+            // could re-sign it), so record what it was actually signed for,
+            // carrying forward the true original if oldStamp was itself
+            // already a moved stamp from an earlier overflow event.
             final newStamp = Stamp(
               id: '${existingCard.id}_stamp_$newStampNumber',
               cardId: existingCard.id,
@@ -715,6 +723,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               signature: oldStamp.signature,
               previousHash: i == 0 ? previousHash : stampsToMove[i - 1].signature,
               deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
+              originalCardId: oldStamp.originalCardId ?? oldStamp.cardId,
+              originalStampNumber: oldStamp.originalStampNumber ?? oldStamp.stampNumber,
+              originalPreviousHash: oldStamp.originalPreviousHash ?? oldStamp.previousHash,
             );
 
             await stampRepo.insertStamp(newStamp, executor: txn);
@@ -820,6 +831,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             await stampRepo.deleteStamp(oldStamp.id, executor: txn);
 
             // Create on new card with renumbered stamp number
+            //
+            // originalCardId/originalStampNumber/originalPreviousHash: see
+            // the matching comment in the existing-card merge branch above -
+            // the carried-over signature was signed for oldStamp's position
+            // on its old card, not this new one.
             final newStamp = Stamp(
               id: '${newCardId}_stamp_$newStampNumber',
               cardId: newCardId,
@@ -828,6 +844,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               signature: oldStamp.signature,
               previousHash: i == 0 ? null : stampsToMove[i - 1].signature,
               deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
+              originalCardId: oldStamp.originalCardId ?? oldStamp.cardId,
+              originalStampNumber: oldStamp.originalStampNumber ?? oldStamp.stampNumber,
+              originalPreviousHash: oldStamp.originalPreviousHash ?? oldStamp.previousHash,
             );
 
             await stampRepo.insertStamp(newStamp, executor: txn);

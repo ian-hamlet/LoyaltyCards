@@ -187,6 +187,9 @@ class DatabaseHelper {
         signature TEXT NOT NULL,
         previous_hash TEXT,
         device_id TEXT,
+        original_card_id TEXT,
+        original_stamp_number INTEGER,
+        original_previous_hash TEXT,
         FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
       )
     ''');
@@ -313,6 +316,28 @@ class DatabaseHelper {
         AppLogger.error('Failed to add indexes (non-critical): $e');
         // Don't fail migration if indexes already exist or can't be created
       }
+    }
+
+    // Migration from v7 to v8: Add original stamp context columns
+    //
+    // A stamp moved between cards by the overflow-splitting logic keeps its
+    // original signature (which can't be recomputed without the supplier's
+    // private key) but is assigned a new stamp_number/previous_hash to fit
+    // its new position - these columns preserve what it was actually signed
+    // for, so redemption verification can check the signature against the
+    // right data instead of always assuming a stamp's current position.
+    if (oldVersion < 8) {
+      AppLogger.database('Migration v7 → v8: Adding original stamp context columns to stamps table');
+      await db.execute('''
+        ALTER TABLE stamps ADD COLUMN original_card_id TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE stamps ADD COLUMN original_stamp_number INTEGER
+      ''');
+      await db.execute('''
+        ALTER TABLE stamps ADD COLUMN original_previous_hash TEXT
+      ''');
+      AppLogger.database('Migration complete: original stamp context columns added');
     }
   }
 

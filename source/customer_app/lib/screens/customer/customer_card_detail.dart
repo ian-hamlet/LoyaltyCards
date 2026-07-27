@@ -735,12 +735,14 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         children: [
           const Icon(Icons.star, color: Colors.white, size: 20),
           const SizedBox(width: 8),
-          Text(
-            '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Flexible(
+            child: Text(
+              '${_card!.stampsCollected} of ${_card!.stampsRequired} stamps',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

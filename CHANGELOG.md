@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.6.0+17] - 2026-07-27 - CURRENT
+## [2.0.0+18] - 2026-07-27 - CURRENT
+
+**Status:** Built on `develop` (merged from `feature/uireview`), not yet built/uploaded as an IPA. Major version bump.
+
+### Changed
+- **Breaking: QR token format.** The QR token payload gained new signed fields during the security review (`stampCount`, `expiryDate`, `scanInterval`, device-mismatch tracking, etc.) since the last main-branch release. Old "add card" and "add stamp" QR codes printed from a pre-review build still parse (the new fields are additive and default-safe) but now fail signature verification, since the signed data those defaults are checked against has changed - confirmed by device testing. There's no version marker in the token to distinguish "old format, expected to fail" from "corrupted/tampered", so this is called out as a deliberate major-version line rather than folded into another minor bump. **Existing printed QR codes will need reprinting after this ships.**
+
+## [1.6.0+17] - 2026-07-27
 
 **Status:** Built on `feature/uireview` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Build-only bump (same 1.6.0 feature set as +16).
 

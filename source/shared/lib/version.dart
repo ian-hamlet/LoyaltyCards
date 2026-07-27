@@ -362,5 +362,23 @@
 ///   and clone-QR flows, since they share the same import code path.
 /// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
 
+/// Version 2.0.0 - QR Token Format Break
+///
+/// Build 18 Changes:
+/// - Major version bump (not minor/patch): the QR token payload gained
+///   new signed fields during the security review (stampCount,
+///   expiryDate, scanInterval, device-mismatch tracking, etc.) between
+///   this branch and the last main-branch release. Old "add card" and
+///   "add stamp" QR codes printed from a pre-review build still parse
+///   (fields are additive and default-safe) but now fail signature
+///   verification, since the signed data those defaults are checked
+///   against has changed - confirmed by device testing. There's no
+///   version marker in the token to distinguish "old format, expected
+///   to fail" from "corrupted/tampered", so this is called out as a
+///   deliberate major-version line rather than folded into another
+///   minor bump. Existing printed QR codes will need reprinting after
+///   this ships.
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '1.6.0+17';
+const String appVersion = '2.0.0+18';

@@ -4,7 +4,7 @@ publish_to: 'none'
 
 # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
 # source/shared/lib/version.dart: 
-version: 1.6.0+17
+version: 2.0.0+18
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

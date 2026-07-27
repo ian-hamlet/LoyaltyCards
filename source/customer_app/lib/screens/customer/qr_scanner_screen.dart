@@ -12,6 +12,7 @@ import '../../services/database_helper.dart';
 import '../../services/key_manager.dart';
 import '../../services/device_orientation_service.dart';
 import '../../services/device_service.dart';
+import '../../utils/error_message_mapper.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -155,7 +156,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Validate token
     final validation = await TokenValidator.validateCardIssueToken(token);
     if (!validation.isValid) {
-      _showScanError(validation.error ?? 'Invalid token');
+      _showScanError(ErrorMessageMapper.getUserMessage(validation.error ?? 'Invalid token'));
       return;
     }
 
@@ -405,7 +406,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       );
 
       if (!validation.isValid) {
-        _showScanError(validation.error ?? 'Invalid stamp');
+        _showScanError(ErrorMessageMapper.getUserMessage(validation.error ?? 'Invalid stamp'));
         return;
       }
 
@@ -566,7 +567,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
             // Verify stamp signature (skip in simple mode) (CR-1.4)
             if (card.mode == OperationMode.secure) {
-              final signatureData = '${card.id}:${additionalStamp.stampNumber}:${additionalStamp.timestamp}:$currentPreviousHash';
+              // Must match SignatureFormat.stampChainData exactly - see the
+              // matching comment in qr_token_generator.dart's signing side.
+              final signatureData = SignatureFormat.stampChainData(
+                cardId: card.id,
+                stampNumber: additionalStamp.stampNumber,
+                timestampMs: additionalStamp.timestamp,
+                previousHash: currentPreviousHash,
+                stampCount: 1,
+              );
               final verificationResult = KeyManager.verifySignature(
                 signatureData,
                 additionalStamp.signature,
@@ -640,7 +649,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       AppLogger.business('Overflow stamps: $overflow');
 
       // Handle overflow stamps - check for existing card with space first (TEST-008 fix)
-      final existingCard = await repository.findCardWithSpace(card.businessId);
+      // excludeCardId: the card being completed right here still shows
+      // space at this point (it isn't marked complete until inside the
+      // transaction below), so without this it would match itself and
+      // overwrite its own just-set completed count with its stale one.
+      final existingCard = await repository.findCardWithSpace(card.businessId, excludeCardId: card.id);
 
       // The rest of this branch (marking the current card complete, bumping
       // a destination card's count, and moving stamp rows via delete+insert

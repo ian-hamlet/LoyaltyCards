@@ -214,15 +214,19 @@ class CardRepository {
   ///
   /// Accepts an optional [executor] so this can participate in a shared
   /// `db.transaction()` - see [updateStampCount] for why this matters.
-  Future<models.Card?> findCardWithSpace(String businessId, {DatabaseExecutor? executor}) async {
+  Future<models.Card?> findCardWithSpace(String businessId, {String? excludeCardId, DatabaseExecutor? executor}) async {
     AppLogger.database('Searching for cards with available space for business: $businessId');
 
     // Get all cards for this business
     final allCards = await getCardsByBusiness(businessId, executor: executor);
     AppLogger.database('Found ${allCards.length} total cards for business');
-    
-    // Filter to non-redeemed cards with available space
+
+    // Filter to non-redeemed cards with available space, excluding the
+    // caller's own card (e.g. the one currently being marked complete -
+    // it still shows space here because this read happens before that
+    // update, and matching itself would overwrite its own new count).
     final availableCards = allCards.where((card) {
+      if (card.id == excludeCardId) return false;
       final hasSpace = !card.isRedeemed && card.stampsCollected < card.stampsRequired;
       if (hasSpace) {
         AppLogger.database('  Card ${card.id}: ${card.stampsCollected}/${card.stampsRequired} stamps, redeemed=${card.isRedeemed}');

@@ -79,12 +79,28 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    if (state == AppLifecycleState.paused && _requireAppLock && _isAuthenticated) {
+    if (state == AppLifecycleState.paused) {
+      _handleAppPaused();
+    } else if (state == AppLifecycleState.resumed && !_isAuthenticated && !_isAuthenticating) {
+      _checkAuthRequirement();
+    }
+  }
+
+  // Re-reads the preference fresh instead of trusting the cached
+  // _requireAppLock - that cache is only otherwise refreshed at cold
+  // launch or while already locked, so toggling app lock ON in Settings
+  // mid-session (while still authenticated) would never re-lock on the
+  // next background/foreground until the app was fully killed and
+  // relaunched. SharedPreferences caches in memory after first load, so
+  // this is effectively instant, not a real async round-trip.
+  Future<void> _handleAppPaused() async {
+    final prefs = await SharedPreferences.getInstance();
+    _requireAppLock = prefs.getBool('require_app_lock') ?? false;
+    if (!mounted) return;
+    if (_requireAppLock && _isAuthenticated) {
       setState(() {
         _isAuthenticated = false;
       });
-    } else if (state == AppLifecycleState.resumed && !_isAuthenticated && !_isAuthenticating) {
-      _checkAuthRequirement();
     }
   }
 

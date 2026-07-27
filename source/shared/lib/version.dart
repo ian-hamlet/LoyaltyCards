@@ -295,5 +295,34 @@
 ///   repeated error popups from one scan attempt while aiming the camera
 /// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
 
+/// Version 1.5.0 - Further Dynamic Type / Layout Overflow Fixes
+///
+/// Build 15 Changes:
+/// - Fix RenderFlex/overlap overflow found across supplier screens at
+///   large-but-not-max accessibility text sizes: "Quick Start Stamps" /
+///   "Reusable QR (no expiry)" text (supplier_issue_card.dart), stepper
+///   counters between +/- buttons (supplier_issue_card.dart,
+///   supplier_onboarding.dart, supplier_stamp_card.dart), REDEEMED/COMPLETE
+///   badges in narrow rotated bars (customer_card_detail.dart,
+///   qr_display_screen.dart), Issued/Stamped/Redeemed stat columns
+///   clipping the rightmost counter (supplier_home.dart)
+/// - Upgrade mini-FAB camera control labels (Flip/90°/180°) from a smaller
+///   base font to ScaleCapped, since the smaller font alone still
+///   overflowed at large-but-not-max scale (all 4 files)
+/// - Apply ScaleCapped to numbered-circle widgets that don't scale with
+///   their fixed-size container (how_it_works.dart in both apps,
+///   supplier_home.dart, clone_device_screen.dart)
+/// - Fix import_business_screen.dart: "Confirm Business Restore" dialog
+///   now scrolls instead of clipping its bottom paragraph; blue
+///   instructional banner over the scanner is scale-capped so it can't
+///   grow tall enough to cover the scan target
+/// - Wrap 3 AlertDialog titles (import_business_screen.dart,
+///   recovery_backup_screen.dart, supplier_redeem_card.dart) so they wrap
+///   instead of overflowing the dialog's narrower width
+/// - Fix clone_device_screen.dart "Expires in: ..." info box overflow
+/// - Rename "Token Configuration" to "Stamp Setup" on the supplier stamp
+///   issuance screen
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '1.4.0+14';
+const String appVersion = '1.5.0+15';

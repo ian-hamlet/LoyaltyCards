@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.0+14] - 2026-07-27 - CURRENT
+## [1.5.0+15] - 2026-07-27 - CURRENT
+
+**Status:** Built on `feature/uireview` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) to keep this distinguishable from v1.4.0+14 in case of rollback.
+
+### Fixed
+- More Dynamic Type / layout overflow found across supplier screens at large-but-not-max accessibility text sizes: "Quick Start Stamps" / "Reusable QR (no expiry)" text and stepper counters (`supplier_issue_card.dart`, `supplier_onboarding.dart`, `supplier_stamp_card.dart`), REDEEMED/COMPLETE badges in narrow rotated bars (`customer_card_detail.dart`, `qr_display_screen.dart`), and Issued/Stamped/Redeemed stat columns clipping the rightmost counter (`supplier_home.dart`)
+- Mini-FAB camera control labels (Flip/90°/180°) upgraded from a smaller base font to `ScaleCapped`, since the smaller font alone still overflowed at large-but-not-max scale, across all 4 files that have these controls
+- Numbered-circle widgets that don't scale with their fixed-size container now use `ScaleCapped` (`how_it_works.dart` in both apps, `supplier_home.dart`, `clone_device_screen.dart`)
+- `import_business_screen.dart`: the "Confirm Business Restore" dialog now scrolls instead of clipping its bottom paragraph; the blue instructional banner over the scanner is scale-capped so it can't grow tall enough to cover the scan target
+- 3 `AlertDialog` titles now wrap instead of overflowing the dialog's narrower width (`import_business_screen.dart`, `recovery_backup_screen.dart`, `supplier_redeem_card.dart`)
+- `clone_device_screen.dart` "Expires in: ..." info box overflow
+
+### Changed
+- Renamed "Token Configuration" to "Stamp Setup" on the supplier stamp issuance screen
+
+## [1.4.0+14] - 2026-07-27
 
 **Status:** Built on `feature/uireview` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) to keep this distinguishable from v1.3.0+13 in case of rollback.
 

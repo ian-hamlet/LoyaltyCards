@@ -246,7 +246,13 @@ void main() {
 
       String previousHash = '';
       for (final stamp in token.initialStamps) {
-        final data = '${token.cardId}:${stamp.stampNumber}:${stamp.timestamp}:$previousHash';
+        final data = SignatureFormat.stampChainData(
+          cardId: token.cardId!,
+          stampNumber: stamp.stampNumber,
+          timestampMs: stamp.timestamp,
+          previousHash: previousHash,
+          stampCount: 1,
+        );
         final result = CryptoUtils.verifySignature(
           data: data,
           signatureBase64: stamp.signature,

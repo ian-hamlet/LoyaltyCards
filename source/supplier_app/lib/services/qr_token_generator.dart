@@ -34,7 +34,20 @@ class QRTokenGenerator {
 
       for (int i = 1; i <= initialStampCount; i++) {
         final stampTimestamp = timestamp + i; // Slight offset to ensure unique timestamps
-        final signatureData = '$cardId:$i:$stampTimestamp:$previousHash';
+        // Must match SignatureFormat.stampChainData exactly - this used to
+        // be a hand-rolled shorter string (same bug class as the additional-
+        // stamp fix elsewhere in this file's history), which matched the
+        // (also-wrong) receipt-time check in qr_scanner_screen.dart but not
+        // the canonical format crypto_utils.dart reconstructs at redemption
+        // time - any card issued with pre-applied stamps could never be
+        // redeemed.
+        final signatureData = SignatureFormat.stampChainData(
+          cardId: cardId,
+          stampNumber: i,
+          timestampMs: stampTimestamp,
+          previousHash: previousHash,
+          stampCount: 1,
+        );
         final signature = await _keyManager.signData(signatureData, privateKey);
         
         if (signature == null) {

@@ -231,7 +231,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         
         // Verify stamp signature (skip in simple mode) (CR-1.4)
         if (token.mode == OperationMode.secure) {
-          final signatureData = '$cardId:${initialStamp.stampNumber}:${initialStamp.timestamp}:$previousHash';
+          // Must match SignatureFormat.stampChainData exactly - see the
+          // matching comment in qr_token_generator.dart's signing side.
+          final signatureData = SignatureFormat.stampChainData(
+            cardId: cardId,
+            stampNumber: initialStamp.stampNumber,
+            timestampMs: initialStamp.timestamp,
+            previousHash: previousHash,
+            stampCount: 1,
+          );
           final verificationResult = KeyManager.verifySignature(
             signatureData,
             initialStamp.signature,

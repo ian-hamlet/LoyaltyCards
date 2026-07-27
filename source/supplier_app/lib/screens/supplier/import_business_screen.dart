@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
+import '../../services/biometric_auth_service.dart';
 import '../../utils/error_message_mapper.dart';
 import 'supplier_home.dart';
 import 'package:pointycastle/ecc/api.dart';
@@ -25,6 +26,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
   final MobileScannerController _scannerController = MobileScannerController();
   final BusinessRepository _businessRepo = BusinessRepository();
   final KeyManager _keyManager = KeyManager();
+  final BiometricAuthService _biometricAuth = BiometricAuthService();
   
   bool _isProcessing = false;
   bool _scanCompleted = false; // Track if scan succeeded to prevent multiple scans
@@ -170,6 +172,40 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
           await _scannerController.start();
         } catch (e) {
           AppLogger.warning('Error restarting camera after cancelled import: $e', 'Import');
+        }
+        return;
+      }
+
+      // Step 5.5: Require device authentication before committing the
+      // import. This installs a new private key onto the device - without
+      // this, anyone with physical access to an idle, unconfigured device
+      // sitting on this screen could scan their own backup QR and tap
+      // through the confirmation dialog to hijack it, since a dialog tap
+      // alone doesn't prove it's the device owner acting.
+      final biometricAvailable = await _biometricAuth.isAvailable();
+      if (!biometricAvailable) {
+        AppLogger.warning('Biometric authentication not available - blocking import', 'Import');
+        if (!mounted) return;
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'Device authentication (Face ID, Touch ID, or passcode) is required to restore a business, but isn\'t available on this device.';
+        });
+        return;
+      }
+
+      final authResult = await _biometricAuth.authenticate(
+        reason: 'Authenticate to restore ${business.name}',
+      );
+      if (!mounted) return;
+      if (!authResult.isSuccess) {
+        AppLogger.warning('Authentication failed at import step: ${authResult.status}', 'Import');
+        setState(() {
+          _isProcessing = false;
+        });
+        try {
+          await _scannerController.start();
+        } catch (e) {
+          AppLogger.warning('Error restarting camera after failed auth: $e', 'Import');
         }
         return;
       }

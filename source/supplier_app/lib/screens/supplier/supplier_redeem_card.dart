@@ -29,6 +29,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   bool _isLoading = true;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
+  // Without this, onDetect fires on every camera frame that decodes the
+  // still-in-view QR code - resetting _isProcessing immediately on error
+  // let the same code get reprocessed and rejected several times in a row
+  // while the camera was still being aimed, showing the same error repeatedly.
+  DateTime? _cooldownUntil;
+  static const Duration _errorCooldownDuration = Duration(seconds: 2);
+
   @override
   void initState() {
     super.initState();
@@ -245,6 +252,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                         errorBuilder: (context, error) => ScannerPermissionErrorView(error: error),
                         onDetect: (capture) {
                           if (_isProcessing) return;
+                          if (_cooldownUntil != null && DateTime.now().isBefore(_cooldownUntil!)) return;
                     
                     final List<Barcode> barcodes = capture.barcodes;
                     for (final barcode in barcodes) {
@@ -762,6 +770,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     Haptics.error();
     setState(() {
       _isProcessing = false;
+      _cooldownUntil = DateTime.now().add(_errorCooldownDuration);
     });
 
     AppFeedback.error(context, message);

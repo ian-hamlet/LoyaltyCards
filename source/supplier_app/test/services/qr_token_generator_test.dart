@@ -134,7 +134,13 @@ void main() {
       // its own chain data - main stamp signature is stamp 1's previousHash.
       String previousHash = token.signature;
       for (final additional in token.additionalStamps) {
-        final data = '${token.cardId}:${additional.stampNumber}:${additional.timestamp}:$previousHash';
+        final data = SignatureFormat.stampChainData(
+          cardId: token.cardId,
+          stampNumber: additional.stampNumber,
+          timestampMs: additional.timestamp,
+          previousHash: previousHash,
+          stampCount: 1,
+        );
         final result = CryptoUtils.verifySignature(
           data: data,
           signatureBase64: additional.signature,

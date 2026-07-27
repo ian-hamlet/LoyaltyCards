@@ -102,10 +102,12 @@ class HowItWorks extends StatelessWidget {
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          'Your Privacy Protected',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            'Your Privacy Protected',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],

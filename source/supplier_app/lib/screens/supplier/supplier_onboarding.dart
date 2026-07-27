@@ -188,11 +188,13 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 // Stamps Required
                 Row(
                   children: [
-                    const Text(
-                      'Stamps Required',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    const Expanded(
+                      child: Text(
+                        'Stamps Required',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -260,11 +262,13 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 // Operation Mode Selection
                 Row(
                   children: [
-                    const Text(
-                      'Operation Mode',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    const Expanded(
+                      child: Text(
+                        'Operation Mode',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),

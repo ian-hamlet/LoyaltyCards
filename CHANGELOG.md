@@ -7,9 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.5.0+15] - 2026-07-27 - CURRENT
+## [1.6.0+17] - 2026-07-27 - CURRENT
 
-**Status:** Built on `feature/uireview` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) to keep this distinguishable from v1.4.0+14 in case of rollback.
+**Status:** Built on `feature/uireview` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Build-only bump (same 1.6.0 feature set as +16).
+
+### Added
+- Require device authentication (Face ID/Touch ID/passcode) before an `import_business_screen.dart` restore actually commits - previously only a tap-through confirmation dialog stood between an idle, unconfigured device and having a scanned backup/clone QR silently installed as its business identity. Covers both the recovery-backup and clone-QR flows, since they share the same import code path.
+
+## [1.6.0+16] - 2026-07-27
+
+**Status:** Built on `feature/uireview` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) to keep this distinguishable from v1.5.0+15 in case of rollback.
+
+### Fixed
+- Customer app: `AppLockWrapper`'s app-lock preference was only refreshed at cold launch or while already locked - toggling app lock ON in Settings mid-session (while already authenticated) never re-locked on the next background/foreground until the app was fully killed and relaunched. Now re-reads the preference fresh on every background.
+- `customer_card_detail.dart`: "N of N stamps" badge (shown once a card is complete/redeemed) overflowing at large-but-not-max accessibility text sizes
+- `supplier_home.dart`: Issued/Stamped/Redeemed stat labels wrapping mid-word ("Stamp/ed", "Redee/med") at large text sizes, throwing the numbers above them out of alignment since the columns became different heights - labels now scale-capped, keeping them single-line and the columns equal height
+- `supplier_home.dart`: dropped the redundant period after step numbers in the info panel ("1." → "1"), and scale-capped the title/description text so it stays proportional to the fixed-size number circle beside it at large text sizes
+
+### Added
+- Optional app-wide biometric lock for the supplier app, matching the customer app - previously it only gated individual actions (viewing backup/clone QR codes) with no app-wide lock option at all. New `AppLockWrapper` in `main.dart`, new Security section in `supplier_settings.dart`, with the fresh-read-on-background fix applied from the start
 
 ### Fixed
 - More Dynamic Type / layout overflow found across supplier screens at large-but-not-max accessibility text sizes: "Quick Start Stamps" / "Reusable QR (no expiry)" text and stepper counters (`supplier_issue_card.dart`, `supplier_onboarding.dart`, `supplier_stamp_card.dart`), REDEEMED/COMPLETE badges in narrow rotated bars (`customer_card_detail.dart`, `qr_display_screen.dart`), and Issued/Stamped/Redeemed stat columns clipping the rightmost counter (`supplier_home.dart`)

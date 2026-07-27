@@ -324,5 +324,43 @@
 ///   issuance screen
 /// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
 
+/// Version 1.6.0 - Supplier App-Wide Lock, Card-List Alignment Fixes
+///
+/// Build 16 Changes:
+/// - Fix customer app: AppLockWrapper's app-lock preference was only
+///   refreshed at cold launch or while already locked - toggling app lock
+///   ON in Settings mid-session (while already authenticated) never
+///   re-locked on the next background/foreground until the app was fully
+///   killed and relaunched. Now re-reads the preference fresh on every
+///   background.
+/// - Add the same optional app-wide biometric lock to the supplier app
+///   (previously it only gated individual actions like viewing backup/
+///   clone QR codes, with no app-wide lock option at all) - new
+///   AppLockWrapper in main.dart, new Security section in
+///   supplier_settings.dart, same fresh-read-on-background fix applied
+///   from the start
+/// - Fix customer_card_detail.dart: "N of N stamps" badge (shown once a
+///   card is complete/redeemed) overflowing at large-but-not-max
+///   accessibility text sizes
+/// - Fix supplier_home.dart: Issued/Stamped/Redeemed stat labels wrapping
+///   mid-word ("Stamp/ed", "Redee/med") at large text sizes, throwing the
+///   numbers above them out of alignment since the columns became
+///   different heights: labels now scale-capped, which keeps them
+///   single-line and the columns equal height
+/// - Fix supplier_home.dart: dropped the redundant period after step
+///   numbers in the info panel ("1." -> "1"), and scale-capped the
+///   title/description text so it stays proportional to the fixed-size
+///   number circle beside it at large text sizes
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
+/// Build 17 Changes:
+/// - Require device authentication (Face ID/Touch ID/passcode) before an
+///   import_business_screen.dart restore actually commits - previously
+///   only a tap-through confirmation dialog stood between an idle,
+///   unconfigured device and having a scanned backup/clone QR silently
+///   installed as its business identity. Covers both the recovery-backup
+///   and clone-QR flows, since they share the same import code path.
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '1.5.0+15';
+const String appVersion = '1.6.0+17';

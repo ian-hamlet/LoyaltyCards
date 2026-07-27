@@ -273,5 +273,27 @@
 /// - Add haptic feedback on QR scan success/failure
 /// - Test Coverage: shared 152, customer_app 124, supplier_app 66 - all passing
 
+/// Version 1.4.0 - Secure Mode Redemption Integrity Fixes
+///
+/// Build 14 Changes:
+/// - Fix Secure Mode redemption always failing for a card that ever
+///   received an overflow-split stamp from another card completing -
+///   the moved stamp's signature covered its original position, not its
+///   new one, so redemption verification always rejected it
+/// - Add original_card_id/original_stamp_number/original_previous_hash
+///   columns (DB v7->v8 migration) recording a moved stamp's true
+///   signing context, populated only by internal move logic
+/// - Fix Secure Mode multi-stamp grants ("additional stamps") signed with
+///   a shorter, non-canonical string that always failed redemption
+///   verification even though accepted fine when first scanned
+/// - Fix a card being auto-completed overwriting its own just-applied
+///   completed stamp count back to its stale pre-scan value when no
+///   other card genuinely had space (findCardWithSpace matched itself)
+/// - Route QR validation error messages through the existing
+///   ErrorMessageMapper instead of showing raw technical strings
+/// - Add scan-error cooldown to the supplier redemption scanner to stop
+///   repeated error popups from one scan attempt while aiming the camera
+/// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '1.3.0+13';
+const String appVersion = '1.4.0+14';

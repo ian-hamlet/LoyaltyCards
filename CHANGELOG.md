@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.3.0+13] - 2026-07-26 - CURRENT
+## [1.4.0+14] - 2026-07-27 - CURRENT
+
+**Status:** Built on `feature/uireview` (not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) to keep this distinguishable from v1.3.0+13 in case of rollback.
+
+### Fixed
+- Secure Mode redemption always failing for a card that ever received an overflow-split stamp from another card completing - the moved stamp's signature covered its original position, not its new one, so redemption verification always rejected it. Added `original_card_id`/`original_stamp_number`/`original_previous_hash` columns (DB v7→v8 migration) recording a moved stamp's true signing context, populated only by internal move logic - never from anything a scanned QR token or user action controls
+- Secure Mode multi-stamp grants ("additional stamps") signed with a shorter, non-canonical string that always failed redemption verification even though accepted fine when first scanned - now uses the same canonical `SignatureFormat` as every other signing/verification call site
+- A card being auto-completed overwriting its own just-applied completed stamp count back to its stale pre-scan value when no other card genuinely had space (`findCardWithSpace` matched itself, since the card still shows space at query time before its completion update lands)
+- QR validation error messages now route through the existing `ErrorMessageMapper` instead of showing raw technical strings like "Invalid signature: signature_mismatch" directly to the user
+- Repeated error popups from a single scan attempt on the supplier redemption scanner while the camera was still being aimed - added the same scan-error cooldown the customer scanner already had
+
+## [1.3.0+13] - 2026-07-26
 
 **Status:** Built on `feature/uireview` (forked from `feature/SecurityReview`, not yet merged to `develop`/`main`), not yet built/uploaded as an IPA. Minor version bump (not patch) to keep this distinguishable from v1.1.0+12 in case of rollback.
 

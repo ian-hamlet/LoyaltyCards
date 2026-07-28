@@ -380,5 +380,31 @@
 ///   this ships.
 /// - Test Coverage: shared 156, customer_app 124, supplier_app 66 - all passing
 
+/// Build 19 Changes:
+/// - Fix Express Mode "add card" QR rejecting a repeat customer entirely:
+///   once a card was redeemed, re-scanning the same static QR to start a
+///   new loyalty cycle was blocked forever ("Card has already been
+///   scanned"), since the dedup check didn't distinguish an active card
+///   from a redeemed one. Now only blocks re-scanning while the existing
+///   card is still active.
+/// - If that QR also grants initial/welcome stamps, those signatures are
+///   bound to the QR's fixed cardId, not the new card's fresh id on a
+///   repeat cycle - now correctly carried over using the same
+///   originalCardId/originalStampNumber/originalPreviousHash mechanism
+///   built for overflow-moved stamps, rather than being dropped.
+/// - Closed a critical redemption-inflation gap in Secure Mode chain
+///   verification (duplicate/replayed proof signatures, and an unused
+///   proof-count check), and a third instance of the additional-stamp
+///   signing-format bug (this time for initial stamps) - both found via a
+///   multi-role security/fraud/UI/code-quality review pass.
+/// - Fixed 2 more Dynamic Type overflow spots the earlier sweep missed,
+///   removed an accessibility-harming ScaleCapped misapplication on
+///   primary instructional text, and added real v7->v8 DB migration test
+///   coverage.
+/// - Delete-card confirmation now warns explicitly when the card has
+///   stamps collected or is complete and ready to redeem, instead of a
+///   generic message regardless of what's actually at stake.
+/// - Test Coverage: shared 158, customer_app 125, supplier_app 66 - all passing
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.0+18';
+const String appVersion = '2.0.0+19';

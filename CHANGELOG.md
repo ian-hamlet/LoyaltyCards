@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.0+18] - 2026-07-27 - CURRENT
+## [2.0.0+19] - 2026-07-28 - CURRENT
+
+**Status:** Built on `develop`, not yet built/uploaded as an IPA. Build-only bump (same 2.0.0 line as +18).
+
+### Fixed
+- Express Mode "add card" QR rejecting a repeat customer entirely: once a card was redeemed, re-scanning the same static QR to start a new loyalty cycle was blocked forever ("Card has already been scanned"), since the dedup check didn't distinguish an active card from a redeemed one. Now only blocks re-scanning while the existing card is still active.
+- If that QR also grants initial/welcome stamps, those signatures are bound to the QR's fixed cardId, not the new card's fresh id on a repeat cycle - now correctly carried over using the same `originalCardId`/`originalStampNumber`/`originalPreviousHash` mechanism built for overflow-moved stamps, rather than being dropped.
+- Closed a critical redemption-inflation gap in Secure Mode chain verification (duplicate/replayed proof signatures, and an unused proof-count check), and a third instance of the additional-stamp signing-format bug (this time for initial stamps) - both found via a multi-role security/fraud/UI/code-quality review pass.
+- 2 more Dynamic Type overflow spots the earlier sweep missed, and an accessibility-harming `ScaleCapped` misapplication on primary instructional text.
+- Delete-card confirmation now warns explicitly when the card has stamps collected or is complete and ready to redeem, instead of a generic message regardless of what's actually at stake.
+
+### Added
+- Real v7→v8 DB migration test coverage (previously only fresh-create was tested).
+
+### Documentation
+- Recorded the accepted-risk decision on the rate-limiter's device-clock manipulation angle in `docs/quality/VULNERABILITIES.md` (V-015 addendum) - not significant given Express Mode's framing as a paper-card equivalent, no further mitigation planned.
+
+## [2.0.0+18] - 2026-07-27
 
 **Status:** Built on `develop` (merged from `feature/uireview`), not yet built/uploaded as an IPA. Major version bump.
 

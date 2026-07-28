@@ -806,7 +806,7 @@ packages:
       path: "../shared"
       relative: true
     source: path
-    version: "2.0.0+18"
+    version: "2.0.0+19"
   shared_preferences:
     dependency: "direct main"
     description:

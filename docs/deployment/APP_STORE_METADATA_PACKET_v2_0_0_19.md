@@ -1,5 +1,7 @@
 # App Store Metadata Packet (v2.0.0+19)
 
+**Status: SUBMITTED FOR REVIEW 2026-07-28.** Both apps were submitted to App Store Connect at version 2.0.0, build 19, using the content below (the shortened descriptions, not the original longer draft this file started with). This is now a record of what was actually submitted, not just a draft.
+
 Use this file as copy/paste source for App Store Connect listing fields.
 
 **Supersedes:** `APP_STORE_METADATA_PACKET_v1_0_2_8.md`. Changes from that version: renamed "Simple Mode" to "Express Mode" throughout (the app itself was renamed earlier and this packet was missed), expanded both descriptions with a clearer explanation of why there are two apps and a compact real-world example per operation mode (previously the mode explanation was a single line with no context for why you'd pick one over the other), and set the Marketing URL to the new About page. Pricing/copyright/phone/age-rating decisions carried forward unchanged from the prior packet.
@@ -49,7 +51,6 @@ WHY LOYALTYCARDS?
 - Complete Privacy - No email, no phone number, no tracking
 - Works Offline - No internet connection required
 - Secure by Design - Cryptographically verified stamps prevent fraud
-- Always Available - Your loyalty cards never leave home
 
 HOW IT WORKS
 
@@ -60,31 +61,17 @@ HOW IT WORKS
 
 TWO APPS, ONE SYSTEM
 
-LoyaltyCards is one half of a pair: this app is your wallet, and businesses use a separate companion app (LoyaltyCards Business) to issue and manage cards. There's no shared server connecting them - your phone and the business's device talk directly through the QR code you scan, and nothing is sent anywhere else. You only ever need this app; the business handles the other side.
+LoyaltyCards is your wallet. Businesses use a separate app, LoyaltyCards Business, to issue and manage cards - no shared server, no account, just a QR code scanned directly between your phone and theirs.
 
-EXPRESS OR SECURE - THE BUSINESS DECIDES
-
-Each business chooses how their card works:
-- Express Mode: scan a printed QR code yourself, stamp added in about 2 seconds. Fast and self-service, like a physical punch card.
-- Secure Mode: the business generates a fresh, cryptographically signed QR code for each stamp from their own device. Slightly slower, but every stamp is provably genuine.
-
-Example: your regular coffee shop might use Express Mode for a $5 coffee reward, while a spa offering a $200 service uses Secure Mode - you'll see both kinds of cards side by side in the same wallet, with no setup required on your end either way.
-
-PERFECT FOR
-
-- Coffee shops and cafes
-- Restaurants and food trucks
-- Retail stores and boutiques
-- Salons and spas
-- Any business offering loyalty rewards
+Some businesses use Express Mode (instant, self-scan) and others use Secure Mode (cryptographically signed, business validates each stamp) - you'll see both in your wallet, with no setup needed on your end either way.
 
 PRIVACY FIRST
 
-We don't collect your personal information. Period. No email, no phone number, no account creation, no tracking, no data sharing. Your loyalty cards stay on your device.
+No email, no phone number, no account, no tracking. Your loyalty cards stay on your device.
 
-SMALL BUSINESS FRIENDLY
+PERFECT FOR
 
-Works perfectly with our companion app, LoyaltyCards Business, designed for small businesses who want to run loyalty programs without expensive systems or monthly fees.
+Coffee shops, restaurants, retail stores, salons, spas, and any business offering loyalty rewards.
 
 Download LoyaltyCards today and start earning rewards.
 
@@ -122,57 +109,29 @@ WHY LOYALTYCARDS BUSINESS?
 - No Customer Data Collection - Privacy-first design
 - Works Offline - No internet connection required
 - Multi-Device Support - Use on multiple iPads/iPhones
-- Setup in 60 Seconds - Start issuing cards immediately
 
 TWO APPS, ONE SYSTEM
 
-This app is the business side of a pair: you use it to issue and manage loyalty cards, and your customers use a separate, free companion app (LoyaltyCards) to hold them. There's no shared server or account linking the two - each customer's card is created directly on their phone when they scan a QR code you show them, and stamps are added the same way on every visit. You never see personal information, because none is ever collected.
+You issue and manage cards here; customers hold them in a separate, free companion app (LoyaltyCards). No shared server or account - each card is created and stamped directly on the customer's phone via QR code.
 
 CHOOSE YOUR MODE
 
-- Express Mode: print a reusable QR code once, customers self-serve. Fastest option (about 2 seconds per stamp), no equipment needed beyond a printed code. A configurable cooldown (5-60 seconds) between stamps discourages casual abuse. Best for high-volume, lower-value rewards - think a coffee shop's "buy 10, get 1 free."
-- Secure Mode: generate a fresh, cryptographically signed QR code for every stamp from your own device. Slightly slower (5-10 seconds) and needs a phone or tablet at checkout, but every stamp is tamper-proof and redemption requires you to scan and validate the customer's card. Best for higher-value rewards where fraud resistance matters more than raw speed - a spa or boutique offering a $50-200 reward, for example.
+- Express Mode: print one reusable QR code, customers self-serve in about 2 seconds. Best for high-volume, lower-value rewards.
+- Secure Mode: generate a fresh, cryptographically signed QR code per stamp from your device. Slightly slower, but every stamp is tamper-proof. Best for higher-value rewards.
 
-Both modes work completely offline and cost nothing to run. You can't switch modes on an existing setup without a full reset, so it's worth choosing based on your typical reward value and how fast you need checkout to be.
-
-PERFECT FOR
-
-- Coffee shops and cafes
-- Restaurants and food trucks
-- Retail stores and boutiques
-- Salons and spas
-- Farmers markets and pop-ups
-- Any small business wanting loyal customers
-
-HOW IT WORKS
-
-1. Configure your stamp card (business name, stamps required)
-2. Show customers your QR code
-3. They scan with LoyaltyCards app (free download)
-4. Issue stamps each visit with one scan
-5. Scan their redemption QR when card is complete
+Both work fully offline. You can't switch modes later without a full reset, so choose based on your typical reward value.
 
 MULTI-DEVICE SUPPORT
 
-Run your loyalty program across multiple devices:
-- Backup your configuration with one QR scan
-- Clone to new devices (registers, iPads, staff phones)
-- All devices issue stamps for the same program
-
-SIMPLE COUNTERS, BY DESIGN
-
-Track the basics without invasive tracking:
-- Lifetime totals for cards issued, stamps given, and redemptions
-- No customer profiles, no behavior tracking, nothing to mine
-- Deliberately simple - because we never collect the customer data a fuller dashboard would require in the first place
+Back up your configuration with one QR scan and clone it to additional devices (registers, staff phones) - all issuing stamps for the same program.
 
 PRIVACY FOCUSED
 
-Unlike traditional loyalty systems, you don't collect customer emails, phone numbers, or personal information. Customers appreciate the privacy, and you avoid GDPR complexity.
+No customer emails, phone numbers, or personal data collected - ever.
 
-NO ONGOING COSTS
+PERFECT FOR
 
-Other loyalty systems often charge monthly subscriptions and setup fees. LoyaltyCards Business is completely free, with zero ongoing costs.
+Coffee shops, restaurants, retail stores, salons, spas, farmers markets, and any small business wanting loyal customers.
 
 Download LoyaltyCards Business and start building customer loyalty today.
 

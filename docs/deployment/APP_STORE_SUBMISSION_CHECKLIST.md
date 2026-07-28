@@ -1,14 +1,14 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v1.0.3+11**  
+**LoyaltyCards v2.0.0+19**  
 **Customer App:** LoyaltyCards - Digital Stamps  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** TBD  
-**Last Updated:** July 21, 2026
+**Target Release:** Submitted  
+**Last Updated:** July 28, 2026
 
-**Status note:** This app has only ever been distributed via TestFlight beta — no version has gone further. An earlier internal tracker (`APP_STORE_MATERIALS_EXECUTION_TRACKER.md`) recorded a submission for v1.0.1+7 that did not actually happen (the required legal/support URLs didn't exist yet at the time). Treat every box below as unchecked-until-verified in App Store Connect directly, regardless of what any other document claims.
+**Status note:** 🟢 **Both apps submitted for App Store review 2026-07-28**, version 2.0.0, build 19 (`releases/v2.0.0-build19`). This is the first submission beyond TestFlight for this project. Everything below has been updated to reflect what was actually entered into App Store Connect for this submission — treat any box still unchecked as a genuine open item, not an oversight.
 
-**Version history since v1.0.2+8** (the version most of this checklist's content was originally verified against): v1.0.2+8's first upload had an incorrect export compliance answer (see the Export Compliance section) and was superseded before submission; v1.0.2+9 was a build-number-only bump to dodge a Transporter conflict; v1.0.3+10 was a proper version bump, **built, uploaded to TestFlight, and confirmed running on physical hardware**; v1.0.3+11 (current) adds clearer Express-vs-Secure Mode guidance to supplier onboarding (see `supplier_onboarding.dart`): the mode selection radio tiles show `recommendedFor` text instead of a shorter description, a persistent always-visible warning explains the mode choice can't be changed without a full reset (and now points to the info icon / User Guide for more detail), and the tap-to-reveal info tooltip was expanded into a fuller side-by-side comparison (speed, equipment, fraud protection, recommended use case). **Built, uploaded to TestFlight, and confirmed running on 2 physical devices** 2026-07-21 (`releases/v1.0.3-build11`).
+**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 (current) fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below. **Built, uploaded, and submitted for App Store review** 2026-07-28.
 
 ---
 
@@ -16,11 +16,11 @@
 
 ### ✅ Code & Build Preparation
 
-- [x] **Final build number incremented** in pubspec.yaml (both apps) — `1.0.3+11`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
-- [x] **Version number confirmed** — v1.0.3+11 is the current `develop`/`main` version
-- [x] **All code merged to `main` branch** — committed and equalized, `main`/`develop` both at `5dcfeb5`
-- [x] **Release branch created** `releases/v1.0.3-build11` — created from `main` at `5dcfeb5`, pushed as a permanent snapshot
-- [x] **Archive builds completed** for v1.0.3+11 — built successfully
+- [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.0.0+19`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
+- [x] **Version number confirmed** — v2.0.0+19 is the current `develop`/`main` version
+- [x] **All code merged to `main` branch** — `main`/`develop` equalized at `02f82c7`
+- [x] **Release branch created** `releases/v2.0.0-build19` — created from `main` at `02f82c7`, pushed as a permanent snapshot
+- [x] **Archive builds completed** for v2.0.0+19
   ```bash
   cd source/customer_app
   flutter clean && flutter pub get
@@ -31,11 +31,11 @@
   flutter build ipa --release
   ```
 - [x] **IPA files uploaded to App Store Connect** via Transporter — both apps uploaded
-- [ ] **Build processing complete** in App Store Connect (10-15 min wait) — confirm in ASC
-- [x] **All 264 automated tests passing** (131 shared + 87 customer + 46 supplier), verified 2026-07-21 against current `develop`/`main` — supersedes the "no build warnings" / "no compilation errors" items below as a stronger signal
-- [x] **`flutter analyze` clean** on the changed onboarding file — no errors, only pre-existing-pattern deprecation info notices
-- [x] **TestFlight beta testing completed for *this* build** — v1.0.3+11 built, uploaded to TestFlight, and confirmed running on 2 physical devices, 2026-07-21
-- [x] **Critical bugs resolved** (zero CRITICAL/HIGH defects open in `DEFECT_TRACKER.md`)
+- [x] **Build processing complete** in App Store Connect — build 19 selected and submitted for both apps
+- [x] **All automated tests passing** against current `develop`/`main` at the time of submission
+- [x] **`flutter analyze` clean**
+- [x] **Critical bugs resolved** (zero CRITICAL/HIGH defects open)
+- [x] **Submitted for App Store review** 2026-07-28 (both apps) — first submission beyond TestFlight
 
 ---
 
@@ -43,175 +43,30 @@
 
 #### Customer App: LoyaltyCards - Digital Stamps
 
-- [ ] **App Name:** LoyaltyCards - Digital Stamps (or "LoyaltyCards") — decided here, needs entering/confirming in ASC
-- [ ] **Bundle ID:** `com.ianhamlet.loyaltycards.customerApp` — should already be registered (TestFlight beta ran under this bundle ID), verify in ASC
-- [ ] **SKU:** `loyaltycards-customer-001`
-- [ ] **Primary Language:** English (US)
-- [ ] **Primary Category:** Lifestyle
-- [ ] **Secondary Category:** Shopping (optional)
-- [ ] **Content Rights:** Confirm you own or have licensed all content
+- [x] **App Name:** LoyaltyCards - Digital Stamps — confirmed in ASC
+- [x] **Bundle ID:** `com.ianhamlet.loyaltycards.customerApp` — registered, verified
+- [x] **SKU:** `loyaltycards-customer-001`
+- [x] **Primary Language:** English (US)
+- [x] **Primary Category:** Lifestyle
+- [x] **Secondary Category:** Shopping
+- [x] **Content Rights:** confirmed
 
 #### Supplier App: LoyaltyCards Business
 
-- [ ] **App Name:** LoyaltyCards Business — decided here, needs entering/confirming in ASC
-- [ ] **Bundle ID:** `com.ianhamlet.loyaltycards.supplierApp` — should already be registered (TestFlight beta ran under this bundle ID), verify in ASC
-- [ ] **SKU:** `loyaltycards-supplier-001`
-- [ ] **Primary Language:** English (US)
-- [ ] **Primary Category:** Business
-- [ ] **Secondary Category:** Productivity (optional)
-- [ ] **Content Rights:** Confirm you own or have licensed all content
+- [x] **App Name:** LoyaltyCards Business — confirmed in ASC
+- [x] **Bundle ID:** `com.ianhamlet.loyaltycards.supplierApp` — registered, verified
+- [x] **SKU:** `loyaltycards-supplier-001`
+- [x] **Primary Language:** English (US)
+- [x] **Primary Category:** Business
+- [x] **Secondary Category:** Productivity
+- [x] **Content Rights:** confirmed
 
 ---
 
 ### 📝 App Descriptions & Marketing
 
-#### Customer App Description (Max 4000 characters)
-
-**Subtitle (30 chars max):**
-```
-Collect stamps, earn rewards
-```
-
-**Promotional Text (170 chars, updatable without review):**
-```
-Digital loyalty cards for your favorite businesses. Collect stamps, earn rewards. No signup required. Fast, private, secure.
-```
-
-**Description:**
-```
-Transform your wallet with LoyaltyCards - the simplest way to collect stamps and earn rewards at your favorite local businesses.
-
-WHY LOYALTYCARDS?
-
-• Zero Signup - Scan a QR code and start collecting instantly
-• Complete Privacy - No email, no phone number, no tracking
-• Works Offline - No internet connection required
-• Secure by Design - Cryptographically verified stamps prevent fraud
-• Always Available - Your loyalty cards never leave home
-
-HOW IT WORKS
-
-1. Business shows you a QR code
-2. You scan it with LoyaltyCards
-3. Collect stamps each visit
-4. Get your reward when complete
-
-PERFECT FOR
-
-• Coffee shops and cafes
-• Restaurants and food trucks
-• Retail stores and boutiques
-• Salons and spas
-• Any business offering loyalty rewards
-
-PRIVACY FIRST
-
-We don't collect your personal information. Period. No email, no phone number, no account creation, no tracking, no data sharing. Your loyalty cards stay on your device.
-
-SIMPLE & SECURE MODES
-
-Choose how you collect stamps:
-• Simple Mode: Fast stamp collection (like physical cards)
-• Secure Mode: Cryptographically verified stamps (fraud-proof)
-
-SMALL BUSINESS FRIENDLY
-
-Works perfectly with our companion app, LoyaltyCards Business, designed for small businesses who want to run loyalty programs without expensive systems or monthly fees.
-
-Download LoyaltyCards today and start earning rewards!
-```
-
-**Keywords (100 chars max, comma-separated):**
-```
-loyalty,rewards,stamps,coffee,local business,qr code,privacy,offline,small business,punch card
-```
-
----
-
-#### Supplier App Description (Max 4000 characters)
-
-**Subtitle (30 chars max):**
-```
-Digital loyalty card system
-```
-
-**Promotional Text (170 chars):**
-```
-Run your loyalty program with zero monthly fees. Issue digital stamp cards to customers. Works offline. No customer data collection. Perfect for small businesses.
-```
-
-**Description:**
-```
-Transform your customer loyalty program with LoyaltyCards Business - the zero-cost alternative to expensive loyalty systems.
-
-WHY LOYALTYCARDS BUSINESS?
-
-• $0 Monthly Fees - No subscriptions, no hidden costs
-• No Customer Data Collection - Privacy-first design
-• Works Offline - No internet connection required
-• Multi-Device Support - Use on multiple iPads/iPhones
-• No Customer App Required* - Customers use free LoyaltyCards app
-• Setup in 60 Seconds - Start issuing cards immediately
-
-PERFECT FOR
-
-• Coffee shops and cafes
-• Restaurants and food trucks
-• Retail stores and boutiques
-• Salons and spas
-• Farmers markets and pop-ups
-• Any small business wanting loyal customers
-
-HOW IT WORKS
-
-1. Configure your stamp card (business name, stamps required)
-2. Show customers your QR code
-3. They scan with LoyaltyCards app (free download)
-4. Issue stamps each visit with one scan
-5. Scan their redemption QR when card is complete
-
-SIMPLE & SECURE MODES
-
-• Simple Mode: Fast stamp issuance (trust-based, like physical cards)
-• Secure Mode: Cryptographically signed stamps (fraud-proof digital signatures)
-
-MULTI-DEVICE SUPPORT
-
-Run your loyalty program across multiple devices:
-• Backup your configuration with one QR scan
-• Clone to new devices (registers, iPads, staff phones)
-• All devices issue stamps for the same program
-
-SIMPLE COUNTERS, BY DESIGN
-
-Track the basics without invasive tracking:
-• Lifetime totals for cards issued, stamps given, and redemptions
-• No customer profiles, no behavior tracking, nothing to mine
-• Deliberately simple - because we never collect the customer data a fuller dashboard would require in the first place
-
-PRIVACY FOCUSED
-
-Unlike traditional loyalty systems, you don't collect customer emails, phone numbers, or personal information. Customers appreciate the privacy, you avoid GDPR complexity.
-
-NO ONGOING COSTS
-
-Other loyalty systems charge:
-• $29-$199/month subscriptions
-• Per-transaction fees
-• Setup fees
-• Customer data storage fees
-
-LoyaltyCards Business: Completely free, zero ongoing costs.
-
-*Note: Customers need the free LoyaltyCards app to collect stamps.
-
-Download LoyaltyCards Business and start building customer loyalty today!
-```
-
-**Keywords (100 chars max):**
-```
-loyalty program,small business,coffee shop,rewards,stamps,qr code,point of sale,customer retention
-```
+- [x] **Subtitle, Promotional Text, Keywords, Description, App Review Notes** — see [`APP_STORE_METADATA_PACKET_v2_0_0_19.md`](APP_STORE_METADATA_PACKET_v2_0_0_19.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Entered into ASC and submitted 2026-07-28.
+- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps)
 
 ---
 
@@ -239,7 +94,7 @@ loyalty program,small business,coffee shop,rewards,stamps,qr code,point of sale,
 
 **Note (2026-07-20):** the original plan called for a "Business analytics dashboard" screenshot, but there is no dashboard screen — the app only shows 3 lifetime counters (Issued/Stamped/Redeemed) inline on the home screen header, and only in Secure Mode. Swapped for a second backup/clone screenshot instead, since that feature works in both modes and doesn't require a Secure Mode setup detour just for a screenshot. See `docs/deployment/SCREENSHOT_CAPTURE_PLAN_v1_0_2_8.md` for the corrected shot list.
 
-**All 10 screenshots captured, QA'd, and staged locally** in `screenshots/customer_app/` and `screenshots/supplier_app/` (2026-07-20) — not yet uploaded to App Store Connect.
+**All 10 screenshots captured, QA'd, and staged locally** in `screenshots/customer_app/` and `screenshots/supplier_app/` (2026-07-20), uploaded to App Store Connect and included in the 2026-07-28 submission.
 
 **iPad:** optional, only needed if the app targets iPad as a distinct experience — not currently planned, skip unless that changes.
 
@@ -270,7 +125,7 @@ Answers decided (all consistent with actual app content), still need entering in
 - [x] **Medical/Treatment Information:** None
 - [x] **Gambling:** None (loyalty stamps not considered gambling)
 - [x] **Horror/Fear Themes:** None
-- [ ] Entered into App Store Connect's actual questionnaire (both apps)
+- [x] Entered into App Store Connect's actual questionnaire (both apps)
 
 **Expected Rating:** 4+ (all ages)
 
@@ -286,18 +141,8 @@ Answers decided (all consistent with actual app content), still need entering in
   the App Store Compliance + Legal/Privacy reviews in
   [docs/quality/REVIEW_ROLES.md](../quality/REVIEW_ROLES.md)
 - [x] **GDPR compliant** (privacy-first design)
-- [ ] **⚠️ REMINDER — App Store Connect's App Privacy questionnaire was
-  already filled in (marked "Data Not Collected") before the above finding.**
-  It needs to be revisited for the **customer app** to declare **Device ID**
-  (Purpose: App Functionality/fraud prevention, Linked to identity: No, Used
-  for tracking: No) before the next submission — see the corrected suggested
-  answers in
-  [APP_REVIEW_PACKET_v1_0_2_8.md](APP_REVIEW_PACKET_v1_0_2_8.md#app-privacy-data-collection-suggested-answers).
-  The supplier app's answer is unaffected. **This is a manual App Store
-  Connect UI change — nothing in this repo can do it; it must be done by
-  hand in App Store Connect → App Privacy before the next build is
-  submitted.**
-- [ ] Paste this URL into App Store Connect (App Privacy section, both apps)
+- [x] **App Privacy questionnaire updated for the customer app** — declares **Device ID** (Purpose: App Functionality/fraud prevention, Linked to identity: No, Used for tracking: No), resulting label "Data Not Linked to You" instead of the stale "Data Not Collected". Supplier app's answer is unaffected ("Data Not Collected" remains accurate). Suggested answers were in [APP_REVIEW_PACKET_v1_0_2_8.md](APP_REVIEW_PACKET_v1_0_2_8.md#app-privacy-data-collection-suggested-answers).
+- [x] Privacy Policy URL entered in App Store Connect (App Privacy section, both apps)
 
 ---
 
@@ -308,7 +153,7 @@ Answers decided (all consistent with actual app content), still need entering in
 - [x] **Terms cover both customer and supplier use**
 - [x] **Fraud prevention disclaimers included**
 - [x] **Liability/data-integrity disclaimers strengthened** (2026-07-20) — explicit "not liable for user input errors or falsified data" language, and an explicit statement that suppliers (not LoyaltyCards) are responsible for verifying presented card/stamp data before issuing rewards, same standard as a paper card
-- [ ] Paste this URL into App Store Connect (both apps)
+- [x] Entered into App Store Connect (both apps)
 
 ---
 
@@ -316,13 +161,13 @@ Answers decided (all consistent with actual app content), still need entering in
 
 - [x] **Support URL:** live — https://ian-hamlet.github.io/LoyaltyCards/support/
 - [x] **Support contact method** — ian.hamlet@dotconnected.com; monitoring cadence still needs to be a real daily habit once live, not just documented
-- [ ] Paste this URL into App Store Connect (both apps)
+- [x] Entered into App Store Connect (both apps)
 
 ---
 
 #### Marketing URL
 
-- [ ] **Marketing URL:** Optional. Could point to https://ian-hamlet.github.io/LoyaltyCards/ (the new landing page) or be left blank — decide before submission
+- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` — the new About page explaining the two-app pairing and Express/Secure Mode with case studies. Entered into ASC for both apps.
 
 ---
 
@@ -344,8 +189,8 @@ Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`):
 **Incident (2026-07-21):** the manual App Store Connect encryption question was initially answered incorrectly ("No encryption") on the first upload of v1.0.2+8 — factually wrong given the ECDSA/SHA-256 usage above. Root cause: neither app's `Info.plist` declared `ITSAppUsesNonExemptEncryption`, so Xcode/Transporter prompted for a manual answer on every upload instead of self-declaring. **Fixed:** added `ITSAppUsesNonExemptEncryption = false` (the correct value, since the app's encryption qualifies for exemption) to both `Info.plist` files. This makes future uploads self-declare correctly with no manual prompt.
 
 - [x] **Info.plist fix applied** (both apps) — `ITSAppUsesNonExemptEncryption = false`
-- [ ] **Rebuild and re-upload both apps** so the corrected declaration actually applies to the uploaded build (the plist fix only affects builds compiled after the change — the already-uploaded build still carries the wrong answer until replaced)
-- [ ] **Export Compliance documentation** confirmed correct in App Store Connect (both apps) after re-upload
+- [x] **Rebuilt and uploaded both apps** at 2.0.0+19, well after the plist fix — self-declared correctly, no manual encryption prompt appeared on upload
+- [x] **Export Compliance documentation** confirmed correct in App Store Connect (both apps)
 
 ---
 
@@ -364,14 +209,14 @@ Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`):
 **Decided 2026-07-20:** both apps are Free. (Resolves the earlier conflict between `APP_STORE_MATERIALS_EXECUTION_TRACKER.md`, which recorded Free, and `V1_0_0_APP_STORE_LAUNCH_PLAN.md`, which had suggested a paid Supplier app — neither was ever actually set in App Store Connect. Marketing copy elsewhere in this document updated to match: "one-time purchase" language removed.)
 
 #### Customer App
-- [x] **Price:** Free (no In-App Purchases) — decided, not yet set in ASC
-- [ ] **Availability:** All countries/regions
-- [ ] **Release Date:** Automatic or manual release (choose one)
+- [x] **Price:** Free (no In-App Purchases) — set in ASC
+- [x] **Availability:** All countries/regions
+- [ ] **Release Date:** Automatic or manual release (choose one) — decide once review clears
 
 #### Supplier App
-- [x] **Price:** Free (no In-App Purchases) — decided, not yet set in ASC
-- [ ] **Availability:** All countries/regions
-- [ ] **Release Date:** Automatic or manual release
+- [x] **Price:** Free (no In-App Purchases) — set in ASC
+- [x] **Availability:** All countries/regions
+- [ ] **Release Date:** Automatic or manual release — decide once review clears
 
 ---
 
@@ -391,7 +236,7 @@ HOW TO TEST:
    - Business name: "Test Coffee Shop"
    - Stamps required: 5
    - Choose any color and icon
-   - Mode: Simple Mode (easier testing)
+   - Mode: Express Mode (easier testing)
    - Tap "Create Business"
 
 3. Issue a Card to Customer:
@@ -536,13 +381,13 @@ Please test both apps together following the demo instructions.
 
 ### 🚀 Submission Process
 
-1. [ ] **Upload build to App Store Connect** (via Transporter)
-2. [ ] **Select build** for Customer app submission
-3. [ ] **Select build** for Supplier app submission
-4. [ ] **Complete all required fields** in App Store Connect
-5. [ ] **Upload screenshots** for all required device sizes
-6. [ ] **Submit for review** (both apps simultaneously recommended)
-7. [ ] **Monitor review status** (typically 24-48 hours)
+1. [x] **Upload build to App Store Connect** (via Transporter)
+2. [x] **Select build** for Customer app submission — build 19
+3. [x] **Select build** for Supplier app submission — build 19
+4. [x] **Complete all required fields** in App Store Connect
+5. [x] **Upload screenshots** for all required device sizes
+6. [x] **Submit for review** — both apps submitted 2026-07-28
+7. [ ] **Monitor review status** (typically 24-48 hours) — in progress
 8. [ ] **Respond to App Review** if questions arise (24-hour response time)
 9. [ ] **Release approved apps** (manual or automatic)
 
@@ -595,15 +440,15 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 3. **Support:** https://ian-hamlet.github.io/LoyaltyCards/support/
    - Source: [docs/legal/SUPPORT_PAGE.md](../legal/SUPPORT_PAGE.md)
 4. **Accessibility Statement** (not an ASC field, linked from the site): https://ian-hamlet.github.io/LoyaltyCards/legal/accessibility-statement.html
-5. **Marketing (optional):** https://ian-hamlet.github.io/LoyaltyCards/ — decide whether to use this or leave blank
+5. **Marketing:** https://ian-hamlet.github.io/LoyaltyCards/user/about.html — in use, entered in ASC for both apps
 
 **Note:** the published HTML in `site/` was hand-converted from the Markdown sources above and is not auto-generated — any future edits to the Markdown need to be mirrored into the matching `site/**/*.html` file.
 
 ---
 
-**Document Status:** 🟢 v1.0.3+11 built, uploaded to TestFlight, release-branch-snapshotted (`releases/v1.0.3-build11`), and confirmed running on 2 physical devices. Legal/support infrastructure, all decisions (pricing: both apps Free, contact phone, copyright), and all 10 screenshots (captured, QA'd, staged locally) are done. What's left is mechanical: confirm App Store Connect processing is complete, enter the already-drafted metadata + screenshots into ASC, and submit for review.  
+**Document Status:** 🟢 **v2.0.0+19 submitted for App Store review 2026-07-28** (both apps), release-branch-snapshotted (`releases/v2.0.0-build19`). Legal/support infrastructure, all decisions, all metadata (subtitle/promo/keywords/description/marketing URL/review notes), the customer app's App Privacy Device ID update, Export Compliance, and all 10 screenshots are entered into App Store Connect. What's left is waiting on Apple's review (typically 24-48 hours) and responding if reviewer questions arise.  
 **Maintained by:** Development Team  
-**Last Updated:** July 20, 2026
+**Last Updated:** July 28, 2026
 
 ---
 

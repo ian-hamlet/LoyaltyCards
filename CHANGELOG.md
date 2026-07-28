@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0+19] - 2026-07-28 - CURRENT
 
-**Status:** Built on `develop`, not yet built/uploaded as an IPA. Build-only bump (same 2.0.0 line as +18).
+**Status:** Built, uploaded, and **submitted for App Store review 2026-07-28** (both apps). Release branch `releases/v2.0.0-build19`. First submission beyond TestFlight for this project.
 
 ### Fixed
 - Express Mode "add card" QR rejecting a repeat customer entirely: once a card was redeemed, re-scanning the same static QR to start a new loyalty cycle was blocked forever ("Card has already been scanned"), since the dedup check didn't distinguish an active card from a redeemed one. Now only blocks re-scanning while the existing card is still active.
@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 - Recorded the accepted-risk decision on the rate-limiter's device-clock manipulation angle in `docs/quality/VULNERABILITIES.md` (V-015 addendum) - not significant given Express Mode's framing as a paper-card equivalent, no further mitigation planned.
+- De-staled `docs/user/ABOUT_LOYALTYCARDS.md` (Express Mode rename, corrected rate-limit claim, dropped pilot/invitation-only framing) and published a new public page, `site/user/about.html`, explaining the two-app pairing and Express vs Secure Mode with case studies.
+- Replaced the stale v1.0.2+8 App Store metadata packet with `APP_STORE_METADATA_PACKET_v2_0_0_19.md` - same Express Mode rename, plus a "Two Apps, One System" section and case study in each app's description (later shortened for readability before submission), and the App Privacy questionnaire update needed for the customer app's Secure Mode device-ID signal.
 
 ## [2.0.0+18] - 2026-07-27
 

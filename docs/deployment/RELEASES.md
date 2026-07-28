@@ -17,6 +17,25 @@ Examples:
 
 ## Current Releases
 
+### v2.0.0+19 - Build 19 (🟢 Submitted for App Store Review)
+- **Date:** July 28, 2026
+- **Platform:** App Store Connect — first submission beyond TestFlight
+- **Branch:** main, develop, `releases/v2.0.0-build19`
+- **Version:** 2.0.0+19
+- **Status:** 🟢 SUBMITTED — awaiting Apple review
+- **Focus:** Security/fraud fixes surfaced by a multi-role review pass, plus App Store readiness (metadata, public site, App Privacy disclosure)
+- **Major Changes:**
+  - **Breaking (v2.0.0+18):** QR token format changed (new signed fields from the security review) — pre-review printed QR codes fail signature verification against the new signed data. Acceptable since the app has never had real-world users.
+  - Closed a critical redemption-inflation gap in Secure Mode chain verification (duplicate/replayed proof signatures, unused proof-count check) and a third instance of the additional-stamp signing-format bug
+  - Fixed Express Mode repeat-customer lockout: re-scanning a supplier's QR after a card was redeemed was blocked forever; also fixed pre-applied "welcome stamps" being silently dropped on that repeat cycle
+  - Renamed "Simple Mode" to "Express Mode" across all user-facing copy (in-app, docs, App Store metadata)
+- **App Store Connect for this submission:**
+  - Metadata (subtitle/promo text/keywords/description/App Review Notes) from `APP_STORE_METADATA_PACKET_v2_0_0_19.md`
+  - Marketing URL set to the new `site/user/about.html` (two-app pairing + Express/Secure Mode explainer with case studies)
+  - Customer app's App Privacy questionnaire updated to declare Device ID (Secure Mode redemption fraud-prevention signal) — supplier app unaffected
+  - `Info.plist` `ITSAppUsesNonExemptEncryption` fix confirmed self-declaring correctly on this upload
+- **Next Steps:** Monitor App Store review (typically 24-48 hours), respond to reviewer questions if any arise
+
 ### v1.0.1+7 - Build 7 (🟡 Release Candidate)
 - **Date:** June 11, 2026
 - **Platform:** App Store Submission Candidate

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About LoyaltyCards</title>
+<meta name="description" content="What LoyaltyCards is, how the Customer and Business apps work together, and when to choose Express Mode vs Secure Mode — with real-world examples.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.25rem; margin-top: 2.4em; border-top: 1px solid var(--border); padding-top: 1em; }
+  h3 { font-size: 1.05rem; margin-top: 1.6em; }
+  h4 { font-size: 0.98rem; margin-top: 1.2em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.02em; }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+  ul, ol { padding-left: 1.3em; }
+  li { margin: 0.3em 0; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin: 1.2em 0; }
+  a { color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.9rem; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
+  th { background: var(--card); }
+  .qa { background: var(--card); border-radius: 8px; padding: 10px 14px; margin: 0.6em 0; }
+  .qa strong { display: block; margin-bottom: 4px; }
+  .case { border-left: 3px solid var(--accent); padding-left: 14px; margin: 1.2em 0; }
+  .case h4 { color: var(--fg); text-transform: none; letter-spacing: normal; font-weight: 700; margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>About LoyaltyCards</h1>
+  <p class="meta">A Privacy-First Digital Loyalty Card System &nbsp;&middot;&nbsp; Version 2.0.0+19 &nbsp;&middot;&nbsp; Last Updated: July 28, 2026</p>
+
+  <p>LoyaltyCards is a digital stamp card system that replaces the paper punch card, without collecting anything about you. It's <strong>two apps working together</strong>: the <strong>Customer app</strong> is your digital wallet of loyalty cards, and the <strong>Business app</strong> is what a shop uses to issue and manage them. There's no server connecting them &mdash; they talk directly to each other via QR code, on the spot, and nothing leaves either device.</p>
+
+  <div class="callout"><strong>Why two apps?</strong> Separating "my cards" from "run my business" keeps each app simple and keeps a customer's wallet independent of any single business staying online, staying in business, or keeping a database intact. Your cards live on your phone; a business's signing keys live on theirs. Neither depends on a company's servers, because there aren't any.</div>
+
+  <h2>Two Operation Modes</h2>
+  <p>Every business picks one mode when they set up &mdash; it's a trade-off between speed and cryptographic proof, and the right choice depends on the reward value and how well a business trusts its regulars.</p>
+
+  <h3>Express Mode &mdash; trust-based, like a physical card</h3>
+  <p>The business displays a static, reusable QR code at checkout. Customers scan it themselves to add a stamp &mdash; no staff interaction needed. It's fast (about 2 seconds) and needs no hardware beyond a printed code, but it's honor-based: a determined customer could scan repeatedly. Each business sets a cooldown between stamps (5&ndash;60 seconds, 30 by default) to discourage casual abuse, though that's enforced locally on the customer's phone, not cryptographically.</p>
+
+  <div class="case">
+    <h4>Joe's Coffee Shop &mdash; Express Mode</h4>
+    <p>Joe prints two QR codes and tapes them to the register: "Get Loyalty Card" and "Add Your Stamp." Sarah, a regular, scans the first on her first visit and the card appears in her wallet instantly. Every visit after that, she scans "Add Your Stamp" &mdash; total time, about 2 seconds. On her 10th visit her card is complete; she scans "Redeem Your Reward," gets her free coffee, and a fresh card is created automatically. It works because Sarah is a regular who values the reward and won't bother gaming a $5 coffee, and speed matters to Joe during the morning rush.</p>
+  </div>
+
+  <h3>Secure Mode &mdash; cryptographically signed</h3>
+  <p>The business generates a fresh, time-limited QR code (valid 1&ndash;2 minutes) from their own device for every stamp. Each one is signed with the business's private key and chained to the previous stamp, so it can't be forged or replayed. Redemption requires the business to scan the customer's completed card and validate the whole chain. It's slower (5&ndash;10 seconds) and needs a device at checkout, but nothing about it depends on trusting the customer.</p>
+
+  <div class="case">
+    <h4>Maria's Luxury Spa &mdash; Secure Mode</h4>
+    <p>Maria keeps an iPad at reception. On Lisa's first $200 massage, Maria issues a card from the iPad and Lisa scans the QR it displays. Every visit after, Maria taps "Add Stamp," a time-limited QR appears, and Lisa scans it &mdash; each stamp is cryptographically signed. On Lisa's 5th visit, Maria taps "Redeem Card," scans Lisa's completed card, the whole signature chain is validated, and Lisa gets her free massage. A $200 reward justifies the extra few seconds, and Maria gets a genuine audit trail for her books.</p>
+  </div>
+
+  <h3>Comparing the modes</h3>
+  <table>
+    <tr><th>Feature</th><th>Express Mode</th><th>Secure Mode</th></tr>
+    <tr><td>Speed</td><td>~2 seconds</td><td>5&ndash;10 seconds</td></tr>
+    <tr><td>Hardware</td><td>Printed QR only</td><td>Phone/tablet required</td></tr>
+    <tr><td>Fraud prevention</td><td>Scan cooldown (5&ndash;60s)</td><td>Cryptographic signatures</td></tr>
+    <tr><td>Redemption</td><td>Self-service</td><td>Business scans and validates</td></tr>
+    <tr><td>QR expiry</td><td>Never (print once)</td><td>1&ndash;2 minutes</td></tr>
+    <tr><td>Best for</td><td>Low-value, high-trust, high-volume</td><td>Higher-value, any trust level</td></tr>
+  </table>
+
+  <h2>More Examples</h2>
+  <p>A few more scenarios that show how the choice usually plays out in practice:</p>
+  <ul>
+    <li><strong>Coffee shop chain (Express):</strong> 3 locations, 500 customers/day, $5 reward &mdash; speed during the morning rush matters more than proof, and regulars are trustworthy at that value.</li>
+    <li><strong>Boutique clothing store (Secure):</strong> 20&ndash;30 customers/day, $50 reward &mdash; low volume means the extra few seconds don't matter, and the higher value justifies an audit trail.</li>
+    <li><strong>University food court, mixed modes:</strong> a burger stand and a coffee kiosk run Express for speed on low-value rewards; a sushi counter runs Secure because its reward is worth more. Each vendor picks independently &mdash; a customer just sees all their cards in one wallet.</li>
+    <li><strong>Salon or spa (Secure):</strong> variable stamps per service (a color might be worth more stamps than a trim), appointment-based rather than rush, so the extra validation time is a non-issue.</li>
+    <li><strong>Community co-op (Express):</strong> a trust-based membership culture with no fraud history &mdash; Express Mode's honor system fits how the community already operates.</li>
+  </ul>
+
+  <h2>Privacy, By Design</h2>
+  <p>Neither app asks for a name, email, phone number, or account. There's nothing to sign up for and nothing to log into. Cards live in a local database on the customer's phone; a business's configuration and signing keys live on theirs. Nothing is sent to us, because there's no "us" to send it to &mdash; there's no backend at all. See the full <a href="../legal/privacy-policy.html">Privacy Policy</a> for details.</p>
+
+  <h2>Backing Up a Business</h2>
+  <p>A business's signing keys are what make every customer's card valid &mdash; losing a device without a backup means starting over. The Business app supports backing up (print, email, or save to Files) and restoring to a new device, plus cloning to a second device (like a manager's iPad and a till) that shares the same identity. Full detail is in the <a href="supplier-setup-guide.html">Supplier Setup Guide</a>.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="qa"><strong>Is my data safe?</strong>There's no data to steal in the first place &mdash; everything stays on your device, and there are no servers to breach.</div>
+  <div class="qa"><strong>What if I lose my phone?</strong>Your cards are lost, the same as physical stamp cards would be. No personal data was ever collected, so there's nothing exposed &mdash; just reinstall and start fresh.</div>
+  <div class="qa"><strong>What if a business loses their device?</strong>With a backup: restore to a new device in seconds, every customer card stays valid. Without one: the business has to start over and re-issue cards.</div>
+  <div class="qa"><strong>Can a business switch modes later?</strong>Not without a full reset, which invalidates every card currently held by customers &mdash; choose carefully during setup.</div>
+  <div class="qa"><strong>Does it work without internet?</strong>Yes, completely &mdash; it's peer-to-peer via QR code, nothing needs a connection.</div>
+  <div class="qa"><strong>Can customers cheat in Express Mode?</strong>The scan cooldown discourages casual abuse but isn't cryptographically enforced &mdash; Express Mode is intentionally trust-based, the same as a physical stamp card. Businesses expecting determined fraud, or offering higher-value rewards, should use Secure Mode instead.</div>
+
+  <h2>Getting Help</h2>
+  <p>See the <a href="user-guide.html">User Guide</a> for step-by-step instructions, the <a href="supplier-setup-guide.html">Supplier Setup Guide</a> for a deeper mode comparison, or the <a href="../support/">Support page</a> for troubleshooting and contact details.</p>
+
+  <p class="meta" style="margin-top:3em;">LoyaltyCards &mdash; Convenient. Private. Local.</p>
+</div>
+</body>
+</html>

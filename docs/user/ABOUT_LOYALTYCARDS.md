@@ -2,8 +2,8 @@
 
 **A Privacy-First Digital Loyalty Card System**
 
-Version 0.3.0+1  
-Last Updated: April 22, 2026
+Version 2.0.0+19
+Last Updated: July 28, 2026
 
 ---
 
@@ -46,8 +46,8 @@ LoyaltyCards is a **digital stamp card system** that replaces traditional paper 
 **For Businesses:**
 - Simple onboarding process
 - Name your business, choose settings
-- No payment required during pilot
-- No subscription fees (pilot phase)
+- No payment required
+- No subscription fees
 
 ### Local Storage Only
 
@@ -70,14 +70,14 @@ LoyaltyCards is a **digital stamp card system** that replaces traditional paper 
 
 LoyaltyCards offers two modes to fit different business needs:
 
-### **Simple Mode** - Trust-Based (Coffee Shop Model)
+### **Express Mode** - Trust-Based (Coffee Shop Model)
 
 **How it works:**
 - Business displays **static QR codes** at checkout
 - Customer scans QR code to add stamp
 - QR codes **never expire** - print once, use forever
 - Based on trust - customer could scan multiple times
-- **Rate limited:** Customer can only get 1 stamp per hour per business (prevents abuse)
+- **Rate limited:** Each business sets a cooldown between stamps (5-60 seconds, 30 seconds by default) to slow down casual abuse
 
 **Best for:**
 - ✅ Coffee shops
@@ -97,11 +97,11 @@ LoyaltyCards offers two modes to fit different business needs:
 
 **Trade-offs:**
 - ⚠️ Requires customer honesty (can't prevent determined fraud)
-- ⚠️ 1-hour rate limit is enforced by customer app (not foolproof)
+- ⚠️ The scan cooldown is enforced by the customer app locally (not foolproof)
 
 **Real-World Scenario:**
 
-*"Joe's Coffee Shop" - Simple Mode*
+*"Joe's Coffee Shop" - Express Mode*
 
 **Setup:**
 1. Joe prints two QR codes and tapes them to the register
@@ -201,7 +201,7 @@ Customer Phone ←--QR Codes--→ Supplier Device
      (SQLite DB)                  (SQLite DB)
 ```
 
-**Simple Mode Flow:**
+**Express Mode Flow:**
 1. Supplier prints static QR codes
 2. Customer scans "issue card" QR → card created on phone
 3. Customer scans "add stamp" QR → stamp added to phone
@@ -230,7 +230,7 @@ Customer Phone ←--QR Codes--→ Supplier Device
 - Public key (for customer validation)
 - Issued card count
 - Redemption count
-- Transaction history (for secure mode)
+- Transaction history (for Secure mode)
 
 **Data Size:**
 - Typical customer: 5-10 cards = ~10KB
@@ -300,13 +300,13 @@ This approach solves the real-world user pain point (having to rotate camera eve
 
 ## 🎨 Use Cases & Scenarios
 
-### 1. Coffee Shop Chain (Simple Mode)
+### 1. Coffee Shop Chain (Express Mode)
 
 **Business:** Local coffee chain with 3 locations  
 **Reward:** 10 coffees, get 1 free  
 **Volume:** 500 customers/day across all locations
 
-**Why Simple Mode:**
+**Why Express Mode:**
 - Speed is critical during morning rush
 - Low-value reward ($5 coffee)
 - Regulars are trustworthy
@@ -346,17 +346,17 @@ This approach solves the real-world user pain point (having to rotate camera eve
 **Each Vendor:** Choose their own mode
 
 **Examples:**
-- **Quick Bites (Simple):** Fast casual, $7 burgers
+- **Quick Bites (Express):** Fast casual, $7 burgers
   - 10 meals = free meal
-  - Simple mode for speed
+  - Express mode for speed
   
 - **Artisan Sushi (Secure):** Premium sushi, $25/meal
   - 8 meals = free meal ($25 value)
   - Secure mode for validation
   
-- **Coffee Kiosk (Simple):** $4 lattes
+- **Coffee Kiosk (Express):** $4 lattes
   - 10 drinks = free drink
-  - Simple mode, printed QR codes
+  - Express mode, printed QR codes
 
 **Customer Benefit:**
 - One app, multiple vendor cards
@@ -385,13 +385,13 @@ This approach solves the real-world user pain point (having to rotate camera eve
 
 ---
 
-### 5. Community Co-op (Simple Mode)
+### 5. Community Co-op (Express Mode)
 
 **Business:** Local food co-op  
 **Reward:** 20 visits = $20 credit  
 **Community:** Trust-based membership
 
-**Why Simple Mode:**
+**Why Express Mode:**
 - Community values trust
 - Members are invested in co-op
 - Speed at checkout important
@@ -407,7 +407,7 @@ This approach solves the real-world user pain point (having to rotate camera eve
 
 ## 🔄 Comparing the Modes
 
-| Feature | Simple Mode | Secure Mode |
+| Feature | Express Mode | Secure Mode |
 |---------|-------------|-------------|
 | **Speed** | ⚡ 2 seconds | ⏱️ 5-10 seconds |
 | **Hardware** | 📄 Printed QR only | 📱 Tablet/phone required |
@@ -416,7 +416,7 @@ This approach solves the real-world user pain point (having to rotate camera eve
 | **QR Expiry** | Never | 1-2 minutes |
 | **Audit Trail** | Basic | Complete |
 | **Best For** | Low-value, high-trust | High-value, any trust |
-| **Fraud Prevention** | Rate limiting (1/hour) | Impossible to forge |
+| **Fraud Prevention** | Scan cooldown (5-60s) | Impossible to forge |
 | **Offline** | ✅ Complete | ✅ Complete |
 
 ---
@@ -447,9 +447,9 @@ This approach solves the real-world user pain point (having to rotate camera eve
 
 ### For Businesses
 
-1. **Zero Cost** (Pilot Phase)
+1. **Zero Cost**
    - No monthly fees
-   - No hardware required (simple mode)
+   - No hardware required (Express mode)
    - No backend infrastructure
 
 2. **Privacy Compliant**
@@ -562,7 +562,7 @@ This approach solves the real-world user pain point (having to rotate camera eve
 
 ---
 
-## 🔮 Future Enhancements (Post-Pilot)
+## 🔮 Future Enhancements
 
 **Planned Features:**
 - Stamp expiration (optional, configurable)
@@ -597,22 +597,17 @@ LoyaltyCards is built on three principles:
 
 3. **Trust & Flexibility**
    - Businesses choose their trust level
-   - Simple mode for high-trust environments
+   - Express mode for high-trust environments
    - Secure mode for validation when needed
    - Balance convenience with security
 
 ---
 
-## 📞 Pilot Program
+## 📞 Availability & Support
 
-**Current Status:** Private pilot phase  
-**Availability:** Invitation only  
-**Platform:** iOS (iPhone & iPad)  
-**Cost:** Free during pilot  
-**Support:** Email support provided
-
-**Interested in Participating?**
-Contact us for pilot program details.
+**Platform:** iOS (iPhone & iPad), via the App Store
+**Cost:** Free for both the Customer and Business apps
+**Support:** Email support provided - see the [Support page](/support/) for details
 
 ---
 
@@ -622,7 +617,7 @@ Contact us for pilot program details.
 A: Yes! There's no data to steal - everything stays on your device. No cloud servers means no data breaches.
 
 **Q: What if I lose my phone?**  
-A: Customer cards are lost (like physical cards). No personal data is exposed. Simple reinstall the app and start fresh.
+A: Customer cards are lost (like physical cards). No personal data is exposed. Simply reinstall the app and start fresh.
 
 **Q: What if supplier loses their device?**  
 A: With backup QR code: Scan the backup on new device, all customer cards remain valid, business fully restored in seconds. Without backup: All customer cards become invalid, must restart business from scratch.
@@ -640,10 +635,10 @@ A: Different devices and holding positions result in different camera orientatio
 A: Automatic camera rotation using device sensors (gyroscope/accelerometer) is extremely difficult in Flutter due to platform abstractions, device-specific quirks, and ambiguous orientations (e.g., tablet can be held with camera on left or right). Instead, we use manual rotation buttons with saved preferences - you teach the app your preference once, and it remembers. This is more reliable and works perfectly on all devices.
 
 **Q: How do you make money?**  
-A: Pilot is free. Future: Optional premium features (advanced analytics, multi-location support).
+A: Both apps are free. We may introduce optional premium features (advanced analytics, multi-location support) in the future.
 
-**Q: Can customers cheat in Simple Mode?**  
-A: Rate limiting (1 stamp/hour) prevents casual abuse. For high-value rewards, use Secure Mode.
+**Q: Can customers cheat in Express Mode?**  
+A: The scan cooldown (5-60 seconds, business-configurable) discourages casual abuse, but it isn't cryptographically enforced - Express Mode is fundamentally trust-based, the same as a physical stamp card. For higher-value rewards or lower-trust environments, use Secure Mode.
 
 ---
 

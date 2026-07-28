@@ -166,20 +166,43 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Use card ID from token if present (for multi-stamp consistency)
     // Otherwise generate new one (backward compatibility)
-    final cardId = token.cardId ?? '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}';
-    
+    final tokenCardId = token.cardId ?? '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}';
+
     // Check if this specific card already exists (prevents duplicate scans of same QR)
     final cardRepository = CardRepository(DatabaseHelper());
-    final existingCard = await cardRepository.getCardById(cardId);
-    
-    if (existingCard != null) {
-      // This exact card has already been scanned
+    final existingCard = await cardRepository.getCardById(tokenCardId);
+
+    if (existingCard != null && !existingCard.isRedeemed) {
+      // This exact card has already been scanned and is still active - block
+      // to avoid a pointless duplicate. A business's "add card" QR is
+      // static/reusable by design (Express Mode), so this is the ordinary
+      // re-scan-the-same-QR-while-nothing-changed case, not a new cycle.
       if (mounted) {
         Navigator.pop(context, 'Card has already been scanned: ${token.businessName}');
       }
       return;
     }
-    
+
+    // A card with this exact (deterministic, QR-embedded) ID exists but has
+    // already been redeemed - the customer is legitimately starting a new
+    // loyalty cycle with the same business's reusable QR, not duplicating a
+    // scan. Give the new card a fresh, unique ID instead of colliding with
+    // the old redeemed row (which stays in their history) - this previously
+    // blocked re-collecting from any business entirely once a card was
+    // redeemed, since the QR's cardId never changes.
+    //
+    // If the QR also grants initial stamps, their signatures are
+    // cryptographically bound to the original tokenCardId, not this new
+    // cardId - same situation as an overflow-moved stamp, so the fix is the
+    // same one: record originalCardId/originalStampNumber/originalPreviousHash
+    // on each initial stamp so redemption verification checks it against
+    // what it was actually signed for, instead of dropping the supplier's
+    // grant.
+    final isRepeatCycle = existingCard != null && existingCard.isRedeemed;
+    final cardId = isRepeatCycle
+        ? '${token.businessId}_${DateTime.now().millisecondsSinceEpoch}'
+        : tokenCardId;
+
     final initialStampCount = token.initialStamps.length;
     
     // Get device ID for multi-device tracking (V-005)
@@ -231,10 +254,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         
         // Verify stamp signature (skip in simple mode) (CR-1.4)
         if (token.mode == OperationMode.secure) {
+          // Must verify against tokenCardId - the ID this was actually
+          // signed against - never the local storage cardId, which differs
+          // from tokenCardId on a repeat cycle (see isRepeatCycle above).
           // Must match SignatureFormat.stampChainData exactly - see the
           // matching comment in qr_token_generator.dart's signing side.
           final signatureData = SignatureFormat.stampChainData(
-            cardId: cardId,
+            cardId: tokenCardId,
             stampNumber: initialStamp.stampNumber,
             timestampMs: initialStamp.timestamp,
             previousHash: previousHash,
@@ -266,6 +292,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           signature: initialStamp.signature,
           previousHash: previousHash.isEmpty ? null : previousHash,
           deviceId: deviceId, // V-005: Track device where stamp was collected
+          // On a repeat cycle, this stamp's signature was computed against
+          // tokenCardId, not the fresh cardId it's being stored under here -
+          // record what it was actually signed for so redemption
+          // verification checks the right thing (same mechanism as an
+          // overflow-moved stamp).
+          originalCardId: isRepeatCycle ? tokenCardId : null,
+          originalStampNumber: isRepeatCycle ? initialStamp.stampNumber : null,
+          originalPreviousHash: isRepeatCycle ? (previousHash.isEmpty ? null : previousHash) : null,
         );
 
         await stampRepository.insertStamp(stamp);

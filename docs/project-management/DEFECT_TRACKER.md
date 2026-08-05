@@ -58,6 +58,16 @@ This document tracks defects from two sources:
 
 ## 🔴 CRITICAL DEFECTS
 
+### CRASH-001: Native EXC_BAD_ACCESS Crash Printing Stamp Setup QR Code
+- **Source:** Apple App Store Connect - Crash Report (production)
+- **Status:** ✅ FIXED (guard added) - pending TestFlight/production verification
+- **Priority:** CRITICAL
+- **File:** `supplier_app/lib/screens/supplier/supplier_stamp_card.dart` (`_printToken`)
+- **Description:** Tapping "Print" on the Stamp Setup (Simple/Express Mode) screen with no busy-state guard allowed a fast double-tap to fire two concurrent `Printing.layoutPdf()` calls, racing iOS's native print-preview page-count query (`CGPDFDocumentGetNumberOfPages`) and crashing with `EXC_BAD_ACCESS`/`SIGSEGV` on an invalid `CGPDFDocumentRef`. Full crash report, root cause analysis, and fix details: [CRASH-001-stamp-print-race-condition.md](CRASH-001-stamp-print-race-condition.md)
+- **Impact:** App termination (crash) for suppliers generating/printing Simple Mode stamp QR tokens
+- **Fix Applied:** Added `_isPrinting` busy-state guard disabling the Print button while a print job is in flight
+- **Testing Verified:** Full `flutter test` suite (66 tests) passing after fix; native race is not reliably reproducible locally (timing-dependent), so field monitoring after release is required to fully confirm
+
 ### CR-001: Broken Public Key Encoding in Card Issuance
 - **Source:** Code Review
 - **Status:** ✅ FIXED - DEPLOYED v0.3.0+1

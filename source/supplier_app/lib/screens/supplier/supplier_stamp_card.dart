@@ -30,6 +30,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   Business? _business;
   StampToken? _stampToken; // For simple mode QR display
   bool _isProcessing = false;
+  bool _isPrinting = false; // CRASH-001: guards against concurrent print jobs
   String? _errorMessage;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
   Timer? _countdownTimer;
@@ -410,9 +411,16 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   }
 
   // REQ-022: Print token QR
+  // CRASH-001: Guarded against re-entrancy - a fast double-tap here previously
+  // fired two concurrent Printing.layoutPdf() calls, racing iOS's native
+  // print-preview page count and crashing with EXC_BAD_ACCESS.
   Future<void> _printToken() async {
-    if (_business == null || _stampToken == null) return;
-    
+    if (_business == null || _stampToken == null || _isPrinting) return;
+
+    setState(() {
+      _isPrinting = true;
+    });
+
     try {
       final result = await BackupStorageService.printSimpleToken(
         qrData: _stampToken!.toQRString(),
@@ -420,7 +428,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         stampCount: _stampCount,
         expiryDate: _expiryDate,
       );
-      
+
       if (mounted) {
         if (result.isSuccess) {
           AppFeedback.success(context, 'Print dialog opened');
@@ -432,6 +440,12 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       AppLogger.error('Error printing token: $e', tag: 'StampToken');
       if (mounted) {
         AppFeedback.error(context, 'Error: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPrinting = false;
+        });
       }
     }
   }
@@ -794,8 +808,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _printToken,
-                          icon: const Icon(Icons.print),
+                          onPressed: _isPrinting ? null : _printToken,
+                          icon: _isPrinting
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.print),
                           label: const Text('Print'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -409,6 +410,13 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       });
     }
   }
+
+  /// CRASH-001 regression test hook: lets the widget test invoke the print
+  /// handler directly (and call it twice back-to-back without awaiting the
+  /// first) to prove the `_isPrinting` guard rejects the second call,
+  /// without depending on real gesture/frame timing to force the race.
+  @visibleForTesting
+  Future<void> printTokenForTesting() => _printToken();
 
   // REQ-022: Print token QR
   // CRASH-001: Guarded against re-entrancy - a fast double-tap here previously

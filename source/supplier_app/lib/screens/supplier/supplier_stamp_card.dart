@@ -32,6 +32,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   StampToken? _stampToken; // For simple mode QR display
   bool _isProcessing = false;
   bool _isPrinting = false; // CRASH-001: guards against concurrent print jobs
+  bool _isSharing = false; // CRASH-001: guards against concurrent share sheet calls
   String? _errorMessage;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
   Timer? _countdownTimer;
@@ -458,14 +459,20 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     }
   }
 
+  /// CRASH-001 regression test hook.
+  @visibleForTesting
+  Future<void> shareTokenForTesting() => _shareToken();
+
   // REQ-022: Share token QR via native share sheet
   Future<void> _shareToken() async {
-    if (_business == null || _stampToken == null) return;
-    
+    if (_business == null || _stampToken == null || _isSharing) return;
+
+    setState(() => _isSharing = true);
+
     try {
       final size = MediaQuery.of(context).size;
       final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
-      
+
       final result = await BackupStorageService.shareSimpleTokenViaEmail(
         qrData: _stampToken!.toQRString(),
         businessName: _business!.name,
@@ -473,7 +480,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         expiryDate: _expiryDate,
         sharePositionOrigin: sharePosition,
       );
-      
+
       if (mounted) {
         if (result.isSuccess) {
           AppFeedback.success(context, 'Share sheet opened');
@@ -486,6 +493,8 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       if (mounted) {
         AppFeedback.error(context, 'Error: $e');
       }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
     }
   }
 
@@ -835,8 +844,14 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _shareToken,
-                          icon: const Icon(Icons.share),
+                          onPressed: _isSharing ? null : _shareToken,
+                          icon: _isSharing
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.share),
                           label: const Text('Share QR'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),

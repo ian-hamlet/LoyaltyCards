@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/models/business.dart';
 import 'package:shared/models/supplier_config_backup.dart';
@@ -49,6 +50,12 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   Uint8List? _qrImageBytes;
   bool _isGenerating = false;
   bool _authenticationRequired = true;
+  // CRASH-001: guards each distribution method against a fast double-tap
+  // firing a second concurrent native call (Printing.layoutPdf /
+  // Share.shareXFiles) before the first one completes.
+  bool _isPrinting = false;
+  bool _isSharingEmail = false;
+  bool _isSavingToFiles = false;
   final Set<String> _completedMethods = {};
   final KeyManager _keyManager = KeyManager();
   final BiometricAuthService _biometricAuth = BiometricAuthService();
@@ -147,17 +154,24 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     }
   }
 
+  /// CRASH-001 regression test hook.
+  @visibleForTesting
+  Future<void> printBackupForTesting() => _printBackup();
+
   Future<void> _printBackup() async {
     AppLogger.debug('🖨️ Print Backup button tapped', 'Backup');
-    
-    if (_backup == null || _qrImageBytes == null) {
-      AppLogger.error('Print failed: backup or image bytes are null', tag: 'Backup');
-      AppFeedback.error(context, 'Backup data not ready');
+
+    if (_backup == null || _qrImageBytes == null || _isPrinting) {
+      if (_backup == null || _qrImageBytes == null) {
+        AppLogger.error('Print failed: backup or image bytes are null', tag: 'Backup');
+        AppFeedback.error(context, 'Backup data not ready');
+      }
       return;
     }
 
+    setState(() => _isPrinting = true);
     AppLogger.debug('Calling BackupStorageService.printBackup...', 'Backup');
-    
+
     try {
       final result = await BackupStorageService.printBackup(
         _backup!,
@@ -180,17 +194,27 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       if (!mounted) return;
       AppFeedback.error(context, 'Print error: $e');
+    } finally {
+      if (mounted) setState(() => _isPrinting = false);
     }
   }
 
+  /// CRASH-001 regression test hook.
+  @visibleForTesting
+  Future<void> shareViaEmailForTesting() => _shareViaEmail();
+
   Future<void> _shareViaEmail() async {
     AppLogger.debug('📧 Share via Email button tapped', 'Backup');
-    
-    if (_backup == null || _qrImageBytes == null) {
-      AppLogger.error('Share via email failed: backup or image bytes are null', tag: 'Backup');
-      AppFeedback.error(context, 'Backup data not ready');
+
+    if (_backup == null || _qrImageBytes == null || _isSharingEmail) {
+      if (_backup == null || _qrImageBytes == null) {
+        AppLogger.error('Share via email failed: backup or image bytes are null', tag: 'Backup');
+        AppFeedback.error(context, 'Backup data not ready');
+      }
       return;
     }
+
+    setState(() => _isSharingEmail = true);
 
     try {
       // Get screen size for iPad share position
@@ -228,17 +252,27 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       if (!mounted) return;
       AppFeedback.error(context, 'Share error: $e');
+    } finally {
+      if (mounted) setState(() => _isSharingEmail = false);
     }
   }
 
+  /// CRASH-001 regression test hook.
+  @visibleForTesting
+  Future<void> saveToFilesForTesting() => _saveToFiles();
+
   Future<void> _saveToFiles() async {
     AppLogger.debug('📁 Save to Files button tapped', 'Backup');
-    
-    if (_backup == null || _qrImageBytes == null) {
-      AppLogger.error('Save to Files failed: backup or image bytes are null', tag: 'Backup');
-      AppFeedback.error(context, 'Backup data not ready');
+
+    if (_backup == null || _qrImageBytes == null || _isSavingToFiles) {
+      if (_backup == null || _qrImageBytes == null) {
+        AppLogger.error('Save to Files failed: backup or image bytes are null', tag: 'Backup');
+        AppFeedback.error(context, 'Backup data not ready');
+      }
       return;
     }
+
+    setState(() => _isSavingToFiles = true);
 
     try {
       // Get screen size for iPad share position
@@ -275,6 +309,8 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       AppLogger.error('Stack trace: $stackTrace', tag: 'Backup');
       if (!mounted) return;
       AppFeedback.error(context, 'Save error: $e');
+    } finally {
+      if (mounted) setState(() => _isSavingToFiles = false);
     }
   }
 
@@ -497,6 +533,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     completed: _completedMethods.contains('print'),
                     onTap: _printBackup,
                     isPrimary: true,
+                    isBusy: _isPrinting,
                   ),
 
                   SizedBox(height: 12),
@@ -508,6 +545,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     subtitle: 'Easy to find and access',
                     completed: _completedMethods.contains('email'),
                     onTap: _shareViaEmail,
+                    isBusy: _isSharingEmail,
                   ),
 
                   SizedBox(height: 12),
@@ -519,6 +557,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     subtitle: 'Store in password manager or cloud',
                     completed: _completedMethods.contains('files'),
                     onTap: _saveToFiles,
+                    isBusy: _isSavingToFiles,
                   ),
 
                   SizedBox(height: 24),
@@ -599,6 +638,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     required bool completed,
     required VoidCallback onTap,
     bool isPrimary = false,
+    bool isBusy = false,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -631,10 +671,18 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
             fontSize: 13,
           ),
         ),
-        trailing: completed
-            ? Icon(Icons.check_circle, color: Colors.green)
-            : Icon(Icons.chevron_right, color: Colors.grey[600]),
-        onTap: onTap,
+        trailing: isBusy
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : (completed
+                ? Icon(Icons.check_circle, color: Colors.green)
+                : Icon(Icons.chevron_right, color: Colors.grey[600])),
+        // CRASH-001: null onTap while busy - prevents a fast double-tap from
+        // firing a second concurrent native call before the first resolves.
+        onTap: isBusy ? null : onTap,
       ),
     );
   }

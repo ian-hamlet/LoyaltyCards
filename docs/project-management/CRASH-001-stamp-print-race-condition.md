@@ -1,11 +1,11 @@
 # CRASH-001: Native EXC_BAD_ACCESS Crash Printing Stamp Setup QR Code
 
-**Source:** Apple App Store Connect - Crash Report (production, real user device)
-**Status:** ✅ FIXED (guard added) - pending TestFlight/production verification
+**Source:** Apple App Store Connect - Crash Report (App Review, physical device flagged as the reproduction environment)
+**Status:** ✅ FIXED (guard added to the confirmed crash site, then audited and applied to 5 other call sites sharing the identical gap) - pending App Review / TestFlight re-verification
 **Priority:** CRITICAL
 **Affected App:** Supplier App (`com.ianhamlet.loyaltycards.supplierApp`)
 **Affected Version:** 2.0.0+19
-**Screen/Feature:** Stamp Setup screen (Simple/Express Mode) - "Generate Stamp QR Code" - **Print** button
+**Screen/Feature:** Stamp Setup screen (Simple/Express Mode) - "Generate Stamp QR Code" - **Print** button (confirmed crash site). A follow-up self-audit (prompted by App Review's report not having been caught across several prior code reviews) found the same unguarded pattern on 5 more buttons across 2 sibling screens - see "Wider Audit" below.
 **File:** `source/supplier_app/lib/screens/supplier/supplier_stamp_card.dart` (`_printToken`, line ~413)
 
 ---
@@ -66,11 +66,7 @@ Notably, `printing` 5.15.0 (the version already in use, and the latest published
 
 ### Contributing factor (in our control)
 
-The same unguarded pattern (`onPressed`/`onTap` bound directly to an async `Printing.layoutPdf()`-calling method, with no busy-state check) also exists on two sibling screens:
-- `source/supplier_app/lib/screens/supplier/recovery_backup_screen.dart` (`_printBackup`, "Print Backup")
-- `source/supplier_app/lib/screens/supplier/supplier_issue_card.dart` (`_printToken`, "Print")
-
-Only the Stamp Setup screen's Print button is confirmed as the crash site from this report; the other two share the identical gap and are called out here for awareness, not fixed as part of this change.
+The same unguarded pattern (`onPressed`/`onTap` bound directly to an async method that calls into a native plugin - `Printing.layoutPdf()` or `Share.shareXFiles()` - with no busy-state check) also existed on two sibling screens. Only the Stamp Setup screen's Print button is confirmed as the crash site from this report; the rest were found by auditing every call site of `BackupStorageService`'s print/share/save methods for the same gap (see "Wider Audit" below) and are now fixed alongside it.
 
 ---
 
@@ -83,9 +79,29 @@ Added a busy-state guard to the Stamp Setup screen's print flow, mirroring the e
 
 This does not fix the underlying native plugin behavior (out of our control), but it removes the app-side trigger identified as the most plausible cause of the concurrent print-job race.
 
+A regression test (`test/screens/supplier_stamp_card_test.dart`) intercepts the `printing` plugin's method channel (`net.nfet.printing`) to count native print-job starts, then calls the print handler twice back-to-back. Verified red/green manually: with the guard removed, two concurrent native print jobs start (the crash's precondition); with the guard in place, only one does.
+
+## Wider Audit and Fix (2026-08-05)
+
+Prompted by the observation that this pattern survived several prior code reviews with different personas, every call site of `BackupStorageService`'s print/share/save methods (the only paths that reach the `printing`/`share_plus` native plugins) was audited for the same missing-guard shape. Five more instances of the identical gap were found and fixed the same way (a per-action busy-state bool, checked at the top of the handler and used to disable the button / show an inline spinner):
+
+| Screen | Button | Method | Native call | Guard added |
+|---|---|---|---|---|
+| `recovery_backup_screen.dart` | Print Backup | `_printBackup` | `Printing.layoutPdf` | `_isPrinting` |
+| `recovery_backup_screen.dart` | Share via Email | `_shareViaEmail` | `Share.shareXFiles` | `_isSharingEmail` |
+| `recovery_backup_screen.dart` | Save to Files | `_saveToFiles` | file write + `Share.shareXFiles` | `_isSavingToFiles` |
+| `supplier_issue_card.dart` | Print | `_printToken` | `Printing.layoutPdf` | `_isPrinting` |
+| `supplier_issue_card.dart` | Share | `_shareToken` | `Share.shareXFiles` | `_isSharing` |
+| `supplier_stamp_card.dart` | Share QR | `_shareToken` | `Share.shareXFiles` | `_isSharing` (added alongside the original `_isPrinting` fix - the Share button on this same screen had been missed the first time) |
+
+The two `Printing.layoutPdf` call sites (Print Backup, Print on the Issue Card screen) carry the same native crash risk as the original Stamp Setup finding. The four `Share.shareXFiles` call sites are a different native subsystem with no confirmed crash report against them, but shared the identical missing-guard shape (double-tap could open two share sheets or double-write a file) and are fixed for consistency and defense-in-depth.
+
+Each screen also gained a `@visibleForTesting` `*ForTesting()` forwarder to its guarded handler (following the existing convention from `SupplierRedeemCard`), so the same double-tap-simulation regression test approach used for the Stamp Setup screen can be added for these five without depending on real gesture/frame timing.
+
 ## Follow-Up Recommendations (not part of this change)
 
-1. Apply the same guard to `recovery_backup_screen.dart` and `supplier_issue_card.dart`, which share the identical gap.
-2. Evaluate replacing `Printing.layoutPdf` (which drives the interactive native Print Preview / page-count subsystem where this crash occurs) with `Printing.sharePdf` or `share_plus` for these QR-backup flows, since the user's end goal is just "get this PDF to a printer," and the share-sheet path does not exercise the crashing code path at all.
-3. File an issue upstream against `DavBfr/dart_pdf` (the `printing` package) with this exact stack trace, since all crashing frames are inside the plugin/UIKit/CoreGraphics, not app code.
-4. Monitor App Store Connect for recurrence/volume after this fix ships, to confirm whether the double-tap race was the sole trigger.
+1. ~~Apply the same guard to `recovery_backup_screen.dart` and `supplier_issue_card.dart`~~ - done, see "Wider Audit" above.
+2. Add regression tests for the five newly-guarded call sites, mirroring `supplier_stamp_card_test.dart`'s method-channel-interception approach - not yet written.
+3. Evaluate replacing `Printing.layoutPdf` (which drives the interactive native Print Preview / page-count subsystem where this crash occurs) with `Printing.sharePdf` or `share_plus` for these QR-backup flows, since the user's end goal is just "get this PDF to a printer," and the share-sheet path does not exercise the crashing code path at all.
+4. File an issue upstream against `DavBfr/dart_pdf` (the `printing` package) with this exact stack trace, since all crashing frames are inside the plugin/UIKit/CoreGraphics, not app code.
+5. Monitor App Store Connect for recurrence/volume after this fix ships, to confirm whether the double-tap race was the sole trigger.

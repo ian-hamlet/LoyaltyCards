@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
@@ -22,6 +23,11 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   Business? _business;
   CardIssueToken? _token;
   bool _isLoading = true;
+  // CRASH-001: guards each distribution method against a fast double-tap
+  // firing a second concurrent native call (Printing.layoutPdf /
+  // Share.shareXFiles) before the first one completes.
+  bool _isPrinting = false;
+  bool _isSharing = false;
   String? _errorMessage;
   int _initialStampCount = 0; // Number of stamps to pre-apply (0-stampsRequired)
   final Set<String> _loggedCardIds = {}; // Track logged card IDs to prevent duplicates
@@ -420,8 +426,14 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                             children: [
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed: _printToken,
-                                  icon: const Icon(Icons.print),
+                                  onPressed: _isPrinting ? null : _printToken,
+                                  icon: _isPrinting
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : const Icon(Icons.print),
                                   label: const Text('Print'),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -433,8 +445,14 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed: _shareToken,
-                                  icon: const Icon(Icons.share),
+                                  onPressed: _isSharing ? null : _shareToken,
+                                  icon: _isSharing
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : const Icon(Icons.share),
                                   label: const Text('Share QR'),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -495,17 +513,23 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     );
   }
 
+  /// CRASH-001 regression test hook.
+  @visibleForTesting
+  Future<void> printTokenForTesting() => _printToken();
+
   // Print issue card QR
   Future<void> _printToken() async {
-    if (_business == null || _token == null) return;
-    
+    if (_business == null || _token == null || _isPrinting) return;
+
+    setState(() => _isPrinting = true);
+
     try {
       final result = await BackupStorageService.printIssueCard(
         qrData: _token!.toQRString(),
         businessName: _business!.name,
         initialStamps: _initialStampCount,
       );
-      
+
       if (mounted) {
         if (result.isSuccess) {
           AppFeedback.success(context, 'Print dialog opened');
@@ -518,24 +542,32 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       if (mounted) {
         AppFeedback.error(context, 'Error: $e');
       }
+    } finally {
+      if (mounted) setState(() => _isPrinting = false);
     }
   }
 
+  /// CRASH-001 regression test hook.
+  @visibleForTesting
+  Future<void> shareTokenForTesting() => _shareToken();
+
   // Share issue card QR via native share sheet
   Future<void> _shareToken() async {
-    if (_business == null || _token == null) return;
-    
+    if (_business == null || _token == null || _isSharing) return;
+
+    setState(() => _isSharing = true);
+
     try {
       final size = MediaQuery.of(context).size;
       final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
-      
+
       final result = await BackupStorageService.shareIssueCard(
         qrData: _token!.toQRString(),
         businessName: _business!.name,
         initialStamps: _initialStampCount,
         sharePositionOrigin: sharePosition,
       );
-      
+
       if (mounted) {
         if (result.isSuccess) {
           AppFeedback.success(context, 'Share sheet opened');
@@ -548,6 +580,8 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       if (mounted) {
         AppFeedback.error(context, 'Error: $e');
       }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
     }
   }
 

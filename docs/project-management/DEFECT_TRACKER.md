@@ -196,6 +196,16 @@ This document tracks defects from two sources:
 
 ## 🟡 MEDIUM PRIORITY DEFECTS
 
+### UI-001: Unreadable Text on How It Works Info Panels in Dark Mode
+- **Source:** User-reported (visual inspection)
+- **Status:** ✅ FIXED
+- **Priority:** MEDIUM
+- **Files:** `supplier_app/lib/screens/supplier/how_it_works.dart`, `customer_app/lib/screens/customer/how_it_works.dart`
+- **Description:** Info panels used a fixed `BrandColors.xContainer` background (light-mode-only hex constant) paired with theme-adaptive foreground text (`colorScheme.onXContainer`/default theme text). In dark mode the background never changed but the text color flipped to a light tone meant for dark surfaces, producing unreadable light-on-light text - 3 panels in the supplier app (after Step 5), 4 in the customer app (after Step 4). Full analysis, audit of 10 other similar-looking call sites (all found to be safe/fixed-pair), and fix details: [UI-001-how-it-works-dark-mode-contrast.md](UI-001-how-it-works-dark-mode-contrast.md)
+- **Impact:** Readability/accessibility - text effectively invisible on these 7 panels when using the app in dark mode
+- **Fix Applied:** Switched both background and foreground to matching `colorScheme` container/on-container pairs on all 7 panels, mirroring the pattern already used correctly elsewhere in the codebase
+- **Testing Verified:** `flutter analyze` clean; full suite green on both apps (74 supplier, 125 customer) - color-only change, no new automated test. **Not yet visually verified on-device in light/dark mode** - flagged as the first check when testing resumes.
+
 ### CR-007: Card Issuance Logging Race Condition
 - **Source:** Code Review
 - **Status:** ✅ FIXED

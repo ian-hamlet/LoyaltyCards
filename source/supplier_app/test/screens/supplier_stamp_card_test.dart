@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,11 +76,14 @@ void main() {
   MobileScannerPlatform.instance = _FakeMobileScannerPlatform();
 
   const printingChannel = MethodChannel('net.nfet.printing');
+  const shareChannel = MethodChannel('dev.fluttercommunity.plus/share');
+  const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
   const businessId = 'business-stamp-print-test';
 
   late KeyManager keyManager;
   late BusinessRepository businessRepo;
   late int printPdfCallCount;
+  late int shareCallCount;
   late Set<int> completedJobIndices;
 
   /// Echoes back the `onCompleted` message the real `printing` plugin sends
@@ -98,6 +102,7 @@ void main() {
 
   setUp(() async {
     printPdfCallCount = 0;
+    shareCallCount = 0;
     completedJobIndices = {};
 
     FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform({});
@@ -128,11 +133,42 @@ void main() {
         return null;
       },
     );
+
+    // share_plus's MethodChannelShare is a single request/response call (no
+    // job/completion round-trip like printing's), so counting is simpler:
+    // any non-empty, non-"unavailable" string is treated as success.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      shareChannel,
+      (call) async {
+        if (call.method == 'share') {
+          shareCallCount++;
+          return 'dev.fluttercommunity.plus/share/completed';
+        }
+        return null;
+      },
+    );
+
+    // shareSimpleTokenViaEmail() writes a real temp file before sharing it -
+    // route it to a real, writable directory rather than mocking the file
+    // I/O away, since the write itself isn't what CRASH-001 is about.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      pathProviderChannel,
+      (call) async {
+        if (call.method == 'getTemporaryDirectory') {
+          return Directory.systemTemp.path;
+        }
+        return null;
+      },
+    );
   });
 
   tearDown(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(printingChannel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(shareChannel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathProviderChannel, null);
   });
 
   /// Mirrors supplier_redeem_card_test.dart's setupBusiness(): real I/O
@@ -259,6 +295,56 @@ void main() {
         tester.widget<OutlinedButton>(printButtonFinder).onPressed,
         isNotNull,
         reason: 'Print button should re-enable once the print job completes.',
+      );
+    },
+  );
+
+  testWidgets(
+    'CRASH-001: guarded _shareToken disables the Share QR button and ignores a second call',
+    (tester) async {
+      await seedSimpleModeBusiness(tester);
+
+      await tester.pumpWidget(const MaterialApp(home: SupplierStampCard()));
+      await settleAfterMount(tester);
+
+      final shareButtonFinder = find.widgetWithText(OutlinedButton, 'Share QR');
+      expect(shareButtonFinder, findsOneWidget);
+      expect(tester.widget<OutlinedButton>(shareButtonFinder).onPressed, isNotNull);
+
+      final state = tester.state(find.byType(SupplierStampCard));
+      late Future<void> firstCall;
+      await tester.runAsync(() async {
+        // ignore: avoid_dynamic_calls
+        firstCall = (state as dynamic).shareTokenForTesting() as Future<void>;
+      });
+      await tester.pump();
+
+      expect(
+        tester.widget<OutlinedButton>(shareButtonFinder).onPressed,
+        isNull,
+        reason: 'Share QR button should disable itself immediately once a '
+            'share is in flight, so a rapid second tap cannot reach '
+            'onPressed at all.',
+      );
+
+      await tester.runAsync(() async {
+        // ignore: avoid_dynamic_calls
+        final secondCall = (state as dynamic).shareTokenForTesting() as Future<void>;
+        await Future.wait([firstCall, secondCall]);
+      });
+      await tester.pumpAndSettle();
+
+      expect(
+        shareCallCount,
+        1,
+        reason: 'The _isSharing guard should reject the second call outright, '
+            'so the native share_plus plugin should only ever be asked to '
+            'open one share sheet.',
+      );
+      expect(
+        tester.widget<OutlinedButton>(shareButtonFinder).onPressed,
+        isNotNull,
+        reason: 'Share QR button should re-enable once the share call completes.',
       );
     },
   );

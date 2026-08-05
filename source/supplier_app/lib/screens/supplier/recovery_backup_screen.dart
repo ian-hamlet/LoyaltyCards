@@ -56,6 +56,23 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   bool _isPrinting = false;
   bool _isSharingEmail = false;
   bool _isSavingToFiles = false;
+
+  /// CRASH-001 regression test hooks: expose each busy-state flag directly
+  /// rather than only via widget-render timing. Print/Share via Email take
+  /// genuine async time before resolving (real MethodChannel round-trip),
+  /// so their disable state is observable a frame later; Save to Files'
+  /// underlying BackupStorageService.saveToFiles() throws synchronously on
+  /// any platform that isn't iOS or Android (which is all a `flutter test`
+  /// host ever is), resolving too fast for that same timing window - these
+  /// getters let the guard be verified directly regardless of how fast the
+  /// native call underneath happens to resolve.
+  @visibleForTesting
+  bool get isPrintingForTesting => _isPrinting;
+  @visibleForTesting
+  bool get isSharingEmailForTesting => _isSharingEmail;
+  @visibleForTesting
+  bool get isSavingToFilesForTesting => _isSavingToFiles;
+
   final Set<String> _completedMethods = {};
   final KeyManager _keyManager = KeyManager();
   final BiometricAuthService _biometricAuth = BiometricAuthService();

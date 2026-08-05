@@ -96,12 +96,29 @@ Prompted by the observation that this pattern survived several prior code review
 
 The two `Printing.layoutPdf` call sites (Print Backup, Print on the Issue Card screen) carry the same native crash risk as the original Stamp Setup finding. The four `Share.shareXFiles` call sites are a different native subsystem with no confirmed crash report against them, but shared the identical missing-guard shape (double-tap could open two share sheets or double-write a file) and are fixed for consistency and defense-in-depth.
 
-Each screen also gained a `@visibleForTesting` `*ForTesting()` forwarder to its guarded handler (following the existing convention from `SupplierRedeemCard`), so the same double-tap-simulation regression test approach used for the Stamp Setup screen can be added for these five without depending on real gesture/frame timing.
+Each screen also gained a `@visibleForTesting` `*ForTesting()` forwarder to its guarded handler (following the existing convention from `SupplierRedeemCard`), so the same double-tap-simulation regression test approach used for the Stamp Setup screen could be extended to all five without depending on real gesture/frame timing.
+
+### Regression tests added for all 6 locations
+
+- `test/screens/supplier_stamp_card_test.dart` - Print (original) + Share QR
+- `test/screens/supplier_issue_card_test.dart` - Print + Share (new file)
+- `test/screens/recovery_backup_screen_test.dart` - Print Backup + Share via Email + Save to Files (new file)
+
+Each test intercepts the relevant native method channel (`net.nfet.printing` for print, `dev.fluttercommunity.plus/share` for share) to count native calls, fires the guarded handler twice back-to-back, and was verified red (native call fires twice with the guard temporarily removed) before green (fires once with the guard restored).
+
+Two non-obvious issues surfaced while writing these and are worth flagging for anyone extending this pattern:
+
+1. **`Printing.layoutPdf()`'s Future only resolves once the mocked channel handler also simulates the native `onCompleted` callback** (`printing`'s job-based protocol) - otherwise the guarded call hangs forever and the test times out.
+2. **Never call `expect()` inside a `tester.runAsync()` callback.** A failure there is recorded via the test binding's single pending-exception slot rather than thrown normally - and on `recovery_backup_screen.dart` specifically, a *later* unrelated exception (a pre-existing, harmless `ListTile`/`DecoratedBox` background-color warning this screen already triggers) silently overwrote that slot before the real failure was ever reported, letting a fully-removed guard pass the test undetected. Confirmed by hand with a deliberately-broken assertion. Fix: capture the value inside `runAsync`, `expect()` it outside, in the normal test-body zone.
+
+Also confirmed: `BackupStorageService.saveToFiles()` throws synchronously on any platform that isn't iOS or Android, which is what a `flutter test` host always is - so its Save to Files test can't observe the native `Share.shareXFiles` call count the way the other five can. Its guard is instead verified via a direct `@visibleForTesting` getter on the busy-state flag rather than through native-call counting.
+
+Full suite (74 tests) passes, confirmed stable across repeated full-suite runs.
 
 ## Follow-Up Recommendations (not part of this change)
 
 1. ~~Apply the same guard to `recovery_backup_screen.dart` and `supplier_issue_card.dart`~~ - done, see "Wider Audit" above.
-2. Add regression tests for the five newly-guarded call sites, mirroring `supplier_stamp_card_test.dart`'s method-channel-interception approach - not yet written.
+2. ~~Add regression tests for the five newly-guarded call sites~~ - done, see "Regression tests added for all 6 locations" above.
 3. Evaluate replacing `Printing.layoutPdf` (which drives the interactive native Print Preview / page-count subsystem where this crash occurs) with `Printing.sharePdf` or `share_plus` for these QR-backup flows, since the user's end goal is just "get this PDF to a printer," and the share-sheet path does not exercise the crashing code path at all.
 4. File an issue upstream against `DavBfr/dart_pdf` (the `printing` package) with this exact stack trace, since all crashing frames are inside the plugin/UIKit/CoreGraphics, not app code.
 5. Monitor App Store Connect for recurrence/volume after this fix ships, to confirm whether the double-tap race was the sole trigger.

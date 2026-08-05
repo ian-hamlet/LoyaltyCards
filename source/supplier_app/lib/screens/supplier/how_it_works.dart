@@ -102,7 +102,7 @@ class HowItWorks extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: BrandColors.primaryContainer,
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -112,7 +112,7 @@ class HowItWorks extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.security,
-                          color: BrandColors.primary,
+                          color: colorScheme.primary,
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -142,7 +142,7 @@ class HowItWorks extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: BrandColors.warningContainer,
+                  color: colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -152,7 +152,7 @@ class HowItWorks extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.timer,
-                          color: BrandColors.warning,
+                          color: colorScheme.secondary,
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -182,7 +182,7 @@ class HowItWorks extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: BrandColors.successContainer,
+                  color: colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -192,7 +192,7 @@ class HowItWorks extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.cloud_off,
-                          color: BrandColors.success,
+                          color: colorScheme.tertiary,
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),

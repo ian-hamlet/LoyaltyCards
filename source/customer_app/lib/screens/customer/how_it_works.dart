@@ -6,6 +6,8 @@ class HowItWorks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('How It Works'),
@@ -88,7 +90,7 @@ class HowItWorks extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: BrandColors.primaryContainer,
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -98,7 +100,7 @@ class HowItWorks extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.privacy_tip,
-                          color: BrandColors.primary,
+                          color: colorScheme.primary,
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -107,6 +109,7 @@ class HowItWorks extends StatelessWidget {
                             'Your Privacy Protected',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimaryContainer,
                             ),
                           ),
                         ),
@@ -116,7 +119,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'No personal information required. No email, no phone number, no account. Your loyalty cards are stored privately on your device.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ],
@@ -129,7 +132,7 @@ class HowItWorks extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: BrandColors.successContainer,
+                  color: colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -139,7 +142,7 @@ class HowItWorks extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.verified_user,
-                          color: BrandColors.success,
+                          color: colorScheme.tertiary,
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -147,6 +150,7 @@ class HowItWorks extends StatelessWidget {
                           'Secure & Verified',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onTertiaryContainer,
                           ),
                         ),
                       ],
@@ -155,7 +159,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'Every stamp is digitally signed by the business to prevent fraud. Your cards are stored securely using industry-standard encryption.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colorScheme.onTertiaryContainer,
                       ),
                     ),
                   ],
@@ -168,7 +172,7 @@ class HowItWorks extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: BrandColors.infoContainer,
+                  color: colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -178,7 +182,7 @@ class HowItWorks extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.timer,
-                          color: BrandColors.info,
+                          color: colorScheme.secondary,
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -186,6 +190,7 @@ class HowItWorks extends StatelessWidget {
                           'Dynamic QR Codes',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onSecondaryContainer,
                           ),
                         ),
                       ],
@@ -194,7 +199,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'Your QR codes are time-limited for security and regenerate automatically. If a code expires while showing it, simply tap the refresh button to generate a new one.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ],
@@ -207,7 +212,7 @@ class HowItWorks extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: BrandColors.warningContainer,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -217,7 +222,7 @@ class HowItWorks extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.cloud_off,
-                          color: BrandColors.warning,
+                          color: colorScheme.onSurfaceVariant,
                           size: 24,
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -225,6 +230,7 @@ class HowItWorks extends StatelessWidget {
                           'Works Anywhere',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -233,7 +239,7 @@ class HowItWorks extends StatelessWidget {
                     Text(
                       'No internet connection required. Earn stamps and redeem rewards even when offline.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

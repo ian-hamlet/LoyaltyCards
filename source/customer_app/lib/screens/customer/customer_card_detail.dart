@@ -328,7 +328,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                       const SizedBox(height: 8),
                       Text(
                         _card!.isComplete
-                            ? 'Show this card to the supplier to verify, then redeem below'
+                            ? 'Show your supplier this completed card. Once they\'re ready, tap Redeem below.'
                             : 'Scan the supplier\'s stamp QR code to add stamps',
                         style: TextStyle(
                           fontSize: 15,
@@ -409,6 +409,15 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                 fontWeight: FontWeight.bold,
                                 color: BrandColors.textPrimary,
                               ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Show this to your supplier to confirm.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: BrandColors.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             if (_card!.redeemedAt != null) ...[
@@ -892,7 +901,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: const Text(
-          'Have you received your reward from the supplier?',
+          'Tapping Redeem confirms with your supplier that you\'re claiming your reward now.',
           style: TextStyle(fontSize: 15),
         ),
         actions: [

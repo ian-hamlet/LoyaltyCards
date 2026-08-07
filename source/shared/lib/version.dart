@@ -407,4 +407,4 @@
 /// - Test Coverage: shared 158, customer_app 125, supplier_app 66 - all passing
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.0+19';
+const String appVersion = '2.0.1+20';

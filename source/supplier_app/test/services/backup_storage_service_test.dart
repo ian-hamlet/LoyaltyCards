@@ -216,9 +216,39 @@ void main() {
       // iOS: Saves to app documents, then shares
       // Android: Saves to Downloads, fallback to external storage
       // Unsupported platform: Returns BackupResult.failure(platformNotSupported, ...)
-      
+
       // TODO: Implement with Platform mock
       expect(true, true); // Placeholder
+    });
+  });
+
+  group('CRASH-001 follow-up: isValidPdfBytesForTesting', () {
+    // A native EXC_BAD_ACCESS crash reported by Apple traced to the printing
+    // plugin trying to construct a native CGPDFDocument from bad data. The
+    // _isPrinting re-entrancy guard added for that fix only stops a *second*
+    // concurrent call - it does nothing if pdf.save() itself ever produces
+    // empty or malformed bytes on a single, first call. This validates that
+    // reject path directly, since coaxing pw.Document.save() into producing
+    // genuinely invalid output isn't practical to set up.
+    test('accepts real PDF bytes with a valid header', () {
+      // Real minimal PDF header + enough trailing bytes to be a plausible
+      // (if truncated) document - only the first 5 bytes are checked.
+      final bytes = Uint8List.fromList('%PDF-1.7\n...'.codeUnits);
+      expect(BackupStorageService.isValidPdfBytesForTesting(bytes), isTrue);
+    });
+
+    test('rejects empty bytes', () {
+      expect(BackupStorageService.isValidPdfBytesForTesting(Uint8List(0)), isFalse);
+    });
+
+    test('rejects bytes shorter than the PDF magic header', () {
+      final bytes = Uint8List.fromList('%PDF'.codeUnits); // 4 bytes, missing the '-'
+      expect(BackupStorageService.isValidPdfBytesForTesting(bytes), isFalse);
+    });
+
+    test('rejects non-empty bytes with the wrong header', () {
+      final bytes = Uint8List.fromList('Not a PDF at all'.codeUnits);
+      expect(BackupStorageService.isValidPdfBytesForTesting(bytes), isFalse);
     });
   });
 }

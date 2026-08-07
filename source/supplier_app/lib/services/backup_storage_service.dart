@@ -48,7 +48,7 @@ class BackupStorageService {
       AppLogger.debug('Calling Printing.layoutPdf with name: $fileName', 'BackupService');
       
       await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => pdf.save(),
+        onLayout: (PdfPageFormat format) async => _generateValidatedPdfBytes(pdf),
         name: fileName,
       );
 
@@ -408,6 +408,41 @@ The QR code image is attached to this email.
     return pdf;
   }
 
+  /// "%PDF-" is the mandatory first 5 bytes of every valid PDF file (PDF
+  /// spec section 7.5.2) - a cheap, reliable well-formedness check without
+  /// parsing the whole document.
+  static const _pdfMagic = [0x25, 0x50, 0x44, 0x46, 0x2D];
+
+  /// CRASH-001 regression test hook - see [_generateValidatedPdfBytes] for
+  /// why this exists. Pulled out as its own pure function (bytes in, bool
+  /// out) specifically so the reject path is independently testable without
+  /// needing to coax `pw.Document.save()` itself into producing bad output.
+  @visibleForTesting
+  static bool isValidPdfBytesForTesting(Uint8List bytes) => _isValidPdfBytes(bytes);
+
+  static bool _isValidPdfBytes(Uint8List bytes) {
+    return bytes.length >= _pdfMagic.length &&
+        _pdfMagic.indexed.every((entry) => bytes[entry.$1] == entry.$2);
+  }
+
+  /// CRASH-001 follow-up: `Printing.layoutPdf`'s `onLayout` callback used to
+  /// hand `pdf.save()`'s result straight to the native printing plugin with
+  /// no validation. If pdf.save() ever produced empty or malformed bytes -
+  /// a rendering edge case, a truncated write - the plugin would still try
+  /// to construct a native CGPDFDocument from it, which is a second,
+  /// single-tap-reachable path to the same EXC_BAD_ACCESS crash the
+  /// re-entrancy guard doesn't cover (that guard only stops a *second*
+  /// concurrent call, not a first call with bad data). Validating here
+  /// converts that native crash into a caught Dart exception, surfaced to
+  /// the user as an ordinary "Failed to print" error instead.
+  static Future<Uint8List> _generateValidatedPdfBytes(pw.Document pdf) async {
+    final bytes = await pdf.save();
+    if (!_isValidPdfBytes(bytes)) {
+      throw StateError('Generated PDF is empty or has an invalid header');
+    }
+    return bytes;
+  }
+
   /// Generate consistent file names for backups
   static String _generateFileName(SupplierConfigBackup backup, String extension) {
     final timestamp = DateFormat('yyyy-MM-dd').format(backup.timestamp);
@@ -579,7 +614,7 @@ The QR code image is attached to this email.
       );
       
       await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => pdf.save(),
+        onLayout: (PdfPageFormat format) async => _generateValidatedPdfBytes(pdf),
         name: fileName,
       );
 
@@ -988,7 +1023,7 @@ For best results:
       );
       
       await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => pdf.save(),
+        onLayout: (PdfPageFormat format) async => _generateValidatedPdfBytes(pdf),
         name: fileName,
       );
 

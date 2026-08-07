@@ -115,6 +115,22 @@ Also confirmed: `BackupStorageService.saveToFiles()` throws synchronously on any
 
 Full suite (74 tests) passes, confirmed stable across repeated full-suite runs.
 
+## Follow-Up Fix: Validate PDF Bytes Before Handing Off to the Native Plugin (2026-08-06)
+
+Apple's App Review rejection notes for this crash described the trigger simply as "Tapping on 'Print' caused the app to crash" (device: iPad Air 11-inch (M3), iPadOS 26.6) - a plain-language description that doesn't distinguish a single tap from a fast double-tap, so it neither confirms nor rules out the double-tap race above. Reviewing for other single-tap-reachable causes of the same crash signature found one real, previously-unaddressed gap: every `Printing.layoutPdf()` call's `onLayout` callback handed `pdf.save()`'s result straight to the native plugin with **no validation at all**:
+
+```dart
+onLayout: (PdfPageFormat format) async => pdf.save(),
+```
+
+If `pdf.save()` ever produced empty or malformed bytes (a rendering edge case, a truncated write), the native plugin would still try to construct a `CGPDFDocument` from it - a second, single-tap-reachable path to the same `EXC_BAD_ACCESS` crash that the re-entrancy guard above doesn't cover (that guard only stops a *second concurrent* call, not a first call with bad data).
+
+**Fix:** added `BackupStorageService._isValidPdfBytes()` - checks the bytes are non-empty and start with the mandatory `%PDF-` header (PDF spec section 7.5.2) - and `_generateValidatedPdfBytes()`, which calls `pdf.save()` then validates before returning. All three `onLayout` callbacks (`printBackup`, `printSimpleToken`, `printIssueCard`) now go through this instead of calling `pdf.save()` directly. An invalid PDF now throws a caught Dart exception, surfaced to the user as an ordinary "Failed to print" error, instead of crossing into native code as bad data.
+
+**Testing:** the validation logic was pulled out as a pure function (`isValidPdfBytesForTesting`, bytes in, bool out) specifically so the reject path is testable without needing to coax `pw.Document.save()` itself into producing bad output. Added 4 tests in `backup_storage_service_test.dart` (accepts valid header, rejects empty bytes, rejects too-short bytes, rejects wrong header) - verified red (all 3 reject cases fail) with the check temporarily stubbed to always return true, then green with it restored. Full suite (78 tests) passes, confirmed stable across repeated runs.
+
+This does not address the possibility of an app-backgrounded-mid-generation interruption, or a genuine iOS 26/M3-specific bug in the plugin's own native layer unrelated to anything on the Dart side - both remain unaddressable from this codebase; see recommendations 3-5 below.
+
 ## Follow-Up Recommendations (not part of this change)
 
 1. ~~Apply the same guard to `recovery_backup_screen.dart` and `supplier_issue_card.dart`~~ - done, see "Wider Audit" above.

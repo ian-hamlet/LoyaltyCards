@@ -131,6 +131,32 @@ If `pdf.save()` ever produced empty or malformed bytes (a rendering edge case, a
 
 This does not address the possibility of an app-backgrounded-mid-generation interruption, or a genuine iOS 26/M3-specific bug in the plugin's own native layer unrelated to anything on the Dart side - both remain unaddressable from this codebase; see recommendations 3-5 below.
 
+## Final Verification: Every Print/Save Instance, by Screen (2026-08-06)
+
+Confirmed by direct search of the codebase, not from memory, that both fixes (the re-entrancy guard and the PDF-bytes validation) are applied everywhere they need to be, with no stragglers:
+
+| Screen | Button | Method | Re-entrancy guard (double-tap fix) | PDF-bytes validation (single-tap fix) | Regression test |
+|---|---|---|---|---|---|
+| `recovery_backup_screen.dart` | Print Backup | `printBackup()` | ✅ `_isPrinting` | ✅ via `_generateValidatedPdfBytes` | `recovery_backup_screen_test.dart` |
+| `supplier_stamp_card.dart` (Stamp Setup / Express Mode) | Print | `printSimpleToken()` | ✅ `_isPrinting` | ✅ via `_generateValidatedPdfBytes` | `supplier_stamp_card_test.dart` |
+| `supplier_issue_card.dart` (Issue Card) | Print | `printIssueCard()` | ✅ `_isPrinting` | ✅ via `_generateValidatedPdfBytes` | `supplier_issue_card_test.dart` |
+
+Verification commands and results:
+
+```
+$ grep -rn "Printing.layoutPdf" source/supplier_app/lib source/customer_app/lib
+```
+Returns exactly the 3 call sites above (`backup_storage_service.dart` lines 50, 616, 1025) - no others exist in either app.
+
+```
+$ grep -rn "pdf\.save()" source/supplier_app/lib source/customer_app/lib
+```
+Returns exactly one call - the one inside `_generateValidatedPdfBytes` itself. No path exists where a `pw.Document` is saved and handed to the native plugin without going through validation first.
+
+**Scope note:** the *Save to Files* button on `recovery_backup_screen.dart` is a different operation - it writes a PNG directly to disk and never touches `Printing.layoutPdf` or `pdf.save()`, so the PDF-bytes validation fix doesn't apply there (there's nothing PDF-shaped to validate). It does have the re-entrancy guard (`_isSavingToFiles`), from the earlier round of fixes, but was never in scope for the PDF-specific gap closed above.
+
+**Share button comparison:** considered whether the three Share buttons (which share the same re-entrancy-guard pattern) have an equivalent single-tap "bad data reaches native code unchecked" gap. Concluded no - `share_plus`'s native call (`channel.invokeMethod('share', paramsMap)`) is a single one-shot request handing the OS a file path; unlike `CGPDFDocumentGetNumberOfPages`, it doesn't parse the file's internal structure on a background thread to compute something like a page count, so there's no equivalent native-parse-of-malformed-data mechanism for it to crash on. No corresponding fix was needed on the Share side.
+
 ## Follow-Up Recommendations (not part of this change)
 
 1. ~~Apply the same guard to `recovery_backup_screen.dart` and `supplier_issue_card.dart`~~ - done, see "Wider Audit" above.

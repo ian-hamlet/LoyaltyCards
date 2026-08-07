@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.0+19] - 2026-07-28 - CURRENT
+## [2.0.1+20] - 2026-08-06 - CURRENT
+
+**Status:** Built on `develop`, not yet built/uploaded as an IPA or submitted. Responds to an Apple App Review rejection of the 2.0.0+19 submission - see CRASH-001 below. Patch version bump - bug fixes and copy changes only, no format/behavior break.
+
+### Fixed
+- **CRASH-001: native `EXC_BAD_ACCESS` crash printing the Stamp Setup QR code (supplier app).** Apple's App Review rejection reported a crash on iPad Air 11-inch (M3), iPadOS 26.6, tapping "Print." Traced to `EXC_BAD_ACCESS` inside `CGPDFDocumentGetNumberOfPages`, on a background thread UIKit spins up itself to compute the page count for the native Print Preview screen. Root cause: the Stamp Setup screen's Print button had no guard against a fast double-tap, which could fire two concurrent `Printing.layoutPdf()` calls and race the native plugin's print-job setup. Fixed by adding a busy-state guard (`_isPrinting`) that disables the button while a print job is in flight. Audited every other call site of `BackupStorageService`'s print/share/save methods and found the identical unguarded-button gap on 5 more buttons across `recovery_backup_screen.dart` (Print Backup, Share via Email, Save to Files) and `supplier_issue_card.dart` (Print, Share) - all fixed the same way. Regression tests added for all 6 locations (`supplier_stamp_card_test.dart`, `supplier_issue_card_test.dart`, `recovery_backup_screen_test.dart`), each verified red (native call fires twice with the guard removed) before green. Full writeup: `docs/project-management/CRASH-001-stamp-print-race-condition.md`.
+- **CRASH-001 follow-up:** every `Printing.layoutPdf()` call handed `pdf.save()`'s output straight to the native plugin with no validation - a second, single-tap-reachable path to the same crash if PDF generation ever produced empty or malformed bytes. Added `BackupStorageService._isValidPdfBytes()` (non-empty, correct `%PDF-` header) ahead of all 3 print paths (`printBackup`, `printSimpleToken`, `printIssueCard`); invalid output now surfaces as an ordinary caught "Failed to print" error instead of reaching native code.
+- **UI-001: unreadable text on How It Works info panels in dark mode (both apps).** The supplier app's 3 panels (after Step 5) and the customer app's 4 panels (after Step 4) paired a fixed `BrandColors.xContainer` background (light-mode-only) with theme-adaptive foreground text - in dark mode the background never changed while the text flipped to a light tone meant for dark surfaces, producing unreadable light-on-light text. Fixed by switching both background and foreground to matching `colorScheme` container/on-container pairs. Full writeup: `docs/project-management/UI-001-how-it-works-dark-mode-contrast.md`.
+
+### Changed
+- Express Mode redemption copy (customer app) now explicitly frames the exchange as a witnessed handshake rather than an implicit self-service action: the pre-redeem instruction tells the customer to show their supplier the completed card before tapping Redeem, the confirm dialog reframes the tap itself as the moment of exchange (previously asked "have you received your reward?" - backwards, since nothing had happened yet), and the redeemed-card screen now explicitly says to show it to the supplier to confirm. No logic changed - copy only, in `customer_card_detail.dart`.
+
+### Documentation
+- Added `docs/project-management/CRASH-001-stamp-print-race-condition.md` and `docs/project-management/UI-001-how-it-works-dark-mode-contrast.md`, both cross-referenced from `DEFECT_TRACKER.md`.
+
+## [2.0.0+19] - 2026-07-28
 
 **Status:** Built, uploaded, and **submitted for App Store review 2026-07-28** (both apps). Release branch `releases/v2.0.0-build19`. First submission beyond TestFlight for this project.
 

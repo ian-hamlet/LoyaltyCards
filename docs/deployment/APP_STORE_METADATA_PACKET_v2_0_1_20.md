@@ -4,7 +4,7 @@
 
 Use this file as copy/paste source for App Store Connect listing fields.
 
-**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_0_19.md`. Changes from that version: rewrote both apps' Promotional Text and Description to be less "adverty" and more plainly factual - explicit framing that this is a free, no-cost pair of apps built to help small/smaller outlets, that customers need the companion app on their own device, and that Express Mode is trust-based rather than cryptographically verified (the prior Customer App description's "Secure by Design - Cryptographically verified stamps prevent fraud" bullet was inaccurate as a blanket claim, since only Secure Mode stamps are signed - Express Mode relies on the supplier witnessing the redemption). Subtitles, Keywords, App Review Notes, and all Decisions carried forward unchanged from the prior packet.
+**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_0_19.md`. Changes from that version: rewrote both apps' Promotional Text and Description to be less "adverty" and more plainly factual - explicit framing that this is a free, no-cost pair of apps built to help small/smaller outlets, that customers need the companion app on their own device, and that Express Mode is trust-based rather than cryptographically verified (the prior Customer App description's "Secure by Design - Cryptographically verified stamps prevent fraud" bullet was inaccurate as a blanket claim, since only Secure Mode stamps are signed - Express Mode relies on the supplier witnessing the redemption). Also rewrote both apps' App Review Notes: the Supplier App notes now explain the CRASH-001 fix directly (what caused it, what changed, how to verify) since this build is a resubmission after a crash rejection; the Customer App notes clarify this is a copy/UI-only update paired with the Supplier App's crash fix. Subtitles, Keywords, and all Decisions carried forward unchanged from the prior packet.
 
 ---
 
@@ -68,7 +68,9 @@ No signup, no email, no phone number, no account, no tracking. Nothing about you
 
 Download LoyaltyCards and start collecting.
 
-### App Review Notes (Customer) - unchanged
+### App Review Notes (Customer) - REVISED
+This update contains no functional changes to this app - only a dark mode text-contrast fix on the "How It Works" screen and clarified wording on the card redemption screens (making explicit that the supplier witnesses the redemption). It is being resubmitted alongside LoyaltyCards Business version 2.0.1, which contains an unrelated crash fix (see that app's notes) - the two apps are versioned together as a paired system.
+
 This app is one side of a two-app system and is tested together with LoyaltyCards Business (the Business app issues cards; this app holds them). No login is required on either app, and no backend account exists - all features are offline-capable, since the two apps communicate only via QR code scanned directly between devices.
 
 To review the full flow: install LoyaltyCards Business on a second device or the Simulator, create a test business in Express Mode (fastest to test - no time-limited QR codes involved), issue a card from the Business app, and scan it with this app. Secure Mode exercises the same flow but with cryptographically signed, time-limited QR codes generated per stamp from the Business app.
@@ -128,7 +130,15 @@ Built with smaller, independent outlets in mind - cafes, salons, and similar sho
 
 Download LoyaltyCards Business and get started.
 
-### App Review Notes (Supplier) - unchanged
+### App Review Notes (Supplier) - REVISED
+This build (2.0.1, build 20) fixes the crash reported in the previous review: tapping Print could cause the app to crash. Please see the reproduction and verification steps below - this note explains exactly what changed so it's easy to confirm the fix.
+
+What caused it: a double-tap race condition. The Print and Share buttons on the Stamp Setup, Issue Card, and Recovery Backup screens had no protection against a second tap while the first print/share job was still starting - a fast repeat tap could fire two concurrent native print calls, which crashed.
+
+What changed: every Print/Share/Save button in this app now disables itself immediately on the first tap and shows a loading indicator until that job completes, so a second tap during that window does nothing. We also added validation of the generated PDF data before it's handed to the native print API, as a defense-in-depth fix for a related but separate crash path in the same code.
+
+How to verify: on the Stamp Setup or Issue Card screen, generate a QR code, then tap Print (or Share) rapidly several times in a row. The button should visibly disable/show a spinner on the first tap and stay disabled until the print or share sheet opens; repeated taps during that window should have no effect and the app should not crash. The same applies to the three buttons (Print Backup, Share via Email, Save to Files) on the Recovery Backup screen.
+
 This app is the business side of a two-app system and is reviewed together with LoyaltyCards (customer app) - this app issues and manages cards, the customer app holds them. No login is required on either app, and no backend account exists - all features are offline-capable.
 
 To review the full flow: create a test business (Express Mode is fastest to review - no time-limited QR codes involved), then install LoyaltyCards on a second device or the Simulator to scan the "issue card" and "add stamp" QR codes this app displays. Secure Mode exercises the same flow but generates a freshly signed, time-limited QR code per stamp instead of a static reusable one.

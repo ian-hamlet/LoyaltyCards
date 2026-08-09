@@ -4,7 +4,7 @@
 
 Use this file as copy/paste source for App Store Connect listing fields.
 
-**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_0_19.md`. Changes from that version: rewrote both apps' Promotional Text and Description to be less "adverty" and more plainly factual - explicit framing that this is a free, no-cost pair of apps built to help small/smaller outlets, that customers need the companion app on their own device, and that Express Mode is trust-based rather than cryptographically verified (the prior Customer App description's "Secure by Design - Cryptographically verified stamps prevent fraud" bullet was inaccurate as a blanket claim, since only Secure Mode stamps are signed - Express Mode relies on the supplier witnessing the redemption). Also rewrote both apps' App Review Notes: the Supplier App notes now explain the CRASH-001 fix directly (what caused it, what changed, how to verify) since this build is a resubmission after a crash rejection; the Customer App notes clarify this is a copy/UI-only update paired with the Supplier App's crash fix. Subtitles, Keywords, and all Decisions carried forward unchanged from the prior packet.
+**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_0_19.md`. Changes from that version: rewrote both apps' Promotional Text and Description to be less "adverty" and more plainly factual - explicit framing that this is a free, no-cost pair of apps built to help small/smaller outlets, that customers need the companion app on their own device, and that Express Mode is trust-based rather than cryptographically verified (the prior Customer App description's "Secure by Design - Cryptographically verified stamps prevent fraud" bullet was inaccurate as a blanket claim, since only Secure Mode stamps are signed - Express Mode relies on the supplier witnessing the redemption). Also rewrote both apps' App Review Notes: the Supplier App notes now explain the CRASH-001 fix directly (what caused it, what changed, how to verify) since this build is a resubmission after a crash rejection; the Customer App notes clarify this is a copy/UI-only update paired with the Supplier App's crash fix. Added a "What's New in This Version" field for both apps (required for every version submission, wasn't present in the prior packet since that was the first-ever submission with no update history). Subtitles, Keywords, and all Decisions carried forward unchanged from the prior packet.
 
 ---
 
@@ -35,6 +35,9 @@ Use this file as copy/paste source for App Store Connect listing fields.
 
 ### Subtitle (30 chars max) - unchanged
 Collect stamps, earn rewards
+
+### What's New in This Version - NEW (required field, not present in prior packet)
+Fixed unreadable text in dark mode on the How It Works screen, and clarified the wording on the card redemption screens.
 
 ### Promotional Text (170 chars max) - REVISED
 Free companion app for LoyaltyCards Business. Scan a shop's code to collect digital stamps - no signup, nothing stored, works offline.
@@ -88,6 +91,9 @@ To review the full flow: install LoyaltyCards Business on a second device or the
 
 ### Subtitle (30 chars max) - unchanged
 Digital loyalty card system
+
+### What's New in This Version - NEW (required field, not present in prior packet)
+Fixed a crash that could occur when tapping Print. Fixed unreadable text in dark mode on the How It Works screen.
 
 ### Promotional Text (170 chars max) - REVISED
 A free pair of apps that help small shops run a simple digital stamp card - no fees, no accounts. Customers need the companion LoyaltyCards app on their own phone.

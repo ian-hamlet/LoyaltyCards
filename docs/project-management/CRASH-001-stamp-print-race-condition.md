@@ -157,6 +157,12 @@ Returns exactly one call - the one inside `_generateValidatedPdfBytes` itself. N
 
 **Share button comparison:** considered whether the three Share buttons (which share the same re-entrancy-guard pattern) have an equivalent single-tap "bad data reaches native code unchecked" gap. Concluded no - `share_plus`'s native call (`channel.invokeMethod('share', paramsMap)`) is a single one-shot request handing the OS a file path; unlike `CGPDFDocumentGetNumberOfPages`, it doesn't parse the file's internal structure on a background thread to compute something like a page count, so there's no equivalent native-parse-of-malformed-data mechanism for it to crash on. No corresponding fix was needed on the Share side.
 
+## Decision: Resubmitting Without Hardware Reproduction (2026-08-10)
+
+The crash could not be reproduced locally on any available simulator or device, and no iPad Air 11" (M3) - the exact model in the crash report - is available to test against directly. Both identified single-tap and double-tap trigger paths are fixed and individually regression-tested (see "Final Verification" table above), but neither fix has been confirmed against the real crash signature on matching hardware, since the race is timing-dependent and didn't reproduce even on other iPad hardware/simulators.
+
+Decision: proceed to App Review resubmission on this basis rather than delay further trying to source M3 hardware. Recommendation 3 below (switch `Printing.layoutPdf` to `Printing.sharePdf`/`share_plus`, which would avoid the crashing native code path - `UIPrintInteractionController`/`CGPDFDocumentGetNumberOfPages` - entirely rather than just guarding against the two theorized triggers) was considered as a lower-risk alternative but not applied for this submission, since it changes the print UX (native print preview vs. share sheet) and the two applied fixes already close every code-reachable path identified during root-cause analysis. Recommendation 5 (monitor App Store Connect for recurrence after this ships) is now the primary remaining verification signal.
+
 ## Follow-Up Recommendations (not part of this change)
 
 1. ~~Apply the same guard to `recovery_backup_screen.dart` and `supplier_issue_card.dart`~~ - done, see "Wider Audit" above.

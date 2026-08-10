@@ -2,8 +2,8 @@
 
 **A Privacy-First Digital Loyalty Card System**
 
-Version 2.0.0+19
-Last Updated: July 28, 2026
+Version 2.0.1+20
+Last Updated: August 10, 2026
 
 ---
 
@@ -113,7 +113,7 @@ LoyaltyCards offers two modes to fit different business needs:
 - Sarah scans "Add Your Stamp" → gets first stamp
 - Every visit: Sarah scans "Add Your Stamp" → gets stamp
 - 10th visit: Sarah's card is complete
-- Sarah scans "Redeem Your Reward" QR → card resets, new card created
+- Sarah shows her completed card to Joe and taps "Redeem Reward" (no scan, just a witnessed tap) → card resets, new card created
 - Total time per visit: **2 seconds**
 
 **Why This Works:**
@@ -205,8 +205,8 @@ Customer Phone ←--QR Codes--→ Supplier Device
 1. Supplier prints static QR codes
 2. Customer scans "issue card" QR → card created on phone
 3. Customer scans "add stamp" QR → stamp added to phone
-4. When complete, customer scans "redeem" QR → card resets on phone
-5. **No supplier interaction** needed (except redemption verification)
+4. When complete, customer shows the card to the supplier and taps Redeem (no QR - a witnessed tap) → card resets on phone
+5. **No supplier app interaction** needed - the supplier just witnesses the redemption
 
 **Secure Mode Flow:**
 1. Supplier generates time-limited QR on device

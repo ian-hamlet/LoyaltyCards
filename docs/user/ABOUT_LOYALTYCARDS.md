@@ -2,7 +2,7 @@
 
 **A Privacy-First Digital Loyalty Card System**
 
-Version 2.0.1+20
+Version 2.0.2+21
 Last Updated: August 10, 2026
 
 ---

@@ -17,12 +17,27 @@ Examples:
 
 ## Current Releases
 
-### v2.0.0+19 - Build 19 (🟢 Submitted for App Store Review)
+### v2.0.2+21 - Build 21 (🟡 In Progress - Resubmission Candidate)
+- **Date:** August 10, 2026
+- **Platform:** Not yet built or uploaded
+- **Branch:** `develop` only - not yet merged to `main`, no release branch created yet
+- **Version:** 2.0.2+21
+- **Status:** 🟡 Code and metadata ready on `develop`; pending merge to `main`, `releases/v2.0.2-build21` creation, archive/upload, and ASC resubmission
+- **Focus:** Fix v2.0.0+19's App Review rejection (CRASH-001) plus a Transporter-flagged deployment-target issue found while preparing that fix
+- **Major Changes:**
+  - CRASH-001: native `EXC_BAD_ACCESS` crash tapping Print on the supplier app's Stamp Setup screen, reported by App Review on an iPad Air 11" (M3). Fixed with a re-entrancy guard on all 6 print/share/save buttons across 3 screens, plus PDF-bytes validation ahead of every native print call. Full writeup: `docs/project-management/CRASH-001-stamp-print-race-condition.md`.
+  - UI-001: unreadable dark-mode text on both apps' How It Works info panels.
+  - Express Mode redemption copy clarified as an explicit witnessed handshake (customer app).
+  - Raised `IPHONEOS_DEPLOYMENT_TARGET` from 13.0 to 15.0 in both apps - Transporter flagged 13.0 during the (never-completed) v2.0.1+20 upload attempt; Apple requires 15.0+ for all uploads starting Spring 2027.
+- **Note:** v2.0.1+20 (2026-08-06) was prepared with the CRASH-001/UI-001 fixes but never uploaded - the deployment-target issue was caught first. Its metadata packet (`APP_STORE_METADATA_PACKET_v2_0_1_20.md`) is superseded by `APP_STORE_METADATA_PACKET_v2_0_2_21.md`.
+- **Next Steps:** Merge `develop` to `main`, create `releases/v2.0.2-build21`, `flutter build ipa --release` both apps, upload via Transporter, re-enter metadata into ASC, resubmit for review.
+
+### v2.0.0+19 - Build 19 (🔴 Rejected by App Review)
 - **Date:** July 28, 2026
 - **Platform:** App Store Connect — first submission beyond TestFlight
 - **Branch:** main, develop, `releases/v2.0.0-build19`
 - **Version:** 2.0.0+19
-- **Status:** 🟢 SUBMITTED — awaiting Apple review
+- **Status:** 🔴 REJECTED 2026-08-05 — CRASH-001 (native crash tapping Print, supplier app). See v2.0.2+21 above for the fix and resubmission.
 - **Focus:** Security/fraud fixes surfaced by a multi-role review pass, plus App Store readiness (metadata, public site, App Privacy disclosure)
 - **Major Changes:**
   - **Breaking (v2.0.0+18):** QR token format changed (new signed fields from the security review) — pre-review printed QR codes fail signature verification against the new signed data. Acceptable since the app has never had real-world users.

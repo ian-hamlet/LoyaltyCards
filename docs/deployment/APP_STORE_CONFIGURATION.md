@@ -212,7 +212,7 @@ This document specifies the configuration requirements for App Store submission,
 | iOS 15+ | ✅ Full support | ✅ Full support | ✅ Works |
 | iOS 16+ | ✅ Full support | ✅ Full support | ✅ Works |
 
-**Minimum Requirement:** iOS 11.3+ (via local_auth package compatibility)
+**`local_auth` package's own floor:** iOS 11.3+. **App's actual minimum (2026-08-10):** iOS 15.0+ - `IPHONEOS_DEPLOYMENT_TARGET` was raised from 13.0 in both apps' Xcode project settings, since Apple requires 15.0+ for all App Store Connect uploads starting Spring 2027 (Transporter had already begun flagging 13.0 as a warning). The app won't install below its own deployment target regardless of what `local_auth` alone could theoretically support.
 
 ### iPhone Models
 

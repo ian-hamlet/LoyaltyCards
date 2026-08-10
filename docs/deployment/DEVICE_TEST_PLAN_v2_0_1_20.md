@@ -1,5 +1,7 @@
 # Device Test Plan - v2.0.1+20
 
+**Still applies to v2.0.2+21:** v2.0.1+20 was never uploaded (Transporter flagged its deployment target before that happened) - v2.0.2+21 carries the identical app-facing changes plus an invisible `IPHONEOS_DEPLOYMENT_TARGET` fix, so every test step below is unchanged. Not renamed to avoid duplicating the file for a build-config-only difference.
+
 **Purpose:** Verify the CRASH-001 print-crash fix and do a light regression pass over the other changes in this release, before rebuilding and resubmitting to Apple.
 
 **Apps under test:** Supplier App (LoyaltyCards Business) and Customer App (LoyaltyCards - Digital Stamps)

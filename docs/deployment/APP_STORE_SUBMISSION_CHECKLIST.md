@@ -1,14 +1,14 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v2.0.0+19**  
+**LoyaltyCards v2.0.2+21**  
 **Customer App:** LoyaltyCards - Digital Stamps  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** Submitted  
-**Last Updated:** July 28, 2026
+**Target Release:** Resubmission in progress  
+**Last Updated:** August 10, 2026
 
-**Status note:** 🟢 **Both apps submitted for App Store review 2026-07-28**, version 2.0.0, build 19 (`releases/v2.0.0-build19`). This is the first submission beyond TestFlight for this project. Everything below has been updated to reflect what was actually entered into App Store Connect for this submission — treat any box still unchecked as a genuine open item, not an oversight.
+**Status note:** 🟡 **v2.0.0+19 was submitted 2026-07-28 and rejected by App Review** — CRASH-001, a native crash tapping Print on the supplier app's Stamp Setup screen (full writeup: `docs/project-management/CRASH-001-stamp-print-race-condition.md`). v2.0.1+20 was prepared to fix it but never uploaded — Transporter flagged its `IPHONEOS_DEPLOYMENT_TARGET = 13.0` before the upload completed (Apple requires 15.0+ starting Spring 2027). **v2.0.2+21 (current) is the actual resubmission candidate**, carrying both the CRASH-001 fix and the deployment-target fix. Metadata for this version: `APP_STORE_METADATA_PACKET_v2_0_2_21.md`. Everything below reflects the last real submission (2.0.0+19) unless marked otherwise — re-verify against ASC before resubmitting, since a rejected build can reset some fields.
 
-**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 (current) fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below. **Built, uploaded, and submitted for App Store review** 2026-07-28.
+**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 (current) carries the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required.
 
 ---
 
@@ -16,11 +16,15 @@
 
 ### ✅ Code & Build Preparation
 
-- [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.0.0+19`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
-- [x] **Version number confirmed** — v2.0.0+19 is the current `develop`/`main` version
-- [x] **All code merged to `main` branch** — `main`/`develop` equalized at `02f82c7`
-- [x] **Release branch created** `releases/v2.0.0-build19` — created from `main` at `02f82c7`, pushed as a permanent snapshot
-- [x] **Archive builds completed** for v2.0.0+19
+**v2.0.0+19 (rejected submission, for the record):** all items below were true and checked for that build — final build number, version confirmed, merged to `main` at `02f82c7`, release branch `releases/v2.0.0-build19`, archived, uploaded, submitted 2026-07-28. Rejected for CRASH-001.
+
+**v2.0.2+21 (current resubmission candidate) — reset to unchecked, not yet done:**
+
+- [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.0.2+21`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
+- [x] **Version number confirmed** — v2.0.2+21 is the current `develop` version
+- [ ] **All code merged to `main` branch** — `main` still at `40bfa18` (2.0.0+19 docs), `develop` has moved ahead through the CRASH-001/UI-001/deployment-target fixes; not yet equalized
+- [ ] **Release branch created** `releases/v2.0.2-build21` — not yet created
+- [ ] **Archive builds completed** for v2.0.2+21
   ```bash
   cd source/customer_app
   flutter clean && flutter pub get
@@ -30,12 +34,12 @@
   flutter clean && flutter pub get
   flutter build ipa --release
   ```
-- [x] **IPA files uploaded to App Store Connect** via Transporter — both apps uploaded
-- [x] **Build processing complete** in App Store Connect — build 19 selected and submitted for both apps
-- [x] **All automated tests passing** against current `develop`/`main` at the time of submission
+- [ ] **IPA files uploaded to App Store Connect** via Transporter
+- [ ] **Build processing complete** in App Store Connect
+- [x] **All automated tests passing** against current `develop`
 - [x] **`flutter analyze` clean**
-- [x] **Critical bugs resolved** (zero CRITICAL/HIGH defects open)
-- [x] **Submitted for App Store review** 2026-07-28 (both apps) — first submission beyond TestFlight
+- [x] **Critical bugs resolved** (CRASH-001 fixed; zero other CRITICAL/HIGH defects open)
+- [ ] **Submitted for App Store review** — pending build/upload above
 
 ---
 
@@ -65,7 +69,7 @@
 
 ### 📝 App Descriptions & Marketing
 
-- [x] **Subtitle, Promotional Text, Keywords, Description, App Review Notes** — see [`APP_STORE_METADATA_PACKET_v2_0_0_19.md`](APP_STORE_METADATA_PACKET_v2_0_0_19.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Entered into ASC and submitted 2026-07-28.
+- [ ] **Subtitle, Promotional Text, Keywords, Description, App Review Notes, What's New** — see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Not yet re-entered into ASC for this resubmission (the v2.0.0+19 content is still what's live there from the rejected submission).
 - [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps)
 
 ---
@@ -313,7 +317,7 @@ Please test both apps together following the demo instructions.
 
 ### ✅ Technical Requirements
 
-- [ ] **iOS Minimum Version:** 13.0+ (confirmed in Info.plist)
+- [x] **iOS Minimum Version:** 15.0+ (raised from 13.0 on 2026-08-10, `IPHONEOS_DEPLOYMENT_TARGET` in both apps' `project.pbxproj` - Apple requires 15.0+ for all uploads starting Spring 2027, and Transporter had already started flagging 13.0 as a warning)
 - [ ] **Supported Devices:** iPhone, iPad
 - [ ] **Supported Orientations:** Portrait (primary), landscape (supported)
 - [ ] **App performs as expected** on all device sizes
@@ -364,7 +368,7 @@ Please test both apps together following the demo instructions.
 ### 📦 Pre-Submission Final Checks
 
 - [ ] **Run full regression test** on physical device
-- [ ] **Test on oldest supported iOS** (iOS 13.0)
+- [ ] **Test on oldest supported iOS** (iOS 15.0)
 - [ ] **Test on smallest screen** (iPhone SE)
 - [ ] **Test on largest screen** (iPhone Pro Max)
 - [ ] **Test on iPad** (if supported)
@@ -446,9 +450,9 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟢 **v2.0.0+19 submitted for App Store review 2026-07-28** (both apps), release-branch-snapshotted (`releases/v2.0.0-build19`). Legal/support infrastructure, all decisions, all metadata (subtitle/promo/keywords/description/marketing URL/review notes), the customer app's App Privacy Device ID update, Export Compliance, and all 10 screenshots are entered into App Store Connect. What's left is waiting on Apple's review (typically 24-48 hours) and responding if reviewer questions arise.  
+**Document Status:** 🟡 **v2.0.0+19 was rejected by App Review (CRASH-001)**; **v2.0.2+21 is the pending resubmission**, not yet built or uploaded. Code fixes (CRASH-001 guard + PDF validation, UI-001 dark mode, `IPHONEOS_DEPLOYMENT_TARGET` bump) and metadata (`APP_STORE_METADATA_PACKET_v2_0_2_21.md`) are ready on `develop`. Still needed: merge to `main`, create `releases/v2.0.2-build21`, archive/upload both apps, re-enter the updated metadata/What's New text into ASC (it still shows the rejected build's content), and resubmit.  
 **Maintained by:** Development Team  
-**Last Updated:** July 28, 2026
+**Last Updated:** August 10, 2026
 
 ---
 

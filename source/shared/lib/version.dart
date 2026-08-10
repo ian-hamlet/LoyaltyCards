@@ -406,5 +406,33 @@
 ///   generic message regardless of what's actually at stake.
 /// - Test Coverage: shared 158, customer_app 125, supplier_app 66 - all passing
 
+/// Build 20 Changes:
+/// - CRASH-001: fixed a native EXC_BAD_ACCESS crash printing the Stamp
+///   Setup QR code (supplier app), reported by Apple App Review on iPad
+///   Air 11" (M3). Root cause: the Print button had no re-entrancy guard,
+///   so a fast double-tap could fire two concurrent Printing.layoutPdf()
+///   calls and race the native plugin's print-job setup. Added a
+///   busy-state guard (_isPrinting) to the confirmed crash site and 5
+///   more instances of the identical unguarded-button gap found by
+///   auditing every BackupStorageService print/share/save call site.
+/// - CRASH-001 follow-up: added PDF-bytes validation ahead of every
+///   Printing.layoutPdf() call, closing a second single-tap-reachable
+///   path to the same crash (malformed/empty PDF bytes reaching native
+///   code unchecked).
+/// - UI-001: fixed unreadable text on How It Works info panels in dark
+///   mode (both apps) - a fixed light-mode-only background paired with
+///   theme-adaptive foreground text produced light-on-light text.
+/// - Express Mode redemption copy (customer app) now explicitly frames
+///   the exchange as a witnessed handshake between customer and supplier,
+///   rather than reading as an implicit self-service action.
+/// - Test Coverage: shared/customer/supplier suites all passing (78+
+///   backup service tests including new print-guard regression tests)
+///
+/// Build 21 Changes:
+/// - Raised IPHONEOS_DEPLOYMENT_TARGET from 13.0 to 15.0 in both apps
+///   (project.pbxproj, plus the commented Podfile reference) - Transporter
+///   flagged 13.0 as a warning during the 2.0.1+20 upload attempt; Apple
+///   requires 15.0+ for all App Store Connect uploads starting Spring 2027.
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.1+20';
+const String appVersion = '2.0.2+21';

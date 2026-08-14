@@ -3,12 +3,12 @@
 **LoyaltyCards v2.0.2+21**  
 **Customer App:** LoyaltyCards - Digital Stamps  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** Resubmission in progress  
+**Target Release:** 🟢 LIVE ON THE APP STORE  
 **Last Updated:** August 10, 2026
 
-**Status note:** 🟡 **v2.0.0+19 was submitted 2026-07-28 and rejected by App Review** — CRASH-001, a native crash tapping Print on the supplier app's Stamp Setup screen (full writeup: `docs/project-management/CRASH-001-stamp-print-race-condition.md`). v2.0.1+20 was prepared to fix it but never uploaded — Transporter flagged its `IPHONEOS_DEPLOYMENT_TARGET = 13.0` before the upload completed (Apple requires 15.0+ starting Spring 2027). **v2.0.2+21 (current) is the actual resubmission candidate**, carrying both the CRASH-001 fix and the deployment-target fix. Metadata for this version: `APP_STORE_METADATA_PACKET_v2_0_2_21.md`. Everything below reflects the last real submission (2.0.0+19) unless marked otherwise — re-verify against ASC before resubmitting, since a rejected build can reset some fields.
+**Status note:** 🟢 **v2.0.2+21 passed App Review and is now publicly available on the App Store** (both apps) — the project's first public release. v2.0.0+19 was submitted 2026-07-28 and rejected for CRASH-001, a native crash tapping Print on the supplier app's Stamp Setup screen (full writeup: `docs/project-management/CRASH-001-stamp-print-race-condition.md`). v2.0.1+20 was prepared to fix it but never uploaded — Transporter flagged its `IPHONEOS_DEPLOYMENT_TARGET = 13.0` before the upload completed. v2.0.2+21 carried both the CRASH-001 fix and the deployment-target fix, and is what shipped. Metadata used for this version: `APP_STORE_METADATA_PACKET_v2_0_2_21.md`. This checklist is now historical - see "Post-Submission" below for what's next now that the app is live.
 
-**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 (current) carries the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required.
+**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10.**
 
 ---
 
@@ -18,13 +18,13 @@
 
 **v2.0.0+19 (rejected submission, for the record):** all items below were true and checked for that build — final build number, version confirmed, merged to `main` at `02f82c7`, release branch `releases/v2.0.0-build19`, archived, uploaded, submitted 2026-07-28. Rejected for CRASH-001.
 
-**v2.0.2+21 (current resubmission candidate) — reset to unchecked, not yet done:**
+**v2.0.2+21 (shipped) — complete:**
 
 - [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.0.2+21`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
-- [x] **Version number confirmed** — v2.0.2+21 is the current `develop` version
-- [ ] **All code merged to `main` branch** — `main` still at `40bfa18` (2.0.0+19 docs), `develop` has moved ahead through the CRASH-001/UI-001/deployment-target fixes; not yet equalized
-- [ ] **Release branch created** `releases/v2.0.2-build21` — not yet created
-- [ ] **Archive builds completed** for v2.0.2+21
+- [x] **Version number confirmed** — v2.0.2+21
+- [x] **All code merged to `main` branch** — `main`/`develop` equalized at `4004c08`
+- [x] **Release branch created** `releases/v2.0.2-build21`
+- [x] **Archive builds completed** for v2.0.2+21
   ```bash
   cd source/customer_app
   flutter clean && flutter pub get
@@ -34,12 +34,12 @@
   flutter clean && flutter pub get
   flutter build ipa --release
   ```
-- [ ] **IPA files uploaded to App Store Connect** via Transporter
-- [ ] **Build processing complete** in App Store Connect
+- [x] **IPA files uploaded to App Store Connect** via Transporter
+- [x] **Build processing complete** in App Store Connect
 - [x] **All automated tests passing** against current `develop`
 - [x] **`flutter analyze` clean**
 - [x] **Critical bugs resolved** (CRASH-001 fixed; zero other CRITICAL/HIGH defects open)
-- [ ] **Submitted for App Store review** — pending build/upload above
+- [x] **Submitted for App Store review** — passed, **live on the App Store** as of 2026-08-10
 
 ---
 
@@ -69,7 +69,7 @@
 
 ### 📝 App Descriptions & Marketing
 
-- [ ] **Subtitle, Promotional Text, Keywords, Description, App Review Notes, What's New** — see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Not yet re-entered into ASC for this resubmission (the v2.0.0+19 content is still what's live there from the rejected submission).
+- [x] **Subtitle, Promotional Text, Keywords, Description, App Review Notes, What's New** — see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Entered into ASC and live.
 - [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps)
 
 ---
@@ -385,15 +385,15 @@ Please test both apps together following the demo instructions.
 
 ### 🚀 Submission Process
 
-1. [x] **Upload build to App Store Connect** (via Transporter)
-2. [x] **Select build** for Customer app submission — build 19
-3. [x] **Select build** for Supplier app submission — build 19
+1. [x] **Upload build to App Store Connect** (via Transporter) — build 21
+2. [x] **Select build** for Customer app submission — build 21
+3. [x] **Select build** for Supplier app submission — build 21
 4. [x] **Complete all required fields** in App Store Connect
 5. [x] **Upload screenshots** for all required device sizes
-6. [x] **Submit for review** — both apps submitted 2026-07-28
-7. [ ] **Monitor review status** (typically 24-48 hours) — in progress
-8. [ ] **Respond to App Review** if questions arise (24-hour response time)
-9. [ ] **Release approved apps** (manual or automatic)
+6. [x] **Submit for review** — both apps resubmitted after the v2.0.0+19/CRASH-001 rejection
+7. [x] **Monitor review status** — passed
+8. [x] **Respond to App Review** if questions arise — n/a, resulted in approval
+9. [x] **Release approved apps** — **live on the App Store**
 
 ---
 
@@ -450,7 +450,7 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟡 **v2.0.0+19 was rejected by App Review (CRASH-001)**; **v2.0.2+21 is the pending resubmission**, not yet built or uploaded. Code fixes (CRASH-001 guard + PDF validation, UI-001 dark mode, `IPHONEOS_DEPLOYMENT_TARGET` bump) and metadata (`APP_STORE_METADATA_PACKET_v2_0_2_21.md`) are ready on `develop`. Still needed: merge to `main`, create `releases/v2.0.2-build21`, archive/upload both apps, re-enter the updated metadata/What's New text into ASC (it still shows the rejected build's content), and resubmit.  
+**Document Status:** 🟢 **v2.0.2+21 is LIVE ON THE APP STORE** (both apps), as of 2026-08-10 — the project's first public release. v2.0.0+19 was rejected for CRASH-001 on 2026-08-05; v2.0.2+21 fixed it (plus a Transporter-flagged deployment-target issue) and passed review. This checklist's job is done for this release cycle — see `RELEASES.md` for the release-branch record and `docs/project-management/CRASH-001-stamp-print-race-condition.md` for the crash fix and its ongoing App Store Connect crash-monitoring follow-up.  
 **Maintained by:** Development Team  
 **Last Updated:** August 10, 2026
 

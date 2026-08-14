@@ -1,6 +1,6 @@
 # App Store Metadata Packet (v2.0.2+21)
 
-**Status: DRAFT - not yet submitted.** Supersedes `APP_STORE_METADATA_PACKET_v2_0_1_20.md` before that build was ever uploaded - Transporter flagged `IPHONEOS_DEPLOYMENT_TARGET = 13.0` during the 2.0.1+20 upload attempt (Apple requires 15.0+ for all App Store Connect uploads starting Spring 2027). Fixed by raising both apps' deployment target to 15.0; no app-facing behavior changed. All listing content below is otherwise identical to the 2.0.1+20 packet - it still describes the CRASH-001 print-crash fix, UI-001 dark mode fix, and Express Mode redemption copy clarification, since none of that shipped yet either.
+**Status: LIVE ON THE APP STORE.** This is the content that's actually live for both apps - passed App Review and shipped 2026-08-10, the project's first public release. Supersedes `APP_STORE_METADATA_PACKET_v2_0_1_20.md`, which was superseded before that build was ever uploaded - Transporter flagged `IPHONEOS_DEPLOYMENT_TARGET = 13.0` during the 2.0.1+20 upload attempt (Apple requires 15.0+ for all App Store Connect uploads starting Spring 2027). Fixed by raising both apps' deployment target to 15.0; no app-facing behavior changed beyond that plus the CRASH-001/UI-001 fixes.
 
 Use this file as copy/paste source for App Store Connect listing fields.
 

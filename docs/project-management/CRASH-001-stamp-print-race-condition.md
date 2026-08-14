@@ -1,7 +1,7 @@
 # CRASH-001: Native EXC_BAD_ACCESS Crash Printing Stamp Setup QR Code
 
 **Source:** Apple App Store Connect - Crash Report (App Review, physical device flagged as the reproduction environment)
-**Status:** ✅ FIXED (guard added to the confirmed crash site, then audited and applied to 5 other call sites sharing the identical gap) - pending App Review / TestFlight re-verification
+**Status:** ✅ FIXED and LIVE - v2.0.2+21 (guard added to the confirmed crash site, then audited and applied to 5 other call sites sharing the identical gap) passed App Review and shipped to the App Store 2026-08-10. Ongoing verification is now via App Store Connect crash monitoring rather than review re-verification - see Follow-Up Recommendation 5 below.
 **Priority:** CRITICAL
 **Affected App:** Supplier App (`com.ianhamlet.loyaltycards.supplierApp`)
 **Affected Version:** 2.0.0+19

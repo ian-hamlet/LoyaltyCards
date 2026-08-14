@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.2+21] - 2026-08-10 - CURRENT
 
-**Status:** Built on `develop`, not yet built/uploaded as an IPA. Build-only bump - Transporter flagged the 2.0.1+20 upload attempt for a deployment-target issue; no app behavior changed.
+**Status:** 🟢 **LIVE ON THE APP STORE** - passed App Review and is now available to the public (both apps). First public release. Build-only bump - Transporter flagged the 2.0.1+20 upload attempt for a deployment-target issue; no app behavior changed beyond that plus the CRASH-001/UI-001 fixes carried over from 2.0.1+20.
 
 ### Fixed
 - Raised `IPHONEOS_DEPLOYMENT_TARGET` from 13.0 to 15.0 in both apps (`project.pbxproj`, plus the commented `Podfile` reference) - Apple requires 15.0+ for all App Store Connect uploads starting Spring 2027, and Transporter had already begun flagging 13.0 as a warning on this upload.

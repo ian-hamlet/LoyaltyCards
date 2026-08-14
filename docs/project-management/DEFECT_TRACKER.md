@@ -206,6 +206,16 @@ This document tracks defects from two sources:
 - **Fix Applied:** Switched both background and foreground to matching `colorScheme` container/on-container pairs on all 7 panels, mirroring the pattern already used correctly elsewhere in the codebase
 - **Testing Verified:** `flutter analyze` clean; full suite green on both apps (74 supplier, 125 customer) - color-only change, no new automated test. **Not yet visually verified on-device in light/dark mode** - flagged as the first check when testing resumes.
 
+### ASC-001: Supplier App Category Mismatch on App Store Connect
+- **Source:** User-reported (live App Store listing observed after 2.0.2 approval)
+- **Status:** 📋 BACKLOG - needs verification in App Store Connect
+- **Priority:** MEDIUM
+- **Description:** The live App Store listing for LoyaltyCards Business (Supplier app) shows **Category: Food & Drink**, but the documented submission packet (`APP_STORE_METADATA_PACKET_v2_0_0_19.md` and its successor) records **Primary Category: Business**, **Secondary Category: Productivity**. Not yet confirmed whether this was changed deliberately at some point in App Store Connect, or drifted from what was actually submitted.
+- **Impact:** Also raised in the same conversation: the app is hard to find via App Store search shortly after approval (direct link works, search doesn't surface it). Most of that is expected for a brand-new app with no install/review history and normal search-index lag, but a Category mismatch would compound it - people browsing/searching by category or generic terms like "loyalty"/"business" would be looking in the wrong place if the app is filed under Food & Drink.
+- **Fix Required:** In App Store Connect → App Information → Category, check the current Primary/Secondary Category values for the Supplier app. If Food & Drink wasn't intentional, correct it to Business (Primary) / Productivity (Secondary) as documented. Category is generally editable without a new version/build, but confirm whether ASC prompts a review pass when saved.
+- **Assigned To:**
+- **Target Build:** Next available (metadata-only, no code change)
+
 ### CR-007: Card Issuance Logging Race Condition
 - **Source:** Code Review
 - **Status:** ✅ FIXED

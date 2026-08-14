@@ -1,10 +1,14 @@
 # App Store Metadata Packet (v2.0.2+21)
 
-**Status: LIVE ON THE APP STORE.** This is the content that's actually live for both apps - passed App Review and shipped 2026-08-10, the project's first public release. Supersedes `APP_STORE_METADATA_PACKET_v2_0_1_20.md`, which was superseded before that build was ever uploaded - Transporter flagged `IPHONEOS_DEPLOYMENT_TARGET = 13.0` during the 2.0.1+20 upload attempt (Apple requires 15.0+ for all App Store Connect uploads starting Spring 2027). Fixed by raising both apps' deployment target to 15.0; no app-facing behavior changed beyond that plus the CRASH-001/UI-001 fixes.
+**Status: LIVE ON THE APP STORE**, with two confirmed corrections needed. Passed App Review and shipped 2026-08-10, the project's first public release. Supersedes `APP_STORE_METADATA_PACKET_v2_0_1_20.md`, which was superseded before that build was ever uploaded - Transporter flagged `IPHONEOS_DEPLOYMENT_TARGET = 13.0` during the 2.0.1+20 upload attempt (Apple requires 15.0+ for all App Store Connect uploads starting Spring 2027). Fixed by raising both apps' deployment target to 15.0; no app-facing behavior changed beyond that plus the CRASH-001/UI-001 fixes.
+
+**⚠️ Category correction needed (found 2026-08-10):** checked the live App Store Connect App Information page for both apps against this packet. Both apps are actually set to **Primary: Food & Drink, Secondary: Shopping** in ASC - not the Lifestyle/Shopping (customer) or Business/Productivity (supplier) documented below and throughout this project's history. Food & Drink doesn't fit either app's actual positioning (both explicitly cover salons, spas, retail, and farmers markets in their own App Store descriptions, not just food businesses), and it's a particularly poor fit for the supplier app, which is a B2B loyalty-management tool that belongs in **Business**, not a consumer food category. The category values documented in this packet (Lifestyle/Shopping, Business/Productivity) are the **target/correct** values, not yet applied in ASC. Per ASC's own UI: *"To make changes to the app name, category, or privacy policy, create a new app version"* - category can't be edited on the live 2.0.2 (21) version in place; fixing this requires a new version bump. SKU and Primary Language below have also been corrected to match the actual live ASC values (SKU used a different naming convention than planned; Primary Language is UK not US - neither is a functional problem, just doc drift).
+
+**⚠️ Subtitle correction needed (found 2026-08-10):** the customer app's Subtitle field is **blank in ASC** - not outdated, actually empty, meaning nothing shows in that search-result real estate right now. The supplier app's live subtitle ("Digital loyalty card system") matched what was previously documented, but both were purely descriptive rather than differentiating. Revised subtitles below lead with each app's actual differentiator instead (privacy/zero-signup for customer, zero-cost for supplier). Confirmed subtitle is not editable on the current live version in ASC - like Category, it needs the next version bump to apply.
 
 Use this file as copy/paste source for App Store Connect listing fields.
 
-**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_1_20.md`. Only change from that version: Release Version/Build bumped to 2.0.2/21 throughout. Subtitle, What's New, Promotional Text, Keywords, Description, App Review Notes, and Decisions are all carried forward unchanged - see that packet's own "Supersedes" note for what changed relative to v2.0.0+19.
+**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_1_20.md`. Changes from that version: Release Version/Build bumped to 2.0.2/21 throughout; Subtitle revised for both apps 2026-08-10 (see correction note above) - What's New, Promotional Text, Keywords, Description, App Review Notes, and Decisions are all still carried forward unchanged - see that packet's own "Supersedes" note for what changed relative to v2.0.0+19.
 
 ---
 
@@ -12,7 +16,7 @@ Use this file as copy/paste source for App Store Connect listing fields.
 
 - Release Version: 2.0.2
 - Build: 21
-- Primary Language: English (US)
+- Primary Language: English (UK) — corrected 2026-08-10 to match ASC; previously documented (incorrectly) as English (US)
 - Privacy Policy URL: https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
 - Terms of Service URL: https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
 - Support URL: https://ian-hamlet.github.io/LoyaltyCards/support/
@@ -20,21 +24,23 @@ Use this file as copy/paste source for App Store Connect listing fields.
 - Support Contact Email: ian.hamlet@dotconnected.com
 - Marketing URL: https://ian-hamlet.github.io/LoyaltyCards/user/about.html
 
-**Status:** All shared values unchanged from the prior packet.
+**Status:** Primary Language corrected to match ASC (see above). All other shared values confirmed unchanged from the prior packet.
 
 ---
 
 ## Customer App (LoyaltyCards - Digital Stamps)
 
 ### Basic Info
-- App Name: LoyaltyCards - Digital Stamps
+- App Name: LoyaltyCards - Digital Stamps — ⚠️ note: ASC currently shows this app's registered name as "LoyaltyCards Customer Wallet," not this. Not addressed in this pass (out of scope of the category/SKU correction requested) - flagging for a separate decision on which name is actually correct.
 - Bundle ID: com.ianhamlet.loyaltycards.customerApp
-- SKU: loyaltycards-customer-001
-- Primary Category: Lifestyle
-- Secondary Category: Shopping (optional)
+- SKU: loyaltycards-customer-2026 — corrected 2026-08-10 to match ASC; previously documented (incorrectly) as loyaltycards-customer-001
+- Primary Category: Lifestyle — ⚠️ **target value, not yet live.** ASC currently shows Food & Drink. See correction note above.
+- Secondary Category: Shopping (optional) — matches what's live in ASC
 
-### Subtitle (30 chars max) - unchanged
-Collect stamps, earn rewards
+### Subtitle (30 chars max) - REVISED 2026-08-10
+No signup, just stamps
+
+**Status:** ⚠️ **Target value, not yet live.** ASC currently shows this field **blank** for the customer app - not just outdated, actually empty. Previous documented text ("Collect stamps, earn rewards") was purely descriptive; this version leads with the app's actual differentiator (privacy/zero-friction) instead. Confirmed 2026-08-10: subtitle isn't editable on the current live version in ASC - needs the next version bump to apply, same constraint as the Category fix above.
 
 ### What's New in This Version - unchanged from v2.0.1+20
 Fixed unreadable text in dark mode on the How It Works screen, and clarified the wording on the card redemption screens.
@@ -83,14 +89,16 @@ To review the full flow: install LoyaltyCards Business on a second device or the
 ## Supplier App (LoyaltyCards Business)
 
 ### Basic Info
-- App Name: LoyaltyCards Business
+- App Name: LoyaltyCards Business — matches what's live in ASC
 - Bundle ID: com.ianhamlet.loyaltycards.supplierApp
-- SKU: loyaltycards-supplier-001
-- Primary Category: Business
-- Secondary Category: Productivity (optional)
+- SKU: loyaltycards-supplier-2026 — corrected 2026-08-10 to match ASC; previously documented (incorrectly) as loyaltycards-supplier-001
+- Primary Category: Business — ⚠️ **target value, not yet live.** ASC currently shows Food & Drink, a poor fit for a B2B loyalty-management tool. See correction note above.
+- Secondary Category: Productivity (optional) — ⚠️ **target value, not yet live.** ASC currently shows Shopping.
 
-### Subtitle (30 chars max) - unchanged
-Digital loyalty card system
+### Subtitle (30 chars max) - REVISED 2026-08-10
+Free loyalty program for shops
+
+**Status:** ⚠️ **Target value, not yet live.** ASC currently shows "Digital loyalty card system" for this field (matches what was previously documented, but it's purely descriptive). This version leads with the app's strongest differentiator against paid competitors (Square, Fivestars) - zero cost - instead. Confirmed 2026-08-10: subtitle isn't editable on the current live version in ASC - needs the next version bump to apply, same constraint as the Category fix above.
 
 ### What's New in This Version - unchanged from v2.0.1+20
 Fixed a crash that could occur when tapping Print. Fixed unreadable text in dark mode on the How It Works screen.

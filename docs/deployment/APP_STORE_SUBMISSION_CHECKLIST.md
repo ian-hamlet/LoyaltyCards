@@ -47,29 +47,30 @@
 
 #### Customer App: LoyaltyCards - Digital Stamps
 
-- [x] **App Name:** LoyaltyCards - Digital Stamps — confirmed in ASC
+- [ ] **App Name:** LoyaltyCards - Digital Stamps — ⚠️ **checked live 2026-08-10: ASC actually shows "LoyaltyCards Customer Wallet."** Not resolved yet - separate decision needed on which name is correct, out of scope of this pass.
 - [x] **Bundle ID:** `com.ianhamlet.loyaltycards.customerApp` — registered, verified
-- [x] **SKU:** `loyaltycards-customer-001`
-- [x] **Primary Language:** English (US)
-- [x] **Primary Category:** Lifestyle
-- [x] **Secondary Category:** Shopping
+- [x] **SKU:** `loyaltycards-customer-2026` — corrected 2026-08-10 to match live ASC value (previously documented, incorrectly, as `loyaltycards-customer-001`)
+- [x] **Primary Language:** English (UK) — corrected 2026-08-10 to match ASC (previously documented, incorrectly, as English (US))
+- [ ] **Primary Category:** Lifestyle — ⚠️ **checked live 2026-08-10: ASC actually shows Food & Drink.** Target value is Lifestyle; requires a new app version to change (category can't be edited on a live version).
+- [ ] **Secondary Category:** Shopping — actually matches what's live in ASC, unchecked only because it's grouped with Primary Category above pending that version bump
 - [x] **Content Rights:** confirmed
 
 #### Supplier App: LoyaltyCards Business
 
-- [x] **App Name:** LoyaltyCards Business — confirmed in ASC
+- [x] **App Name:** LoyaltyCards Business — confirmed in ASC, matches
 - [x] **Bundle ID:** `com.ianhamlet.loyaltycards.supplierApp` — registered, verified
-- [x] **SKU:** `loyaltycards-supplier-001`
-- [x] **Primary Language:** English (US)
-- [x] **Primary Category:** Business
-- [x] **Secondary Category:** Productivity
+- [x] **SKU:** `loyaltycards-supplier-2026` — corrected 2026-08-10 to match live ASC value (previously documented, incorrectly, as `loyaltycards-supplier-001`)
+- [x] **Primary Language:** English (UK) — corrected 2026-08-10 to match ASC (previously documented, incorrectly, as English (US))
+- [ ] **Primary Category:** Business — ⚠️ **checked live 2026-08-10: ASC actually shows Food & Drink** — a poor fit for a B2B loyalty-management tool. Requires a new app version to change.
+- [ ] **Secondary Category:** Productivity — ⚠️ **checked live 2026-08-10: ASC actually shows Shopping.** Requires a new app version to change.
 - [x] **Content Rights:** confirmed
 
 ---
 
 ### 📝 App Descriptions & Marketing
 
-- [x] **Subtitle, Promotional Text, Keywords, Description, App Review Notes, What's New** — see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Entered into ASC and live.
+- [ ] **Subtitle** — ⚠️ **revised 2026-08-10, not yet live.** Customer app's subtitle is currently blank in ASC; supplier app's live subtitle is purely descriptive. Both revised to lead with each app's differentiator instead - see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md). Not editable on the current live version - needs the next version bump, same as Category.
+- [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Entered into ASC and live.
 - [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps)
 
 ---

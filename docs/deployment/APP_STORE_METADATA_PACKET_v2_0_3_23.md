@@ -1,6 +1,6 @@
 # App Store Metadata Packet (v2.0.3+23)
 
-**Status: DRAFT - builds in progress for TestFlight.** This is the version that actually applies the Category and Subtitle corrections found on 2026-08-10 - both required a new app version to take effect, since ASC doesn't allow editing Category, App Name, or Subtitle on a live version in place. It also ships a real feature: a new Settings "Sharing" section (Tell a Business / Tell a Friend) in both apps, plus a Home-screen shortcut icon in the supplier app, and two bug fixes found during TestFlight-prep testing. What's New text below reflects all of it.
+**Status: Built, uploaded, and TestFlight-tested - not yet entered into ASC or submitted for review.** This is the version that actually applies the Category and Subtitle corrections found on 2026-08-10 - both required a new app version to take effect, since ASC doesn't allow editing Category, App Name, or Subtitle on a live version in place. It also ships a real feature: a new Settings "Sharing" section (Tell a Business / Tell a Friend) in both apps, plus a Home-screen shortcut icon in the supplier app, and two bug fixes found during TestFlight-prep testing - all confirmed working during TestFlight testing 2026-08-15. What's New text below reflects all of it. Next step: paste this content into App Store Connect and submit for review.
 
 Use this file as copy/paste source for App Store Connect listing fields.
 

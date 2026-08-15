@@ -1,14 +1,14 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v2.0.2+21**  
+**LoyaltyCards v2.0.3+23**  
 **Customer App:** LoyaltyCards Customer Wallet  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** 🟢 LIVE ON THE APP STORE  
-**Last Updated:** August 10, 2026
+**Target Release:** 🟡 Tested via TestFlight, preparing for App Store submission  
+**Last Updated:** August 15, 2026
 
-**Status note:** 🟢 **v2.0.2+21 passed App Review and is now publicly available on the App Store** (both apps) — the project's first public release. v2.0.0+19 was submitted 2026-07-28 and rejected for CRASH-001, a native crash tapping Print on the supplier app's Stamp Setup screen (full writeup: `docs/project-management/CRASH-001-stamp-print-race-condition.md`). v2.0.1+20 was prepared to fix it but never uploaded — Transporter flagged its `IPHONEOS_DEPLOYMENT_TARGET = 13.0` before the upload completed. v2.0.2+21 carried both the CRASH-001 fix and the deployment-target fix, and is what shipped. Metadata used for this version: `APP_STORE_METADATA_PACKET_v2_0_2_21.md`. This checklist is now historical - see "Post-Submission" below for what's next now that the app is live.
+**Status note:** 🟢 **v2.0.2+21 is live on the App Store** (shipped 2026-08-10 — see prior status below for that history). 🟡 **v2.0.3+23 has been built, uploaded to App Store Connect, and tested via TestFlight — the Sharing feature and both bug fixes were confirmed working.** Not yet submitted for App Store review: the finalized metadata (Category, Subtitle, Description, What's New, App Review Notes — all drafted in `APP_STORE_METADATA_PACKET_v2_0_3_23.md`) still needs entering into ASC, and no release branch has been created yet for this build (deliberately held until this checklist and the other release-tracking docs are updated first).
 
-**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10.**
+**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10**; v2.0.3+22 added the App Store Category/Subtitle corrections found post-launch but never produced an uploaded build; v2.0.3+23 (current) adds the Sharing feature (Tell a Business / Tell a Friend, both apps) plus two bug fixes found during TestFlight-prep testing (Express Mode stamp routing, a false error on opening Clone/Recovery Backup screens) — **built, uploaded, and tested via TestFlight 2026-08-15; not yet submitted for review.**
 
 ---
 
@@ -41,6 +41,22 @@
 - [x] **Critical bugs resolved** (CRASH-001 fixed; zero other CRITICAL/HIGH defects open)
 - [x] **Submitted for App Store review** — passed, **live on the App Store** as of 2026-08-10
 
+**v2.0.3+23 (current) — in progress:**
+
+- [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.0.3+23`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
+- [x] **Version number confirmed** — v2.0.3+23 (version 2.0.3 unchanged from +22, build bumped only)
+- [x] **All code merged to `main` branch** — `main`/`develop` equalized at `ea4e2ee`
+- [ ] **Release branch created** `releases/v2.0.3-build23` — deliberately not yet created, pending this documentation pass
+- [x] **Archive builds completed** for v2.0.3+23 — built via `source/build_both_apps.sh`, both IPAs verified (valid zip, correct 2.0.3/23 embedded in Info.plist)
+- [x] **IPA files uploaded to App Store Connect** via Transporter
+- [x] **Build processing complete** in App Store Connect
+- [x] **TestFlight testing completed** — Sharing feature and both bug fixes confirmed working on-device
+- [x] **All automated tests passing** (shared 160, customer 128, supplier 80)
+- [x] **`flutter analyze` clean**
+- [x] **Critical bugs resolved** (both TestFlight-prep bugs fixed; zero other CRITICAL/HIGH defects open)
+- [ ] **Metadata entered into App Store Connect** — Category, Subtitle, Description, What's New, App Review Notes from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` still need pasting in (see "Common Metadata Checklist" below)
+- [ ] **Submitted for App Store review** — pending metadata entry above
+
 ---
 
 ### 📱 App Store Connect - Basic Information
@@ -51,8 +67,8 @@
 - [x] **Bundle ID:** `com.ianhamlet.loyaltycards.customerApp` — registered, verified
 - [x] **SKU:** `loyaltycards-customer-2026` — corrected 2026-08-10 to match live ASC value (previously documented, incorrectly, as `loyaltycards-customer-001`)
 - [x] **Primary Language:** English (UK) — corrected 2026-08-10 to match ASC (previously documented, incorrectly, as English (US))
-- [ ] **Primary Category:** Lifestyle — ⚠️ **checked live 2026-08-10: ASC actually shows Food & Drink.** Target value is Lifestyle; requires a new app version to change (category can't be edited on a live version).
-- [ ] **Secondary Category:** Shopping — actually matches what's live in ASC, unchecked only because it's grouped with Primary Category above pending that version bump
+- [ ] **Primary Category:** Lifestyle — ⚠️ **checked live 2026-08-10: ASC actually shows Food & Drink.** The version needed to change it (2.0.3+23) is already built and uploaded - this is now just a manual field entry on that version's ASC page, not blocked on another build.
+- [ ] **Secondary Category:** Shopping — already matches what's live in ASC, unchecked only because it's grouped with Primary Category above
 - [x] **Content Rights:** confirmed
 
 #### Supplier App: LoyaltyCards Business
@@ -61,17 +77,17 @@
 - [x] **Bundle ID:** `com.ianhamlet.loyaltycards.supplierApp` — registered, verified
 - [x] **SKU:** `loyaltycards-supplier-2026` — corrected 2026-08-10 to match live ASC value (previously documented, incorrectly, as `loyaltycards-supplier-001`)
 - [x] **Primary Language:** English (UK) — corrected 2026-08-10 to match ASC (previously documented, incorrectly, as English (US))
-- [ ] **Primary Category:** Business — ⚠️ **checked live 2026-08-10: ASC actually shows Food & Drink** — a poor fit for a B2B loyalty-management tool. Requires a new app version to change.
-- [ ] **Secondary Category:** Productivity — ⚠️ **checked live 2026-08-10: ASC actually shows Shopping.** Requires a new app version to change.
+- [ ] **Primary Category:** Business — ⚠️ **checked live 2026-08-10: ASC actually shows Food & Drink** — a poor fit for a B2B loyalty-management tool. The version needed to change it (2.0.3+23) is already built and uploaded - this is now just a manual field entry.
+- [ ] **Secondary Category:** Productivity — ⚠️ **checked live 2026-08-10: ASC actually shows Shopping.** Same - just needs entering on the 2.0.3+23 version page.
 - [x] **Content Rights:** confirmed
 
 ---
 
 ### 📝 App Descriptions & Marketing
 
-- [ ] **Subtitle** — ⚠️ **revised 2026-08-10, not yet live.** Customer app's subtitle is currently blank in ASC; supplier app's live subtitle is purely descriptive. Both revised to lead with each app's differentiator instead - see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md). Not editable on the current live version - needs the next version bump, same as Category.
-- [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — see [`APP_STORE_METADATA_PACKET_v2_0_2_21.md`](APP_STORE_METADATA_PACKET_v2_0_2_21.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). Entered into ASC and live.
-- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps)
+- [ ] **Subtitle** — ⚠️ **revised, not yet live.** Customer app's subtitle is currently blank in ASC; supplier app's live subtitle is purely descriptive. Both revised to lead with each app's differentiator instead - see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md). The 2.0.3+23 version needed to change it is already built and uploaded - just needs entering.
+- [ ] **Promotional Text, Keywords, Description, App Review Notes, What's New** — see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md), the single source of truth for this content (this checklist previously duplicated it inline, which let a stale "Simple Mode" copy drift out of sync — don't re-duplicate it here again). What's live in ASC right now is still the v2.0.2+21 content - needs re-entering for 2.0.3+23, especially What's New and App Review Notes which now describe the Sharing feature.
+- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps) — unchanged, already correct
 
 ---
 
@@ -386,6 +402,8 @@ Please test both apps together following the demo instructions.
 
 ### 🚀 Submission Process
 
+**v2.0.2+21 (shipped) — complete:**
+
 1. [x] **Upload build to App Store Connect** (via Transporter) — build 21
 2. [x] **Select build** for Customer app submission — build 21
 3. [x] **Select build** for Supplier app submission — build 21
@@ -395,6 +413,18 @@ Please test both apps together following the demo instructions.
 7. [x] **Monitor review status** — passed
 8. [x] **Respond to App Review** if questions arise — n/a, resulted in approval
 9. [x] **Release approved apps** — **live on the App Store**
+
+**v2.0.3+23 (current) — in progress:**
+
+1. [x] **Upload build to App Store Connect** (via Transporter) — build 23, both apps
+2. [ ] **Select build** for Customer app submission — build 23 uploaded and processed, but not yet selected on the version's ASC submission page
+3. [ ] **Select build** for Supplier app submission — same
+4. [ ] **Complete all required fields** in App Store Connect — Category, Subtitle, Description, What's New, App Review Notes all still need entering (see above)
+5. [x] **Screenshots** — unchanged from v2.0.2+21, still accurate (no screens the 10 staged screenshots show have changed)
+6. [ ] **Submit for review** — pending metadata entry above
+7. [ ] **Monitor review status**
+8. [ ] **Respond to App Review** if questions arise
+9. [ ] **Release approved apps**
 
 ---
 
@@ -451,9 +481,9 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟢 **v2.0.2+21 is LIVE ON THE APP STORE** (both apps), as of 2026-08-10 — the project's first public release. v2.0.0+19 was rejected for CRASH-001 on 2026-08-05; v2.0.2+21 fixed it (plus a Transporter-flagged deployment-target issue) and passed review. This checklist's job is done for this release cycle — see `RELEASES.md` for the release-branch record and `docs/project-management/CRASH-001-stamp-print-race-condition.md` for the crash fix and its ongoing App Store Connect crash-monitoring follow-up.  
+**Document Status:** 🟢 **v2.0.2+21 is LIVE ON THE APP STORE** (both apps), as of 2026-08-10 — the project's first public release. 🟡 **v2.0.3+23 is built, uploaded, and TestFlight-tested** (Sharing feature + two bug fixes confirmed working) but **not yet submitted for review** — metadata still needs entering into ASC (see the checklist items above), and no release branch has been created for it yet. See `RELEASES.md` for the release-branch record once created.  
 **Maintained by:** Development Team  
-**Last Updated:** August 10, 2026
+**Last Updated:** August 15, 2026
 
 ---
 

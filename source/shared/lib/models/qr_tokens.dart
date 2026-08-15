@@ -181,7 +181,10 @@ class CardIssueToken extends QRToken {
     if (businessId.isEmpty || businessName.isEmpty || publicKey.isEmpty) {
       return false;
     }
-    if (stampsRequired < 5 || stampsRequired > 20) {
+    // TEST-016: must match the onboarding slider's minimum (min: 3 in
+    // supplier_onboarding.dart) - this was previously 5, silently rejecting
+    // every card issued by a business configured for 3 or 4 stamps.
+    if (stampsRequired < 3 || stampsRequired > 20) {
       return false;
     }
     if (!brandColor.startsWith('#') || brandColor.length != 7) {

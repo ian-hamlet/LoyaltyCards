@@ -154,11 +154,13 @@ void main() {
     });
 
     test('CardIssueToken - rejects invalid stamp requirements', () {
+      // TEST-016: minimum must match the onboarding slider's min (3), not the
+      // stale value (5) that silently rejected every 3- or 4-stamp business.
       final tooFew = CardIssueToken(
         businessId: 'business-123',
         businessName: 'Test Coffee',
         publicKey: 'test-public-key',
-        stampsRequired: 3,
+        stampsRequired: 2,
         brandColor: '#FF5733',
         signature: 'test-signature',
         timestamp: 1234567890000,
@@ -177,6 +179,34 @@ void main() {
       );
 
       expect(tooMany.isValid(), false);
+    });
+
+    test('CardIssueToken - TEST-016: accepts minimum stamp requirement (3) in both Secure and Express mode', () {
+      final secureAtMinimum = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 3,
+        brandColor: '#FF5733',
+        mode: OperationMode.secure,
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+
+      expect(secureAtMinimum.isValid(), true);
+
+      final expressAtMinimum = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 3,
+        brandColor: '#FF5733',
+        mode: OperationMode.simple,
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+
+      expect(expressAtMinimum.isValid(), true);
     });
 
     test('CardIssueToken - rejects invalid brand color', () {

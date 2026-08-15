@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.2+21] - 2026-08-10 - CURRENT
+## [2.0.3+22] - 2026-08-15 - CURRENT
+
+**Status:** In progress on `develop`, not yet built/uploaded. Fixes App Store Connect metadata drift found after the 2.0.2+21 launch (Category, Subtitle) - both required a new version, since ASC won't allow editing them on a live version. An in-app companion-app QR share feature is still planned for this same build.
+
+### Fixed
+- App Store Connect metadata corrections queued since 2.0.2+21 shipped, now finalized as real submission content in `APP_STORE_METADATA_PACKET_v2_0_3_22.md`: Category (both apps were live under Food & Drink - a poor fit, especially for the B2B supplier app - now Lifestyle/Shopping for the customer app and Business/Productivity for the supplier app) and Subtitle (customer app's was blank in ASC; both now lead with each app's actual differentiator instead of a generic description).
+- Resolved the customer app name question flagged 2026-08-10: "LoyaltyCards Customer Wallet" is correct (matches live ASC), not "LoyaltyCards - Digital Stamps" as every doc previously said - corrected throughout the repo.
+
+### Added
+- Each app's description now links directly to the companion app's App Store listing, so a reader doesn't have to search for it.
+- Printable "Get the App" QR flyer for suppliers to display at checkout (`marketing/supplier_app/get-the-app-flyer.html`, published copy linked from the Supplier Setup Guide and site homepage) - uses the official Apple "Download on the App Store" badge SVGs, switching between black/white variants by color scheme and forcing black for print.
+
+## [2.0.2+21] - 2026-08-10
 
 **Status:** 🟢 **LIVE ON THE APP STORE** - passed App Review and is now available to the public (both apps). First public release. Build-only bump - Transporter flagged the 2.0.1+20 upload attempt for a deployment-target issue; no app behavior changed beyond that plus the CRASH-001/UI-001 fixes carried over from 2.0.1+20.
 

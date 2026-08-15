@@ -445,9 +445,14 @@
 ///   Stamps" as every doc previously said.
 /// - Added each app's App Store URL directly into the other's description,
 ///   so a reader doesn't have to search for the companion app.
-/// - Planned for this build: in-app QR/share feature pointing to the
-///   companion app (supplier app promoting the customer app first), plus
-///   a printable supplier point-of-sale asset pack.
+/// - Added a printable "Get the App" QR flyer for suppliers to display at
+///   checkout (marketing/supplier_app/get-the-app-flyer.html, published
+///   copy linked from the Supplier Setup Guide and site homepage). Uses
+///   the official Apple "Download on the App Store" badge SVGs.
+/// - Finalized APP_STORE_METADATA_PACKET_v2_0_3_22.md with the Category
+///   and Subtitle corrections baked in as the real submission content.
+/// - Still planned for this build: in-app QR/share feature pointing to
+///   the companion app (supplier app promoting the customer app first).
 
 /// # source/shared/lib/version.dart:
 const String appVersion = '2.0.3+22';

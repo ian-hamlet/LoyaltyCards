@@ -433,6 +433,21 @@
 ///   (project.pbxproj, plus the commented Podfile reference) - Transporter
 ///   flagged 13.0 as a warning during the 2.0.1+20 upload attempt; Apple
 ///   requires 15.0+ for all App Store Connect uploads starting Spring 2027.
+///
+/// Build 22 Changes (in progress):
+/// - App Store Connect metadata corrections found post-launch: Category
+///   (both apps are live under Food & Drink, target is Lifestyle/Shopping
+///   for the customer app and Business/Productivity for the supplier app)
+///   and Subtitle (customer app's was blank in ASC; both revised to lead
+///   with each app's actual differentiator instead of generic description).
+/// - Resolved the customer app name question: "LoyaltyCards Customer
+///   Wallet" is correct (matches live ASC), not "LoyaltyCards - Digital
+///   Stamps" as every doc previously said.
+/// - Added each app's App Store URL directly into the other's description,
+///   so a reader doesn't have to search for the companion app.
+/// - Planned for this build: in-app QR/share feature pointing to the
+///   companion app (supplier app promoting the customer app first), plus
+///   a printable supplier point-of-sale asset pack.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.2+21';
+const String appVersion = '2.0.3+22';

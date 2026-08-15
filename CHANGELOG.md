@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.3+23] - 2026-08-15 - CURRENT
 
-**Status:** 🟡 Build bump only (version stays 2.0.3) - built, uploaded, and tested via TestFlight; Sharing feature and both bug fixes confirmed working. Not yet submitted for App Store review - metadata still needs entering into ASC. Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
+**Status:** 🟡 Build bump only (version stays 2.0.3) - built, uploaded, TestFlight-tested (Sharing feature and both bug fixes confirmed working), and **submitted for App Store review 2026-08-15** (both apps, Release set to Manual). Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
 
 ### Added
 - **Sharing feature (both apps):** new Settings section, "Sharing," with "Tell a Business" (QR code + native share-sheet link to LoyaltyCards Business - for a customer referring a shop, or a shop owner referring another shop) and "Tell a Friend" (same, but to LoyaltyCards - for customer-to-customer referral, or a shop pointing a new customer at the wallet app). Built as a reusable `AppReferralScreen` widget in the shared package rather than three near-identical screens, since the same pattern is needed in both apps. The supplier app also gets a small "Tell a Friend" shortcut icon on the Home screen's app bar, since a shop needs this one tap away during a live checkout interaction, not buried in Settings. Settings reordered in both apps to put Sharing alongside the other identity/account-level sections.

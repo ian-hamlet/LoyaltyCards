@@ -17,20 +17,20 @@ Examples:
 
 ## Current Releases
 
-### v2.0.3+23 - Build 23 (🟡 TestFlight-Tested, Preparing for App Store Submission)
+### v2.0.3+23 - Build 23 (🟡 Submitted for App Store Review)
 - **Date:** August 15, 2026
-- **Platform:** App Store Connect (TestFlight) — not yet submitted for App Store review
-- **Branch:** main, develop — no release branch created yet (deliberately held until this doc pass is complete)
+- **Platform:** App Store Connect — submitted for App Store review, awaiting Apple's decision
+- **Branch:** main, develop, `releases/v2.0.3-build23`
 - **Version:** 2.0.3+23
-- **Status:** 🟡 Built, uploaded via Transporter, and tested via TestFlight — Sharing feature and both bug fixes confirmed working on-device. Metadata (Category, Subtitle, Description, What's New, App Review Notes) still needs entering into ASC before submission.
+- **Status:** 🟡 Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), and submitted for App Store review 2026-08-15. Release set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
 - **Focus:** Companion-app/friend referral sharing (both apps), plus two bugs found during TestFlight-prep testing
 - **Major Changes:**
   - **Sharing feature:** new Settings section in both apps, "Tell a Business" (QR + share link to LoyaltyCards Business) and "Tell a Friend" (QR + share link to LoyaltyCards) - built as a reusable `AppReferralScreen` widget in the shared package. Supplier app also gets a "Tell a Friend" shortcut icon on the Home screen's app bar.
   - **Fixed:** Express Mode stamps were routed to the newest card for a business instead of an older card with existing progress and room - `getAllCards().firstWhere(...)` always returns the most recently created match; fixed to use the existing `CardRepository.findCardWithSpace()` helper.
   - **Fixed:** Clone to Another Device and Create Recovery Backup screens briefly showed a false "failed" error on open - their loading flag started `false` but `initState()` kicks off async auth-then-generate work immediately, leaving a gap before the flag caught up. Started both `true` instead.
-  - Category/Subtitle corrections (queued since v2.0.2+21 shipped) finalized as real submission content - see `APP_STORE_METADATA_PACKET_v2_0_3_23.md`.
+  - Category/Subtitle corrections (queued since v2.0.2+21 shipped) finalized as real submission content - see `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. Also caught the customer app's Promotional Text, which turned out blank in ASC despite being documented as already-live.
 - **Note:** v2.0.3+22 was build-bumped to +23 before ever producing an uploaded build, once the two bugs above were found during TestFlight-prep testing - see that packet's own superseded note.
-- **Next Steps:** Enter the finalized metadata into App Store Connect, create `releases/v2.0.3-build23`, submit both apps for review.
+- **Next Steps:** Monitor App Store review (typically 24-48 hours); once both apps are approved, manually release them together.
 
 ### v2.0.2+21 - Build 21 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 10, 2026

@@ -215,6 +215,29 @@ void main() {
   }
 
   testWidgets(
+    'first frame shows the loading indicator, not a premature backup body',
+    (tester) async {
+      // Deliberately no settleAfterMount() here - this test is specifically
+      // about the frame that renders immediately after pumpWidget(), before
+      // initState()'s async authenticate-then-generate work has had any
+      // chance to resolve. Regression test for a bug where _isGenerating
+      // started false: that first frame rendered assuming _backup already
+      // existed, instead of showing the loading state that was already
+      // genuinely in flight underneath.
+      final business = await seedBusiness(tester);
+
+      await tester.pumpWidget(MaterialApp(home: RecoveryBackupScreen(business: business)));
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Let the pending auth/generate work and its timers finish before the
+      // next test's setUp() tears down the mocks it depends on.
+      await settleAfterMount(tester);
+      consumeKnownListTileWarning(tester);
+    },
+  );
+
+  testWidgets(
     'CRASH-001: guarded _printBackup disables Print Backup and ignores a second call',
     (tester) async {
       final business = await seedBusiness(tester);

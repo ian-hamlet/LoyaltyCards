@@ -25,7 +25,14 @@ class CloneDeviceScreen extends StatefulWidget {
 
 class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
   SupplierConfigBackup? _cloneQR;
-  bool _isGenerating = false;
+  // Starts true, not false: initState() kicks off authentication
+  // immediately, but _isGenerating isn't set until _generateCloneQR() runs
+  // *after* auth succeeds. Starting false left the first frame rendering
+  // with _isGenerating==false and _cloneQR==null, which fell into the
+  // "Failed to generate clone QR" branch below for that first frame - not
+  // an actual failure, just the state not having caught up to what's
+  // already in flight.
+  bool _isGenerating = true;
   bool _authenticationRequired = true;
   Timer? _countdownTimer;
   Duration? _remainingTime;

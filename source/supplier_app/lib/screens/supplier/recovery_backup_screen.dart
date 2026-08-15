@@ -48,7 +48,13 @@ class RecoveryBackupScreen extends StatefulWidget {
 class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   SupplierConfigBackup? _backup;
   Uint8List? _qrImageBytes;
-  bool _isGenerating = false;
+  // Starts true, not false: same reasoning as CloneDeviceScreen -
+  // initState() kicks off authentication immediately, but _isGenerating
+  // isn't set until the generate step runs *after* auth succeeds. Starting
+  // false let the first frame render the backup screen's body before
+  // _backup existed, instead of showing the loading state that's already
+  // genuinely in flight.
+  bool _isGenerating = true;
   bool _authenticationRequired = true;
   // CRASH-001: guards each distribution method against a fast double-tap
   // firing a second concurrent native call (Printing.layoutPdf /

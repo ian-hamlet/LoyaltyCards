@@ -4,7 +4,7 @@
 
 **Purpose:** Verify the CRASH-001 print-crash fix and do a light regression pass over the other changes in this release, before rebuilding and resubmitting to Apple.
 
-**Apps under test:** Supplier App (LoyaltyCards Business) and Customer App (LoyaltyCards - Digital Stamps)
+**Apps under test:** Supplier App (LoyaltyCards Business) and Customer App (LoyaltyCards Customer Wallet)
 
 **Related:**
 - [`CRASH-001-stamp-print-race-condition.md`](../project-management/CRASH-001-stamp-print-race-condition.md) - full crash analysis and fix details

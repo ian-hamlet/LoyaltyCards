@@ -15,7 +15,7 @@
 
 ## Apps Under Test
 
-**Customer App:** LoyaltyCards - Digital Stamps  
+**Customer App:** LoyaltyCards Customer Wallet  
 **Supplier App:** LoyaltyCards Business
 
 **Devices Required:**

@@ -28,10 +28,10 @@ Use this file as copy/paste source for App Store Connect listing fields.
 
 ---
 
-## Customer App (LoyaltyCards - Digital Stamps)
+## Customer App (LoyaltyCards Customer Wallet)
 
 ### Basic Info
-- App Name: LoyaltyCards - Digital Stamps — ⚠️ note: ASC currently shows this app's registered name as "LoyaltyCards Customer Wallet," not this. Not addressed in this pass (out of scope of the category/SKU correction requested) - flagging for a separate decision on which name is actually correct.
+- App Name: LoyaltyCards Customer Wallet — resolved 2026-08-15: this is the correct name, matching what's live in ASC. Every doc in the repo previously said "LoyaltyCards - Digital Stamps" instead; corrected throughout.
 - Bundle ID: com.ianhamlet.loyaltycards.customerApp
 - SKU: loyaltycards-customer-2026 — corrected 2026-08-10 to match ASC; previously documented (incorrectly) as loyaltycards-customer-001
 - Primary Category: Lifestyle — ⚠️ **target value, not yet live.** ASC currently shows Food & Drink. See correction note above.
@@ -74,6 +74,8 @@ Some shops use Express Mode, where you self-serve and the shop simply checks you
 PRIVACY
 
 No signup, no email, no phone number, no account, no tracking. Nothing about you is collected or sent anywhere - your cards are stored only on your device and exchanged directly with the shop's device over a scanned QR code.
+
+Run a shop and want to offer this? Get LoyaltyCards Business here: https://apple.co/4hFWKsh
 
 Download LoyaltyCards and start collecting.
 
@@ -121,7 +123,7 @@ WHY LOYALTYCARDS BUSINESS?
 
 TWO APPS, ONE SYSTEM
 
-This app is for the shop. Customers need the free companion app, LoyaltyCards, on their own phone to hold their cards - there's no shared server or account, each card is created and stamped directly between your device and theirs via QR code.
+This app is for the shop. Customers need the free companion app, LoyaltyCards, on their own phone to hold their cards - there's no shared server or account, each card is created and stamped directly between your device and theirs via QR code. Point your customers here to get it: https://apple.co/4bYdQ0T
 
 CHOOSE YOUR MODE
 

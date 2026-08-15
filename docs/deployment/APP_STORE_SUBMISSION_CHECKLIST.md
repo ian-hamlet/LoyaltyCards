@@ -1,7 +1,7 @@
 # App Store Submission Checklist
 
 **LoyaltyCards v2.0.2+21**  
-**Customer App:** LoyaltyCards - Digital Stamps  
+**Customer App:** LoyaltyCards Customer Wallet  
 **Supplier App:** LoyaltyCards Business  
 **Target Release:** 🟢 LIVE ON THE APP STORE  
 **Last Updated:** August 10, 2026
@@ -45,9 +45,9 @@
 
 ### 📱 App Store Connect - Basic Information
 
-#### Customer App: LoyaltyCards - Digital Stamps
+#### Customer App: LoyaltyCards Customer Wallet
 
-- [ ] **App Name:** LoyaltyCards - Digital Stamps — ⚠️ **checked live 2026-08-10: ASC actually shows "LoyaltyCards Customer Wallet."** Not resolved yet - separate decision needed on which name is correct, out of scope of this pass.
+- [x] **App Name:** LoyaltyCards Customer Wallet — confirmed correct 2026-08-15, matches ASC
 - [x] **Bundle ID:** `com.ianhamlet.loyaltycards.customerApp` — registered, verified
 - [x] **SKU:** `loyaltycards-customer-2026` — corrected 2026-08-10 to match live ASC value (previously documented, incorrectly, as `loyaltycards-customer-001`)
 - [x] **Primary Language:** English (UK) — corrected 2026-08-10 to match ASC (previously documented, incorrectly, as English (US))

@@ -179,7 +179,7 @@ Examples:
   - TERMS_OF_SERVICE.md (App Store compliance)
   - Updated USER_GUIDE.md and BUILD_21_TESTING_GUIDE.md
 - **Apps:**
-  - LoyaltyCards - Digital Stamps (Customer)
+  - LoyaltyCards Customer Wallet (Customer)
   - LoyaltyCards Business (Supplier)
 
 ### v0.2.0-build15 (TestFlight Stable)
@@ -193,7 +193,7 @@ Examples:
   - All critical defects fixed
   - Stable for internal pilot testing
 - **Apps:**
-  - LoyaltyCards - Digital Stamps (Customer)
+  - LoyaltyCards Customer Wallet (Customer)
   - LoyaltyCards Business (Supplier)
 
 ### v0.2.0-build4 (TestFlight Initial)
@@ -208,7 +208,7 @@ Examples:
   - Privacy-first architecture
   - QR-based stamp issuance and redemption
 - **Apps:**
-  - LoyaltyCards - Digital Stamps (Customer)
+  - LoyaltyCards Customer Wallet (Customer)
   - LoyaltyCards Business (Supplier)
 
 ## Workflow

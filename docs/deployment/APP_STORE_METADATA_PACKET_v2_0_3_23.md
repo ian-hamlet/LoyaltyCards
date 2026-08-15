@@ -41,8 +41,10 @@ No signup, just stamps
 ### What's New in This Version
 New: Settings → Sharing has "Tell a Business" and "Tell a Friend" - each shows a QR code and a share link so you can point someone straight to the companion Business app or invite a friend to LoyaltyCards. Also fixed a bug where a stamp could land on the wrong card when you had more than one active card for the same business.
 
-### Promotional Text (170 chars max) - unchanged
+### Promotional Text (170 chars max)
 Free companion app for LoyaltyCards Business. Scan a shop's code to collect digital stamps - no signup, nothing stored, works offline.
+
+**Status:** ⚠️ Found blank in ASC 2026-08-15 despite being documented as "unchanged"/already live - needs entering. Worth checking the supplier app's Promotional Text too rather than assuming it's actually live.
 
 ### Keywords (100 chars max) - unchanged
 loyalty,rewards,stamps,coffee,local business,qr code,privacy,offline,small business,punch card

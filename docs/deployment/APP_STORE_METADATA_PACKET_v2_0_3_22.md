@@ -1,10 +1,11 @@
 # App Store Metadata Packet (v2.0.3+22)
 
-**Status: DRAFT - not yet submitted.** This is the version that actually applies the Category and Subtitle corrections found on 2026-08-10 - both required a new app version to take effect, since ASC doesn't allow editing Category, App Name, or Subtitle on a live version in place. No app-facing code changes are confirmed for this build yet beyond the version bump itself; an in-app "share the companion app" QR feature is planned for this same build but not yet implemented - **re-check the What's New text below once that lands**, since it's currently written for a metadata-only release.
+**Status: DRAFT - builds in progress for TestFlight.** This is the version that actually applies the Category and Subtitle corrections found on 2026-08-10 - both required a new app version to take effect, since ASC doesn't allow editing Category, App Name, or Subtitle on a live version in place. It also ships a real feature: a new Settings "Sharing" section (Tell a Business / Tell a Friend) in both apps, plus a Home-screen shortcut icon in the supplier app. What's New text below reflects this.
 
 Use this file as copy/paste source for App Store Connect listing fields.
 
 **Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_2_21.md`. Changes from that version:
+- **New feature:** "Sharing" section in both apps' Settings (Tell a Business, Tell a Friend - QR code + native share-sheet link to the companion/friend's app), plus a Home-screen shortcut icon for Tell a Friend in the supplier app.
 - **Category is no longer flagged as a target/blocked value - this version is what actually applies it.** Customer app: Lifestyle/Shopping. Supplier app: Business/Productivity. (Both apps are currently live under Food & Drink/Shopping in ASC - a poor fit, especially for the supplier app, a B2B tool.)
 - **Subtitle likewise no longer flagged - this version applies it.** Customer: "No signup, just stamps" (previously blank in ASC). Supplier: "Free loyalty program for shops" (previously "Digital loyalty card system").
 - App Name, SKU, and Primary Language carried forward unchanged (already corrected to match ASC in the prior packet - see that file's own correction notes for the history).
@@ -42,7 +43,7 @@ Use this file as copy/paste source for App Store Connect listing fields.
 No signup, just stamps
 
 ### What's New in This Version
-Improved our App Store listing, including a clearer way to find our companion business app.
+New: Settings → Sharing has "Tell a Business" and "Tell a Friend" - each shows a QR code and a share link so you can point someone straight to the companion Business app or invite a friend to LoyaltyCards. Also improved our App Store listing.
 
 ### Promotional Text (170 chars max) - unchanged
 Free companion app for LoyaltyCards Business. Scan a shop's code to collect digital stamps - no signup, nothing stored, works offline.
@@ -79,11 +80,13 @@ Run a shop and want to offer this? Get LoyaltyCards Business here: https://apple
 Download LoyaltyCards and start collecting.
 
 ### App Review Notes (Customer)
-This build contains no functional code changes - it corrects the App Store listing's Category (was Food & Drink, now Lifestyle/Shopping) and Subtitle (was blank), and adds a link to the companion app's listing in the description. It is submitted alongside LoyaltyCards Business version 2.0.3, which has the equivalent metadata corrections - the two apps are versioned together as a paired system.
+This build adds a new "Sharing" section to Settings ("Tell a Business" and "Tell a Friend," each a QR code plus a native share-sheet link pointing at the other app's or a friend's copy of this app's App Store listing - no account, network call, or personal data involved). It also corrects the App Store listing's Category (was Food & Drink, now Lifestyle/Shopping) and Subtitle (was blank), and adds a link to the companion app's listing in the description. It is submitted alongside LoyaltyCards Business version 2.0.3, which has the equivalent feature and metadata corrections - the two apps are versioned together as a paired system.
 
 This app is one side of a two-app system and is tested together with LoyaltyCards Business (the Business app issues cards; this app holds them). No login is required on either app, and no backend account exists - all features are offline-capable, since the two apps communicate only via QR code scanned directly between devices.
 
 To review the full flow: install LoyaltyCards Business on a second device or the Simulator, create a test business in Express Mode (fastest to test - no time-limited QR codes involved), issue a card from the Business app, and scan it with this app. Secure Mode exercises the same flow but with cryptographically signed, time-limited QR codes generated per stamp from the Business app.
+
+To review the new Sharing feature: Settings → Sharing → tap either "Tell a Business" or "Tell a Friend" - both show a QR code and a "Share the Link" button that opens the standard iOS share sheet with a plain-text link. No account, camera permission, or network access is required for this feature.
 
 ---
 
@@ -100,7 +103,7 @@ To review the full flow: install LoyaltyCards Business on a second device or the
 Free loyalty program for shops
 
 ### What's New in This Version
-Improved our App Store listing, including a clearer way for your customers to find the companion app.
+New: Settings → Sharing has "Tell a Business" and "Tell a Friend" - each shows a QR code and a share link, so you can point another shop owner to this app or a customer to the companion wallet app in one tap. Tell a Friend also has a shortcut icon right on the Home screen for quick access at checkout. Also improved our App Store listing.
 
 ### Promotional Text (170 chars max) - unchanged
 A free pair of apps that help small shops run a simple digital stamp card - no fees, no accounts. Customers need the companion LoyaltyCards app on their own phone.
@@ -144,11 +147,13 @@ Built with smaller, independent outlets in mind - cafes, salons, and similar sho
 Download LoyaltyCards Business and get started.
 
 ### App Review Notes (Supplier)
-This build contains no functional code changes - it corrects the App Store listing's Category (was Food & Drink, a poor fit for a B2B loyalty-management tool - now Business/Productivity) and Subtitle (was purely descriptive, now leads with the app's zero-cost differentiator), and adds a link to the companion app's listing in the description. It is submitted alongside LoyaltyCards version 2.0.3, which has the equivalent metadata corrections - the two apps are versioned together as a paired system.
+This build adds a new "Sharing" section to Settings ("Tell a Business" and "Tell a Friend," each a QR code plus a native share-sheet link - no account, network call, or personal data involved), plus a matching shortcut icon on the Home screen for Tell a Friend. It also corrects the App Store listing's Category (was Food & Drink, a poor fit for a B2B loyalty-management tool - now Business/Productivity) and Subtitle (was purely descriptive, now leads with the app's zero-cost differentiator), and adds a link to the companion app's listing in the description. It is submitted alongside LoyaltyCards version 2.0.3, which has the equivalent feature and metadata corrections - the two apps are versioned together as a paired system.
 
 This app is the business side of a two-app system and is reviewed together with LoyaltyCards (customer app) - this app issues and manages cards, the customer app holds them. No login is required on either app, and no backend account exists - all features are offline-capable.
 
 To review the full flow: create a test business (Express Mode is fastest to review - no time-limited QR codes involved), then install LoyaltyCards on a second device or the Simulator to scan the "issue card" and "add stamp" QR codes this app displays. Secure Mode exercises the same flow but generates a freshly signed, time-limited QR code per stamp instead of a static reusable one.
+
+To review the new Sharing feature: either tap the person icon in the Home screen's top bar, or go to Settings → Sharing → "Tell a Business" or "Tell a Friend" - both show a QR code and a "Share the Link" button that opens the standard iOS share sheet with a plain-text link. No account, camera permission, or network access is required for this feature.
 
 ---
 

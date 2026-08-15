@@ -297,11 +297,11 @@ class _CustomerSettingsState extends State<CustomerSettings> {
 
                 const Divider(height: 32),
 
-                // App Information Section
+                // Sharing Section
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'App Information',
+                    'Sharing',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -309,9 +309,56 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('Version'),
-                  subtitle: Text(appVersion),
+                  leading: const Icon(Icons.storefront),
+                  title: const Text('Tell a Business'),
+                  subtitle: const Text('Share LoyaltyCards Business with a shop you know'),
+                  onTap: () {
+                    Haptics.light();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AppReferralScreen(
+                          appBarTitle: 'Tell a Business',
+                          appBarColor: const Color(0xFF673AB7),
+                          icon: Icons.storefront,
+                          headline: 'Know a shop that would like this?',
+                          bodyText: 'Show them this code, or share the link, to get '
+                              'LoyaltyCards Business - the free app shops use to run a '
+                              'digital stamp card.',
+                          qrData: AppConstants.supplierAppStoreUrl,
+                          shareText: 'Run a shop and want to offer digital loyalty cards? '
+                              'Get LoyaltyCards Business here: ${AppConstants.supplierAppStoreUrl}',
+                          errorTag: 'ReferBusiness',
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.people_outline),
+                  title: const Text('Tell a Friend'),
+                  subtitle: const Text('Share LoyaltyCards with someone you know'),
+                  onTap: () {
+                    Haptics.light();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AppReferralScreen(
+                          appBarTitle: 'Tell a Friend',
+                          appBarColor: const Color(0xFF673AB7),
+                          icon: Icons.people_outline,
+                          headline: "Know someone who'd like this?",
+                          bodyText: 'Show them this code, or share the link, to get '
+                              'LoyaltyCards - the free app for tracking your loyalty stamps.',
+                          qrData: AppConstants.customerAppStoreUrl,
+                          shareText: 'I use LoyaltyCards to track my stamp cards - it\'s '
+                              'free and no signup needed. Get it here: '
+                              '${AppConstants.customerAppStoreUrl}',
+                          errorTag: 'TellAFriend',
+                        ),
+                      ),
+                    );
+                  },
                 ),
 
                 const Divider(height: 32),
@@ -350,6 +397,25 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                       ),
                     ),
                   ),
+
+                const Divider(height: 32),
+
+                // App Information Section
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'App Information',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: const Text('Version'),
+                  subtitle: Text(appVersion),
+                ),
 
                 const Divider(height: 32),
 

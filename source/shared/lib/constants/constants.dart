@@ -44,6 +44,10 @@ class AppConstants {
   static const int simpleModeDefaultScanIntervalMs = 30000; // 30 seconds default for simple mode (configurable per supplier)
   static const int simpleModeMinScanIntervalMs = 5000; // 5 seconds minimum (prevents abuse)
   static const int simpleModeMaxScanIntervalMs = 60000; // 60 seconds maximum (usability)
+
+  // Companion App Store links (each app points to the other)
+  static const String customerAppStoreUrl = 'https://apple.co/4bYdQ0T'; // LoyaltyCards Customer Wallet
+  static const String supplierAppStoreUrl = 'https://apple.co/4hFWKsh'; // LoyaltyCards Business
 }
 
 /// Typography scale for consistent text sizing

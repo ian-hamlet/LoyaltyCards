@@ -29,6 +29,12 @@ dependencies:
   # kept in sync with the version customer_app/supplier_app depend on directly.
   mobile_scanner: ^7.2.0
 
+  # For AppReferralScreen (QR + share sheet for companion-app/friend
+  # referrals) - kept in sync with the versions customer_app/supplier_app
+  # depend on directly.
+  qr_flutter: ^4.1.0
+  share_plus: ^13.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

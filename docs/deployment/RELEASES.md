@@ -286,6 +286,8 @@ When creating new releases:
 6. Build and upload to TestFlight/App Store
 7. Return to `develop` for continued work
 
+**⚠️ Note on step 4 - merging to `main` publishes the public site immediately, ahead of the actual App Store release.** `.github/workflows/pages.yml` deploys `site/` on every push to `main` that touches it - there's no separate "publish" step. So the moment `main` is equalized, the public site's version stamps and feature descriptions (About page, User Guide, Supplier Setup Guide) go live describing the *in-progress* version, potentially days before App Review actually approves it and it's downloadable. This happened with v2.0.3+23: `main` was equalized once TestFlight testing confirmed the build worked, but the app itself wasn't submitted for review yet at that point. In practice this is low-risk (a version stamp or a feature description being slightly ahead of what's downloadable isn't seriously misleading), but it's worth knowing about - if a release ever needs the site to stay in lockstep with what's actually live, merge `develop` → `main` only once the App Store submission is approved and released, not as soon as testing passes.
+
 ---
 
 **Current branch structure:**

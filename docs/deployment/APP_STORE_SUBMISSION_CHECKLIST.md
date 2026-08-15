@@ -232,12 +232,12 @@ Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`):
 #### Customer App
 - [x] **Price:** Free (no In-App Purchases) — set in ASC
 - [x] **Availability:** All countries/regions
-- [ ] **Release Date:** Automatic or manual release (choose one) — decide once review clears
+- [ ] **Release Date:** ⚠️ **Set to MANUAL release, not automatic.** The two apps are separate ASC submissions and routinely clear review at different speeds - if either is set to automatic release, it can go live while the other is still "In Review," which is a bad state for a paired system (e.g. a customer downloading the Sharing feature's "Tell a Business" flow before the Supplier app it points to has updated). Manual release lets you hold both approved builds and release them together once *both* have passed review.
 
 #### Supplier App
 - [x] **Price:** Free (no In-App Purchases) — set in ASC
 - [x] **Availability:** All countries/regions
-- [ ] **Release Date:** Automatic or manual release — decide once review clears
+- [ ] **Release Date:** ⚠️ **Same as above - set to MANUAL release**, so this app doesn't go live before the Customer app (or vice versa) if their review times diverge.
 
 ---
 

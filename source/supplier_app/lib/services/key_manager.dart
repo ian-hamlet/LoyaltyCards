@@ -16,9 +16,15 @@ class KeyManager {
   // Recovery Backup / Clone Device QR flow. Those flows are unaffected -
   // they re-derive and re-store keys on the new device via a scanned QR,
   // independent of this OS-level accessibility setting.
+  // macOS: the Data Protection Keychain API (the default) requires the
+  // `keychain-access-groups` entitlement, which in turn requires signing
+  // with a real Apple Developer team - not available for local/ad-hoc
+  // debug builds. Falling back to the legacy Keychain API avoids that
+  // entitlement requirement entirely.
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
+    mOptions: MacOsOptions(usesDataProtectionKeychain: false),
   );
 
   factory KeyManager() => _instance;

@@ -451,8 +451,27 @@
 ///   the official Apple "Download on the App Store" badge SVGs.
 /// - Finalized APP_STORE_METADATA_PACKET_v2_0_3_22.md with the Category
 ///   and Subtitle corrections baked in as the real submission content.
-/// - Still planned for this build: in-app QR/share feature pointing to
-///   the companion app (supplier app promoting the customer app first).
+///
+/// Build 23 Changes:
+/// - Added the Sharing feature planned for build 22: Settings gets a new
+///   "Sharing" section in both apps (Tell a Business, Tell a Friend - QR
+///   code + native share-sheet link), built as a reusable AppReferralScreen
+///   widget in the shared package. Supplier app also gets a "Tell a Friend"
+///   shortcut icon on the Home screen's app bar. Settings reordered in both
+///   apps to group Sharing with the other identity-level sections.
+/// - Fixed Express Mode stamps being routed to the newest card for a
+///   business instead of an older card that already had progress and
+///   room - the lookup used getAllCards().firstWhere(...), which always
+///   returns the most recently created match; fixed to use the existing
+///   CardRepository.findCardWithSpace() helper instead.
+/// - Fixed CloneDeviceScreen and RecoveryBackupScreen briefly showing a
+///   false "failed" state on open - their loading flag started false but
+///   initState() kicks off async auth-then-generate work immediately, so
+///   the first frame rendered before that flag caught up. Started both
+///   true instead, matching the pattern already correct elsewhere.
+/// - Metadata packet renamed APP_STORE_METADATA_PACKET_v2_0_3_23.md,
+///   carrying forward the Category/Subtitle corrections from build 22 and
+///   adding What's New text for the Sharing feature.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.3+22';
+const String appVersion = '2.0.3+23';

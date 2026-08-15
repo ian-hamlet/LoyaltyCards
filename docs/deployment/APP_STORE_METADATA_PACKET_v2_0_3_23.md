@@ -1,23 +1,19 @@
-# App Store Metadata Packet (v2.0.3+22)
+# App Store Metadata Packet (v2.0.3+23)
 
-**Status: SUPERSEDED - never produced an uploaded build.** Superseded by `APP_STORE_METADATA_PACKET_v2_0_3_23.md` (build-only bump, same 2.0.3 version) before this build ever got uploaded - two bugs were found during TestFlight-prep testing and fixed under build 23 instead. Kept here as a historical snapshot only.
+**Status: DRAFT - builds in progress for TestFlight.** This is the version that actually applies the Category and Subtitle corrections found on 2026-08-10 - both required a new app version to take effect, since ASC doesn't allow editing Category, App Name, or Subtitle on a live version in place. It also ships a real feature: a new Settings "Sharing" section (Tell a Business / Tell a Friend) in both apps, plus a Home-screen shortcut icon in the supplier app, and two bug fixes found during TestFlight-prep testing. What's New text below reflects all of it.
 
 Use this file as copy/paste source for App Store Connect listing fields.
 
-**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_2_21.md`. Changes from that version:
-- **New feature:** "Sharing" section in both apps' Settings (Tell a Business, Tell a Friend - QR code + native share-sheet link to the companion/friend's app), plus a Home-screen shortcut icon for Tell a Friend in the supplier app.
-- **Category is no longer flagged as a target/blocked value - this version is what actually applies it.** Customer app: Lifestyle/Shopping. Supplier app: Business/Productivity. (Both apps are currently live under Food & Drink/Shopping in ASC - a poor fit, especially for the supplier app, a B2B tool.)
-- **Subtitle likewise no longer flagged - this version applies it.** Customer: "No signup, just stamps" (previously blank in ASC). Supplier: "Free loyalty program for shops" (previously "Digital loyalty card system").
-- App Name, SKU, and Primary Language carried forward unchanged (already corrected to match ASC in the prior packet - see that file's own correction notes for the history).
-- Description carried forward unchanged, including the companion-app URLs added 2026-08-15 (each app's description links directly to the other's App Store listing) - these were written before 2.0.2+21 shipped but never actually got applied to a live version, so this is their first real submission.
-- What's New rewritten for this build (see note above - revisit once the in-app QR feature lands).
+**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_3_22.md`, which never produced an uploaded build - build-only bump, same version (2.0.3). Changes from that version:
+- Two bug fixes landed: Express Mode stamps were being routed to the newest card for a business instead of one that already had progress and room (customer app); Clone/Recovery Backup screens briefly showed a false "failed" error on open (supplier app). See `CHANGELOG.md`'s `[2.0.3+23]` entry for full detail.
+- Build bumped to 23; everything else (Category/Subtitle corrections, Sharing feature, Description, App Review Notes) carried forward unchanged from the v2_0_3_22 packet - see that file's own "Supersedes" note for what changed relative to v2.0.2+21.
 
 ---
 
 ## Shared Listing Values
 
 - Release Version: 2.0.3
-- Build: 22
+- Build: 23
 - Primary Language: English (UK)
 - Privacy Policy URL: https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
 - Terms of Service URL: https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
@@ -43,7 +39,7 @@ Use this file as copy/paste source for App Store Connect listing fields.
 No signup, just stamps
 
 ### What's New in This Version
-New: Settings → Sharing has "Tell a Business" and "Tell a Friend" - each shows a QR code and a share link so you can point someone straight to the companion Business app or invite a friend to LoyaltyCards. Also improved our App Store listing.
+New: Settings → Sharing has "Tell a Business" and "Tell a Friend" - each shows a QR code and a share link so you can point someone straight to the companion Business app or invite a friend to LoyaltyCards. Also fixed a bug where a stamp could land on the wrong card when you had more than one active card for the same business.
 
 ### Promotional Text (170 chars max) - unchanged
 Free companion app for LoyaltyCards Business. Scan a shop's code to collect digital stamps - no signup, nothing stored, works offline.
@@ -103,7 +99,7 @@ To review the new Sharing feature: Settings → Sharing → tap either "Tell a B
 Free loyalty program for shops
 
 ### What's New in This Version
-New: Settings → Sharing has "Tell a Business" and "Tell a Friend" - each shows a QR code and a share link, so you can point another shop owner to this app or a customer to the companion wallet app in one tap. Tell a Friend also has a shortcut icon right on the Home screen for quick access at checkout. Also improved our App Store listing.
+New: Settings → Sharing has "Tell a Business" and "Tell a Friend" - each shows a QR code and a share link, so you can point another shop owner to this app or a customer to the companion wallet app in one tap. Tell a Friend also has a shortcut icon right on the Home screen for quick access at checkout. Also fixed a brief false error when opening Clone to Another Device or Create Recovery Backup.
 
 ### Promotional Text (170 chars max) - unchanged
 A free pair of apps that help small shops run a simple digital stamp card - no fees, no accounts. Customers need the companion LoyaltyCards app on their own phone.

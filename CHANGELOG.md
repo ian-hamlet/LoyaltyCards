@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.3+22] - 2026-08-15 - CURRENT
+## [2.0.3+23] - 2026-08-15 - CURRENT
 
-**Status:** In progress on `develop`, not yet built/uploaded. Fixes App Store Connect metadata drift found after the 2.0.2+21 launch (Category, Subtitle) - both required a new version, since ASC won't allow editing them on a live version. An in-app companion-app QR share feature is still planned for this same build.
-
-### Fixed
-- App Store Connect metadata corrections queued since 2.0.2+21 shipped, now finalized as real submission content in `APP_STORE_METADATA_PACKET_v2_0_3_22.md`: Category (both apps were live under Food & Drink - a poor fit, especially for the B2B supplier app - now Lifestyle/Shopping for the customer app and Business/Productivity for the supplier app) and Subtitle (customer app's was blank in ASC; both now lead with each app's actual differentiator instead of a generic description).
-- Resolved the customer app name question flagged 2026-08-10: "LoyaltyCards Customer Wallet" is correct (matches live ASC), not "LoyaltyCards - Digital Stamps" as every doc previously said - corrected throughout the repo.
+**Status:** Build bump only (version stays 2.0.3) - builds going to TestFlight for testing before this is submitted. Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
 
 ### Added
+- **Sharing feature (both apps):** new Settings section, "Sharing," with "Tell a Business" (QR code + native share-sheet link to LoyaltyCards Business - for a customer referring a shop, or a shop owner referring another shop) and "Tell a Friend" (same, but to LoyaltyCards - for customer-to-customer referral, or a shop pointing a new customer at the wallet app). Built as a reusable `AppReferralScreen` widget in the shared package rather than three near-identical screens, since the same pattern is needed in both apps. The supplier app also gets a small "Tell a Friend" shortcut icon on the Home screen's app bar, since a shop needs this one tap away during a live checkout interaction, not buried in Settings. Settings reordered in both apps to put Sharing alongside the other identity/account-level sections.
 - Each app's description now links directly to the companion app's App Store listing, so a reader doesn't have to search for it.
 - Printable "Get the App" QR flyer for suppliers to display at checkout (`marketing/supplier_app/get-the-app-flyer.html`, published copy linked from the Supplier Setup Guide and site homepage) - uses the official Apple "Download on the App Store" badge SVGs, switching between black/white variants by color scheme and forcing black for print.
+
+### Fixed
+- **Express Mode stamps were routed to the wrong card.** Reported: add a card, collect a few stamps, scan "Add Card" again for the same business (correctly creates a second, empty overflow card), then scan "Add Stamp" - the stamp landed on the empty card instead of the older card that already had progress and room, and repeating the cycle left several partially-filled cards instead of ever finishing one. Root cause: the stamp lookup used `getAllCards().firstWhere(...)`, which always returns the most recently created matching card (`getAllCards()` orders newest-first) with no concept of "has space" or "not redeemed." Fixed by routing through the existing `CardRepository.findCardWithSpace()` helper instead, which was already used correctly elsewhere for overflow handling.
+- **Clone/Recovery Backup screens briefly showed a false error on open.** Reported: opening "Clone to Another Device" showed "Failed to generate clone QR" for a moment before the real screen appeared. Both screens kick off an async authenticate-then-generate flow directly from `initState()`, but their loading flag started `false` and wasn't set `true` until generation actually began - after the biometric prompt resolved - leaving a gap where the first frame rendered with no data and the flag still saying "not loading." Fixed by starting both flags `true`, matching the pattern already correct in three other screens; audited the rest of `supplier_app` for the same shape, no other instances found.
+- App Store Connect metadata corrections queued since 2.0.2+21 shipped, now finalized as real submission content in `APP_STORE_METADATA_PACKET_v2_0_3_23.md`: Category (both apps were live under Food & Drink - a poor fit, especially for the B2B supplier app - now Lifestyle/Shopping for the customer app and Business/Productivity for the supplier app) and Subtitle (customer app's was blank in ASC; both now lead with each app's actual differentiator instead of a generic description).
+- Resolved the customer app name question flagged 2026-08-10: "LoyaltyCards Customer Wallet" is correct (matches live ASC), not "LoyaltyCards - Digital Stamps" as every doc previously said - corrected throughout the repo.
 
 ## [2.0.2+21] - 2026-08-10
 

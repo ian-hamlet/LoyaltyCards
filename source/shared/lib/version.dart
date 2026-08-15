@@ -472,6 +472,17 @@
 /// - Metadata packet renamed APP_STORE_METADATA_PACKET_v2_0_3_23.md,
 ///   carrying forward the Category/Subtitle corrections from build 22 and
 ///   adding What's New text for the Sharing feature.
+///
+/// Build 24 Changes:
+/// - Fixed TEST-016: CardIssueToken.isValid() rejected stampsRequired below
+///   5, but the onboarding "Stamps Required" slider allows a minimum of 3.
+///   Any business configured with 3 or 4 stamps could never issue a valid
+///   card - the token always failed validation on scan, in both Secure and
+///   Express Mode. Lowered the floor to 3 to match the slider. Build 23 is
+///   affected and currently under App Store review; this build supersedes
+///   it. Found while investigating macOS build feasibility for the
+///   supplier app (unrelated, separate branch - the macOS work itself is
+///   not part of this or any release).
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.3+23';
+const String appVersion = '2.0.3+24';

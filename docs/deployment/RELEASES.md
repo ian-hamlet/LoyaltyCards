@@ -17,7 +17,18 @@ Examples:
 
 ## Current Releases
 
-### v2.0.3+23 - Build 23 (🟡 Submitted for App Store Review)
+### v2.0.3+24 - Build 24 (🟡 In Progress)
+- **Date:** August 15, 2026
+- **Platform:** Not yet built/uploaded
+- **Branch:** develop (not yet on main or a releases branch)
+- **Version:** 2.0.3+24
+- **Status:** 🟡 In progress - supersedes v2.0.3+23, which is currently under App Store review and contains TEST-016 (see below). Once ready, this build should be built, tested, and submitted; v2.0.3+23 should not be released even if Apple approves it first, since it has the defect.
+- **Focus:** Single critical bug fix, no new features
+- **Major Changes:**
+  - **Fixed TEST-016:** businesses configured with 3 or 4 required stamps could never issue a valid card - `CardIssueToken.isValid()` rejected `stampsRequired` below 5, but the onboarding slider allows a minimum of 3. Affected both Secure and Express Mode, since both share the same token/validation path. Found while investigating macOS build feasibility for the supplier app (see `feature/macos-supplier-port` - that work is unrelated and not part of this release). Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-016.
+- **Next Steps:** Build both IPAs, upload via Transporter, verify via TestFlight, then submit for App Store review. Once main is fast-forwarded to develop for this build, decide whether to withdraw the v2.0.3+23 submission from Apple review or let it lapse/get superseded at release time.
+
+### v2.0.3+23 - Build 23 (🟡 Submitted for App Store Review - superseded by v2.0.3+24, do not release)
 - **Date:** August 15, 2026
 - **Platform:** App Store Connect — submitted for App Store review, awaiting Apple's decision
 - **Branch:** main, develop, `releases/v2.0.3-build23`

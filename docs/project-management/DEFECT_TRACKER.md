@@ -1699,7 +1699,8 @@ This document tracks defects from two sources:
 - **Impact:** Core card-issuance flow completely broken for any business choosing the two lowest stamp-count options on the slider. Not platform-specific - would reproduce identically on iOS/iPadOS, just hadn't been exercised since default/tested configurations used 8-10 stamps.
 - **Fix Applied:** Lowered the floor in `CardIssueToken.isValid()` (`shared/lib/models/qr_tokens.dart`) from `stampsRequired < 5` to `stampsRequired < 3`, matching the onboarding slider's actual minimum. This is the only place in the codebase that enforced a floor above 0, and it's shared by both Secure and Express (Simple) Mode issuance.
 - **Testing Verified:** Updated `qr_tokens_test.dart`'s existing "rejects invalid stamp requirements" test (previously asserted 3 stamps was invalid - encoded the bug as expected behavior; now asserts 2 is the invalid boundary). Added a new test explicitly asserting 3 stamps is valid in both `OperationMode.secure` and `OperationMode.simple` (Express). Full `shared` suite green (161 tests).
-- **Fix Branch:** `fix/TEST-016-stamps-required-minimum-mismatch` (off `develop`)
+- **Fix Branch:** `fix/TEST-016-stamps-required-minimum-mismatch` (off `develop`, merged and deleted)
+- **Target Build:** Build 24 (v2.0.3+24) - v2.0.3+23 is currently under App Store review and contains this defect; must not be released, superseded by Build 24 once submitted
 - **Notes:** Found while empirically testing supplier_app on a non-Apple-Silicon Mac (separate feasibility investigation, branch `feature/macos-supplier-port`) - creating a fresh 3- and 4-stamp test business to probe QR scan reliability surfaced this as a genuine, unrelated, pre-existing app defect.
 
 ### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production

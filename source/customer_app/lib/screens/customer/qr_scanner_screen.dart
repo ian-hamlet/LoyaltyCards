@@ -369,15 +369,20 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     if ((token.cardId == 'express-mode-stamp' || token.cardId == 'simple-mode-stamp') && token.businessId.isNotEmpty) {
       AppLogger.qr('Express Mode Stamp Detected');
       AppLogger.business('Looking up card by businessId: ${token.businessId}');
-      final allCards = await repository.getAllCards();
-      try {
-        card = allCards.firstWhere(
-          (c) => c.businessId == token.businessId,
-        );
+      // findCardWithSpace (not getAllCards().firstWhere) - it excludes
+      // redeemed/full cards and, when more than one active card exists for
+      // this business (e.g. after an overflow-created empty card), picks
+      // the one with the most stamps already collected rather than
+      // whichever happens to match first. getAllCards() orders newest-first,
+      // so the old firstWhere here always routed new stamps onto the most
+      // recently created card instead of finishing off one already partway
+      // full - reported as stamps landing on a fresh empty card while an
+      // older, closer-to-complete card for the same business sat untouched.
+      card = await repository.findCardWithSpace(token.businessId);
+      if (card != null) {
         AppLogger.business('Found card with ID: ${card.id}');
-      } catch (e) {
-        AppLogger.debug('No card found for businessId: ${token.businessId}');
-        card = null;
+      } else {
+        AppLogger.debug('No card with space found for businessId: ${token.businessId}');
       }
     } else {
       // Secure mode: look up by exact cardId

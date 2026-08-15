@@ -217,11 +217,74 @@ void main() {
         stampsRequired: 1,
         stampsCollected: 0,
       );
-      
+
       await repository.insertCard(card);
-      
+
       final retrieved = await repository.getCardById(card.id);
       expect(retrieved, isNotNull);
+    });
+  });
+
+  group('CardRepository.findCardWithSpace - Express Mode stamp routing regression', () {
+    // Reported bug: after an overflow-created a second, empty card for the
+    // same business, scanning an Express Mode "Add Stamp" QR added the
+    // stamp to the newest (empty) card instead of the older card that
+    // already had progress and room. Root cause was qr_scanner_screen.dart
+    // looking cards up via getAllCards().firstWhere(...) - getAllCards()
+    // orders newest-first, so firstWhere always found the just-created
+    // empty card. Fixed by routing through findCardWithSpace() instead,
+    // which is exercised directly here.
+    test('prefers the card with more stamps over a newer, emptier card for the same business', () async {
+      final olderPartialCard = createTestCard(
+        id: 'card-older-partial',
+        businessId: 'business-express',
+        stampsRequired: 10,
+        stampsCollected: 4,
+      );
+      await repository.insertCard(olderPartialCard);
+
+      // Ensure a distinct, later created_at than the first insert - the DB
+      // column has second-level precision in practice, and this is what
+      // actually reproduces the bug (a same-millisecond insert wouldn't).
+      await Future.delayed(const Duration(seconds: 1));
+
+      final newerEmptyCard = createTestCard(
+        id: 'card-newer-empty',
+        businessId: 'business-express',
+        stampsRequired: 10,
+        stampsCollected: 0,
+      );
+      await repository.insertCard(newerEmptyCard);
+
+      final selected = await repository.findCardWithSpace('business-express');
+
+      expect(selected, isNotNull);
+      expect(
+        selected!.id,
+        'card-older-partial',
+        reason: 'The card with existing progress should be topped up before '
+            'a newer, emptier card for the same business - not the other '
+            'way around, regardless of which was created more recently.',
+      );
+    });
+
+    test('excludes a fully redeemed card even if it would otherwise match', () async {
+      final redeemedCard = createTestCard(
+        id: 'card-redeemed',
+        businessId: 'business-express-2',
+        stampsRequired: 5,
+        stampsCollected: 5,
+      ).copyWith(isRedeemed: true);
+      await repository.insertCard(redeemedCard);
+
+      final selected = await repository.findCardWithSpace('business-express-2');
+
+      expect(selected, isNull);
+    });
+
+    test('returns null when no card exists for the business at all', () async {
+      final selected = await repository.findCardWithSpace('business-with-no-cards');
+      expect(selected, isNull);
     });
   });
 }

@@ -97,6 +97,31 @@ class _SupplierHomeState extends State<SupplierHome> {
             },
           ),
           IconButton(
+            icon: const Icon(Icons.people_outline),
+            tooltip: 'Tell a Friend',
+            onPressed: () {
+              Haptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AppReferralScreen(
+                    appBarTitle: 'Tell a Friend',
+                    appBarColor: const Color(0xFF2C3E50),
+                    icon: Icons.people_outline,
+                    headline: 'New customer without the app?',
+                    bodyText: 'Show them this code, or share the link, to get '
+                        'LoyaltyCards - the free app customers use to hold their '
+                        'stamp cards.',
+                    qrData: AppConstants.customerAppStoreUrl,
+                    shareText: 'Get LoyaltyCards - the free app for tracking your '
+                        'loyalty stamps. Download here: ${AppConstants.customerAppStoreUrl}',
+                    errorTag: 'TellAFriend',
+                  ),
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
               Haptics.light();

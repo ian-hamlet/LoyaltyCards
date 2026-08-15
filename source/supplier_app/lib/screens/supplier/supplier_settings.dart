@@ -261,6 +261,135 @@ class _SupplierSettingsState extends State<SupplierSettings> {
 
           const Divider(height: 32),
 
+          // Backup & Recovery Section
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Backup & Recovery',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.backup, color: Colors.blue),
+            title: const Text('Create Recovery Backup'),
+            subtitle: const Text(
+              'Save your business configuration to prevent data loss',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Haptics.medium();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecoveryBackupScreen(
+                    business: widget.business,
+                    isFirstTime: false,
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.device_hub, color: Colors.green),
+            title: const Text('Clone to Another Device'),
+            subtitle: const Text(
+              'Set up this business on additional devices',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Haptics.medium();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CloneDeviceScreen(
+                    business: widget.business,
+                  ),
+                ),
+              );
+            },
+          ),
+
+          const Divider(height: 32),
+
+          // Sharing Section
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Sharing',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.storefront),
+            title: const Text('Tell a Business'),
+            subtitle: const Text(
+              'Share LoyaltyCards Business with another shop you know',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Haptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AppReferralScreen(
+                    appBarTitle: 'Tell a Business',
+                    appBarColor: const Color(0xFF2C3E50),
+                    icon: Icons.storefront,
+                    headline: 'Know another business that would like this?',
+                    bodyText: 'Show them this code, or share the link, to get '
+                        'LoyaltyCards Business - the free app for running a digital '
+                        'stamp card program.',
+                    qrData: AppConstants.supplierAppStoreUrl,
+                    shareText: 'Run a shop and want to offer digital loyalty cards? '
+                        'Get LoyaltyCards Business here: ${AppConstants.supplierAppStoreUrl}',
+                    errorTag: 'ReferBusiness',
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.people_outline),
+            title: const Text('Tell a Friend'),
+            subtitle: const Text(
+              'Help new customers find the LoyaltyCards app',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Haptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AppReferralScreen(
+                    appBarTitle: 'Tell a Friend',
+                    appBarColor: const Color(0xFF2C3E50),
+                    icon: Icons.people_outline,
+                    headline: 'New customer without the app?',
+                    bodyText: 'Show them this code, or share the link, to get '
+                        'LoyaltyCards - the free app customers use to hold their '
+                        'stamp cards.',
+                    qrData: AppConstants.customerAppStoreUrl,
+                    shareText: 'Get LoyaltyCards - the free app for tracking your '
+                        'loyalty stamps. Download here: ${AppConstants.customerAppStoreUrl}',
+                    errorTag: 'TellAFriend',
+                  ),
+                ),
+              );
+            },
+          ),
+
+          const Divider(height: 32),
+
           // Security Section
           const Padding(
             padding: EdgeInsets.all(16),
@@ -313,60 +442,6 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             leading: const Icon(Icons.info_outline),
             title: const Text('Version'),
             subtitle: Text(appVersion),
-          ),
-          const Divider(height: 32),
-
-          // Backup & Recovery Section
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Backup & Recovery',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.backup, color: Colors.blue),
-            title: const Text('Create Recovery Backup'),
-            subtitle: const Text(
-              'Save your business configuration to prevent data loss',
-              style: TextStyle(fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Haptics.medium();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => RecoveryBackupScreen(
-                    business: widget.business,
-                    isFirstTime: false,
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.device_hub, color: Colors.green),
-            title: const Text('Clone to Another Device'),
-            subtitle: const Text(
-              'Set up this business on additional devices',
-              style: TextStyle(fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Haptics.medium();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CloneDeviceScreen(
-                    business: widget.business,
-                  ),
-                ),
-              );
-            },
           ),
           const Divider(height: 32),
 

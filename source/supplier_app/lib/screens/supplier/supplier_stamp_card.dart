@@ -231,7 +231,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 spacing: 8,
                 runSpacing: 8,
                 alignment: WrapAlignment.center,
-                children: List.generate(7, (index) {
+                children: List.generate(5, (index) {
                   final count = index + 1;
                   final isSelected = selectedCount == count;
                   return ChoiceChip(

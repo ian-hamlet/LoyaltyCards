@@ -10,7 +10,7 @@ import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/device_service.dart';
 import '../../utils/error_message_mapper.dart';
-import 'qr_display_screen.dart';
+import '../../services/qr_token_generator.dart';
 import 'qr_scanner_screen.dart';
 import 'package:uuid/uuid.dart';
 
@@ -39,6 +39,19 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   // Recomputed only when card/stamp data is actually reloaded.
   String? _cachedQRData;
 
+  // TEST-017/TEST-020: a redemption QR for a high-stamp-count Secure Mode
+  // card (or one with several overflow-relocated stamps) can exceed a QR
+  // code's maximum encodable capacity. TEST-020 makes this dramatically
+  // less likely (gzip+Base45+alphanumeric-mode encoding via
+  // RedemptionQrCodec/AlphanumericQr - see DEFECT_TRACKER.md), but doesn't
+  // make it impossible for an arbitrarily large payload, and an
+  // already-issued pre-TEST-020 card could still be affected. Built once
+  // when card data loads, alongside _qrTooLargeToRender for the build()
+  // method to check without redoing the (non-trivial - tries QR versions
+  // 1-40) work on every rebuild.
+  QrCode? _cachedRedemptionQrCode;
+  bool _qrTooLargeToRender = false;
+
   @override
   void initState() {
     super.initState();
@@ -66,10 +79,18 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         _card = card;
         _stamps = stamps;
         _isLoading = false;
-        // _generateCardQR() reads _card/_stamps, which were just assigned
-        // above in this same synchronous callback, so this reflects the
-        // freshly-loaded data.
-        _cachedQRData = _generateCardQR();
+        // _generateCardQR()/_buildRedemptionQrCode() read _card/_stamps,
+        // which were just assigned above in this same synchronous
+        // callback, so this reflects the freshly-loaded data.
+        if (card != null && card.isComplete && !card.isRedeemed) {
+          _cachedQRData = null;
+          _cachedRedemptionQrCode = _buildRedemptionQrCode();
+          _qrTooLargeToRender = _cachedRedemptionQrCode == null;
+        } else {
+          _cachedRedemptionQrCode = null;
+          _qrTooLargeToRender = false;
+          _cachedQRData = _generateCardQR();
+        }
       });
     } catch (e) {
       AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
@@ -79,52 +100,45 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
     }
   }
 
+  // TEST-020: builds the redemption QR as an alphanumeric-mode QrCode via
+  // RedemptionQrCodec (gzip + Base45) instead of the plain-JSON byte-mode
+  // string _generateCardQR() used to produce for this case - see
+  // DEFECT_TRACKER.md TEST-020 for the size comparison that motivated
+  // this. Returns null if the payload doesn't fit even at the largest QR
+  // version, or if the generator rejects inconsistent card/stamp data -
+  // either way, the caller falls back to the "too large to display" panel
+  // (stamp history below it still proves what's been earned).
+  QrCode? _buildRedemptionQrCode() {
+    if (_card == null) return null;
+    AppLogger.qr('Card is COMPLETE - generating REDEMPTION QR (TEST-020 compact encoding)');
+    AppLogger.qr('Including ${_stamps.length} stamps for redemption');
+    try {
+      final token = QRTokenGenerator().generateRedemptionRequest(
+        card: _card!,
+        stamps: _stamps,
+        cardDeviceId: _card!.deviceId, // V-005: Device where card was created
+        currentDeviceId: _currentDeviceId, // V-005: Device showing redemption QR (cached)
+      );
+      final compact = RedemptionQrCodec.encode(token);
+      return AlphanumericQr.build(compact);
+    } catch (e) {
+      AppLogger.error('Failed to build redemption QR', error: e, tag: 'QR');
+      return null;
+    }
+  }
+
   String _generateCardQR() {
     if (_card == null) return '';
-    
+
     // If card has been redeemed, don't generate any QR
     if (_card!.isRedeemed) {
       AppLogger.qr('Card REDEEMED - no QR generation');
       return 'REDEEMED'; // Special marker to show redeemed message instead of QR
     }
-    
-    // If card is complete, generate redemption QR instead
-    if (_card!.isComplete) {
-      AppLogger.qr('Card is COMPLETE - generating REDEMPTION QR');
-      AppLogger.qr('Including ${_stamps.length} stamps for redemption');
-      
-      // V-012: include each stamp's timestamp alongside its signature -
-      // must match RedemptionStampProof / QRTokenGenerator.generateRedemptionRequest,
-      // since the supplier reconstructs the signed data from these fields.
-      //
-      // originalCardId/originalStampNumber/originalPreviousHash: only set
-      // for a stamp that was relocated here by the overflow-splitting
-      // logic - its signature covers that original context, not its
-      // current position, so the supplier needs this to verify it.
-      final stampProofs = _stamps
-          .map((s) => {
-                'signature': s.signature,
-                'timestamp': s.timestamp.millisecondsSinceEpoch,
-                if (s.originalCardId != null) 'originalCardId': s.originalCardId,
-                if (s.originalStampNumber != null) 'originalStampNumber': s.originalStampNumber,
-                if (s.originalPreviousHash != null) 'originalPreviousHash': s.originalPreviousHash,
-              })
-          .toList();
 
-      final qrData = {
-        'type': 'redemption_request',
-        'cardId': _card!.id,
-        'businessId': _card!.businessId,
-        'stampsCollected': _card!.stampsCollected,
-        'stampProofs': stampProofs,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'cardDeviceId': _card!.deviceId, // V-005: Device where card was created
-        'currentDeviceId': _currentDeviceId, // V-005: Device showing redemption QR (cached)
-      };
-      
-      return jsonEncode(qrData);
-    }
-    
+    // Redemption QR (card complete) is handled separately by
+    // _buildRedemptionQrCode() - TEST-020.
+
     // Otherwise, generate stamp request QR
     String lastStampHash = '';
     if (_stamps.isNotEmpty) {
@@ -615,6 +629,54 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         textAlign: TextAlign.center,
                       ),
                     ],
+                  ),
+                )
+              else if (_qrTooLargeToRender)
+                // TEST-017: the code couldn't be encoded (too much data for
+                // a QR code to hold - see _qrDataFits). Show a clear
+                // explanation instead of letting QrImageView fail silently;
+                // the stamp history below still proves what's been earned.
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.orange, size: 40),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "This card's code is too large to display",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold, color: BrandColors.textPrimary),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'This can happen on an older card with a lot of stamps. Show the business your stamp history below, or ask them to redeem it manually.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13, color: BrandColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                )
+              else if (_card!.isComplete)
+                // TEST-020: redemption QR uses the alphanumeric-mode
+                // QrCode built ahead of time by _buildRedemptionQrCode(),
+                // not the plain byte-mode data: String path below.
+                Container(
+                  padding: const EdgeInsets.all(8), // Reduced from 16 (TEST-010 - Compact QR Layout)
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: QrImageView.withQr(
+                    qr: _cachedRedemptionQrCode!,
+                    size: QRCodeSize.calculate(context) * 0.95, // 95% size (TEST-010 - Compact QR Layout)
+                    backgroundColor: Colors.white,
                   ),
                 )
               else

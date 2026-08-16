@@ -1682,6 +1682,25 @@ This document tracks defects from two sources:
   - Discovered during TEST-014/015 testing, fixed proactively
 - **Notes:** This is a critical blocker paired with TEST-014. Both issues affect business setup workflows and stem from poor navigation/state management. The backup restore feature is essential for business continuity and disaster recovery scenarios. Current behavior makes feature unusable in edge cases and creates serious user experience problems. Must be fixed before pilot deployment expands. Consider refactoring entire business setup flow to use consistent navigation pattern (recommend modal approach for all scanning operations). This issue demonstrates why mixing modal and non-modal navigation is dangerous - state becomes unpredictable and error recovery breaks down.
 
+### TEST-016: Stamps Required Minimum Mismatch - 3 and 4 Stamp Businesses Could Never Issue a Valid Card
+- **Source:** Testing - macOS build (discovered while investigating Intel Mac feasibility for supplier_app; not macOS-specific, reproduces identically on iOS)
+- **Status:** 🔴 **PRESENT IN LIVE VERSION 2.0.3+23** - fix in progress, not yet released
+- **Priority:** CRITICAL
+- **Screen/Feature:** Supplier App - Business Setup (Stamps Required slider) / Card Issuance
+- **Description:** The onboarding "Stamps Required" slider (`supplier_onboarding.dart`) allows values from 3 to 20, but `CardIssueToken.isValid()` (`shared/lib/models/qr_tokens.dart`) rejects any `stampsRequired` below 5. Any business configured with 3 or 4 required stamps produces a `CardIssueToken` that always fails validation when scanned - the card can never actually be issued, in Secure Mode or Express (Simple) Mode, since both use the same token type and the same `isValid()` check.
+- **Reproduction Steps:**
+  1. Supplier app → Business Setup → set "Stamps Required" to 3 (or 4) via the slider or `-` button
+  2. Complete business setup (Secure Mode or Express Mode, either reproduces)
+  3. Issue a card, present the QR code
+  4. Scanning device rejects the QR / reports it can't be read - `CardIssueToken.isValid()` silently returns `false`
+  5. A business set up with 5+ stamps works normally
+- **Expected Behavior:** Any stamp count allowed by the setup UI (3-20) should produce a valid, issuable card.
+- **Actual Behavior:** Businesses configured with 3 or 4 stamps can never successfully issue a card to a customer.
+- **Impact:** Core card-issuance flow broken for any business choosing the two lowest stamp-count options on the slider. **This is present in v2.0.3+23, which is live on the App Store as of 2026-08-16.**
+- **Fix Required/Applied:** Fixed on `develop` by lowering the floor in `CardIssueToken.isValid()` from `stampsRequired < 5` to `stampsRequired < 3`, matching the onboarding slider's actual minimum. Regression tests added (`qr_tokens_test.dart`), full `shared` suite green. Not yet built, uploaded, or submitted as of this writing - targeted for v2.0.3+24.
+- **Target Build:** Build 24 (v2.0.3+24) - in progress on `develop`, not yet promoted to `main`
+- **Notes:** Found while empirically testing supplier_app on a non-Apple-Silicon Mac (separate feasibility investigation) - creating a fresh 3- and 4-stamp test business to probe QR scan reliability surfaced this as a genuine, unrelated, pre-existing app defect. Do not manually release any build that doesn't include this fix.
+
 ### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production
 - **Type:** Architecture/UX Decision
 - **Status:** ✅ IMPLEMENTED

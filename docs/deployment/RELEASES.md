@@ -17,12 +17,13 @@ Examples:
 
 ## Current Releases
 
-### v2.0.3+23 - Build 23 (🟡 Submitted for App Store Review)
-- **Date:** August 15, 2026
-- **Platform:** App Store Connect — submitted for App Store review, awaiting Apple's decision
+### v2.0.3+23 - Build 23 (🟢 LIVE ON THE APP STORE)
+- **Date:** August 15, 2026 (submitted); August 16, 2026 (approved and released)
+- **Platform:** App Store — **passed review and is now publicly available** (both apps)
 - **Branch:** main, develop, `releases/v2.0.3-build23`
 - **Version:** 2.0.3+23
-- **Status:** 🟡 Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), and submitted for App Store review 2026-08-15. Release set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
+- **Status:** 🟢 LIVE — available for download on the App Store. Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), submitted 2026-08-15, approved and released 2026-08-16. Release was set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
+- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed on `develop` as v2.0.3+24, not yet built/submitted. Do not treat this build as fully correct despite being live.
 - **Focus:** Companion-app/friend referral sharing (both apps), plus two bugs found during TestFlight-prep testing
 - **Major Changes:**
   - **Sharing feature:** new Settings section in both apps, "Tell a Business" (QR + share link to LoyaltyCards Business) and "Tell a Friend" (QR + share link to LoyaltyCards) - built as a reusable `AppReferralScreen` widget in the shared package. Supplier app also gets a "Tell a Friend" shortcut icon on the Home screen's app bar.
@@ -30,7 +31,7 @@ Examples:
   - **Fixed:** Clone to Another Device and Create Recovery Backup screens briefly showed a false "failed" error on open - their loading flag started `false` but `initState()` kicks off async auth-then-generate work immediately, leaving a gap before the flag caught up. Started both `true` instead.
   - Category/Subtitle corrections (queued since v2.0.2+21 shipped) finalized as real submission content - see `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. Also caught the customer app's Promotional Text, which turned out blank in ASC despite being documented as already-live.
 - **Note:** v2.0.3+22 was build-bumped to +23 before ever producing an uploaded build, once the two bugs above were found during TestFlight-prep testing - see that packet's own superseded note.
-- **Next Steps:** Monitor App Store review (typically 24-48 hours); once both apps are approved, manually release them together.
+- **Next Steps:** Build, test, and submit v2.0.3+24 (TEST-016 fix, in progress on `develop`) as soon as possible given the defect is now live.
 
 ### v2.0.2+21 - Build 21 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 10, 2026

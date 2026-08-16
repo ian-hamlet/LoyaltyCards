@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.3+23] - 2026-08-15 - CURRENT
 
-**Status:** 🟡 Build bump only (version stays 2.0.3) - built, uploaded, TestFlight-tested (Sharing feature and both bug fixes confirmed working), and **submitted for App Store review 2026-08-15** (both apps, Release set to Manual). Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
+**Status:** 🟢 **LIVE ON THE APP STORE** (both apps) - approved by Apple and released 2026-08-16. Build bump only (version stays 2.0.3). Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
+
+**⚠️ Known defect in this live build (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card - `CardIssueToken.isValid()` rejects `stampsRequired` below 5, but the onboarding slider allows a minimum of 3. Affects both Secure and Express Mode. Discovered after this build was submitted; fixed in 2.0.3+24, which is in progress on `develop` (not yet built/submitted). Full detail in `docs/project-management/DEFECT_TRACKER.md`.
 
 ### Added
 - **Sharing feature (both apps):** new Settings section, "Sharing," with "Tell a Business" (QR code + native share-sheet link to LoyaltyCards Business - for a customer referring a shop, or a shop owner referring another shop) and "Tell a Friend" (same, but to LoyaltyCards - for customer-to-customer referral, or a shop pointing a new customer at the wallet app). Built as a reusable `AppReferralScreen` widget in the shared package rather than three near-identical screens, since the same pattern is needed in both apps. The supplier app also gets a small "Tell a Friend" shortcut icon on the Home screen's app bar, since a shop needs this one tap away during a live checkout interaction, not buried in Settings. Settings reordered in both apps to put Sharing alongside the other identity/account-level sections.

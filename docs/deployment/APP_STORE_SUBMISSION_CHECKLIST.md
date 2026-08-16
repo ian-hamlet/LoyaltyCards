@@ -3,12 +3,12 @@
 **LoyaltyCards v2.0.3+23**  
 **Customer App:** LoyaltyCards Customer Wallet  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** 🟡 Submitted for App Store review  
-**Last Updated:** August 15, 2026
+**Target Release:** 🟢 Live on the App Store  
+**Last Updated:** August 16, 2026
 
-**Status note:** 🟢 **v2.0.2+21 is live on the App Store** (shipped 2026-08-10 — see prior status below for that history). 🟡 **v2.0.3+23 was submitted for App Store review 2026-08-15** (both apps) after being built, uploaded, and TestFlight-tested — the Sharing feature and both bug fixes were confirmed working. Metadata from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered into ASC, build 23 selected on both apps, Release set to **Manual** on both (per the note above - the two apps review at different speeds, so release is held until both are approved).
+**Status note:** 🟢 **v2.0.2+21 was live on the App Store** (shipped 2026-08-10 — see prior status below for that history), now superseded. 🟢 **v2.0.3+23 was submitted 2026-08-15, approved and released 2026-08-16** (both apps) - the Sharing feature and both bug fixes are confirmed working. Metadata from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered into ASC, build 23 selected on both apps, Release was set to **Manual** on both (the two apps review at different speeds, so release was held until both were approved). **⚠️ This live build contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - see `docs/project-management/DEFECT_TRACKER.md`. Fix is in progress on `develop` as v2.0.3+24, not yet built or submitted.
 
-**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10**; v2.0.3+22 added the App Store Category/Subtitle corrections found post-launch but never produced an uploaded build; v2.0.3+23 (current) adds the Sharing feature (Tell a Business / Tell a Friend, both apps) plus two bug fixes found during TestFlight-prep testing (Express Mode stamp routing, a false error on opening Clone/Recovery Backup screens) — **built, uploaded, TestFlight-tested, and submitted for App Store review 2026-08-15.**
+**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10**; v2.0.3+22 added the App Store Category/Subtitle corrections found post-launch but never produced an uploaded build; v2.0.3+23 (current) adds the Sharing feature (Tell a Business / Tell a Friend, both apps) plus two bug fixes found during TestFlight-prep testing (Express Mode stamp routing, a false error on opening Clone/Recovery Backup screens) — **built, uploaded, TestFlight-tested, submitted for App Store review 2026-08-15, and released 2026-08-16** - contains TEST-016, fix in progress as v2.0.3+24 (see `develop`).
 
 ---
 
@@ -41,7 +41,7 @@
 - [x] **Critical bugs resolved** (CRASH-001 fixed; zero other CRITICAL/HIGH defects open)
 - [x] **Submitted for App Store review** — passed, **live on the App Store** as of 2026-08-10
 
-**v2.0.3+23 (current) — in progress:**
+**v2.0.3+23 (live on the App Store) — complete, but contains TEST-016:**
 
 - [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.0.3+23`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
 - [x] **Version number confirmed** — v2.0.3+23 (version 2.0.3 unchanged from +22, build bumped only)
@@ -53,9 +53,11 @@
 - [x] **TestFlight testing completed** — Sharing feature and both bug fixes confirmed working on-device
 - [x] **All automated tests passing** (shared 160, customer 128, supplier 80)
 - [x] **`flutter analyze` clean**
-- [x] **Critical bugs resolved** (both TestFlight-prep bugs fixed; zero other CRITICAL/HIGH defects open)
+- [x] **Critical bugs resolved (at submission time)** — both TestFlight-prep bugs fixed; TEST-016 not yet discovered, found afterward and is present in this live build
 - [x] **Metadata entered into App Store Connect** — Category, Subtitle, Description, What's New, App Review Notes from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered for both apps (also caught the customer app's Promotional Text, which turned out to be blank in ASC despite being documented as already-live)
 - [x] **Submitted for App Store review** — both apps submitted 2026-08-15, Release set to Manual on both
+- [x] **Approved and released** — approved by Apple and released 2026-08-16, live on the App Store
+- ⚠️ **Contains TEST-016** — businesses with 3 or 4 required stamps can't issue a valid card. Fix in progress on `develop` as v2.0.3+24 - build, test, and submit as soon as possible.
 
 ---
 
@@ -414,7 +416,7 @@ Please test both apps together following the demo instructions.
 8. [x] **Respond to App Review** if questions arise — n/a, resulted in approval
 9. [x] **Release approved apps** — **live on the App Store**
 
-**v2.0.3+23 (current) — in progress:**
+**v2.0.3+23 (live on the App Store) — complete, but contains TEST-016:**
 
 1. [x] **Upload build to App Store Connect** (via Transporter) — build 23, both apps
 2. [x] **Select build** for Customer app submission — build 23
@@ -422,9 +424,9 @@ Please test both apps together following the demo instructions.
 4. [x] **Complete all required fields** in App Store Connect — Category, Subtitle, Description, What's New, App Review Notes entered for both apps (see above)
 5. [x] **Screenshots** — unchanged from v2.0.2+21, still accurate (no screens the 10 staged screenshots show have changed)
 6. [x] **Submit for review** — both apps submitted 2026-08-15, Release set to Manual
-7. [ ] **Monitor review status** — in progress
-8. [ ] **Respond to App Review** if questions arise
-9. [ ] **Release approved apps** — pending both apps' approval (Manual release chosen deliberately so neither goes live before the other)
+7. [x] **Monitor review status** — approved 2026-08-16
+8. [x] **Respond to App Review** if questions arise — n/a, approved without questions
+9. [x] **Release approved apps** — both apps manually released 2026-08-16, live on the App Store. ⚠️ Contains TEST-016 - build/submit v2.0.3+24 as soon as possible.
 
 ---
 
@@ -481,7 +483,7 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟢 **v2.0.2+21 is LIVE ON THE APP STORE** (both apps), as of 2026-08-10 — the project's first public release. 🟡 **v2.0.3+23 was submitted for App Store review 2026-08-15** (both apps), Release set to Manual so neither goes live before the other clears review. See `RELEASES.md` for the release-branch record.  
+**Document Status:** 🟢 **v2.0.3+23 is LIVE ON THE APP STORE** (both apps), submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix in progress on `develop` as v2.0.3+24, not yet built or submitted. See `RELEASES.md` for the release-branch record and `docs/project-management/DEFECT_TRACKER.md` for the defect.  
 **Maintained by:** Development Team  
 **Last Updated:** August 15, 2026
 

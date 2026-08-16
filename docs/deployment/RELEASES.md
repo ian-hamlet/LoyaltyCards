@@ -17,16 +17,26 @@ Examples:
 
 ## Current Releases
 
-### v2.0.4+24 - Build 24 (🟡 In Progress)
-- **Date:** August 15, 2026
+### v2.1.0+26 - Build 26 (🟡 In Progress)
+- **Date:** August 16, 2026
 - **Platform:** Not yet built/uploaded
-- **Branch:** develop (not yet on main or a releases branch)
-- **Version:** 2.0.4+24
-- **Status:** 🟡 In progress - supersedes v2.0.3+23, which is **live on the App Store** (approved and released 2026-08-16) but contains TEST-016 (see below). Build, test, and submit as soon as possible given the defect is already live.
-- **Focus:** Single critical bug fix, no new features
+- **Branch:** `fix/TEST-017-redemption-qr-overflow` (not yet on develop, main, or a releases branch)
+- **Version:** 2.1.0+26
+- **Status:** 🟡 In progress, pending real-device verification. Minor version bump (2.0.4 -> 2.1.0) - deliberate, not a build-only bump, since raising the stamps-required ceiling is a real capability change. Supersedes v2.0.4+24 and the interim test-only build v2.0.4+25 (neither ever a real release candidate). Also supersedes v2.0.3+23, which is **live on the App Store** but contains TEST-016 and none of the fixes below.
+- **Focus:** Redemption QR reliability - the real fix for the QR-capacity problem found while testing TEST-016, plus everything it surfaced along the way
 - **Major Changes:**
-  - **Fixed TEST-016:** businesses configured with 3 or 4 required stamps could never issue a valid card - `CardIssueToken.isValid()` rejected `stampsRequired` below 5, but the onboarding slider allows a minimum of 3. Affected both Secure and Express Mode, since both share the same token/validation path. Found while investigating macOS build feasibility for the supplier app (see `feature/macos-supplier-port` - that work is unrelated and not part of this release). Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-016.
-- **Next Steps:** Build both IPAs, upload via Transporter, verify via TestFlight (specifically a 3- and 4-stamp business in both modes), then submit for App Store review.
+  - **TEST-016** (carried forward from v2.0.4+24): businesses configured with 3 or 4 required stamps could never issue a valid card - `CardIssueToken.isValid()` rejected `stampsRequired` below 5, but the onboarding slider allows a minimum of 3.
+  - **TEST-017:** a Secure Mode redemption QR bundles one signature per stamp; at high stamp counts the plain-JSON payload could exceed a QR code's maximum capacity, causing a silent blank-panel failure with no error shown. Interim fix (cap lowered to 10, fallback UI added) - superseded by TEST-020.
+  - **TEST-018:** one of three overflow-relocation code paths omitted the provenance fields needed to verify a moved stamp's signature at redemption - fixed by centralizing relocated-stamp construction in `Stamp.relocateTo()`.
+  - **TEST-019:** a business whose stored stamp count fell outside the supported range saw a generic, misleading "please try again" on every scan, forever - added a specific, actionable error message instead.
+  - **TEST-020 (the real fix):** replaced the plain-JSON redemption QR encoding with gzip + Base45 (RFC 9285) + QR's alphanumeric encoding mode, plus an explicit version field. Raised the stamps-required ceiling from 10 to 12 - measured safe even at 100% overflow-relocated stamps (the worst case), verified against the real QR library. Also consolidated redemption-QR generation onto the existing `QRTokenGenerator`, fixing a real, separate bug found along the way (device-mismatch detection had silently been dropped from a duplicate hand-rolled implementation).
+  - Full detail and measured payload sizes for all four: `docs/project-management/DEFECT_TRACKER.md` TEST-017 through TEST-020.
+- **Next Steps:** Real-device verification (both apps, full redemption round-trip including a heavily overflow-relocated 12-stamp card), then build both IPAs, upload via Transporter, verify via TestFlight, and submit for App Store review.
+
+### v2.0.4+24 - Build 24 (🟡 Superseded by v2.1.0+26 - never built or uploaded)
+- **Date:** August 15, 2026
+- **Version:** 2.0.4+24 (folded into v2.1.0+26 along with the interim test-only build v2.0.4+25)
+- **Major Changes:** TEST-016 only - see v2.1.0+26 above, which carries this fix forward alongside TEST-017 through TEST-020.
 
 ### v2.0.3+23 - Build 23 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 15, 2026 (submitted); August 16, 2026 (approved and released)
@@ -34,7 +44,7 @@ Examples:
 - **Branch:** main, develop, `releases/v2.0.3-build23`
 - **Version:** 2.0.3+23
 - **Status:** 🟢 LIVE — available for download on the App Store. Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), submitted 2026-08-15, approved and released 2026-08-16. Release was set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
-- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed on `develop` as v2.0.4+24, not yet built/submitted. Do not treat this build as fully correct despite being live.
+- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed in v2.1.0+26, not yet built/submitted. Do not treat this build as fully correct despite being live.
 - **Focus:** Companion-app/friend referral sharing (both apps), plus two bugs found during TestFlight-prep testing
 - **Major Changes:**
   - **Sharing feature:** new Settings section in both apps, "Tell a Business" (QR + share link to LoyaltyCards Business) and "Tell a Friend" (QR + share link to LoyaltyCards) - built as a reusable `AppReferralScreen` widget in the shared package. Supplier app also gets a "Tell a Friend" shortcut icon on the Home screen's app bar.
@@ -42,7 +52,7 @@ Examples:
   - **Fixed:** Clone to Another Device and Create Recovery Backup screens briefly showed a false "failed" error on open - their loading flag started `false` but `initState()` kicks off async auth-then-generate work immediately, leaving a gap before the flag caught up. Started both `true` instead.
   - Category/Subtitle corrections (queued since v2.0.2+21 shipped) finalized as real submission content - see `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. Also caught the customer app's Promotional Text, which turned out blank in ASC despite being documented as already-live.
 - **Note:** v2.0.3+22 was build-bumped to +23 before ever producing an uploaded build, once the two bugs above were found during TestFlight-prep testing - see that packet's own superseded note.
-- **Next Steps:** Build, test, and submit v2.0.4+24 (TEST-016 fix, in progress on `develop`) as soon as possible given the defect is now live.
+- **Next Steps:** Build, test, and submit v2.1.0+26 (TEST-016 fix plus TEST-017 through TEST-020, in progress) as soon as possible given the defect is now live.
 
 ### v2.0.2+21 - Build 21 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 10, 2026

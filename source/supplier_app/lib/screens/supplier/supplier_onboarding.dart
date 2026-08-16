@@ -201,7 +201,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     Tooltip(
                       triggerMode: TooltipTriggerMode.tap,
                       showDuration: const Duration(seconds: 10),
-                      message: 'Sets how many stamps a customer must collect before earning a reward. Lower values redeem faster; higher values encourage repeat visits. Range: 3-10 stamps.',
+                      message: 'Sets how many stamps a customer must collect before earning a reward. Lower values redeem faster; higher values encourage repeat visits. Range: 3-12 stamps.',
                       child: Icon(
                         Icons.info_outline,
                         size: 18,
@@ -235,7 +235,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ),
                     ),
                     IconButton(
-                      onPressed: _stampsRequired < 10
+                      onPressed: _stampsRequired < 12
                           ? () {
                               Haptics.light();
                               setState(() => _stampsRequired++);
@@ -249,8 +249,8 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 Slider(
                   value: _stampsRequired.toDouble(),
                   min: 3,
-                  max: 10,
-                  divisions: 7,
+                  max: 12,
+                  divisions: 9,
                   label: '$_stampsRequired',
                   onChanged: (value) {
                     setState(() => _stampsRequired = value.toInt());

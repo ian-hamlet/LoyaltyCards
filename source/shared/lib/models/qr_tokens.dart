@@ -194,17 +194,20 @@ class CardIssueToken extends QRToken {
     // supplier_onboarding.dart) - this was previously 5, silently rejecting
     // every card issued by a business configured for 3 or 4 stamps.
     //
-    // TEST-017: upper bound lowered from 20 to 10 - a Secure Mode
-    // redemption QR bundles one signature per stamp, and at 20 stamps the
-    // encoded payload sits at ~99.5% of the QR library's max capacity even
-    // with zero overflow-relocated stamps (any relocation, or trivial
-    // real-world signature-length variance, pushes it over and the QR
-    // silently fails to render). 10 stays under capacity until roughly
-    // 60-70% of its stamps are overflow-relocated (vs ~40% at 12) - not
-    // literally bulletproof at the 100%-relocated extreme, but a much
-    // wider safety margin. CustomerCardDetail's QrCapacity.fits() check
-    // remains as a safety net for the residual case and for already-issued
-    // cards from before this fix shipped.
+    // TEST-017: upper bound originally lowered from 20 to 10 - a Secure
+    // Mode redemption QR bundles one signature per stamp, and at 20
+    // stamps the encoded payload sat at ~99.5% of the plain-JSON/byte-mode
+    // QR capacity even with zero overflow-relocated stamps.
+    //
+    // TEST-020: raised from 10 to 12 now that RedemptionQrCodec
+    // (gzip + Base45 + QR alphanumeric mode, see AlphanumericQr) is used
+    // for the actual redemption QR instead of plain JSON/byte mode - a
+    // 12-stamp card stays within capacity even at 100% overflow-relocated
+    // stamps (the worst case), measured against the real qr package. See
+    // DEFECT_TRACKER.md TEST-020 for the full size comparison.
+    // CustomerCardDetail's _qrTooLargeToRender fallback remains as a
+    // safety net for an already-issued pre-TEST-020 card, or any payload
+    // that still doesn't fit for some other reason.
     //
     // TEST-019: a business created before this bound was tightened still
     // has its old, now-out-of-range stampsRequired stored, and issues
@@ -214,8 +217,8 @@ class CardIssueToken extends QRToken {
     // with a specific, identifiable message (see ErrorMessageMapper) so
     // the customer isn't just told to keep retrying a scan that can never
     // succeed.
-    if (stampsRequired < 3 || stampsRequired > 10) {
-      return "This business's card is set up for $stampsRequired stamps, which this app version doesn't support (supported range: 3-10). This won't be fixed by scanning again - let the business know, they may need to update or reconfigure.";
+    if (stampsRequired < 3 || stampsRequired > 12) {
+      return "This business's card is set up for $stampsRequired stamps, which this app version doesn't support (supported range: 3-12). This won't be fixed by scanning again - let the business know, they may need to update or reconfigure.";
     }
     if (!brandColor.startsWith('#') || brandColor.length != 7) {
       return 'This QR code has invalid formatting.';

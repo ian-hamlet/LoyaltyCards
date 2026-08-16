@@ -88,6 +88,12 @@ class QRTokenGenerator {
   RedemptionRequestToken generateRedemptionRequest({
     required Card card,
     required List<Stamp> stamps,
+    // V-005: device where the card was created / where this QR is being
+    // shown, so the supplier can detect a card cloned to another device -
+    // TEST-020: previously only set by CustomerCardDetail's own hand-built
+    // token, dropped entirely if a caller used this generator instead.
+    String? cardDeviceId,
+    String? currentDeviceId,
   }) {
     try {
       // Validate inputs
@@ -135,6 +141,8 @@ class QRTokenGenerator {
         stampsCollected: card.stampsCollected,
         stampProofs: proofs,
         timestamp: timestamp,
+        cardDeviceId: cardDeviceId,
+        currentDeviceId: currentDeviceId,
       );
     } catch (e, stackTrace) {
       AppLogger.error(

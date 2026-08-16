@@ -1,6 +1,6 @@
 # App Store Metadata Packet (v2.0.4+24)
 
-**Status: IN PROGRESS - not yet built or uploaded.**
+**Status: SUPERSEDED - never built or uploaded.** Folded into `APP_STORE_METADATA_PACKET_v2_1_0_26.md` along with the interim test-only build v2.0.4+25 - that build carries this one's TEST-016 fix forward and adds the real fix for a redemption QR-capacity failure (TEST-017 through TEST-020) found while testing it.
 
 **Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. That build is live on the App Store and contains TEST-016 (see `docs/project-management/DEFECT_TRACKER.md`) - businesses configured with 3 or 4 required stamps can never issue a valid card. This build fixes that. Everything else (Category, Subtitle, Description, Keywords, Promotional Text, App Review Notes) is **unchanged from the v2_0_3_23 packet** - see that file for the full text of those fields. Only What's New changes below.
 

@@ -168,15 +168,15 @@ void main() {
 
       expect(tooFew.isValid(), false);
 
-      // TEST-017: max lowered from 20 to 10 - a Secure Mode redemption QR
-      // bundles one signature per stamp, and at 20 stamps the encoded
-      // payload already exceeds the QR format's max capacity even before
-      // accounting for overflow-relocated stamps.
+      // TEST-020: max raised from 10 to 12 now that RedemptionQrCodec
+      // (gzip + Base45 + QR alphanumeric mode) is used for the redemption
+      // QR - a 12-stamp card fits even at 100% overflow-relocated stamps.
+      // See RedemptionQrCodec's own test suite for the measured sizes.
       final tooMany = CardIssueToken(
         businessId: 'business-123',
         businessName: 'Test Coffee',
         publicKey: 'test-public-key',
-        stampsRequired: 11,
+        stampsRequired: 13,
         brandColor: '#FF5733',
         signature: 'test-signature',
         timestamp: 1234567890000,
@@ -185,12 +185,12 @@ void main() {
       expect(tooMany.isValid(), false);
     });
 
-    test('CardIssueToken - TEST-017: accepts maximum stamp requirement (10)', () {
+    test('CardIssueToken - TEST-020: accepts maximum stamp requirement (12)', () {
       final atMaximum = CardIssueToken(
         businessId: 'business-123',
         businessName: 'Test Coffee',
         publicKey: 'test-public-key',
-        stampsRequired: 10,
+        stampsRequired: 12,
         brandColor: '#FF5733',
         signature: 'test-signature',
         timestamp: 1234567890000,

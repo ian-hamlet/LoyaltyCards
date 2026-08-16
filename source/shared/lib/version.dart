@@ -483,6 +483,48 @@
 ///   supersedes it. Found while investigating macOS build feasibility for
 ///   the supplier app (unrelated, separate branch - the macOS work itself
 ///   is not part of this or any release).
+///
+/// Build 26 Changes (version bumped 2.0.4 -> 2.1.0 - minor, not a build-only
+/// bump: raises the supported stampsRequired ceiling, a real capability
+/// change, backward compatible - see TEST-020 below):
+/// - Fixed TEST-017: a Secure Mode redemption QR bundles one signature per
+///   stamp; at high stamp counts (or with overflow-relocated stamps, which
+///   add extra fields each) the plain-JSON payload could exceed a QR
+///   code's maximum encodable capacity, causing QrImageView to fail
+///   silently (a blank grey panel, no error - release-build default
+///   behavior for a widget that throws during build()). Interim fix
+///   lowered the max stampsRequired from 20 to 10 and added a graceful
+///   fallback UI; superseded by TEST-020 below.
+/// - Fixed TEST-018: the overflow-splitting logic (moving a completed
+///   card's leftover stamps onto another card) has three code paths that
+///   each build the relocated stamp's record - one of the three omitted
+///   `originalCardId`/`originalStampNumber`/`originalPreviousHash`
+///   entirely, silently dropping the provenance needed to verify that
+///   stamp's signature correctly at redemption. Fixed by adding
+///   `Stamp.relocateTo()`, which centralizes the whole construction
+///   (not just those three fields) so no call site can omit them again.
+/// - Fixed TEST-019: `CardIssueToken.isValid()` only ever returned
+///   true/false, so a business whose stored `stampsRequired` fell outside
+///   the supported range (e.g. one configured before TEST-017 tightened
+///   it) showed a generic "An error occurred. Please try again." on every
+///   scan, forever - misleading, since retrying can never help. Added
+///   `CardIssueToken.validationError()`, which reports a specific,
+///   actionable reason instead.
+/// - Fixed TEST-020 (the real fix superseding TEST-017's interim
+///   mitigation): replaced the plain-JSON/byte-mode redemption QR
+///   encoding with a compact one - gzip compression, Base45 text encoding
+///   (RFC 9285, chosen because its alphabet is exactly QR's more
+///   space-efficient "alphanumeric mode" character set), and an explicit
+///   `'v': 2` version field. Raised the stampsRequired ceiling from 10 to
+///   12 - measured safe (fits) even at 100% overflow-relocated stamps,
+///   the worst case, verified against the real `qr` package. New shared
+///   utilities: `Base45`, `AlphanumericQr`, `RedemptionQrCodec`. Also
+///   consolidated `customer_card_detail.dart` onto the existing
+///   `QRTokenGenerator.generateRedemptionRequest()` instead of a
+///   hand-rolled duplicate, which surfaced and fixed a real, separate
+///   inconsistency: that generator was previously only reachable from
+///   dead code and had drifted to omit device-mismatch detection (V-005).
+///   Full detail and measured sizes: DEFECT_TRACKER.md TEST-020.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.4+25';
+const String appVersion = '2.1.0+26';

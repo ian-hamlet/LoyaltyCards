@@ -81,6 +81,37 @@ void main() {
       expect(token.stampProofs[1].signature, 'sig-2');
     });
 
+    test('TEST-020: passes cardDeviceId/currentDeviceId through when provided', () {
+      // Previously these V-005 device-mismatch-detection fields were only
+      // ever set by CustomerCardDetail's own hand-built token, not by this
+      // generator - would have been a silent regression to consolidate
+      // onto this generator without fixing that first.
+      final card = testCard(stampsCollected: 1);
+      final stamps = [testStamp(id: 's1', stampNumber: 1, signature: 'sig-1')];
+
+      final token = generator.generateRedemptionRequest(
+        card: card,
+        stamps: stamps,
+        cardDeviceId: 'device-original',
+        currentDeviceId: 'device-current',
+      );
+
+      expect(token.cardDeviceId, 'device-original');
+      expect(token.currentDeviceId, 'device-current');
+      expect(token.hasDeviceMismatch(), true);
+    });
+
+    test('TEST-020: device IDs default to null when not provided', () {
+      final card = testCard(stampsCollected: 1);
+      final stamps = [testStamp(id: 's1', stampNumber: 1, signature: 'sig-1')];
+
+      final token = generator.generateRedemptionRequest(card: card, stamps: stamps);
+
+      expect(token.cardDeviceId, isNull);
+      expect(token.currentDeviceId, isNull);
+      expect(token.hasDeviceMismatch(), false);
+    });
+
     test('throws when stamps.length does not match card.stampsCollected', () {
       final card = testCard(stampsCollected: 3);
       final stamps = [testStamp(id: 's1', stampNumber: 1)];

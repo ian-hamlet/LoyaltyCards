@@ -485,4 +485,4 @@
 ///   is not part of this or any release).
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.4+24';
+const String appVersion = '2.0.4+25';

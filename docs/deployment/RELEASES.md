@@ -22,18 +22,19 @@ Examples:
 - **Platform:** Not yet built/uploaded
 - **Branch:** develop (not yet on main or a releases branch)
 - **Version:** 2.0.3+24
-- **Status:** 🟡 In progress - supersedes v2.0.3+23, which is currently under App Store review and contains TEST-016 (see below). Once ready, this build should be built, tested, and submitted; v2.0.3+23 should not be released even if Apple approves it first, since it has the defect.
+- **Status:** 🟡 In progress - supersedes v2.0.3+23, which is **live on the App Store** (approved and released 2026-08-16) but contains TEST-016 (see below). Build, test, and submit as soon as possible given the defect is already live.
 - **Focus:** Single critical bug fix, no new features
 - **Major Changes:**
   - **Fixed TEST-016:** businesses configured with 3 or 4 required stamps could never issue a valid card - `CardIssueToken.isValid()` rejected `stampsRequired` below 5, but the onboarding slider allows a minimum of 3. Affected both Secure and Express Mode, since both share the same token/validation path. Found while investigating macOS build feasibility for the supplier app (see `feature/macos-supplier-port` - that work is unrelated and not part of this release). Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-016.
-- **Next Steps:** Build both IPAs, upload via Transporter, verify via TestFlight, then submit for App Store review. Once main is fast-forwarded to develop for this build, decide whether to withdraw the v2.0.3+23 submission from Apple review or let it lapse/get superseded at release time.
+- **Next Steps:** Build both IPAs, upload via Transporter, verify via TestFlight (specifically a 3- and 4-stamp business in both modes), then submit for App Store review.
 
-### v2.0.3+23 - Build 23 (🟡 Submitted for App Store Review - superseded by v2.0.3+24, do not release)
-- **Date:** August 15, 2026
-- **Platform:** App Store Connect — submitted for App Store review, awaiting Apple's decision
+### v2.0.3+23 - Build 23 (🟢 LIVE ON THE APP STORE)
+- **Date:** August 15, 2026 (submitted); August 16, 2026 (approved and released)
+- **Platform:** App Store — **passed review and is now publicly available** (both apps)
 - **Branch:** main, develop, `releases/v2.0.3-build23`
 - **Version:** 2.0.3+23
-- **Status:** 🟡 Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), and submitted for App Store review 2026-08-15. Release set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
+- **Status:** 🟢 LIVE — available for download on the App Store. Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), submitted 2026-08-15, approved and released 2026-08-16. Release was set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
+- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed on `develop` as v2.0.3+24, not yet built/submitted. Do not treat this build as fully correct despite being live.
 - **Focus:** Companion-app/friend referral sharing (both apps), plus two bugs found during TestFlight-prep testing
 - **Major Changes:**
   - **Sharing feature:** new Settings section in both apps, "Tell a Business" (QR + share link to LoyaltyCards Business) and "Tell a Friend" (QR + share link to LoyaltyCards) - built as a reusable `AppReferralScreen` widget in the shared package. Supplier app also gets a "Tell a Friend" shortcut icon on the Home screen's app bar.
@@ -41,7 +42,7 @@ Examples:
   - **Fixed:** Clone to Another Device and Create Recovery Backup screens briefly showed a false "failed" error on open - their loading flag started `false` but `initState()` kicks off async auth-then-generate work immediately, leaving a gap before the flag caught up. Started both `true` instead.
   - Category/Subtitle corrections (queued since v2.0.2+21 shipped) finalized as real submission content - see `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. Also caught the customer app's Promotional Text, which turned out blank in ASC despite being documented as already-live.
 - **Note:** v2.0.3+22 was build-bumped to +23 before ever producing an uploaded build, once the two bugs above were found during TestFlight-prep testing - see that packet's own superseded note.
-- **Next Steps:** Monitor App Store review (typically 24-48 hours); once both apps are approved, manually release them together.
+- **Next Steps:** Build, test, and submit v2.0.3+24 (TEST-016 fix, in progress on `develop`) as soon as possible given the defect is now live.
 
 ### v2.0.2+21 - Build 21 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 10, 2026

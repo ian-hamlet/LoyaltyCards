@@ -1684,10 +1684,10 @@ This document tracks defects from two sources:
 
 ### TEST-016: Stamps Required Minimum Mismatch - 3 and 4 Stamp Businesses Could Never Issue a Valid Card
 - **Source:** Testing - macOS build (discovered while investigating Intel Mac feasibility for supplier_app; not macOS-specific, reproduces identically on iOS)
-- **Status:** ✅ FIXED
+- **Status:** 🔴 **PRESENT IN LIVE VERSION 2.0.3+23** (released 2026-08-16) - ✅ fix already merged to `develop`, targeted for v2.0.3+24, not yet built/uploaded/submitted
 - **Priority:** CRITICAL
 - **Screen/Feature:** Supplier App - Business Setup (Stamps Required slider) / Card Issuance
-- **Description:** The onboarding "Stamps Required" slider (`supplier_onboarding.dart`) allows values from 3 to 20, but `CardIssueToken.isValid()` (`shared/lib/models/qr_tokens.dart`) rejected any `stampsRequired` below 5. Any business configured with 3 or 4 required stamps produced a `CardIssueToken` that would always fail validation when scanned - the card could never actually be issued, in Secure Mode or Express (Simple) Mode, since both use the same token type and the same `isValid()` check.
+- **Description:** The onboarding "Stamps Required" slider (`supplier_onboarding.dart`) allows values from 3 to 20, but `CardIssueToken.isValid()` (`shared/lib/models/qr_tokens.dart`) rejects any `stampsRequired` below 5. Any business configured with 3 or 4 required stamps produces a `CardIssueToken` that always fails validation when scanned - the card can never actually be issued, in Secure Mode or Express (Simple) Mode, since both use the same token type and the same `isValid()` check.
 - **Reproduction Steps:**
   1. Supplier app → Business Setup → set "Stamps Required" to 3 (or 4) via the slider or `-` button
   2. Complete business setup (Secure Mode or Express Mode, either reproduces)
@@ -1695,12 +1695,12 @@ This document tracks defects from two sources:
   4. Scanning device rejects the QR / reports it can't be read - `CardIssueToken.isValid()` silently returns `false`, so the token is treated as invalid rather than surfacing a clear "unsupported stamp count" error
   5. A business set up with 5+ stamps works normally
 - **Expected Behavior:** Any stamp count allowed by the setup UI (3-20) should produce a valid, issuable card.
-- **Actual Behavior:** Businesses configured with 3 or 4 stamps could never successfully issue a card to a customer.
-- **Impact:** Core card-issuance flow completely broken for any business choosing the two lowest stamp-count options on the slider. Not platform-specific - would reproduce identically on iOS/iPadOS, just hadn't been exercised since default/tested configurations used 8-10 stamps.
+- **Actual Behavior:** Businesses configured with 3 or 4 stamps can never successfully issue a card to a customer.
+- **Impact:** Core card-issuance flow broken for any business choosing the two lowest stamp-count options on the slider. Not platform-specific - would reproduce identically on iOS/iPadOS, just hadn't been exercised since default/tested configurations used 8-10 stamps. **This is present in v2.0.3+23, which is live on the App Store as of 2026-08-16.**
 - **Fix Applied:** Lowered the floor in `CardIssueToken.isValid()` (`shared/lib/models/qr_tokens.dart`) from `stampsRequired < 5` to `stampsRequired < 3`, matching the onboarding slider's actual minimum. This is the only place in the codebase that enforced a floor above 0, and it's shared by both Secure and Express (Simple) Mode issuance.
 - **Testing Verified:** Updated `qr_tokens_test.dart`'s existing "rejects invalid stamp requirements" test (previously asserted 3 stamps was invalid - encoded the bug as expected behavior; now asserts 2 is the invalid boundary). Added a new test explicitly asserting 3 stamps is valid in both `OperationMode.secure` and `OperationMode.simple` (Express). Full `shared` suite green (161 tests).
 - **Fix Branch:** `fix/TEST-016-stamps-required-minimum-mismatch` (off `develop`, merged and deleted)
-- **Target Build:** Build 24 (v2.0.3+24) - v2.0.3+23 is currently under App Store review and contains this defect; must not be released, superseded by Build 24 once submitted
+- **Target Build:** Build 24 (v2.0.3+24) - fix already merged to `develop`, not yet built, uploaded, or submitted. Do not manually release any build that doesn't include this fix.
 - **Notes:** Found while empirically testing supplier_app on a non-Apple-Silicon Mac (separate feasibility investigation, branch `feature/macos-supplier-port`) - creating a fresh 3- and 4-stamp test business to probe QR scan reliability surfaced this as a genuine, unrelated, pre-existing app defect.
 
 ### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production

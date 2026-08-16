@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.3+24] - 2026-08-15 - CURRENT
 
-**Status:** 🟡 Build bump only (version stays 2.0.3) - in progress. Supersedes 2.0.3+23, which is currently under App Store review and contains TEST-016 (see below) - every business configured with 3 or 4 required stamps can never issue a working card. Everything in 2.0.3+23 below carries forward unchanged except this fix.
+**Status:** 🟡 Build bump only (version stays 2.0.3) - in progress, not yet built/uploaded/submitted. Supersedes 2.0.3+23, which is **live on the App Store** (approved and released 2026-08-16) but contains TEST-016 (see below) - every business configured with 3 or 4 required stamps can never issue a working card. Build and submit this version as soon as possible given the defect is already live. Everything in 2.0.3+23 below carries forward unchanged except this fix.
 
 ### Fixed
 - **TEST-016: Businesses set up with 3 or 4 required stamps could never issue a valid card.** The onboarding "Stamps Required" slider allows a minimum of 3, but `CardIssueToken.isValid()` rejected anything below 5 - any card issued by such a business always failed validation on scan, in both Secure and Express Mode, since both share the same token and validation path. Discovered while testing the supplier app on macOS (unrelated investigation - see `docs/project-management/DEFECT_TRACKER.md` TEST-016). Fixed by lowering the floor to 3 to match the slider.
 
 ## [2.0.3+23] - 2026-08-15
 
-**Status:** 🟡 Build bump only (version stays 2.0.3) - built, uploaded, TestFlight-tested (Sharing feature and both bug fixes confirmed working), and **submitted for App Store review 2026-08-15** (both apps, Release set to Manual). Contains TEST-016 (see 2.0.3+24 above) - supersede with that build once available. Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
+**Status:** 🟢 **LIVE ON THE APP STORE** (both apps) - built, uploaded, TestFlight-tested (Sharing feature and both bug fixes confirmed working), submitted for App Store review 2026-08-15, and approved and released 2026-08-16. **⚠️ Contains TEST-016** (see 2.0.3+24 above) - supersede with that build as soon as possible. Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
 
 ### Added
 - **Sharing feature (both apps):** new Settings section, "Sharing," with "Tell a Business" (QR code + native share-sheet link to LoyaltyCards Business - for a customer referring a shop, or a shop owner referring another shop) and "Tell a Friend" (same, but to LoyaltyCards - for customer-to-customer referral, or a shop pointing a new customer at the wallet app). Built as a reusable `AppReferralScreen` widget in the shared package rather than three near-identical screens, since the same pattern is needed in both apps. The supplier app also gets a small "Tell a Friend" shortcut icon on the Home screen's app bar, since a shop needs this one tap away during a live checkout interaction, not buried in Settings. Settings reordered in both apps to put Sharing alongside the other identity/account-level sections.

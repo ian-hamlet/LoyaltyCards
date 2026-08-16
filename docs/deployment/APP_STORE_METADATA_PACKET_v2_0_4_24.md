@@ -1,14 +1,18 @@
-# App Store Metadata Packet (v2.0.3+24)
+# App Store Metadata Packet (v2.0.4+24)
 
-**Status: SUPERSEDED - renamed.** This build was renumbered from a build-only bump (2.0.3+24) to a version bump (2.0.4+24) before ever being built - see `APP_STORE_METADATA_PACKET_v2_0_4_24.md` for the current content, which is otherwise identical.
+**Status: IN PROGRESS - not yet built or uploaded.**
 
-**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. That build is currently under App Store review and contains TEST-016 (see `docs/project-management/DEFECT_TRACKER.md`) - businesses configured with 3 or 4 required stamps can never issue a valid card. This build fixes that. Everything else (Category, Subtitle, Description, Keywords, Promotional Text, App Review Notes) is **unchanged from the v2_0_3_23 packet** - see that file for the full text of those fields. Only What's New changes below.
+**Supersedes:** `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. That build is live on the App Store and contains TEST-016 (see `docs/project-management/DEFECT_TRACKER.md`) - businesses configured with 3 or 4 required stamps can never issue a valid card. This build fixes that. Everything else (Category, Subtitle, Description, Keywords, Promotional Text, App Review Notes) is **unchanged from the v2_0_3_23 packet** - see that file for the full text of those fields. Only What's New changes below.
+
+**Renumbered from build-only bump 2.0.3+24 to version bump 2.0.4+24** (see `APP_STORE_METADATA_PACKET_v2_0_3_24.md`, superseded) - no content difference, decided before this build was built.
 
 ---
 
 ## Shared Listing Values
 
-Unchanged from v2_0_3_23 - see that packet.
+- Release Version: 2.0.4
+- Build: 24
+- All other shared values unchanged from v2_0_3_23 - see that packet.
 
 ---
 

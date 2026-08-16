@@ -1684,7 +1684,7 @@ This document tracks defects from two sources:
 
 ### TEST-016: Stamps Required Minimum Mismatch - 3 and 4 Stamp Businesses Could Never Issue a Valid Card
 - **Source:** Testing - macOS build (discovered while investigating Intel Mac feasibility for supplier_app; not macOS-specific, reproduces identically on iOS)
-- **Status:** 🔴 **PRESENT IN LIVE VERSION 2.0.3+23** (released 2026-08-16) - ✅ fix already merged to `develop`, targeted for v2.0.3+24, not yet built/uploaded/submitted
+- **Status:** 🔴 **PRESENT IN LIVE VERSION 2.0.3+23** (released 2026-08-16) - ✅ fix already merged to `develop`, targeted for v2.0.4+24, not yet built/uploaded/submitted
 - **Priority:** CRITICAL
 - **Screen/Feature:** Supplier App - Business Setup (Stamps Required slider) / Card Issuance
 - **Description:** The onboarding "Stamps Required" slider (`supplier_onboarding.dart`) allows values from 3 to 20, but `CardIssueToken.isValid()` (`shared/lib/models/qr_tokens.dart`) rejects any `stampsRequired` below 5. Any business configured with 3 or 4 required stamps produces a `CardIssueToken` that always fails validation when scanned - the card can never actually be issued, in Secure Mode or Express (Simple) Mode, since both use the same token type and the same `isValid()` check.
@@ -1700,7 +1700,7 @@ This document tracks defects from two sources:
 - **Fix Applied:** Lowered the floor in `CardIssueToken.isValid()` (`shared/lib/models/qr_tokens.dart`) from `stampsRequired < 5` to `stampsRequired < 3`, matching the onboarding slider's actual minimum. This is the only place in the codebase that enforced a floor above 0, and it's shared by both Secure and Express (Simple) Mode issuance.
 - **Testing Verified:** Updated `qr_tokens_test.dart`'s existing "rejects invalid stamp requirements" test (previously asserted 3 stamps was invalid - encoded the bug as expected behavior; now asserts 2 is the invalid boundary). Added a new test explicitly asserting 3 stamps is valid in both `OperationMode.secure` and `OperationMode.simple` (Express). Full `shared` suite green (161 tests).
 - **Fix Branch:** `fix/TEST-016-stamps-required-minimum-mismatch` (off `develop`, merged and deleted)
-- **Target Build:** Build 24 (v2.0.3+24) - fix already merged to `develop`, not yet built, uploaded, or submitted. Do not manually release any build that doesn't include this fix.
+- **Target Build:** Build 24 (v2.0.4+24) - fix already merged to `develop`, not yet built, uploaded, or submitted. Do not manually release any build that doesn't include this fix.
 - **Notes:** Found while empirically testing supplier_app on a non-Apple-Silicon Mac (separate feasibility investigation, branch `feature/macos-supplier-port`) - creating a fresh 3- and 4-stamp test business to probe QR scan reliability surfaced this as a genuine, unrelated, pre-existing app defect.
 
 ### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production

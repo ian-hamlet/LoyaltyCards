@@ -168,17 +168,67 @@ void main() {
 
       expect(tooFew.isValid(), false);
 
+      // TEST-017: max lowered from 20 to 10 - a Secure Mode redemption QR
+      // bundles one signature per stamp, and at 20 stamps the encoded
+      // payload already exceeds the QR format's max capacity even before
+      // accounting for overflow-relocated stamps.
       final tooMany = CardIssueToken(
         businessId: 'business-123',
         businessName: 'Test Coffee',
         publicKey: 'test-public-key',
-        stampsRequired: 25,
+        stampsRequired: 11,
         brandColor: '#FF5733',
         signature: 'test-signature',
         timestamp: 1234567890000,
       );
 
       expect(tooMany.isValid(), false);
+    });
+
+    test('CardIssueToken - TEST-017: accepts maximum stamp requirement (10)', () {
+      final atMaximum = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 10,
+        brandColor: '#FF5733',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+
+      expect(atMaximum.isValid(), true);
+    });
+
+    test('CardIssueToken - TEST-019: validationError() gives a specific, actionable reason for an out-of-range stampsRequired', () {
+      final legacyToken = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 20, // a business configured before the 3-10 bound
+        brandColor: '#FF5733',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+
+      final error = legacyToken.validationError();
+
+      expect(error, isNotNull);
+      expect(error, contains('20 stamps'));
+      expect(error, contains("won't be fixed by scanning again"));
+    });
+
+    test('CardIssueToken - TEST-019: validationError() returns null for a valid token', () {
+      final validToken = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: 'test-public-key',
+        stampsRequired: 6,
+        brandColor: '#FF5733',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+
+      expect(validToken.validationError(), isNull);
     });
 
     test('CardIssueToken - TEST-016: accepts minimum stamp requirement (3) in both Secure and Express mode', () {

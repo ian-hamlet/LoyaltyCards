@@ -96,6 +96,39 @@ class Stamp {
     );
   }
 
+  /// TEST-018: builds a copy of this stamp for a new card/position, as
+  /// created by the overflow-relocation logic when a completed card has
+  /// stamps left over. Preserves the *original* signing context
+  /// (originalCardId/originalStampNumber/originalPreviousHash) - the true
+  /// first card/position this stamp was ever signed for, not whatever
+  /// intermediate card it's currently on - so a stamp relocated more than
+  /// once still resolves back to where its signature was actually issued.
+  ///
+  /// Centralizing the whole construction here (not just the original*
+  /// fields) is deliberate: a hand-written `Stamp(...)` at each overflow
+  /// call site previously let one of three call sites omit these fields
+  /// entirely, silently dropping provenance and breaking signature
+  /// verification for those stamps at redemption.
+  Stamp relocateTo({
+    required String id,
+    required String cardId,
+    required int stampNumber,
+    String? previousHash,
+  }) {
+    return Stamp(
+      id: id,
+      cardId: cardId,
+      stampNumber: stampNumber,
+      timestamp: timestamp,
+      signature: signature,
+      previousHash: previousHash,
+      deviceId: deviceId,
+      originalCardId: originalCardId ?? this.cardId,
+      originalStampNumber: originalStampNumber ?? this.stampNumber,
+      originalPreviousHash: originalPreviousHash ?? this.previousHash,
+    );
+  }
+
   @override
   String toString() {
     return 'Stamp(id: $id, cardId: $cardId, number: $stampNumber, timestamp: $timestamp)';

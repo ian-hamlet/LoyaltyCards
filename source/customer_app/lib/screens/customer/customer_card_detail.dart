@@ -10,7 +10,6 @@ import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../services/device_service.dart';
 import '../../utils/error_message_mapper.dart';
-import 'qr_display_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'package:uuid/uuid.dart';
 
@@ -38,6 +37,17 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   // a visibly different QR code even though nothing the user did changed.
   // Recomputed only when card/stamp data is actually reloaded.
   String? _cachedQRData;
+
+  // TEST-017: a redemption QR for a high-stamp-count Secure Mode card (or
+  // one with several overflow-relocated stamps) can exceed the QR format's
+  // maximum encodable capacity. QrImageView has no built-in way to signal
+  // this - the underlying qr package's own validation doesn't check the
+  // largest QR version's true capacity, so the failure only surfaces when
+  // the widget is actually painted, by which point it's too late to show
+  // anything but Flutter's default blank-grey-box error widget. Checking
+  // here, ahead of time, with the same encode path the widget uses
+  // internally, lets the build() method show a real fallback instead.
+  bool _qrTooLargeToRender = false;
 
   @override
   void initState() {
@@ -70,6 +80,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         // above in this same synchronous callback, so this reflects the
         // freshly-loaded data.
         _cachedQRData = _generateCardQR();
+        _qrTooLargeToRender = !QrCapacity.fits(_cachedQRData!);
       });
     } catch (e) {
       AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
@@ -613,6 +624,37 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                           fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
+              else if (_qrTooLargeToRender)
+                // TEST-017: the code couldn't be encoded (too much data for
+                // a QR code to hold - see _qrDataFits). Show a clear
+                // explanation instead of letting QrImageView fail silently;
+                // the stamp history below still proves what's been earned.
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.orange, size: 40),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "This card's code is too large to display",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold, color: BrandColors.textPrimary),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'This can happen on an older card with a lot of stamps. Show the business your stamp history below, or ask them to redeem it manually.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13, color: BrandColors.textSecondary),
                       ),
                     ],
                   ),

@@ -15,7 +15,7 @@ class AppConstants {
   static const String version = '0.1.0';
   
   // Defaults
-  static const int defaultStampsRequired = 10;
+  static const int defaultStampsRequired = 6;
   static const String defaultBrandColor = '#673AB7'; // Deep Purple
   
   // Database

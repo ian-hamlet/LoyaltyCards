@@ -1703,6 +1703,74 @@ This document tracks defects from two sources:
 - **Target Build:** Build 24 (v2.0.4+24) - fix already merged to `develop`, not yet built, uploaded, or submitted. Do not manually release any build that doesn't include this fix.
 - **Notes:** Found while empirically testing supplier_app on a non-Apple-Silicon Mac (separate feasibility investigation, branch `feature/macos-supplier-port`) - creating a fresh 3- and 4-stamp test business to probe QR scan reliability surfaced this as a genuine, unrelated, pre-existing app defect.
 
+### TEST-017: Secure Mode Redemption QR Silently Fails to Render on Higher-Stamp-Count Cards
+- **Source:** Testing - physical device, Secure Mode, 20-stamp business
+- **Status:** 🔴 **PRESENT IN LIVE VERSION 2.0.3+23** - CRITICAL, actively being fixed
+- **Priority:** CRITICAL
+- **Screen/Feature:** Customer App - `customer_card_detail.dart` (completed-card redemption view - there is no separate "redeem screen"; the QR/history for a completed card render inline in the card detail screen)
+- **Description:** The redemption QR for a completed Secure Mode card bundles one signature-bearing proof per stamp (`_generateCardQR()` in `customer_card_detail.dart`, mirroring `RedemptionRequestToken`/`RedemptionStampProof` in `shared/lib/models/qr_tokens.dart`). For high stamp counts, the resulting JSON payload exceeds the QR code library's maximum encodable capacity. `QrImageView` (`customer_card_detail.dart:628`) has no `errorCorrectionLevel` set (defaults to the most-capacity level, `L`, whose ceiling at the largest QR version is 2,953 bytes) and no `errorStateBuilder`. The underlying `qr` package's own validation (`QrValidator.validate()`) has a bug where it reports success without checking that the largest version actually fits the data - the real capacity check only happens later, inside `QrImageView`'s `build()`, where it throws `InputTooLongException`. Flutter's default behavior for a widget that throws during `build()` in a release build is to render nothing but a plain grey box (see `framework.dart` `ComponentElement.performRebuild()` doc comment) - no error text, no fallback.
+- **Reproduction Steps:**
+  1. Supplier app → Secure Mode business, 20 stamps required
+  2. Issue stamps across multiple visits (any combination) until a customer's card completes
+  3. Customer app → tap the completed card
+  4. The "show this QR code to redeem your reward" heading appears, but the QR area renders as a blank grey panel - no code, no error message
+- **Expected Behavior:** The redemption QR should always render, or if it genuinely can't (payload too large), the screen should show a clear fallback message - never a silent blank panel.
+- **Actual Behavior:** Blank grey panel, no error shown to the user or logged visibly. (Stamp history further down the same screen is NOT gated by mode and is unaffected by this crash - Flutter isolates build errors per-widget - so it should still be visible if the user scrolls past the blank QR area; not yet independently confirmed on-device.)
+- **Impact:** Complete inability to redeem a fully-earned Secure Mode card once stamp count is high enough - the core "cash in your reward" moment is broken, with no error message explaining why. **Present in v2.0.3+23, live on the App Store.**
+- **Root Cause Data (measured precisely against the real `qr` package, not estimated):**
+
+  | stamps | relocated (overflow-split) | JSON payload | fits at level L (2,953 byte cap)? |
+  |---|---|---|---|
+  | 20 | 0 (0%) | 2,937 bytes | barely (99.5% of capacity - trivial real-world variance in signature/ID length tips it over, consistent with this report) |
+  | 20 | 10 (50%) | 5,018 bytes | no |
+  | 20 | 20 (100%) | 7,108 bytes | no |
+  | 12 | 0 (0%) | 1,889 bytes | yes, comfortable |
+  | 12 | 6 (50%) | 3,137 bytes | no |
+  | 10 | 0 (0%) | 1,627 bytes | yes, comfortable |
+  | 10 | 5 (50%) | 2,667 bytes | yes, but tight (90% of cap) |
+  | 10 | 10 (100%) | 3,708 bytes | no |
+  | 7 | 7 (100%) | 2,689 bytes | yes |
+  | 8 | 8 (100%) | 3,028 bytes | no |
+
+  A relocated stamp (one moved onto this card by the overflow-splitting logic, carrying `originalCardId`/`originalStampNumber`/`originalPreviousHash` per V-012/the overflow-relocation design) costs roughly 217 extra bytes each on top of a normal ~141-byte proof entry. `qr_flutter`'s default error-correction level (`L`) is already the most-capacity option - there is no lower level to switch to for more room; the only levers are shrinking the payload or capping stamp count.
+- **Fix In Progress:**
+  1. Lower the maximum `stampsRequired` (currently 20, `CardIssueToken.isValid()` in `shared/lib/models/qr_tokens.dart` and the onboarding slider's `max` in `supplier_onboarding.dart`) to 10 - safe with comfortable margin at 0% relocation and still fits (with less margin) even at 50% relocation; only a near-100%-relocated 10-stamp card would still be at risk, a narrow edge case.
+  2. Add a graceful fallback for `QrImageView` failures (`errorStateBuilder` + try/catch around encoding) so a payload that still exceeds capacity - an existing already-issued high-stamp card from before this fix, or a heavily-relocated edge case - shows a clear message instead of a blank panel, and confirm/ensure the stamp history section remains visible regardless.
+  3. Existing already-issued cards above the new cap (issued under the old 3-20 range) are not retroactively changed - this only prevents *new* businesses from configuring a card size that risks the failure; the fallback in (2) is the safety net for those.
+- **Fix Branch:** `fix/TEST-017-redemption-qr-overflow` (off `develop`)
+- **Notes:** Related to TEST-016 (also a `CardIssueToken`/stamps-required validation issue) but independent - found via real-device testing immediately after the TEST-016 fix, using a 20-stamp Secure Mode business with a 7-stamp-per-transaction supplier cap that triggered the overflow-splitting logic. Not a QR *scanning*/camera-resolution issue (see the macOS supplier-app testing notes) - this is a QR *generation* failure, reproducible on any device including the customer's own iPhone screen.
+
+### TEST-018: Overflow-Relocated Stamps Lost Provenance in a Three-Way Split, Breaking Redemption Verification
+- **Source:** Code review - found while investigating TEST-017's overflow-relocation mechanics
+- **Status:** ✅ FIXED
+- **Priority:** CRITICAL
+- **Screen/Feature:** Customer App - `qr_scanner_screen.dart`, overflow-splitting logic (`_handleStampToken`)
+- **Description:** When a completed card's leftover stamps overflow onto a new/existing card, each relocated stamp needs to record the *original* card/position/hash its signature was actually signed against (`originalCardId`/`originalStampNumber`/`originalPreviousHash`) - the signature can't be recomputed for its new position without the supplier's private key. Two of the three overflow code paths did this correctly, including correctly cascading through multiple relocations (a stamp relocated a second time keeps pointing at its true first origin, via `oldStamp.originalCardId ?? oldStamp.cardId`). The third path - when a single overflow event partially fills an existing card and then needs a brand-new card for what's still left over - built its `Stamp(...)` by hand and omitted all three fields entirely, silently dropping provenance. A stamp relocated through this specific path would have its signature checked against the wrong context at redemption and could be incorrectly rejected as invalid.
+- **Reproduction Steps (previously):**
+  1. Secure Mode business, customer has a card 1 stamp short of an existing partially-filled second card's space, but the overflow amount also exceeds that second card's remaining space
+  2. Supplier issues enough stamps in one scan to: complete the first card, partially fill the second (existing) card, AND still have stamps left over
+  3. The leftover stamps land on a brand-new third card, with `originalCardId`/`originalStampNumber`/`originalPreviousHash` all null instead of pointing back to the first card
+  4. That card's eventual redemption would fail to verify those specific stamps' signatures correctly
+- **Root Cause:** `qr_scanner_screen.dart`'s three overflow-destination code paths each built their relocated `Stamp` by hand; one of the three (existing-card-partial-fill-then-new-card-for-remainder, previously around line 810-826) omitted the three original-context fields that the other two set correctly.
+- **Fix Applied:** Added `Stamp.relocateTo({required id, required cardId, required stampNumber, previousHash})` to `shared/lib/models/stamp.dart` - centralizes the *entire* stamp construction for a relocation (not just the original-context fields), so no call site can build a relocated stamp without them being set correctly, including the cascade-preserving `?? ` pattern for multi-hop relocations. All three `qr_scanner_screen.dart` call sites now use this method instead of hand-written `Stamp(...)` construction.
+- **Testing Verified:** Two new tests in `shared/test/models/stamp_test.dart` (`relocateTo - TEST-018` group) - a never-relocated stamp records its own card/position as the original; an already-relocated stamp preserves its true original rather than the intermediate card on a second relocation. Both verified red (reverting the fix to `null` for all three fields) then green. Full `shared`/`customer_app` suites green, `flutter analyze` clean on both changed files.
+- **Notes:** Not reachable via any external input - `originalCardId`/etc. are populated only by the app's own internal move logic, never from a scanned QR or user action, so this was a data-integrity bug (a legitimate stamp becoming unverifiable), not a security hole. Found as a side effect of investigating TEST-017's relocation mechanics, not from a user report.
+
+### TEST-019: Generic "An error occurred" Shown When a Business's Card Config Is Incompatible With the App Version
+- **Source:** Testing - real device, discovered while attempting to issue a 3rd card from the same 20-stamp business used to test TEST-017
+- **Status:** ✅ FIXED (error message only - see Notes for the underlying backward-compatibility gap, still open)
+- **Priority:** HIGH
+- **Screen/Feature:** Customer App - `qr_scanner_screen.dart` (`_handleCardIssue`) / `TokenValidator.validateCardIssueToken` / `CardIssueToken.isValid()`
+- **Description:** `CardIssueToken.isValid()` (tightened to 3-10 stamps by TEST-017) has no way to report *why* a token is invalid - just true/false. When a business created before that bound shipped (e.g. one still configured for 20 stamps, which can't be changed after setup) issues a card, `TokenValidator.validateCardIssueToken` returned the generic `'Invalid token structure'`, which doesn't match any pattern in `ErrorMessageMapper` and falls through to the fully generic `'An error occurred. Please try again.'` - misleading, since retrying can never help: that business will fail this exact check on every single scan, forever, until its configuration or the app's bound changes.
+- **Reproduction Steps (before fix):**
+  1. Business created with `stampsRequired` outside the app's currently-supported range (e.g. 20, from before TEST-017 lowered the max to 10)
+  2. Customer scans that business's "Issue Card" QR
+  3. Shown: "An error occurred. Please try again." - retrying produces the identical result every time, with no explanation
+- **Impact:** A business in this state can never be scanned by an updated customer app again, and the customer has no way to know why or what to do about it.
+- **Fix Applied:** Added `CardIssueToken.validationError()` (`shared/lib/models/qr_tokens.dart`) - returns a specific reason string instead of just failing `isValid()`, with a dedicated, actionable message for the stampsRequired-out-of-range case ("...won't be fixed by scanning again - let the business know..."). `TokenValidator.validateCardIssueToken` now surfaces this directly, and `qr_scanner_screen.dart` shows it as-is instead of routing it through `ErrorMessageMapper` (which would otherwise discard it in favor of the generic fallback, since it matches none of the mapper's known technical-error substrings).
+- **Testing Verified:** New tests in `shared/test/qr_tokens_test.dart` (`validationError()` for an out-of-range and a valid token) and `customer_app/test/services/token_validator_test.dart` (specific message propagates through `TokenValidator`); two pre-existing tests there updated since they asserted on the old generic `'structure'` substring, which no longer appears. Full suite green (shared 171, customer 129, supplier 80).
+- **Notes:** This fixes the *message* only. The underlying problem - a business's `stampsRequired` becoming permanently unsupported the moment the app's validation bound tightens, with no way to reconfigure since mode/stamp-count are locked after setup - is a real backward-compatibility gap, not yet solved. Surfaced directly by real-device testing of TEST-017/TEST-018 (the 20-stamp business used for that testing can no longer issue cards at all). See the backward-compatibility discussion referenced elsewhere in this session's notes for next steps - possibilities include a data migration/clamp on app update, a higher validation ceiling with the QR-capacity fallback as the real safety net, or a supported "business needs reconfiguration" recovery flow.
+
 ### DECISION-016: Remove or Protect "Delete All Data" Dangerous Operations for Production
 - **Type:** Architecture/UX Decision
 - **Status:** ✅ IMPLEMENTED

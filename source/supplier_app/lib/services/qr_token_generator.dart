@@ -111,7 +111,7 @@ class QRTokenGenerator {
 
   /// Generate a Stamp Token for customer to scan and add to their card
   /// 
-  /// If [additionalStampCount] is provided (1-6), the token will include additional
+  /// If [additionalStampCount] is provided (1-4), the token will include additional
   /// stamps with valid signatures and hash chain. This allows adding multiple stamps
   /// in a single QR scan operation.
   /// 

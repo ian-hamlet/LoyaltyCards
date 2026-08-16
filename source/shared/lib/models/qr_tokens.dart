@@ -177,27 +177,57 @@ class CardIssueToken extends QRToken {
   }
 
   /// Validate token structure
-  bool isValid() {
+  bool isValid() => validationError() == null;
+
+  /// TEST-019: like [isValid], but reports *why* when invalid, instead of
+  /// just true/false. A generic "invalid token" message is fine for a
+  /// genuinely malformed/corrupt scan (retrying makes sense), but the
+  /// stampsRequired-out-of-range case is different: it means the business's
+  /// own stored configuration is incompatible with this app version, which
+  /// no amount of retrying fixes - the customer needs to know that so they
+  /// don't keep re-scanning a QR that will always fail the same way.
+  String? validationError() {
     if (businessId.isEmpty || businessName.isEmpty || publicKey.isEmpty) {
-      return false;
+      return 'This QR code is missing required information.';
     }
     // TEST-016: must match the onboarding slider's minimum (min: 3 in
     // supplier_onboarding.dart) - this was previously 5, silently rejecting
     // every card issued by a business configured for 3 or 4 stamps.
-    if (stampsRequired < 3 || stampsRequired > 20) {
-      return false;
+    //
+    // TEST-017: upper bound lowered from 20 to 10 - a Secure Mode
+    // redemption QR bundles one signature per stamp, and at 20 stamps the
+    // encoded payload sits at ~99.5% of the QR library's max capacity even
+    // with zero overflow-relocated stamps (any relocation, or trivial
+    // real-world signature-length variance, pushes it over and the QR
+    // silently fails to render). 10 stays under capacity until roughly
+    // 60-70% of its stamps are overflow-relocated (vs ~40% at 12) - not
+    // literally bulletproof at the 100%-relocated extreme, but a much
+    // wider safety margin. CustomerCardDetail's QrCapacity.fits() check
+    // remains as a safety net for the residual case and for already-issued
+    // cards from before this fix shipped.
+    //
+    // TEST-019: a business created before this bound was tightened still
+    // has its old, now-out-of-range stampsRequired stored, and issues
+    // tokens with it forever (it can't be changed after setup without a
+    // full reset that wipes customer data) - this is a real, permanent
+    // backward-compatibility gap, not a hypothetical one. Reported here
+    // with a specific, identifiable message (see ErrorMessageMapper) so
+    // the customer isn't just told to keep retrying a scan that can never
+    // succeed.
+    if (stampsRequired < 3 || stampsRequired > 10) {
+      return "This business's card is set up for $stampsRequired stamps, which this app version doesn't support (supported range: 3-10). This won't be fixed by scanning again - let the business know, they may need to update or reconfigure.";
     }
     if (!brandColor.startsWith('#') || brandColor.length != 7) {
-      return false;
+      return 'This QR code has invalid formatting.';
     }
     if (signature.isEmpty) {
-      return false;
+      return "This QR code couldn't be verified.";
     }
     // If there are initial stamps, cardId must be present
     if (initialStamps.isNotEmpty && (cardId == null || cardId!.isEmpty)) {
-      return false;
+      return 'This QR code is missing required information.';
     }
-    return true;
+    return null;
   }
 }
 

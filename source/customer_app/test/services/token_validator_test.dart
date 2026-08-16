@@ -69,7 +69,9 @@ void main() {
       final result = await TokenValidator.validateCardIssueToken(token);
 
       expect(result.isValid, false);
-      expect(result.error, contains('structure'));
+      // TEST-019: TokenValidator now surfaces CardIssueToken.validationError()'s
+      // specific message instead of a generic "Invalid token structure".
+      expect(result.error, contains('missing required information'));
     });
 
     test('validates token structure before checking signature', () async {
@@ -87,7 +89,30 @@ void main() {
       final result = await TokenValidator.validateCardIssueToken(token);
 
       expect(result.isValid, false);
-      expect(result.error, contains('structure'));
+      expect(result.error, contains('missing required information'));
+    });
+
+    test('TEST-019: reports a specific, actionable message for a stampsRequired out of the supported range', () async {
+      // Otherwise-valid token so the check actually reaches stampsRequired,
+      // not an earlier field. Mirrors a business created before the 3-10
+      // bound was tightened, whose stored config can't be changed after
+      // setup - every card it issues will always fail this same way.
+      final token = CardIssueToken(
+        businessId: 'business-123',
+        businessName: 'Test Coffee',
+        publicKey: testPublicKey,
+        stampsRequired: 20,
+        brandColor: '#FF5733',
+        signature: testSignature,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      final result = await TokenValidator.validateCardIssueToken(token);
+
+      expect(result.isValid, false);
+      expect(result.error, isNot(contains('An error occurred')));
+      expect(result.error, contains('20 stamps'));
+      expect(result.error, contains("won't be fixed by scanning again"));
     });
   });
 

@@ -12,10 +12,15 @@ class TokenValidator {
     CardIssueToken token,
   ) async {
     // Check basic structure
-    if (!token.isValid()) {
+    // TEST-019: use validationError() rather than a generic message - a
+    // stampsRequired-out-of-range business (created before this app's
+    // bound tightened) is a permanent, unfixable-by-retrying state the
+    // customer needs a specific explanation for, not "try again".
+    final structureError = token.validationError();
+    if (structureError != null) {
       return ValidationResult(
         isValid: false,
-        error: 'Invalid token structure',
+        error: structureError,
       );
     }
 

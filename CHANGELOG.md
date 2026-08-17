@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.1+28] - 2026-08-17 - CURRENT
 
-**Status:** 🟡 Patch version bump (2.1.0 -> 2.1.1, not build-only) - not yet built, uploaded, or submitted. Supersedes v2.1.0+27, which carried the same content but was only ever committed to git, never built or uploaded to TestFlight. v2.1.0+26 was already built and uploaded to TestFlight before either fix below was found/added, and Apple doesn't allow re-uploading the same build number with different content. Bumped to a real patch version rather than another build-only bump because DECISION-017 below is a genuine UX improvement, not just a bug fix.
+**Status:** 🟡 Patch version bump (2.1.0 -> 2.1.1, not build-only) - not yet built, uploaded, or submitted. Supersedes v2.1.0+27, which shipped TEST-021 to TestFlight the night of 2026-08-16/17 but not DECISION-017, added afterward. v2.1.0+26 was already built and uploaded to TestFlight before either fix below was found/added, and Apple doesn't allow re-uploading the same build number with different content. Bumped to a real patch version rather than another build-only bump because DECISION-017 below is a genuine UX improvement, not just a bug fix.
 
 ### Added
 - **DECISION-017: a business whose stamps-required count falls outside the supported range can now fix it themselves, in-app.** Previously, a business in this state (e.g. one still configured for 20 stamps, from before this range tightened) had no way to recover short of a full reset, wiping every customer's card - a disproportionate response to a number being out of range, when changing it going forward is actually safe (each existing card keeps its own stamp count, unaffected by the business's current setting). The Supplier app now shows a proactive warning on Home and blocks Issue Card from generating a doomed QR at all, with a "Fix Now" flow (also available in Settings) to reconfigure into the supported range. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-017.
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0+27] - 2026-08-17
 
-**Status:** 🟡 SUPERSEDED by 2.1.1+28 - committed to git but never built, uploaded, or submitted; folded into that release along with DECISION-017, added afterward. Carried TEST-021 only - see 2.1.1+28 above for full detail.
+**Status:** 🟢 Shipped to TestFlight the night of 2026-08-16/17, superseded by v2.1.1+28 for App Store submission (missing DECISION-017 - see above). Carried TEST-021 only - see 2.1.1+28 above for full detail.
 
 ## [2.1.0+26] - 2026-08-16
 

@@ -22,17 +22,19 @@ Examples:
 - **Platform:** Not yet built/uploaded
 - **Branch:** `develop` (`505d5f9` for TEST-021; DECISION-017 not yet committed as of this writing)
 - **Version:** 2.1.1+28
-- **Status:** 🟡 In progress. **Patch version bump (2.1.0 -> 2.1.1), not build-only** - v2.1.0+27 carried the same content but was only ever committed to git, never built or uploaded to TestFlight (superseded, see below). Bumped to a real patch version rather than another build-only bump because DECISION-017 is a genuine UX improvement, not just a bug fix. v2.1.0+26 was already built and uploaded to TestFlight before either fix here was found/added, and Apple doesn't allow re-uploading the same build number with different content.
+- **Status:** 🟡 In progress. **Patch version bump (2.1.0 -> 2.1.1), not build-only** - v2.1.0+27 shipped TEST-021 to TestFlight (see below) but not DECISION-017, added afterward - Apple doesn't allow re-uploading the same build number with different content, so this carries both forward together. Bumped to a real patch version rather than another build-only bump because DECISION-017 is a genuine UX improvement, not just a bug fix.
 - **Focus:** TEST-021 (the issue-card counterpart to TEST-017/020's redemption QR capacity fix) plus DECISION-017 (self-service recovery for a business outside the supported stamps-required range, closing the gap TEST-019 flagged as still open)
 - **Major Changes:**
-  - **TEST-021:** the same silent QR-capacity failure as TEST-017, never fixed on the issue-card side - a card issued with many pre-applied initial stamps could hit it too. Found via real-device testing of the v2.1.0+26 TestFlight build. Applied the same compact-encoding fix (`CardIssueQrCodec`) to the supplier app's on-screen, Print, and Share issue-card QR.
+  - **TEST-021:** the same silent QR-capacity failure as TEST-017, never fixed on the issue-card side - a card issued with many pre-applied initial stamps could hit it too. Found via real-device testing of the v2.1.0+26 TestFlight build. Applied the same compact-encoding fix (`CardIssueQrCodec`) to the supplier app's on-screen, Print, and Share issue-card QR. (Already shipped to TestFlight in v2.1.0+27 - see below.)
   - **DECISION-017:** a business whose `stampsRequired` falls outside the supported range previously had no way to recover short of a full reset (wiping every customer's card). Turns out changing it going forward is safe (each existing card stores its own value at issuance). Supplier app now warns proactively on Home, blocks Issue Card from generating a doomed QR, and offers a scoped "Fix Now" flow (also in Settings) to reconfigure into range - which also makes TEST-021's fix unreachable through the UI for this specific scenario going forward, though it remains verified directly against the codec.
   - Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-021 and DECISION-017.
-- **Next Steps:** Commit and push DECISION-017 (and this version bump), merge `develop` → `main`, cut a release branch, build both IPAs (`source/build_both_apps.sh`), upload via Transporter, verify via TestFlight, and submit for App Store review.
+- **Next Steps:** Merge `develop` → `main`, cut a release branch, build both IPAs (`source/build_both_apps.sh`), upload via Transporter, verify DECISION-017 via TestFlight (TEST-021 already confirmed in v2.1.0+27), and submit for App Store review.
 
-### v2.1.0+27 - Build 27 (🟡 Superseded by v2.1.1+28 - never built or uploaded)
+### v2.1.0+27 - Build 27 (🟢 Shipped to TestFlight, superseded by v2.1.1+28 for submission)
 - **Date:** August 17, 2026
-- **Version:** 2.1.0+27 (committed to git as `505d5f9`, folded into v2.1.1+28 along with DECISION-017, added afterward)
+- **Platform:** ⚠️ Built and uploaded to **TestFlight** the night of 2026-08-16/17 - this happened outside this document's tracked workflow, so there's no record here of exactly when/how (no `main` merge, release branch, or `build_both_apps.sh` run is logged). Confirmed by the user 2026-08-17.
+- **Version:** 2.1.0+27 (committed to git as `505d5f9`)
+- **Status:** 🟢 Shipped to TestFlight, not submitted for App Store review. Carried TEST-021 only - DECISION-017 was added afterward, folded into v2.1.1+28 above. **Should not be submitted for App Store review as-is** - use v2.1.1+28 once built, since this build is missing DECISION-017.
 - **Major Changes:** TEST-021 only - see v2.1.1+28 above, which carries this fix forward alongside DECISION-017.
 
 ### v2.1.0+26 - Build 26 (🟡 Shipped to TestFlight, superseded by v2.1.1+28 for submission)

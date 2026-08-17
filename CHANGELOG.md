@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.1+28] - 2026-08-17 - CURRENT
+## [2.1.1+29] - 2026-08-17 - CURRENT
 
-**Status:** 🟡 Patch version bump (2.1.0 -> 2.1.1, not build-only) - not yet built, uploaded, or submitted. Supersedes v2.1.0+27, which shipped TEST-021 to TestFlight the night of 2026-08-16/17 but not DECISION-017, added afterward. v2.1.0+26 was already built and uploaded to TestFlight before either fix below was found/added, and Apple doesn't allow re-uploading the same build number with different content. Bumped to a real patch version rather than another build-only bump because DECISION-017 below is a genuine UX improvement, not just a bug fix.
+**Status:** 🟡 Build-only bump - not yet built, uploaded, or submitted. Supersedes v2.1.1+28, which shipped DECISION-017 and TEST-021 to TestFlight but not this fix, found via real-device testing of that exact build. Apple doesn't allow re-uploading the same build number with different content.
+
+### Fixed
+- **TEST-022: TEST-021's compact issue-card QR encoding was unconditional, breaking issuance for any customer app older than that fix.** A supplier on v2.1.0+27 or later compact-encodes every Issue Card QR regardless of size - Base45 is never valid JSON, so a customer app that predates TEST-021 fails to parse it at all (a generic "not a valid QR Code" error), for *every* issuance, not just the rare high-initial-stamp-count case TEST-021 targeted. Confirmed on a real device (supplier 27, customer 23). Fixed by preferring plain JSON whenever it fits (covers every initial-stamp count up to 16, comfortably spanning the whole 3-12 supported range), falling back to compact encoding only for the genuine legacy edge case. Applied the same fix proactively to the redemption QR (TEST-020), which had the identical unconditional-encoding shape. Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-022.
+
+## [2.1.1+28] - 2026-08-17
+
+**Status:** 🟢 Shipped to TestFlight, superseded by v2.1.1+29 for App Store submission (missing the TEST-022 fix above). Patch version bump (2.1.0 -> 2.1.1, not build-only). Real-device verified end-to-end, including the full DECISION-017 flow across both matched and mismatched supplier/customer version pairs - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. Supersedes v2.1.0+27, which shipped TEST-021 to TestFlight the night of 2026-08-16/17 but not DECISION-017. v2.1.0+26 was already built and uploaded to TestFlight before either fix below was found/added.
 
 ### Added
 - **DECISION-017: a business whose stamps-required count falls outside the supported range can now fix it themselves, in-app.** Previously, a business in this state (e.g. one still configured for 20 stamps, from before this range tightened) had no way to recover short of a full reset, wiping every customer's card - a disproportionate response to a number being out of range, when changing it going forward is actually safe (each existing card keeps its own stamp count, unaffected by the business's current setting). The Supplier app now shows a proactive warning on Home and blocks Issue Card from generating a doomed QR at all, with a "Fix Now" flow (also available in Settings) to reconfigure into the supported range. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-017.

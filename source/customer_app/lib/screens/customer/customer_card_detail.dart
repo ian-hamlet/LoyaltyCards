@@ -108,6 +108,12 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   // version, or if the generator rejects inconsistent card/stamp data -
   // either way, the caller falls back to the "too large to display" panel
   // (stamp history below it still proves what's been earned).
+  // TEST-022: same fix as the supplier app's issue-card QR - prefer plain
+  // JSON (readable by any supplier app version) whenever it actually
+  // fits, and only fall back to the compact encoding for the genuinely
+  // oversized case (high stamp count and/or heavily overflow-relocated).
+  // The decode side (supplier_redeem_card.dart) already tries plain JSON
+  // first, so no change needed there.
   QrCode? _buildRedemptionQrCode() {
     if (_card == null) return null;
     AppLogger.qr('Card is COMPLETE - generating REDEMPTION QR (TEST-020 compact encoding)');
@@ -119,6 +125,10 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         cardDeviceId: _card!.deviceId, // V-005: Device where card was created
         currentDeviceId: _currentDeviceId, // V-005: Device showing redemption QR (cached)
       );
+      final plainJson = token.toQRString();
+      if (QrCapacity.fits(plainJson)) {
+        return QrCode.fromData(data: plainJson, errorCorrectLevel: QrErrorCorrectLevel.L);
+      }
       final compact = RedemptionQrCodec.encode(token);
       return AlphanumericQr.build(compact);
     } catch (e) {

@@ -567,6 +567,25 @@
 ///   `maxStampsRequired`), referenced by the onboarding slider too,
 ///   instead of being duplicated - the exact kind of drift that caused
 ///   TEST-016/017/019. Full detail: DEFECT_TRACKER.md DECISION-017.
+///
+/// Build 29 Changes (build-only bump - build 28 was already uploaded to
+/// TestFlight without this fix, and Apple doesn't allow re-uploading a
+/// build number with different content):
+/// - Fixed TEST-022: TEST-021's compact issue-card QR encoding was
+///   unconditional (no size check), which broke card issuance for any
+///   customer app older than that fix - Base45 is never valid JSON, so a
+///   pre-TEST-021 customer app scanning ANY issuance from an updated
+///   supplier (not just a high-initial-stamp-count one) saw a generic
+///   "not a valid QR code" error. Confirmed on a real device: supplier
+///   v2.1.0+27, customer v2.0.3+23, ordinary issuance failed outright.
+///   `_buildIssueQrCode()` and `_buildRedemptionQrCode()` (the latter had
+///   the identical unconditional shape from TEST-020, fixed proactively)
+///   now check `QrCapacity.fits()` on the plain-JSON payload first and
+///   only fall back to compact encoding when it genuinely doesn't fit -
+///   plain JSON now covers every initial-stamp count up to 16, comfortably
+///   spanning the entire 3-12 supported range with huge margin. No decode
+///   -side changes needed - both apps already try plain JSON first.
+///   Full detail: DEFECT_TRACKER.md TEST-022.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.1.1+28';
+const String appVersion = '2.1.1+29';

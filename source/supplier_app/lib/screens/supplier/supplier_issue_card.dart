@@ -23,11 +23,18 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   
   Business? _business;
   CardIssueToken? _token;
-  // TEST-021: pre-built alphanumeric-mode QR for _token, cached alongside
-  // it so build() never re-derives it. Null means either _token hasn't
-  // been generated yet, or (extremely unlikely given measured margins -
-  // see DEFECT_TRACKER.md TEST-021) the payload still didn't fit.
+  // TEST-021: pre-built QR for _token, cached alongside it so build()
+  // never re-derives it. Null means either _token hasn't been generated
+  // yet, or (extremely unlikely given measured margins - see
+  // DEFECT_TRACKER.md TEST-021) the payload still didn't fit even
+  // compact-encoded.
   QrCode? _cachedIssueQrCode;
+  // TEST-022 regression test hook: true when the cached QR had to fall
+  // back to compact encoding (payload too large for plain JSON), false
+  // when plain JSON was used - the common case, and the only one
+  // readable by a customer app older than TEST-021/022.
+  @visibleForTesting
+  bool issueQrUsedCompactEncodingForTesting = false;
   bool _isLoading = true;
   // DECISION-017: true when _business.stampsRequired falls outside the
   // currently-supported range (e.g. a legacy business from before
@@ -135,9 +142,27 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   // TEST-021: a card issued with pre-applied initial stamps embeds one
   // signature per stamp - the same shape as the redemption QR TEST-020
   // fixed - and had the same silent-failure capacity ceiling, just never
-  // fixed on this side. Compact-encode via CardIssueQrCodec and use
-  // alphanumeric mode instead of the default byte-mode QrImageView(data:).
+  // fixed on this side.
+  //
+  // TEST-022: TEST-021's original fix compact-encoded unconditionally,
+  // which broke issuance for any customer app older than this fix (Base45
+  // is never valid JSON, so a pre-TEST-021 customer app's plain
+  // jsonDecode() fails outright - "not a valid QR code" for every
+  // issuance, not just the rare high-initial-stamp-count case TEST-021
+  // targeted). Plain JSON has been readable by every app version since
+  // day one, so prefer it whenever it actually fits - only the genuinely
+  // oversized legacy case (a business still configured above the
+  // supported range, with many pre-applied stamps) needs the compact
+  // fallback. The decode side on the customer app already tries plain
+  // JSON first (QRToken.fromQRString) before falling back to
+  // CardIssueQrCodec.decode(), so no change needed there.
   QrCode? _buildIssueQrCode(CardIssueToken token) {
+    final plainJson = token.toQRString();
+    if (QrCapacity.fits(plainJson)) {
+      issueQrUsedCompactEncodingForTesting = false;
+      return QrCode.fromData(data: plainJson, errorCorrectLevel: QrErrorCorrectLevel.L);
+    }
+    issueQrUsedCompactEncodingForTesting = true;
     try {
       final compact = CardIssueQrCodec.encode(token);
       return AlphanumericQr.build(compact);

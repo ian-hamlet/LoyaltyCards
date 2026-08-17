@@ -332,9 +332,83 @@ void main() {
       );
       expect(find.text("New cards can't be issued"), findsNothing);
 
+      // TEST-022: once reconfigured into the supported range (12), the
+      // payload fits comfortably as plain JSON (measured ~2,221 of ~2,953
+      // bytes) - should NOT need the compact fallback, so a customer app
+      // older than TEST-021/022 can still read this QR.
+      final state = tester.state(find.byType(SupplierIssueCard));
+      expect(
+        // ignore: avoid_dynamic_calls
+        (state as dynamic).issueQrUsedCompactEncodingForTesting as bool,
+        isFalse,
+        reason: 'A reconfigured in-range business should use plain JSON, not the compact fallback.',
+      );
+
       // Secure Mode starts a countdown Timer.periodic (_startCountdown) -
       // dispose the widget before the test ends so it gets cancelled,
       // otherwise flutter_test's pending-timer invariant check fails.
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  /// TEST-022: TEST-021's original fix compact-encoded every issue-card QR
+  /// unconditionally, which broke issuance for any customer app older than
+  /// that fix - Base45 is never valid JSON, so a pre-TEST-021 customer app
+  /// scanning ANY issuance from an updated supplier (not just a
+  /// high-initial-stamp-count one) would see a generic "not a valid QR
+  /// code" error. Confirmed on a real device: supplier v2.1.0+27, customer
+  /// v2.0.3+23, ordinary issuance failed outright. Fixed by preferring
+  /// plain JSON whenever it fits, falling back to compact encoding only
+  /// for the genuine legacy edge case.
+  const ordinaryBusinessId = 'business-issue-card-ordinary-test022';
+  Future<void> seedOrdinaryBusiness(WidgetTester tester) async {
+    await tester.runAsync(() async {
+      final keyPair = await keyManager.generateKeyPair();
+      await keyManager.storePrivateKey(ordinaryBusinessId, keyPair.privateKey as ECPrivateKey);
+      await keyManager.storePublicKey(ordinaryBusinessId, keyPair.publicKey as ECPublicKey);
+      final publicKeyEncoded = (await keyManager.getPublicKeyString(ordinaryBusinessId))!;
+
+      await businessRepo.insertBusiness(Business(
+        id: ordinaryBusinessId,
+        name: 'Test Coffee Shop',
+        publicKey: publicKeyEncoded,
+        privateKey: 'unused-plaintext-field',
+        stampsRequired: 10,
+        brandColor: '#FF5733',
+        mode: OperationMode.secure,
+        createdAt: DateTime.now(),
+      ));
+    });
+  }
+
+  testWidgets(
+    'TEST-022: an ordinary in-range business issues a plain-JSON QR, not compact-encoded',
+    (tester) async {
+      await tester.runAsync(
+        () => SupplierDatabaseHelper.resetForTesting(testDatabaseName: 'test_supplier_issue_card_ordinary.db'),
+      );
+      await seedOrdinaryBusiness(tester);
+
+      await tester.pumpWidget(const MaterialApp(home: SupplierIssueCard()));
+      await tester.pump();
+      for (var attempt = 0; attempt < 50; attempt++) {
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pump();
+        if (find.byType(QrImageView).evaluate().isNotEmpty) break;
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.byType(QrImageView), findsOneWidget);
+
+      final state = tester.state(find.byType(SupplierIssueCard));
+      expect(
+        // ignore: avoid_dynamic_calls
+        (state as dynamic).issueQrUsedCompactEncodingForTesting as bool,
+        isFalse,
+        reason: 'An ordinary business well within the supported range should never need the '
+            'compact fallback - readable by any customer app version, however old.',
+      );
+
       await tester.pumpWidget(const SizedBox());
     },
   );

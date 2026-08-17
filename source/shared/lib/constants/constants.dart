@@ -34,10 +34,10 @@ class AppConstants {
   // Timing
   static const Duration animationDuration = Duration(milliseconds: 300);
   static const Duration qrScanSuccessDelay = Duration(milliseconds: 500);
+  static const Duration errorCooldownDuration = Duration(seconds: 2); // Shared by both apps' scan-error screens (N-009) - suppresses re-triggering an error dialog on every frame while an invalid/duplicate QR remains in camera view
   
   // Security Constants
   static const int stampRateLimitMs = 5000; // 5 seconds between stamps (prevents duplicate scans)
-  static const int issueIntervalMs = 30000; // 30 seconds between card issuances (supplier rate limit)
   static const int stampExpiryMs = 120000; // 2 minutes stamp token validity (timestamp tolerance)
   static const int cardIssueExpiryMs = 300000; // 5 minutes Secure Mode card-issue token validity (token_validator.dart)
   static const int stampRequestExpiryMs = 60000; // 1 minute stamp-request token freshness window (distinct from stampExpiryMs, which times the *response* stamp token, not the request)

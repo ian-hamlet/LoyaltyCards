@@ -4,17 +4,15 @@
 **Assessment Date:** August 17, 2026
 **Assessor:** AI-assisted review (Claude) — repo-wide search across `source/supplier_app`, `source/customer_app`, and `source/shared` for numeric literals used directly in business/security-rule logic instead of a named constant.
 **Scope:** Time windows, thresholds, counts, rate limits, and crypto parameters that encode a rule. Purely cosmetic UI sizing (padding, font size, icon size) was intentionally skipped except where it duplicates a security-relevant value.
-**Status:** N-001 through N-007 fixed 2026-08-17 (see "Resolution" note under each finding below). N-008 and N-009 remain open - not addressed in this pass.
+**Status:** N-001 through N-009 all fixed as of 2026-08-17 (see "Resolution" note under each finding below). This review is complete.
 
 ---
 
 ## How to resume this review
 
-N-001 through N-007 are done. Remaining:
-1. **N-008** (duplicated `_decodePublicKey`/`_decodeLength` implementation between `crypto_utils.dart` and `key_manager.dart`) - this is a duplicated *algorithm*, not just a magic number, so consolidating it is a small refactor rather than a constant extraction. Not started.
-2. **N-009** (`_errorCooldownDuration` defined identically but independently in both apps) - low priority, already named locally in each file, just not shared. Not started.
+All findings (N-001 through N-009) are resolved. Nothing outstanding from this pass.
 
-`AppConstants.issueIntervalMs` (30s) is defined but currently unused anywhere in the codebase — worth checking whether it was meant to gate something before assuming it's dead code.
+`AppConstants.issueIntervalMs` (30s, "between card issuances") was investigated at the user's request and confirmed to be genuinely dead code, distinct from the (correctly implemented, unrelated) Express Mode scan-cooldown slider (`simpleModeMin/Max/DefaultScanIntervalMs`, stored on `Business.scanInterval` and embedded in the stamp QR token). It was never referenced anywhere and has been removed.
 
 ---
 
@@ -25,7 +23,7 @@ N-001 through N-007 are done. Remaining:
 | Constant | Value | Correctly referenced everywhere? |
 |---|---|---|
 | `stampRateLimitMs` | 5000 (5s between stamps) | Yes — see `rate_limiter.dart:61` |
-| `issueIntervalMs` | 30000 (30s) | Unreferenced anywhere — possibly dead |
+| ~~`issueIntervalMs`~~ | ~~30000 (30s)~~ | **Removed 2026-08-17** — confirmed dead, unreferenced anywhere; distinct from the Express Mode scan-cooldown, which is a separate, correctly-wired feature |
 | `stampExpiryMs` | 120000 (2-min stamp-token expiry) | Enforced correctly (`token_validator.dart:147`), but redisplayed as a raw literal in UI (see N-003) |
 | `simpleModeDefaultScanIntervalMs` | 30000 | Redefined as raw literal elsewhere (see N-006) |
 | `simpleModeMinScanIntervalMs` | 5000 | Redefined as raw literal elsewhere (see N-006) |
@@ -108,10 +106,14 @@ All three throw on the same `100` ceiling. This is a separate, larger bound than
 - `source/shared/lib/utils/crypto_utils.dart:54, 72, 90, 236, 243, 256` and `source/supplier_app/lib/services/key_manager.dart:224, 229-256` both independently hardcode `8` (minimum byte-buffer length for two 4-byte length headers) and `4` (length-prefix field size) multiple times.
 - This isn't just repeated literals — the entire `_decodePublicKey` / `_decodeLength` implementation exists twice. If the encoding format ever changes, both copies have to be updated in lockstep, and the magic numbers `8`/`4` would need to change consistently in both.
 
+**✅ Resolved 2026-08-17:** `CryptoUtils._decodePublicKey`/`_decodeLength` made public (`decodePublicKey`/`decodeLength`); `KeyManager.getPublicKey()` and its public `decodePublicKey()` wrapper now delegate to `CryptoUtils.decodePublicKey()` instead of maintaining a byte-for-byte duplicate, matching the same delegation pattern `KeyManager.verifySignature()` already used. `KeyManager._encodeLength`/`encodePublicKey` were left untouched — legitimately supplier-only, since only the supplier app generates (encodes) a public key.
+
 ### N-009 (minor, informational): `_errorCooldownDuration` — same value, defined twice, but already named
 **Priority:** Low
 
 - `source/customer_app/lib/screens/customer/qr_scanner_screen.dart:58` and `source/supplier_app/lib/screens/supplier/supplier_redeem_card.dart:37` both declare `static const Duration _errorCooldownDuration = Duration(seconds: 2);`. Each is already a named constant locally, so this is lower severity than the others, but it's still one shared value defined independently in two places.
+
+**✅ Resolved 2026-08-17:** added `AppConstants.errorCooldownDuration`; both screens now reference it instead of their own local declaration.
 
 ---
 
@@ -129,4 +131,4 @@ All three throw on the same `100` ceiling. This is a separate, larger bound than
 | N-008 | `8` / `4` byte-header sizes + duplicated decode logic | `crypto_utils.dart`, `key_manager.dart` | Medium |
 | N-009 | 2s error cooldown (already named, defined twice) | `qr_scanner_screen.dart`, `supplier_redeem_card.dart` | Low |
 
-No changes were made to any source file as part of this review.
+All nine findings (N-001 through N-009) are now fixed. `AppConstants.issueIntervalMs` was also removed as confirmed dead code, separate from this review's numbered findings.

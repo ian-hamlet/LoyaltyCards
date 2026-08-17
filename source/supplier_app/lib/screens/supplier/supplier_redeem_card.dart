@@ -34,7 +34,6 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   // let the same code get reprocessed and rejected several times in a row
   // while the camera was still being aimed, showing the same error repeatedly.
   DateTime? _cooldownUntil;
-  static const Duration _errorCooldownDuration = Duration(seconds: 2);
 
   @override
   void initState() {
@@ -815,7 +814,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     Haptics.error();
     setState(() {
       _isProcessing = false;
-      _cooldownUntil = DateTime.now().add(_errorCooldownDuration);
+      _cooldownUntil = DateTime.now().add(AppConstants.errorCooldownDuration);
     });
 
     AppFeedback.error(context, message);

@@ -55,7 +55,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   bool _isProcessing = false;
   String? _errorMessage;
   DateTime? _cooldownUntil;
-  static const Duration _errorCooldownDuration = Duration(seconds: 2);
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
   @override
@@ -159,7 +158,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     setState(() {
       _errorMessage = message;
       _isProcessing = false;
-      _cooldownUntil = DateTime.now().add(_errorCooldownDuration);
+      _cooldownUntil = DateTime.now().add(AppConstants.errorCooldownDuration);
     });
   }
 

@@ -56,7 +56,7 @@ class TokenValidator {
     // Secure mode: Check timestamp (reject tokens older than 5 minutes)
     final now = DateTime.now().millisecondsSinceEpoch;
     final age = now - token.timestamp;
-    if (age > 5 * 60 * 1000) {
+    if (age > AppConstants.cardIssueExpiryMs) {
       return ValidationResult(
         isValid: false,
         error: 'Token expired (older than 5 minutes)',
@@ -220,7 +220,7 @@ class TokenValidator {
     // Check timestamp (reject requests older than 1 minute)
     final now = DateTime.now().millisecondsSinceEpoch;
     final age = now - token.timestamp;
-    if (age > 60 * 1000) {
+    if (age > AppConstants.stampRequestExpiryMs) {
       return ValidationResult(
         isValid: false,
         error: 'Request expired (older than 1 minute)',

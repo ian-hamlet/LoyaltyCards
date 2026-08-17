@@ -35,10 +35,10 @@ class SupplierDatabaseHelper {
     
     try {
       _database = await _initDatabase().timeout(
-        const Duration(seconds: 10),
+        AppConstants.databaseOpenTimeout,
         onTimeout: () {
           AppLogger.error('Database initialization timeout - database may be locked or corrupted', tag: 'Database');
-          throw TimeoutException('Database initialization failed after 10 seconds');
+          throw TimeoutException('Database initialization failed after ${AppConstants.databaseOpenTimeout.inSeconds} seconds');
         },
       );
       return _database!;

@@ -52,18 +52,24 @@
 - [x] Added a further stamp to the *new* 12-stamp card - went from 2/12 to **3/12** - new card also stamps normally
 - **Result: the actual purpose of DECISION-017 is confirmed working end-to-end. The business now has two live cards for the same customer - an old 20-stamp card (11/20) and a new 12-stamp card (3/12) - both stamping correctly and independently, exactly as the architecture predicted (each card frozen at its own issuance-time stampsRequired, unaffected by the business's current live config).**
 
+### Phase 7 — Extended confirmation: 20-stamp card completed via overflow onto the 12-stamp card, then redeemed — ✅ COMPLETE, PASSED
+- [x] Continued adding stamps to the old 20-stamp card on the matched 28/28 pair until it completed
+- [x] Overflow (leftover stamps beyond the 20-stamp card's own target) correctly rolled onto the *existing* 12-stamp card rather than creating a third card - matches `CardRepository.findCardWithSpace()`'s "most stamps with space" priority (confirmed by code read earlier this session)
+- [x] The completed 20-stamp card was redeemable and was successfully redeemed
+- **Result: the overflow-relocation mechanics (TEST-018) and the redemption QR compact encoding (TEST-020) both work correctly end-to-end for a real, live legacy card, including routing overflow onto a pre-existing card rather than blindly creating a new one. This is the most complete real-world exercise of the whole TEST-017 through DECISION-017 defect chain in a single scenario.**
+
 ### Discovered along the way
-- **TEST-022 logged** (see `docs/project-management/DEFECT_TRACKER.md`): supplier v27 + customer v23 could not issue a *new* card - blocked by constraint #1 above. Root-caused to TEST-021's unconditional compact QR encoding. Status: open, not yet fixed. Proposed fix: only compact-encode when plain JSON wouldn't fit as a standard QR (mirroring the existing size-check pattern from TEST-017), so ordinary low-stamp-count issuance stays readable by any customer app version.
+- **TEST-022** (see `docs/project-management/DEFECT_TRACKER.md`): supplier v27 + customer v23 could not issue a *new* card - blocked by constraint #1 above. Root-caused to TEST-021's unconditional compact QR encoding. **Fixed 2026-08-17** (v2.1.1+29, not yet built/uploaded to TestFlight) - now prefers plain JSON whenever it fits, falling back to compact encoding only for the genuine oversized case.
 
 ---
 
 ## Status: this test plan is complete
 
-Every phase passed. DECISION-017 works exactly as designed - self-service reconfiguration, no impact on existing cards, new issuance unblocked. The only open item from this whole exercise is **TEST-022**, tracked separately in `DEFECT_TRACKER.md`.
+Every phase passed, including the extended Phase 7 exercise (full completion + overflow relocation + redemption of the legacy 20-stamp card). DECISION-017 works exactly as designed - self-service reconfiguration, no impact on existing cards, new issuance unblocked, and existing cards continue to interoperate correctly with overflow/redemption even after the business's live config changes. TEST-022 (found along the way) is fixed and tracked separately in `DEFECT_TRACKER.md`; it still needs a real TestFlight build (v2.1.1+29) for final on-device confirmation.
 
 ## Remaining steps
 
-- [ ] Decide whether to fix TEST-022 now or defer it - separate track from this test plan, tracked in `DEFECT_TRACKER.md`.
+- [ ] Build and upload v2.1.1+29 to TestFlight, and confirm TEST-022's fix (ordinary card issuance from a matched-or-mismatched supplier/customer pair) on an actual device - the fix itself is only automated-test verified so far.
 
 ---
 

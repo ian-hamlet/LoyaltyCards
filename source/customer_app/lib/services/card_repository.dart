@@ -273,9 +273,9 @@ class CardRepository {
       );
     }
     
-    if (card.stampsRequired > 100) {
+    if (card.stampsRequired > AppConstants.stampsRequiredHardCeiling) {
       throw CardValidationException(
-        'Stamps required must be <= 100, got: ${card.stampsRequired}'
+        'Stamps required must be <= ${AppConstants.stampsRequiredHardCeiling}, got: ${card.stampsRequired}'
       );
     }
     

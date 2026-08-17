@@ -718,7 +718,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     if (_token == null) return;
 
     final expiryTime = DateTime.fromMillisecondsSinceEpoch(_token!.timestamp)
-        .add(const Duration(minutes: 5));
+        .add(const Duration(milliseconds: AppConstants.cardIssueExpiryMs));
     final remaining = expiryTime.difference(DateTime.now());
     
     if (remaining.isNegative) {
@@ -743,8 +743,8 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     if (_token == null) return '--:--';
     
     final expiryTime = DateTime.fromMillisecondsSinceEpoch(_token!.timestamp)
-        .add(const Duration(minutes: 5));
-    
+        .add(const Duration(milliseconds: AppConstants.cardIssueExpiryMs));
+
     final hour = expiryTime.hour.toString().padLeft(2, '0');
     final minute = expiryTime.minute.toString().padLeft(2, '0');
     

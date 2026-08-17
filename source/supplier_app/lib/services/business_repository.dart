@@ -31,8 +31,8 @@ class BusinessRepository {
     if (business.stampsRequired <= 0) {
       throw ArgumentError('Stamps required must be positive, got: ${business.stampsRequired}');
     }
-    if (business.stampsRequired > 100) {
-      throw ArgumentError('Stamps required must be <= 100, got: ${business.stampsRequired}');
+    if (business.stampsRequired > AppConstants.stampsRequiredHardCeiling) {
+      throw ArgumentError('Stamps required must be <= ${AppConstants.stampsRequiredHardCeiling}, got: ${business.stampsRequired}');
     }
     
     AppLogger.database('Inserting business "${business.name}" (ID: ${business.id})');
@@ -66,8 +66,8 @@ class BusinessRepository {
     if (business.stampsRequired <= 0) {
       throw ArgumentError('Stamps required must be positive, got: ${business.stampsRequired}');
     }
-    if (business.stampsRequired > 100) {
-      throw ArgumentError('Stamps required must be <= 100, got: ${business.stampsRequired}');
+    if (business.stampsRequired > AppConstants.stampsRequiredHardCeiling) {
+      throw ArgumentError('Stamps required must be <= ${AppConstants.stampsRequiredHardCeiling}, got: ${business.stampsRequired}');
     }
     
     final db = await _dbHelper.database;

@@ -2014,6 +2014,26 @@ This document tracks defects from two sources:
 - **Target Build:** v2.1.1+28 (patch bump from v2.1.0+27, which shipped TEST-021 to TestFlight but not this fix - see TEST-021's own Target Build note)
 - **Notes:** Directly prompted by the user's own real-device testing of the 20-stamp legacy business used throughout this whole defect chain, and their observation that "the business has to reset" was the only recovery path. Doesn't touch operation *mode* (Secure vs Express), which remains genuinely locked after setup for a real reason (it affects the cryptographic flow itself) - only `stampsRequired`, which never had that constraint.
 
+### TEST-022: TEST-021's Compact Issue-Card QR Broke Card Issuance for Any Customer App Older Than That Fix
+
+- **Source:** Real-device testing, found by the user while trying to reproduce the DECISION-017/old-card scenario using a supplier on v2.1.0+27 (has TEST-021) and a customer on v2.0.3+23 (predates it)
+- **Status:** 🔴 OPEN - found, not yet fixed
+- **Priority:** HIGH (regression - affects ordinary new-card issuance, not just an edge case)
+- **Screen/Feature:** Supplier App - `supplier_issue_card.dart` (`_buildIssueQrCode`) / Customer App - `qr_scanner_screen.dart` (`_handleQRCode`, `QRScanMode.addCard`)
+- **Description:** TEST-021's fix (`_buildIssueQrCode()`) compact-encodes **every** Issue Card QR unconditionally via `CardIssueQrCodec.encode()` + `AlphanumericQr.build()` - there's no size check gating it to only large payloads (the legacy 16+ pre-applied-stamp scenario TEST-021 was actually written for). A customer app built before TEST-021 only knows how to `jsonDecode()` the QR content; Base45 text is never valid JSON, so `QRToken.fromQRString()` throws internally, is caught, and returns `null`. The customer sees the fully generic fallback message ("This is not a valid QR Code. Please scan a card issuance QR.") for **every** issuance from an updated supplier, regardless of stamp count - not just the narrow high-initial-stamp case.
+- **Reproduction Steps:**
+  1. Supplier app on v2.1.0+27 or later (has TEST-021), any business, any initial stamp count (including 0)
+  2. Customer app on v2.0.3+23 or any build before TEST-021
+  3. Supplier taps Issue Card, customer scans the QR
+  4. Customer sees "This is not a valid QR Code. Please scan a card issuance QR." - card is never added
+- **Impact:** Any customer who hasn't updated their app past the TEST-021 build can no longer add a new card from any supplier who has updated - a first-contact scenario (a brand-new customer at a business), not an edge case. Considerably broader impact than the bug TEST-021 itself fixed.
+- **Root Cause:** `supplier_issue_card.dart`'s `_buildIssueQrCode()` always compact-encodes, with no fallback to plain JSON when the payload would fit comfortably as-is. TEST-020's equivalent fix for the *redemption* QR has the same unconditional-compact-encoding shape, so it likely has the identical cross-version issue for redemption, just not yet confirmed by a real-device report - see Notes.
+- **Fix Applied:** Not yet - proposed direction: only compact-encode when the plain-JSON payload wouldn't otherwise fit as a standard byte-mode QR (mirroring `QrCapacity`'s existing size-check pattern from TEST-017), so a supplier's typical low-initial-stamp issuance stays plain JSON (readable by any customer app version, however old) and only the genuinely large legacy case (16+ pre-applied stamps) falls back to compact encoding, same as it does today. Needs a decision on whether the same conditional approach should apply to TEST-020's redemption QR too.
+- **Testing Verified:** Not yet - reproduced via real-device testing only so far.
+- **Fix Branch:** Not yet started
+- **Target Build:** Not yet assigned
+- **Notes:** Found as a side effect of the user resequencing their DECISION-017 test plan to use matched old builds (supplier v23 + customer v23) after this exact mismatch blocked issuance. Confirmed the resequenced plan works around it for issuance. Separately, real-device testing confirmed **stamping** an existing card is unaffected by any supplier/customer version mismatch (stamp tokens were never compact-encoded by TEST-020/021/DECISION-017, and the customer app never re-validates an existing card's `stampsRequired` against the app's own currently-supported range - only new-card issuance does that check).
+
 ---
 
 ## 📊 Defect Summary Statistics

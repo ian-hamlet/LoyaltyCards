@@ -108,7 +108,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     });
 
     try {
-      final token = QRToken.fromQRString(qrData);
+      QRToken? token = QRToken.fromQRString(qrData);
+
+      // TEST-021: a card issued with pre-applied initial stamps may be
+      // compact-encoded (gzip + Base45 + alphanumeric QR mode) instead of
+      // plain JSON, the same way TEST-020 compact-encodes the redemption
+      // QR - see DEFECT_TRACKER.md TEST-021. Base45's alphabet can never
+      // be valid JSON, so QRToken.fromQRString above already fails
+      // (returns null) on this data; only worth trying for addCard mode,
+      // since that's the only token type using this encoding.
+      if (token == null && widget.mode == QRScanMode.addCard) {
+        try {
+          token = CardIssueQrCodec.decode(qrData);
+        } catch (_) {
+          // Not a compact-encoded card issue token either - fall through
+          // to the "not valid" error below.
+        }
+      }
 
       if (token == null) {
         final message = widget.mode == QRScanMode.receiveStamp

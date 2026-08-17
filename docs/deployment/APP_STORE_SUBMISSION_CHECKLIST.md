@@ -1,14 +1,14 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v2.1.0+26**  
+**LoyaltyCards v2.1.0+27**  
 **Customer App:** LoyaltyCards Customer Wallet  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** 🟡 v2.1.0+26 in progress - v2.0.3+23 live but defective  
-**Last Updated:** August 16, 2026
+**Target Release:** 🟡 v2.1.0+27 in progress - v2.0.3+23 live but defective; v2.1.0+26 shipped to TestFlight but missing TEST-021  
+**Last Updated:** August 17, 2026
 
-**Status note:** 🟢 **v2.0.2+21 was live on the App Store** (shipped 2026-08-10 — see prior status below for that history), now superseded. 🟢 **v2.0.3+23 was submitted 2026-08-15, approved and released 2026-08-16** (both apps) - the Sharing feature and both bug fixes are confirmed working. Metadata from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered into ASC, build 23 selected on both apps, Release was set to **Manual** on both (the two apps review at different speeds, so release was held until both were approved). **⚠️ This live build contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - see `docs/project-management/DEFECT_TRACKER.md`. 🟡 **v2.1.0+26 fixes TEST-016 plus TEST-017 through TEST-020** and is now in progress - not yet built/uploaded/submitted. v2.0.4+24 and the interim test build v2.0.4+25 are both folded into this release and were never their own release candidates.
+**Status note:** 🟢 **v2.0.2+21 was live on the App Store** (shipped 2026-08-10 — see prior status below for that history), now superseded. 🟢 **v2.0.3+23 was submitted 2026-08-15, approved and released 2026-08-16** (both apps) - the Sharing feature and both bug fixes are confirmed working. Metadata from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered into ASC, build 23 selected on both apps, Release was set to **Manual** on both (the two apps review at different speeds, so release was held until both were approved). **⚠️ This live build contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - see `docs/project-management/DEFECT_TRACKER.md`. 🟡 **v2.1.0+26 fixed TEST-016 plus TEST-017 through TEST-020 and was built and uploaded to TestFlight**, but not submitted for App Store review before TEST-021 was found on that same TestFlight build - see `docs/project-management/DEFECT_TRACKER.md` TEST-021. 🟡 **v2.1.0+27 (current target) adds TEST-021** - build-only bump, not yet built/uploaded/submitted, since Apple won't allow re-uploading build 26 with different content. v2.0.4+24 and the interim test build v2.0.4+25 are both folded into the v2.1.0 line and were never their own release candidates.
 
-**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10**; v2.0.3+22 added the App Store Category/Subtitle corrections found post-launch but never produced an uploaded build; v2.0.3+23 added the Sharing feature (Tell a Business / Tell a Friend, both apps) plus two bug fixes found during TestFlight-prep testing (Express Mode stamp routing, a false error on opening Clone/Recovery Backup screens) — **built, uploaded, TestFlight-tested, submitted for App Store review 2026-08-15, and approved and released 2026-08-16**, but contains TEST-016 (see below); v2.0.4+24 fixed TEST-016 but never shipped - folded into v2.1.0+26; v2.1.0+26 (current) carries TEST-016 forward and adds the real fix for a QR-capacity failure found while testing it (TEST-017: redemption QR could silently fail to render at high stamp counts; TEST-018: a related stamp-provenance bug found along the way; TEST-019: a clearer error message for an affected business; TEST-020: the actual fix - compact gzip+Base45+alphanumeric-mode QR encoding, raising the safe stamps-required ceiling from 10 to 12) - **minor version bump (2.0.4 -> 2.1.0), deliberate given the real capability increase**, in progress.
+**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10**; v2.0.3+22 added the App Store Category/Subtitle corrections found post-launch but never produced an uploaded build; v2.0.3+23 added the Sharing feature (Tell a Business / Tell a Friend, both apps) plus two bug fixes found during TestFlight-prep testing (Express Mode stamp routing, a false error on opening Clone/Recovery Backup screens) — **built, uploaded, TestFlight-tested, submitted for App Store review 2026-08-15, and approved and released 2026-08-16**, but contains TEST-016 (see below); v2.0.4+24 fixed TEST-016 but never shipped - folded into v2.1.0+26; v2.1.0+26 carried TEST-016 forward and added the real fix for a QR-capacity failure found while testing it (TEST-017: redemption QR could silently fail to render at high stamp counts; TEST-018: a related stamp-provenance bug found along the way; TEST-019: a clearer error message for an affected business; TEST-020: the actual fix - compact gzip+Base45+alphanumeric-mode QR encoding, raising the safe stamps-required ceiling from 10 to 12) - **minor version bump (2.0.4 -> 2.1.0), deliberate given the real capability increase** - **built and uploaded to TestFlight**, where TEST-021 was then found (the same QR-capacity failure, never fixed on the issue-card side); v2.1.0+27 (current) adds that fix - **build-only bump**, in progress.
 
 ---
 
@@ -63,21 +63,35 @@
 
 - TEST-016 fix only, folded into v2.1.0+26 below along with the interim test-only build v2.0.4+25. See v2.1.0+26 for the current checklist state.
 
-**v2.1.0+26 (current) — in progress:**
+**v2.1.0+26 (shipped to TestFlight, superseded by v2.1.0+27 for submission):**
 
-- [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.1.0+26`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
+- [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.1.0+26` at the time
 - [x] **Version number confirmed** — v2.1.0+26 (minor version bump from 2.0.4 -> 2.1.0, deliberate - see Version history above)
 - [x] **All fixes complete on branch** `fix/TEST-017-redemption-qr-overflow` — TEST-016 (carried forward), TEST-017, TEST-018, TEST-019, TEST-020
-- [ ] **All code merged to `develop`, then `main` branch**
-- [ ] **Release branch created** `releases/v2.1.0-build26`
-- [ ] **Archive builds completed** for v2.1.0+26 — use `source/build_both_apps.sh`
+- [x] **All code merged to `develop`** — 2026-08-16 (`c7b8e63`)
+- [x] **Archive builds completed, IPA files uploaded to App Store Connect, build processing complete** — ⚠️ happened outside this checklist's tracked workflow (no record here of exactly when/how, or whether `develop` was merged to `main`/a release branch first) - confirmed only by the user testing against the live TestFlight build 2026-08-17
+- [x] **Physical-device verification completed, including via this actual TestFlight build** — a 12-stamp Secure Mode card with 100% of its stamps arrived via overflow relocation redeems successfully (TEST-017/020, the worst case - see the engineered-scenario recipe in `docs/project-management/DEFECT_TRACKER.md` TEST-020); a 3/4-stamp business issues a working card end-to-end (TEST-016, confirmed 2026-08-17); the 20-stamp legacy business's Issue Card QR correctly shows the specific "supported range: 3-12" message (TEST-019) rather than a generic error, confirmed 2026-08-17; Express Mode spot-checked, no regressions; Recovery Backup restore onto a new Secure Mode business confirmed working.
+- [x] **All automated tests passing** (shared 201, customer 131, supplier 81 at the time)
+- [x] **`flutter analyze` clean**
+- ⚠️ **Missing TEST-021** (found via this build's own TestFlight testing, afterward) — **do not submit this build for App Store review.** See v2.1.0+27 below.
+
+**v2.1.0+27 (current) — in progress:**
+
+- [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.1.0+27`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
+- [x] **Version number confirmed** — v2.1.0+27 (build-only bump from 2.1.0+26 - same feature set plus TEST-021, since Apple won't allow re-uploading build 26 with different content)
+- [x] **All fixes complete** — TEST-016 through TEST-021, on top of `fix/TEST-017-redemption-qr-overflow`'s prior work
+- [x] **All code merged to `develop`** — TEST-016 through TEST-020 at 2026-08-16 (`c7b8e63`); TEST-021 added 2026-08-17 (not yet committed as of this writing)
+- [ ] **`develop` merged to `main` branch**
+- [ ] **Release branch created** `releases/v2.1.0-build27`
+- [ ] **Archive builds completed** for v2.1.0+27 — use `source/build_both_apps.sh`
 - [ ] **IPA files uploaded to App Store Connect** via Transporter
 - [ ] **Build processing complete** in App Store Connect
-- [ ] **TestFlight testing completed** — specifically verify: a 3/4-stamp business can issue a card (TEST-016); a 12-stamp Secure Mode card with heavily overflow-relocated stamps redeems successfully (TEST-017/020, see the engineered-scenario recipe in `docs/project-management/DEFECT_TRACKER.md` TEST-017); a business with an out-of-range stamp count shows the new specific error message, not a generic one (TEST-019)
-- [x] **All automated tests passing** (shared 201, customer 131, supplier 81)
+- [x] **Physical-device verification completed** — see v2.1.0+26 above for TEST-016/017/019/020; TEST-021 is automated-test verified (widget test in `supplier_issue_card_test.dart`, 10 tests in `card_issue_qr_codec_test.dart`) but not yet separately physical-device confirmed, since it was found and fixed after the TestFlight round above.
+- [ ] **TestFlight testing completed for TEST-021 specifically** — needs a build that actually includes it, which doesn't exist yet.
+- [x] **All automated tests passing** (shared 211, customer 131, supplier 82)
 - [x] **`flutter analyze` clean**
-- [x] **Critical bugs resolved** (TEST-016/017/018/019 fixed, TEST-020 supersedes TEST-017's interim mitigation; zero other CRITICAL/HIGH defects open)
-- [ ] **Metadata entered into App Store Connect** — What's New only, from `APP_STORE_METADATA_PACKET_v2_1_0_26.md`; all other fields unchanged from v2.0.3+23 and already live
+- [x] **Critical bugs resolved** (TEST-016/017/018/019/021 fixed, TEST-020 supersedes TEST-017's interim mitigation; zero other CRITICAL/HIGH defects open)
+- [ ] **Metadata entered into App Store Connect** — What's New only, from `APP_STORE_METADATA_PACKET_v2_1_0_27.md`; all other fields unchanged from v2.0.3+23 and already live
 - [ ] **Submitted for App Store review**
 - [ ] **v2.0.3+23 status** — already approved and released 2026-08-16; superseding it with this build is the priority now that the defect is live
 
@@ -438,7 +452,7 @@ Please test both apps together following the demo instructions.
 8. [x] **Respond to App Review** if questions arise — n/a, resulted in approval
 9. [x] **Release approved apps** — **live on the App Store**
 
-**v2.0.3+23 (live on the App Store, superseded by v2.1.0+26) — complete, but contains TEST-016:**
+**v2.0.3+23 (live on the App Store, superseded by v2.1.0+27) — complete, but contains TEST-016:**
 
 1. [x] **Upload build to App Store Connect** (via Transporter) — build 23, both apps
 2. [x] **Select build** for Customer app submission — build 23
@@ -448,15 +462,27 @@ Please test both apps together following the demo instructions.
 6. [x] **Submit for review** — both apps submitted 2026-08-15, Release set to Manual
 7. [x] **Monitor review status** — approved 2026-08-16
 8. [x] **Respond to App Review** if questions arise — n/a, approved without questions
-9. [x] **Release approved apps** — both apps manually released 2026-08-16, live on the App Store. ⚠️ Contains TEST-016 - build/submit v2.1.0+26 as soon as possible.
+9. [x] **Release approved apps** — both apps manually released 2026-08-16, live on the App Store. ⚠️ Contains TEST-016 - build/submit v2.1.0+27 as soon as possible.
 
-**v2.1.0+26 (current) — in progress:**
+**v2.1.0+26 (shipped to TestFlight only, never submitted for App Store review):**
 
-1. [ ] **Upload build to App Store Connect** (via Transporter) — build 26, both apps
-2. [ ] **Select build** for Customer app submission — build 26
-3. [ ] **Select build** for Supplier app submission — build 26
-4. [ ] **Complete all required fields** in App Store Connect — only What's New needs updating (`APP_STORE_METADATA_PACKET_v2_1_0_26.md`); everything else already live from v2.0.3+23
-5. [ ] **Screenshots** — unchanged, no screens affected by this fix (redemption QR appearance is visually similar - same white rounded container, just a different underlying encoding)
+1. [x] **Upload build to App Store Connect** (via Transporter) — build 26, both apps - happened outside this checklist's tracked workflow, confirmed only via the user testing the live TestFlight build 2026-08-17
+2. [ ] **Select build** for Customer app submission — not submitted; superseded by v2.1.0+27 before this step (missing TEST-021)
+3. [ ] **Select build** for Supplier app submission — same
+4. [ ] **Complete all required fields** in App Store Connect
+5. [ ] **Screenshots**
+6. [ ] **Submit for review** — deliberately not done; see TEST-021 in `docs/project-management/DEFECT_TRACKER.md`
+7. [ ] **Monitor review status**
+8. [ ] **Respond to App Review** if questions arise
+9. [ ] **Release approved apps**
+
+**v2.1.0+27 (current) — in progress:**
+
+1. [ ] **Upload build to App Store Connect** (via Transporter) — build 27, both apps
+2. [ ] **Select build** for Customer app submission — build 27
+3. [ ] **Select build** for Supplier app submission — build 27
+4. [ ] **Complete all required fields** in App Store Connect — only What's New needs updating (`APP_STORE_METADATA_PACKET_v2_1_0_27.md`); everything else already live from v2.0.3+23
+5. [ ] **Screenshots** — unchanged, no screens affected by this fix (redemption/issue QR appearance is visually similar - same white rounded container, just a different underlying encoding)
 6. [ ] **Submit for review**
 7. [ ] **Monitor review status**
 8. [ ] **Respond to App Review** if questions arise
@@ -517,9 +543,9 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟢 **v2.0.3+23 is LIVE ON THE APP STORE** (both apps), submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix in progress as **v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), not yet built or submitted. See `RELEASES.md` for the release-branch record and `docs/project-management/DEFECT_TRACKER.md` for the defects.  
+**Document Status:** 🟢 **v2.0.3+23 is LIVE ON THE APP STORE** (both apps), submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix shipped to **TestFlight as v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), but not submitted for App Store review since TEST-021 (the issue-card counterpart to TEST-017/020's fix) was found on that same TestFlight build. **v2.1.0+27** (build-only bump) adds TEST-021 and is the actual submission candidate, not yet built or submitted. See `RELEASES.md` for the release-branch record and `docs/project-management/DEFECT_TRACKER.md` for the defects.  
 **Maintained by:** Development Team  
-**Last Updated:** August 16, 2026
+**Last Updated:** August 17, 2026
 
 ---
 

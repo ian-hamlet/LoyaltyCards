@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pointycastle/export.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supplier_app/screens/supplier/supplier_issue_card.dart';
@@ -237,6 +238,97 @@ void main() {
         isNotNull,
         reason: 'Share button should re-enable once the share call completes.',
       );
+    },
+  );
+
+  /// TEST-021: a legacy business created before the stampsRequired ceiling
+  /// tightened can still have a much higher value stored (up to 20, the
+  /// historical maximum) - the initial-stamp slider's max tracks that
+  /// stored value, not the current onboarding range, so a supplier can
+  /// still set a high initial stamp count on one of these. Mirrors the
+  /// real-device scenario that surfaced this bug.
+  const legacyBusinessId = 'business-issue-card-legacy-20-stamp';
+  Future<void> seedLegacyHighStampBusiness(WidgetTester tester) async {
+    await tester.runAsync(() async {
+      final keyPair = await keyManager.generateKeyPair();
+      await keyManager.storePrivateKey(legacyBusinessId, keyPair.privateKey as ECPrivateKey);
+      await keyManager.storePublicKey(legacyBusinessId, keyPair.publicKey as ECPublicKey);
+      final publicKeyEncoded = (await keyManager.getPublicKeyString(legacyBusinessId))!;
+
+      await businessRepo.insertBusiness(Business(
+        id: legacyBusinessId,
+        name: "Maria's Luxury Spa & Wellness Centre",
+        publicKey: publicKeyEncoded,
+        privateKey: 'unused-plaintext-field',
+        stampsRequired: 20,
+        brandColor: '#6A1B9A',
+        mode: OperationMode.secure,
+        createdAt: DateTime.now(),
+      ));
+    });
+  }
+
+  testWidgets(
+    'TEST-021: a legacy 20-stamp business can issue a card with 16+ pre-applied stamps without the QR failing silently',
+    (tester) async {
+      // resetForTesting only closes the connection and clears the cached
+      // in-memory handle - it doesn't delete the on-disk file (see
+      // supplier_database_helper.dart), so reusing the same test DB name
+      // as the earlier tests in this file would leave their business rows
+      // still present, and getBusiness() (no ID filter, single-business
+      // model) could return one of those instead of this test's business.
+      // A distinct name gives this test a genuinely empty database.
+      await tester.runAsync(
+        () => SupplierDatabaseHelper.resetForTesting(testDatabaseName: 'test_supplier_issue_card_legacy.db'),
+      );
+      await seedLegacyHighStampBusiness(tester);
+
+      await tester.pumpWidget(const MaterialApp(home: SupplierIssueCard()));
+      await tester.pump();
+      for (var attempt = 0; attempt < 50; attempt++) {
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pump();
+        if (find.byType(QrImageView).evaluate().isNotEmpty) break;
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.byType(QrImageView), findsOneWidget, reason: 'QR should render at 0 initial stamps');
+
+      final state = tester.state(find.byType(SupplierIssueCard));
+      // 17 was the exact point the old plain-JSON/byte-mode encoding
+      // first failed for this business shape (measured in
+      // DEFECT_TRACKER.md TEST-021) - well past the max any *new*
+      // business can reach (12), only possible via a legacy business
+      // like this one.
+      await tester.runAsync(() async {
+        // ignore: avoid_dynamic_calls
+        await (state as dynamic).setInitialStampCountForTesting(17);
+      });
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byType(QrImageView),
+        findsOneWidget,
+        reason: 'QR should still render at 17 pre-applied stamps with the compact encoding, '
+            'not fall back to the "too large to display" panel.',
+      );
+      expect(find.text("This card's code is too large to display"), findsNothing);
+
+      // The historical maximum stampsRequired ever allowed - the true
+      // worst case for this business.
+      await tester.runAsync(() async {
+        // ignore: avoid_dynamic_calls
+        await (state as dynamic).setInitialStampCountForTesting(20);
+      });
+      await tester.pumpAndSettle();
+
+      expect(find.byType(QrImageView), findsOneWidget, reason: 'QR should still render at 20/20 pre-applied stamps');
+      expect(find.text("This card's code is too large to display"), findsNothing);
+
+      // Secure Mode starts a countdown Timer.periodic (_startCountdown) -
+      // dispose the widget before the test ends so it gets cancelled,
+      // otherwise flutter_test's pending-timer invariant check fails.
+      await tester.pumpWidget(const SizedBox());
     },
   );
 }

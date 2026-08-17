@@ -21,6 +21,7 @@ export 'utils/qr_capacity.dart';
 export 'utils/base45.dart';
 export 'utils/alphanumeric_qr.dart';
 export 'utils/redemption_qr_codec.dart';
+export 'utils/card_issue_qr_codec.dart';
 export 'utils/crypto_utils.dart';
 export 'utils/app_logger.dart';
 export 'utils/error_handling.dart';

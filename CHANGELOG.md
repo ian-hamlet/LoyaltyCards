@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.0+26] - 2026-08-16 - CURRENT
+## [2.1.0+27] - 2026-08-17 - CURRENT
 
-**Status:** 🟡 Minor version bump (2.0.4 -> 2.1.0, not a build-only bump - see Added) - in progress, not yet built/uploaded/submitted, pending real-device verification. Supersedes 2.0.4+24 and the interim test-only build 2.0.4+25 (never a real release candidate). Also supersedes 2.0.3+23, which is **live on the App Store** but contains TEST-016 (carried forward and fixed here) and does not have any of the fixes below.
+**Status:** 🟡 Build-only bump - not yet built, uploaded, or submitted. v2.1.0+26 was already built and uploaded to TestFlight before TEST-021 was found, and Apple doesn't allow re-uploading the same build number with different content, so this exists purely to carry TEST-021. Supersedes v2.1.0+26 for App Store submission purposes.
+
+### Fixed
+- **TEST-021: issuing a card with many pre-applied initial stamps could hit the same silent QR-capacity failure as TEST-017, never fixed on the issuance side.** Found by real-device testing of the v2.1.0+26 TestFlight build, using the same legacy 20-stamp business used throughout this whole defect chain. Applied the same compact encoding (`CardIssueQrCodec`, mirroring `RedemptionQrCodec`) to the supplier app's issue-card QR - on-screen, Print, and Share, the latter two having an even lower capacity ceiling than the on-screen view. Doesn't affect any business created under the current 3-12 range. Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-021.
+
+## [2.1.0+26] - 2026-08-16
+
+**Status:** 🟢 Shipped to TestFlight, superseded by v2.1.0+27 for App Store submission (missing TEST-021 - see above). Minor version bump (2.0.4 -> 2.1.0, not a build-only bump - see Added). Real-device verified, including via this actual TestFlight build (12-stamp Secure Mode card with 100% overflow-relocated stamps redeems successfully; a 3/4-stamp business issues a working card end-to-end; the TEST-019 message confirmed against the 20-stamp legacy business; Express Mode and Recovery Backup restore also spot-checked). Supersedes 2.0.4+24 and the interim test-only build 2.0.4+25 (never a real release candidate). Also supersedes 2.0.3+23, which is **live on the App Store** but contains TEST-016 (carried forward and fixed here) and does not have any of the fixes below.
 
 ### Added
 - **Raised the maximum Secure Mode `stampsRequired` from 10 to 12** (TEST-020) - a real, deliberate capability increase, not a side effect, which is why this is a minor version bump rather than a patch. Backward compatible: nothing that worked at 10 stamps changes.

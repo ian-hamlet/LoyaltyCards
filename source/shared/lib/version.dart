@@ -525,6 +525,26 @@
 ///   inconsistency: that generator was previously only reachable from
 ///   dead code and had drifted to omit device-mismatch detection (V-005).
 ///   Full detail and measured sizes: DEFECT_TRACKER.md TEST-020.
+///
+/// Build 27 Changes (build-only bump - build 26 was already uploaded to
+/// TestFlight without this fix, and Apple doesn't allow re-uploading a
+/// build number with different content):
+/// - Fixed TEST-021: issuing a card with many pre-applied initial stamps
+///   had the same silent QR-capacity failure as TEST-017, just never
+///   fixed on the issuance side. `supplier_issue_card.dart`'s on-screen
+///   QR, and `backup_storage_service.dart`'s Print/Share QR generation
+///   (which actually had a *lower* capacity ceiling, using error
+///   correction level M instead of the on-screen view's L), now use the
+///   same compact gzip+Base45+alphanumeric-mode encoding as TEST-020's
+///   redemption QR, via a new `CardIssueQrCodec`. `qr_scanner_screen.dart`
+///   (customer app) gained a matching decode-fallback tier. Doesn't
+///   affect any business created under the current 3-12 stampsRequired
+///   range - only a legacy business with a higher stored value (e.g. the
+///   20-stamp business used throughout this whole defect chain) could
+///   reach a high enough initial-stamp count to hit this. Incidental fix:
+///   `_startCountdown()` leaked a new Timer.periodic on every QR
+///   regeneration instead of cancelling the previous one. Full detail and
+///   measured sizes: DEFECT_TRACKER.md TEST-021.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.1.0+26';
+const String appVersion = '2.1.0+27';

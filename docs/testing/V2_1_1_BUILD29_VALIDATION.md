@@ -1,6 +1,8 @@
 # v2.1.1+29 Short Device Validation Plan
 
-**Purpose:** Quick real-device sanity pass after v2.1.1+29 is built and on TestFlight, covering everything fixed in this batch of work. Not a full regression pass - the automated suite (shared 211, customer_app 131, supplier_app 83, all green) already covers correctness; this is specifically for the one item that's inherently cross-version/device-dependent (TEST-022), plus quick confirmation nothing else regressed.
+**Status: v2.1.1+29 built and delivered to TestFlight 2026-08-18 - ready to test.** Nothing below has been run yet.
+
+**Purpose:** Quick real-device sanity pass now that v2.1.1+29 is on TestFlight, covering everything fixed in this batch of work. Not a full regression pass - the automated suite (shared 211, customer_app 131, supplier_app 83, all green) already covers correctness; this is specifically for the one item that's inherently cross-version/device-dependent (TEST-022), plus quick confirmation nothing else regressed.
 
 **Devices:** Supplier iPad + Customer iPhone, both updated to v2.1.1+29.
 

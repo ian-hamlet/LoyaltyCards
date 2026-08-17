@@ -1,6 +1,6 @@
 # App Store Metadata Packet (v2.1.1+29)
 
-**Status: IN PROGRESS - not yet built or uploaded. Build-only bump - v2.1.1+28 was already built and uploaded to TestFlight before TEST-022 was found (via real-device testing of that exact build), and Apple doesn't allow re-uploading the same build number with different content.**
+**Status: Built and delivered to TestFlight 2026-08-18, ready for real-device validation - not yet submitted for App Store review. Build-only bump - v2.1.1+28 was already built and uploaded to TestFlight before TEST-022 was found (via real-device testing of that exact build), and Apple doesn't allow re-uploading the same build number with different content.**
 
 **Supersedes:** `APP_STORE_METADATA_PACKET_v2_1_1_28.md` (shipped to TestFlight with TEST-021 and DECISION-017, but not TEST-022) for App Store submission purposes. See `docs/project-management/DEFECT_TRACKER.md` TEST-022 for full detail. Everything else (Category, Subtitle, Description, Keywords, Promotional Text, and the Customer App's What's New) is **unchanged from the v2_1_1_28 packet** - only the Supplier App's What's New and App Review Notes gain a line about TEST-022.
 

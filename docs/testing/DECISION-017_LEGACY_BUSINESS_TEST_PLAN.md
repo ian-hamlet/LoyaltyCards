@@ -59,17 +59,18 @@
 - **Result: the overflow-relocation mechanics (TEST-018) and the redemption QR compact encoding (TEST-020) both work correctly end-to-end for a real, live legacy card, including routing overflow onto a pre-existing card rather than blindly creating a new one. This is the most complete real-world exercise of the whole TEST-017 through DECISION-017 defect chain in a single scenario.**
 
 ### Discovered along the way
-- **TEST-022** (see `docs/project-management/DEFECT_TRACKER.md`): supplier v27 + customer v23 could not issue a *new* card - blocked by constraint #1 above. Root-caused to TEST-021's unconditional compact QR encoding. **Fixed 2026-08-17** (v2.1.1+29, not yet built/uploaded to TestFlight) - now prefers plain JSON whenever it fits, falling back to compact encoding only for the genuine oversized case.
+- **TEST-022** (see `docs/project-management/DEFECT_TRACKER.md`): supplier v27 + customer v23 could not issue a *new* card - blocked by constraint #1 above. Root-caused to TEST-021's unconditional compact QR encoding. **Fixed 2026-08-17** (v2.1.1+29, built and delivered to TestFlight 2026-08-18) - now prefers plain JSON whenever it fits, falling back to compact encoding only for the genuine oversized case.
 
 ---
 
 ## Status: this test plan is complete
 
-Every phase passed, including the extended Phase 7 exercise (full completion + overflow relocation + redemption of the legacy 20-stamp card). DECISION-017 works exactly as designed - self-service reconfiguration, no impact on existing cards, new issuance unblocked, and existing cards continue to interoperate correctly with overflow/redemption even after the business's live config changes. TEST-022 (found along the way) is fixed and tracked separately in `DEFECT_TRACKER.md`; it still needs a real TestFlight build (v2.1.1+29) for final on-device confirmation.
+Every phase passed, including the extended Phase 7 exercise (full completion + overflow relocation + redemption of the legacy 20-stamp card). DECISION-017 works exactly as designed - self-service reconfiguration, no impact on existing cards, new issuance unblocked, and existing cards continue to interoperate correctly with overflow/redemption even after the business's live config changes. TEST-022 (found along the way) is fixed and tracked separately in `DEFECT_TRACKER.md`; v2.1.1+29 is now on TestFlight - final on-device confirmation is the one remaining step, see below.
 
 ## Remaining steps
 
-- [ ] Build and upload v2.1.1+29 to TestFlight, and confirm TEST-022's fix (ordinary card issuance from a matched-or-mismatched supplier/customer pair) on an actual device - the fix itself is only automated-test verified so far.
+- [x] Build and upload v2.1.1+29 to TestFlight - done 2026-08-18.
+- [ ] Confirm TEST-022's fix (ordinary card issuance from a matched-or-mismatched supplier/customer pair) on an actual device - see `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md` for the procedure. Not yet run.
 
 ---
 

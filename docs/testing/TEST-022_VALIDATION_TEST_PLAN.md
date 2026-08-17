@@ -49,4 +49,4 @@ Record results directly in this file's Progress Log (add one below, following th
 
 ## Progress Log
 
-*(Not yet run - waiting on v2.1.1+29 TestFlight build.)*
+**v2.1.1+29 built and delivered to TestFlight 2026-08-18 - ready to test.** Not yet run.

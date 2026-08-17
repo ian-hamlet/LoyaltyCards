@@ -17,24 +17,25 @@ Examples:
 
 ## Current Releases
 
-### v2.1.1+29 - Build 29 (🟡 In Progress)
-- **Date:** August 17, 2026
-- **Platform:** Not yet built/uploaded
-- **Branch:** `develop` (TEST-022 fix pending commit as of this writing)
+### v2.1.1+29 - Build 29 (🟢 Shipped to TestFlight, ready for real-device validation)
+- **Date:** August 17-18, 2026
+- **Platform:** Built and delivered to TestFlight - confirmed by the user 2026-08-18.
+- **Branch:** `develop` at `68fd740` (TEST-022 fix, plus N-008/N-009 dedup and dead-code removal added afterward, before this build)
 - **Version:** 2.1.1+29
-- **Status:** 🟡 In progress. **Build-only bump** - v2.1.1+28 was already built and uploaded to TestFlight before TEST-022 was found via real-device testing of that exact build, and Apple doesn't allow re-uploading the same build number with different content.
-- **Focus:** TEST-022 - the cross-version compatibility regression TEST-021 introduced
+- **Status:** 🟢 Shipped to TestFlight, not yet submitted for App Store review. **Build-only bump** - v2.1.1+28 was already built and uploaded to TestFlight before TEST-022 was found via real-device testing of that exact build, and Apple doesn't allow re-uploading the same build number with different content. Real-device validation not yet run - see `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md` and `docs/testing/V2_1_1_BUILD29_VALIDATION.md`.
+- **Focus:** TEST-022 - the cross-version compatibility regression TEST-021 introduced - plus a quality-review cleanup pass (N-008/N-009/dead-code removal) that shipped in the same build.
 - **Major Changes:**
   - **TEST-022:** TEST-021's compact issue-card QR encoding was unconditional (no size gate), breaking issuance for any customer app older than that fix - not just the rare high-initial-stamp-count case it was written for. Confirmed on a real device (supplier 27, customer 23). Fixed by preferring plain JSON whenever it fits (covers every initial-stamp count up to 16), falling back to compact encoding only for the genuine legacy edge case. Applied the same fix proactively to the redemption QR (TEST-020), which had the identical unconditional-encoding shape.
-  - Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-022.
-- **Next Steps:** Commit and push, merge `develop` → `main`, cut a release branch, build both IPAs (`source/build_both_apps.sh`), upload via Transporter, verify via TestFlight, and submit for App Store review.
+  - **DECISION-019:** consolidated the duplicated public-key decode routine (N-008) and error-cooldown constant (N-009) flagged in the 2026-08-17 magic numbers review; removed the confirmed-dead `AppConstants.issueIntervalMs`. Internal cleanup only, no user-facing behavior change - automated-test verified (full suite green across all three packages), no dedicated device test needed.
+  - Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-022 and DECISION-019.
+- **Next Steps:** Real-device validation (`docs/testing/TEST-022_VALIDATION_TEST_PLAN.md` and `docs/testing/V2_1_1_BUILD29_VALIDATION.md`), then merge `develop` → `main`, cut a release branch, and submit for App Store review.
 
 ### v2.1.1+28 - Build 28 (🟢 Shipped to TestFlight, superseded by v2.1.1+29 for submission)
 - **Date:** August 17, 2026
 - **Platform:** Built and uploaded to TestFlight - confirmed by the user actively testing against it.
 - **Branch:** `develop` (`505d5f9` for TEST-021; DECISION-017 added afterward, before this build)
 - **Version:** 2.1.1+28
-- **Status:** 🟢 Shipped to TestFlight, not submitted for App Store review. Real-device verified end-to-end - full DECISION-017 flow tested across both matched (28/28) and mismatched (28 supplier/23 customer) supplier/customer pairs, including the old 20-stamp card continuing to stamp correctly after reconfiguration and a new card issuing cleanly from the fixed business. See `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md` for the full log. **Missing the TEST-022 fix** (found via this same testing round) - **should not be submitted for App Store review as-is**, use v2.1.1+29 once built.
+- **Status:** 🟢 Shipped to TestFlight, not submitted for App Store review. Real-device verified end-to-end - full DECISION-017 flow tested across both matched (28/28) and mismatched (28 supplier/23 customer) supplier/customer pairs, including the old 20-stamp card continuing to stamp correctly after reconfiguration and a new card issuing cleanly from the fixed business. See `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md` for the full log. **Missing the TEST-022 fix** (found via this same testing round) - **should not be submitted for App Store review as-is**, use v2.1.1+29 above, now shipped to TestFlight.
 - **Major Changes:**
   - **TEST-021:** the same silent QR-capacity failure as TEST-017, never fixed on the issue-card side - a card issued with many pre-applied initial stamps could hit it too. Found via real-device testing of the v2.1.0+26 TestFlight build. Applied the same compact-encoding fix (`CardIssueQrCodec`) to the supplier app's on-screen, Print, and Share issue-card QR. (Already shipped to TestFlight in v2.1.0+27 too.)
   - **DECISION-017:** a business whose `stampsRequired` falls outside the supported range previously had no way to recover short of a full reset (wiping every customer's card). Turns out changing it going forward is safe (each existing card stores its own value at issuance). Supplier app now warns proactively on Home, blocks Issue Card from generating a doomed QR, and offers a scoped "Fix Now" flow (also in Settings) to reconfigure into range.
@@ -52,7 +53,7 @@ Examples:
 - **Platform:** ⚠️ Built and uploaded to **TestFlight** at some point after the TEST-016/017/018/019/020 code landed on `develop` (`c7b8e63`) - this happened outside this document's tracked workflow, so there's no record here of exactly when/how (no `main` merge, release branch, or `build_both_apps.sh` run is logged). Confirmed by the user testing against it directly 2026-08-17.
 - **Branch:** `develop` at `c7b8e63` (TEST-016 through TEST-020 only - TEST-021, DECISION-017, and TEST-022 came afterward, see v2.1.1+29 above)
 - **Version:** 2.1.0+26
-- **Status:** 🟡 Shipped to TestFlight, not submitted for App Store review. Real-device verification passed, including via this actual TestFlight build (12-stamp Secure Mode card, 100% of stamps overflow-relocated, redeems successfully; a 3/4-stamp business issues a working card end-to-end; the TEST-019 out-of-range message confirmed against the 20-stamp legacy business; Express Mode and Recovery Backup restore spot-checked with no regressions). Minor version bump (2.0.4 -> 2.1.0) - deliberate, not a build-only bump, since raising the stamps-required ceiling is a real capability change. Supersedes v2.0.4+24 and the interim test-only build v2.0.4+25 (neither ever a real release candidate). Also supersedes v2.0.3+23, which is **live on the App Store** but contains TEST-016 and none of the fixes below. **Should not be submitted for App Store review as-is** - use v2.1.1+29 once built, since this build is missing TEST-021, DECISION-017, and TEST-022.
+- **Status:** 🟡 Shipped to TestFlight, not submitted for App Store review. Real-device verification passed, including via this actual TestFlight build (12-stamp Secure Mode card, 100% of stamps overflow-relocated, redeems successfully; a 3/4-stamp business issues a working card end-to-end; the TEST-019 out-of-range message confirmed against the 20-stamp legacy business; Express Mode and Recovery Backup restore spot-checked with no regressions). Minor version bump (2.0.4 -> 2.1.0) - deliberate, not a build-only bump, since raising the stamps-required ceiling is a real capability change. Supersedes v2.0.4+24 and the interim test-only build v2.0.4+25 (neither ever a real release candidate). Also supersedes v2.0.3+23, which is **live on the App Store** but contains TEST-016 and none of the fixes below. **Should not be submitted for App Store review as-is** - use v2.1.1+29 above, now shipped to TestFlight, since this build is missing TEST-021, DECISION-017, and TEST-022.
 - **Focus:** Redemption QR reliability - the real fix for the QR-capacity problem found while testing TEST-016, plus everything it surfaced along the way
 - **Major Changes:**
   - **TEST-016** (carried forward from v2.0.4+24): businesses configured with 3 or 4 required stamps could never issue a valid card - `CardIssueToken.isValid()` rejected `stampsRequired` below 5, but the onboarding slider allows a minimum of 3.
@@ -73,7 +74,7 @@ Examples:
 - **Branch:** main, develop, `releases/v2.0.3-build23`
 - **Version:** 2.0.3+23
 - **Status:** 🟢 LIVE — available for download on the App Store. Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), submitted 2026-08-15, approved and released 2026-08-16. Release was set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
-- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed in v2.1.0+26 (shipped to TestFlight, not yet submitted to the App Store - see v2.1.1+29 above, which is the actual submission candidate). Do not treat this build as fully correct despite being live.
+- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed in v2.1.0+26 (carried forward through v2.1.1+29, shipped to TestFlight, not yet submitted to the App Store - see v2.1.1+29 above, which is the actual submission candidate, pending real-device validation). Do not treat this build as fully correct despite being live.
 - **Focus:** Companion-app/friend referral sharing (both apps), plus two bugs found during TestFlight-prep testing
 - **Major Changes:**
   - **Sharing feature:** new Settings section in both apps, "Tell a Business" (QR + share link to LoyaltyCards Business) and "Tell a Friend" (QR + share link to LoyaltyCards) - built as a reusable `AppReferralScreen` widget in the shared package. Supplier app also gets a "Tell a Friend" shortcut icon on the Home screen's app bar.
@@ -81,7 +82,7 @@ Examples:
   - **Fixed:** Clone to Another Device and Create Recovery Backup screens briefly showed a false "failed" error on open - their loading flag started `false` but `initState()` kicks off async auth-then-generate work immediately, leaving a gap before the flag caught up. Started both `true` instead.
   - Category/Subtitle corrections (queued since v2.0.2+21 shipped) finalized as real submission content - see `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. Also caught the customer app's Promotional Text, which turned out blank in ASC despite being documented as already-live.
 - **Note:** v2.0.3+22 was build-bumped to +23 before ever producing an uploaded build, once the two bugs above were found during TestFlight-prep testing - see that packet's own superseded note.
-- **Next Steps:** Build, test, and submit v2.1.1+29 (TEST-016 fix plus TEST-017 through TEST-022 and DECISION-017, in progress) as soon as possible given the defect is now live.
+- **Next Steps:** v2.1.1+29 (TEST-016 fix plus TEST-017 through TEST-022, DECISION-017, and DECISION-019) is now built and shipped to TestFlight - real-device validation and App Store submission are next, as soon as possible given the defect is live in this build.
 
 ### v2.0.2+21 - Build 21 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 10, 2026

@@ -27,6 +27,18 @@ class BusinessIcons {
     Icons.palette,              // 17 - Art/Creative
     Icons.headphones,           // 18 - Electronics/Music
     Icons.pets,                 // 19 - Pet store
+
+    // Added 2026-08-17 (DECISION-018) - append-only: logoIndex is the only
+    // thing persisted (not an icon name/identifier), so existing entries
+    // above must never be reordered or removed.
+    Icons.content_cut,          // 20 - Hair Salon / Barbershop
+    Icons.local_car_wash,       // 21 - Car Wash
+    Icons.car_repair,           // 22 - Auto Repair / Mechanic
+    Icons.menu_book,            // 23 - Bookstore
+    Icons.camera_alt,           // 24 - Photography Studio
+    Icons.pedal_bike,           // 25 - Bicycle Shop
+    Icons.self_improvement,     // 26 - Yoga / Meditation Studio
+    Icons.toys,                 // 27 - Toy Store
   ];
 
   /// Get icon by index with fallback to default
@@ -60,6 +72,14 @@ class BusinessIcons {
       'Art & Creative',
       'Electronics',
       'Pet Store',
+      'Hair Salon',
+      'Car Wash',
+      'Auto Repair',
+      'Bookstore',
+      'Photography',
+      'Bike Shop',
+      'Yoga Studio',
+      'Toy Store',
     ];
     
     if (index >= 0 && index < names.length) {

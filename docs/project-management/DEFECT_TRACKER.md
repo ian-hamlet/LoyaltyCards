@@ -2037,6 +2037,21 @@ This document tracks defects from two sources:
 
 ---
 
+### DECISION-018: Accepted Behavior for Business Icons Added in a Future Update, Viewed on an Un-Updated Customer App
+
+- **Type:** Architecture/UX Decision, followed immediately by the real extension it was written about
+- **Status:** ✅ DECIDED and ACTIONED - fallback behavior accepted as-is; 8 new icons appended the same day
+- **Priority:** LOW
+- **Screen/Feature:** Shared - `constants/business_icons.dart` (`BusinessIcons.getIcon()`/`getIconName()`), rendered wherever a business logo shows (`supplier_home.dart`, `customer_home.dart`, `customer_card_detail.dart`, etc.)
+- **Context:** Hypothetical raised by the user: if a future update extends the `BusinessIcons.icons` array (a supplier picks a new icon only their updated app knows about), how does a customer app that hasn't updated yet render that business's `logoIndex`? Does it show the first icon, the last, crash, or something else - and does it self-correct once the customer eventually updates?
+- **Investigation finding:** `getIcon(int index)` already bounds-checks explicitly (`if (index >= 0 && index < icons.length) return icons[index]; return icons[0];`) - an out-of-range index falls back to `icons[0]` (the storefront icon), never crashes, and never picks the last icon. `getIconName()` has the identical pattern, falling back to `'Store'`. Critically, `logoIndex` is stored as a plain `int` on both `Business` and `Card` with **no range validation on insert/update** in either repository (unlike `stampsRequired`, which is checked) - so the true value always round-trips through storage untouched. The fallback is a pure display-time computation, recalculated fresh on every render from whatever `BusinessIcons.icons.length` happens to be *right now* - nothing is ever written back, and there's no cache to invalidate. The moment the customer's app updates (a full binary replacement on iOS, so no stale in-memory state survives it), the very next render of that icon resolves correctly from the same stored index, with no migration step. `Business.logoIndex`'s own doc comment already says `(0-99)`, confirming this was designed with headroom for exactly this kind of growth.
+- **Decision:** Accepted as-is. The only real gap - a business past the customer's currently-known icon range looks visually identical to a genuinely-unconfigured one (both show the generic storefront icon) - was judged not significant enough to warrant a distinguishable "unknown icon" state or an error message. Most users won't notice, and the substitution is purely temporary and self-correcting.
+- **Constraint for future icon-set expansion:** only ever **append** new icons to the end of `BusinessIcons.icons` - never reorder or remove existing entries. The index is the only thing persisted (not an icon name/identifier), so reordering would silently reassign every business's existing icon to something else, and removing an entry would shift every index after it.
+- **Extension applied 2026-08-17:** appended 8 new icons (indices 20-27) covering previously-missing recurring-visit business categories - Hair Salon (`content_cut`), Car Wash (`local_car_wash`), Auto Repair (`car_repair`), Bookstore (`menu_book`), Photography (`camera_alt`), Bike Shop (`pedal_bike`), Yoga Studio (`self_improvement`), Toy Store (`toys`) - each verified to exist against the actual Flutter SDK on this machine rather than assumed. Also added corresponding entries to `getIconName()`, and to the onboarding icon picker (`supplier_onboarding.dart`'s `_buildLogoOption` calls), which was already a curated subset of the full array rather than auto-generated from it - the new icons wouldn't have been selectable through any UI without this second change. Full suite green: shared 211, customer_app 131, supplier_app 83.
+- **Notes:** Originally a documented decision from a hypothetical the user raised while thinking ahead about extending the icon set; the extension itself followed the same session once the fallback behavior was confirmed safe.
+
+---
+
 ## 📊 Defect Summary Statistics
 
 ### By Priority

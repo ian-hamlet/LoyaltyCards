@@ -500,6 +500,15 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     _buildLogoOption(13, 'Spa', Icons.spa),
                     _buildLogoOption(14, 'Gym', Icons.fitness_center),
                     _buildLogoOption(19, 'Pets', Icons.pets),
+                    // Added 2026-08-17 (DECISION-018)
+                    _buildLogoOption(20, 'Hair Salon', Icons.content_cut),
+                    _buildLogoOption(21, 'Car Wash', Icons.local_car_wash),
+                    _buildLogoOption(22, 'Auto Repair', Icons.car_repair),
+                    _buildLogoOption(23, 'Bookstore', Icons.menu_book),
+                    _buildLogoOption(24, 'Photography', Icons.camera_alt),
+                    _buildLogoOption(25, 'Bike Shop', Icons.pedal_bike),
+                    _buildLogoOption(26, 'Yoga Studio', Icons.self_improvement),
+                    _buildLogoOption(27, 'Toy Store', Icons.toys),
                   ],
                 ),
                 

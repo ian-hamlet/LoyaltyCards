@@ -201,7 +201,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     Tooltip(
                       triggerMode: TooltipTriggerMode.tap,
                       showDuration: const Duration(seconds: 10),
-                      message: 'Sets how many stamps a customer must collect before earning a reward. Lower values redeem faster; higher values encourage repeat visits. Range: 3-12 stamps.',
+                      message: 'Sets how many stamps a customer must collect before earning a reward. Lower values redeem faster; higher values encourage repeat visits. Range: ${CardIssueToken.minStampsRequired}-${CardIssueToken.maxStampsRequired} stamps.',
                       child: Icon(
                         Icons.info_outline,
                         size: 18,
@@ -215,7 +215,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      onPressed: _stampsRequired > 3
+                      onPressed: _stampsRequired > CardIssueToken.minStampsRequired
                           ? () {
                               Haptics.light();
                               setState(() => _stampsRequired--);
@@ -235,7 +235,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ),
                     ),
                     IconButton(
-                      onPressed: _stampsRequired < 12
+                      onPressed: _stampsRequired < CardIssueToken.maxStampsRequired
                           ? () {
                               Haptics.light();
                               setState(() => _stampsRequired++);
@@ -248,9 +248,9 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 ),
                 Slider(
                   value: _stampsRequired.toDouble(),
-                  min: 3,
-                  max: 12,
-                  divisions: 9,
+                  min: CardIssueToken.minStampsRequired.toDouble(),
+                  max: CardIssueToken.maxStampsRequired.toDouble(),
+                  divisions: CardIssueToken.maxStampsRequired - CardIssueToken.minStampsRequired,
                   label: '$_stampsRequired',
                   onChanged: (value) {
                     setState(() => _stampsRequired = value.toInt());

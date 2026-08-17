@@ -8,6 +8,7 @@ import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import '../../services/supplier_database_helper.dart';
 import '../../services/backup_storage_service.dart';
+import '../../widgets/stamps_required_fix.dart';
 
 class SupplierIssueCard extends StatefulWidget {
   const SupplierIssueCard({super.key});
@@ -28,6 +29,11 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   // see DEFECT_TRACKER.md TEST-021) the payload still didn't fit.
   QrCode? _cachedIssueQrCode;
   bool _isLoading = true;
+  // DECISION-017: true when _business.stampsRequired falls outside the
+  // currently-supported range (e.g. a legacy business from before
+  // TEST-017/020 tightened it) - short-circuits before ever generating a
+  // token that would just be rejected by the customer app anyway.
+  bool _businessOutOfRange = false;
   // CRASH-001: guards each distribution method against a fast double-tap
   // firing a second concurrent native call (Printing.layoutPdf /
   // Share.shareXFiles) before the first one completes.
@@ -56,6 +62,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _businessOutOfRange = false;
     });
 
     try {
@@ -64,6 +71,15 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       if (business == null) {
         setState(() {
           _errorMessage = 'Business not found. Please complete onboarding.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      if (!CardIssueToken.isStampsRequiredSupported(business.stampsRequired)) {
+        setState(() {
+          _business = business;
+          _businessOutOfRange = true;
           _isLoading = false;
         });
         return;
@@ -151,7 +167,17 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
+          : _businessOutOfRange
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: OutOfRangeStampsBanner(
+                      business: _business!,
+                      onFixed: _loadBusinessAndGenerateToken,
+                    ),
+                  ),
+                )
+              : _errorMessage != null
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(32),

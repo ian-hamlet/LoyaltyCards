@@ -8,6 +8,7 @@ import '../../services/biometric_auth_service.dart';
 import 'supplier_onboarding.dart';
 import 'recovery_backup_screen.dart';
 import 'clone_device_screen.dart';
+import '../../widgets/stamps_required_fix.dart';
 
 /// Feature flag: Show dangerous reset button during testing phase
 /// Set to false before production App Store release
@@ -34,11 +35,25 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   bool _requireAppLock = false;
   bool _biometricAvailable = false;
   String _authMethodName = 'Biometric';
+  // DECISION-017: local copy so the tile reflects a fix immediately,
+  // without needing the whole screen to be popped/reloaded from Home.
+  late int _stampsRequired = widget.business.stampsRequired;
 
   @override
   void initState() {
     super.initState();
     _loadSecuritySettings();
+  }
+
+  Future<void> _fixStampsRequired() async {
+    final fixed = await showFixStampsRequiredDialog(
+      context,
+      widget.business.copyWith(stampsRequired: _stampsRequired),
+    );
+    if (!fixed || !mounted) return;
+    final updated = await _businessRepo.getBusiness();
+    if (!mounted || updated == null) return;
+    setState(() => _stampsRequired = updated.stampsRequired);
   }
 
   Future<void> _loadSecuritySettings() async {
@@ -241,9 +256,20 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.confirmation_number),
+            leading: Icon(
+              Icons.confirmation_number,
+              color: CardIssueToken.isStampsRequiredSupported(_stampsRequired) ? null : Colors.orange,
+            ),
             title: const Text('Stamps Required'),
-            subtitle: Text('${widget.business.stampsRequired} stamps'),
+            subtitle: Text(
+              CardIssueToken.isStampsRequiredSupported(_stampsRequired)
+                  ? '$_stampsRequired stamps'
+                  : '$_stampsRequired stamps - not supported by this app version, tap to fix',
+            ),
+            trailing: CardIssueToken.isStampsRequiredSupported(_stampsRequired)
+                ? null
+                : const Icon(Icons.chevron_right, color: Colors.orange),
+            onTap: CardIssueToken.isStampsRequiredSupported(_stampsRequired) ? null : _fixStampsRequired,
           ),
           ListTile(
             leading: const Icon(Icons.security),

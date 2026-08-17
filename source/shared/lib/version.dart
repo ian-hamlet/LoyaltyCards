@@ -526,9 +526,14 @@
 ///   dead code and had drifted to omit device-mismatch detection (V-005).
 ///   Full detail and measured sizes: DEFECT_TRACKER.md TEST-020.
 ///
-/// Build 27 Changes (build-only bump - build 26 was already uploaded to
-/// TestFlight without this fix, and Apple doesn't allow re-uploading a
-/// build number with different content):
+/// Build 28 Changes (patch version bump 2.1.0 -> 2.1.1, not build-only -
+/// build 27 was committed to git but never built or uploaded to
+/// TestFlight, so this supersedes it entirely and carries its content
+/// forward; bumped to a real patch version rather than another build-only
+/// bump because DECISION-017 below is a genuine UX improvement, not just
+/// a bug fix. Build 26 was already uploaded to TestFlight without either
+/// of these, and Apple doesn't allow re-uploading a build number with
+/// different content):
 /// - Fixed TEST-021: issuing a card with many pre-applied initial stamps
 ///   had the same silent QR-capacity failure as TEST-017, just never
 ///   fixed on the issuance side. `supplier_issue_card.dart`'s on-screen
@@ -545,6 +550,23 @@
 ///   `_startCountdown()` leaked a new Timer.periodic on every QR
 ///   regeneration instead of cancelling the previous one. Full detail and
 ///   measured sizes: DEFECT_TRACKER.md TEST-021.
+/// - DECISION-017: a business whose stampsRequired falls outside the
+///   supported range (e.g. a legacy business from before TEST-017/020
+///   tightened it) previously had no way to recover short of a full
+///   reset - which wipes every customer's card - even though changing
+///   stampsRequired going forward is actually safe (each existing card
+///   stores its own value at issuance, not read live from the business).
+///   Supplier app now: shows a proactive warning banner on Home the
+///   moment an out-of-range business is detected; blocks Issue Card from
+///   generating a doomed token/QR at all (the customer app would reject
+///   it anyway per TEST-019); and offers a scoped "Fix Now" flow (also
+///   reachable from Settings) to reconfigure into the supported range,
+///   deliberately not general free-editing. New
+///   `widgets/stamps_required_fix.dart`. The 3-12 bound is now a single
+///   source of truth (`CardIssueToken.minStampsRequired`/
+///   `maxStampsRequired`), referenced by the onboarding slider too,
+///   instead of being duplicated - the exact kind of drift that caused
+///   TEST-016/017/019. Full detail: DEFECT_TRACKER.md DECISION-017.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.1.0+27';
+const String appVersion = '2.1.1+28';

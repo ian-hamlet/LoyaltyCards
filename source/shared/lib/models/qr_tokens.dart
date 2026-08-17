@@ -96,6 +96,20 @@ class InitialStamp {
 
 /// Token for supplier to issue a new card to customer
 class CardIssueToken extends QRToken {
+  /// DECISION-017: the single source of truth for the supported
+  /// stampsRequired range, so the onboarding slider (supplier_onboarding.dart),
+  /// this token's own validation below, and the supplier-side
+  /// out-of-range detection (business_repository.dart /
+  /// supplier_home.dart / supplier_issue_card.dart / supplier_settings.dart)
+  /// can never drift apart the way they did across TEST-016/017/019 -
+  /// each of those bugs was a bound defined in one place not matching a
+  /// check defined in another.
+  static const int minStampsRequired = 3;
+  static const int maxStampsRequired = 12;
+
+  static bool isStampsRequiredSupported(int stampsRequired) =>
+      stampsRequired >= minStampsRequired && stampsRequired <= maxStampsRequired;
+
   final String businessId;
   final String businessName;
   final String publicKey;
@@ -217,8 +231,8 @@ class CardIssueToken extends QRToken {
     // with a specific, identifiable message (see ErrorMessageMapper) so
     // the customer isn't just told to keep retrying a scan that can never
     // succeed.
-    if (stampsRequired < 3 || stampsRequired > 12) {
-      return "This business's card is set up for $stampsRequired stamps, which this app version doesn't support (supported range: 3-12). This won't be fixed by scanning again - let the business know, they may need to update or reconfigure.";
+    if (!isStampsRequiredSupported(stampsRequired)) {
+      return "This business's card is set up for $stampsRequired stamps, which this app version doesn't support (supported range: $minStampsRequired-$maxStampsRequired). This won't be fixed by scanning again - let the business know, they may need to update or reconfigure.";
     }
     if (!brandColor.startsWith('#') || brandColor.length != 7) {
       return 'This QR code has invalid formatting.';

@@ -8,6 +8,7 @@ import 'supplier_stamp_card.dart';
 import 'supplier_redeem_card.dart';
 import 'supplier_settings.dart';
 import 'how_it_works.dart';
+import '../../widgets/stamps_required_fix.dart';
 
 class SupplierHome extends StatefulWidget {
   const SupplierHome({super.key});
@@ -142,6 +143,17 @@ class _SupplierHomeState extends State<SupplierHome> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // DECISION-017: proactive warning if this business's
+              // stampsRequired falls outside the currently-supported
+              // range (e.g. a legacy business from before TEST-017/020
+              // tightened it) - catches the problem here instead of a
+              // customer discovering it via a rejected Issue Card scan.
+              if (!CardIssueToken.isStampsRequiredSupported(_business!.stampsRequired))
+                OutOfRangeStampsBanner(
+                  business: _business!,
+                  onFixed: _loadBusinessData,
+                ),
+
               // Business Card
               Container(
                 padding: const EdgeInsets.all(24),

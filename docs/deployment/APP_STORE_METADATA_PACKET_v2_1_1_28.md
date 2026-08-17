@@ -1,17 +1,17 @@
-# App Store Metadata Packet (v2.1.0+27)
+# App Store Metadata Packet (v2.1.1+28)
 
-**Status: SUPERSEDED by `APP_STORE_METADATA_PACKET_v2_1_1_28.md` - never built or uploaded.** This build was committed to git carrying TEST-021 only; DECISION-017 was added afterward, and the two now ship together as v2.1.1+28 (a patch bump, since DECISION-017 is a genuine UX improvement rather than another build-only fix).
+**Status: IN PROGRESS - not yet built or uploaded. Patch version bump (2.1.0 -> 2.1.1), not build-only - v2.1.0+27 carried the same content but was only ever committed to git, never built or uploaded to TestFlight.**
 
-**Supersedes:** `APP_STORE_METADATA_PACKET_v2_1_0_26.md` for App Store submission purposes - that build shipped to TestFlight and fixed TEST-016 through TEST-020, but not TEST-021 (the issue-card counterpart to TEST-017/020's redemption QR capacity fix) or DECISION-017 (self-service recovery for a business outside the supported stamps-required range), both found/added afterward via TestFlight testing. See `docs/project-management/DEFECT_TRACKER.md` for full detail. Everything else (Category, Subtitle, Description, Keywords, Promotional Text, and the Customer App's What's New) is **unchanged from the v2_1_0_26 packet** - only the Supplier App's What's New and App Review Notes gain lines about TEST-021 and DECISION-017.
+**Supersedes:** `APP_STORE_METADATA_PACKET_v2_1_0_27.md` (committed but never built/uploaded) and `APP_STORE_METADATA_PACKET_v2_1_0_26.md` for App Store submission purposes - that build shipped to TestFlight and fixed TEST-016 through TEST-020, but not TEST-021 (the issue-card counterpart to TEST-017/020's redemption QR capacity fix) or DECISION-017 (self-service recovery for a business outside the supported stamps-required range), both found/added afterward via TestFlight testing. See `docs/project-management/DEFECT_TRACKER.md` for full detail. Everything else (Category, Subtitle, Description, Keywords, Promotional Text, and the Customer App's What's New) is **unchanged from the v2_1_0_26 packet** - only the Supplier App's What's New and App Review Notes gain lines about TEST-021 and DECISION-017.
 
-**Build-only bump (2.1.0+26 -> 2.1.0+27), not a version change** - same feature set as v2.1.0+26 plus TEST-021's bug fix. (This version never actually shipped - see the Status note above.)
+**Patch version bump (2.1.0 -> 2.1.1)** - bumped past build-only because DECISION-017 is a genuine UX improvement, not just a bug fix; same feature set as v2.1.0+26 plus one additional bug fix and one UX improvement, both supplier-side only.
 
 ---
 
 ## Shared Listing Values
 
-- Release Version: 2.1.0
-- Build: 27
+- Release Version: 2.1.1
+- Build: 28
 - All other shared values unchanged from v2_0_3_23 - see that packet.
 
 ---

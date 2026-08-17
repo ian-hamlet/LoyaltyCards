@@ -241,12 +241,12 @@ void main() {
     },
   );
 
-  /// TEST-021: a legacy business created before the stampsRequired ceiling
+  /// A legacy business created before the stampsRequired ceiling
   /// tightened can still have a much higher value stored (up to 20, the
-  /// historical maximum) - the initial-stamp slider's max tracks that
-  /// stored value, not the current onboarding range, so a supplier can
-  /// still set a high initial stamp count on one of these. Mirrors the
-  /// real-device scenario that surfaced this bug.
+  /// historical maximum) - mirrors the real-device scenario that
+  /// surfaced both TEST-021 (silent QR-capacity failure) and
+  /// DECISION-017 (no self-service way to fix an out-of-range business
+  /// short of a full reset).
   const legacyBusinessId = 'business-issue-card-legacy-20-stamp';
   Future<void> seedLegacyHighStampBusiness(WidgetTester tester) async {
     await tester.runAsync(() async {
@@ -269,7 +269,7 @@ void main() {
   }
 
   testWidgets(
-    'TEST-021: a legacy 20-stamp business can issue a card with 16+ pre-applied stamps without the QR failing silently',
+    'DECISION-017: a legacy 20-stamp business is blocked from issuing until fixed, then issues successfully once reconfigured',
     (tester) async {
       // resetForTesting only closes the connection and clears the cached
       // in-memory handle - it doesn't delete the on-disk file (see
@@ -288,42 +288,49 @@ void main() {
       for (var attempt = 0; attempt < 50; attempt++) {
         await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
         await tester.pump();
-        if (find.byType(QrImageView).evaluate().isNotEmpty) break;
+        if (find.text("New cards can't be issued").evaluate().isNotEmpty) break;
       }
       await tester.pumpAndSettle();
 
-      expect(find.byType(QrImageView), findsOneWidget, reason: 'QR should render at 0 initial stamps');
+      // DECISION-017: a business outside the supported range is blocked
+      // before ever reaching QR generation - the customer app would
+      // reject the token anyway (TEST-019), so there's no point letting
+      // the supplier generate one at all. This also means TEST-021's
+      // compact-encoding fix is no longer reachable via this specific
+      // 20-stamp scenario through the UI - it remains verified directly
+      // against the codec in card_issue_qr_codec_test.dart instead.
+      expect(
+        find.byType(QrImageView),
+        findsNothing,
+        reason: 'No QR should be generated for an out-of-range business.',
+      );
+      expect(find.text("New cards can't be issued"), findsOneWidget);
+      expect(find.text('Fix Now'), findsOneWidget);
 
-      final state = tester.state(find.byType(SupplierIssueCard));
-      // 17 was the exact point the old plain-JSON/byte-mode encoding
-      // first failed for this business shape (measured in
-      // DEFECT_TRACKER.md TEST-021) - well past the max any *new*
-      // business can reach (12), only possible via a legacy business
-      // like this one.
-      await tester.runAsync(() async {
-        // ignore: avoid_dynamic_calls
-        await (state as dynamic).setInitialStampCountForTesting(17);
-      });
+      await tester.tap(find.text('Fix Now'));
+      await tester.pumpAndSettle();
+
+      // The dialog defaults to business.stampsRequired clamped into
+      // range - 20 clamps to the max (12), so Save works immediately
+      // with no further interaction needed.
+      expect(find.text('Fix Stamps Required'), findsOneWidget);
+      expect(find.text('12 stamps'), findsOneWidget);
+
+      await tester.tap(find.text('Save'));
+      await tester.pump();
+      for (var attempt = 0; attempt < 50; attempt++) {
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pump();
+        if (find.byType(QrImageView).evaluate().isNotEmpty) break;
+      }
       await tester.pumpAndSettle();
 
       expect(
         find.byType(QrImageView),
         findsOneWidget,
-        reason: 'QR should still render at 17 pre-applied stamps with the compact encoding, '
-            'not fall back to the "too large to display" panel.',
+        reason: 'Once reconfigured to a supported value, issuance should proceed normally.',
       );
-      expect(find.text("This card's code is too large to display"), findsNothing);
-
-      // The historical maximum stampsRequired ever allowed - the true
-      // worst case for this business.
-      await tester.runAsync(() async {
-        // ignore: avoid_dynamic_calls
-        await (state as dynamic).setInitialStampCountForTesting(20);
-      });
-      await tester.pumpAndSettle();
-
-      expect(find.byType(QrImageView), findsOneWidget, reason: 'QR should still render at 20/20 pre-applied stamps');
-      expect(find.text("This card's code is too large to display"), findsNothing);
+      expect(find.text("New cards can't be issued"), findsNothing);
 
       // Secure Mode starts a countdown Timer.periodic (_startCountdown) -
       // dispose the widget before the test ends so it gets cancelled,

@@ -10,7 +10,7 @@ import '../../services/biometric_auth_service.dart';
 import '../../models/biometric_auth_result.dart';
 
 /// Screen for generating clone QR code to set up business on additional devices
-/// Clone QR expires in 24 hours and allows another device to get full business config
+/// Clone QR expires in 5 minutes (see SupplierConfigBackup.cloneQrExpiryMs) and allows another device to get full business config
 class CloneDeviceScreen extends StatefulWidget {
   final Business business;
 
@@ -314,7 +314,7 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                                     Text(
                                       _remainingTime!.inMinutes < 2
                                           ? 'Expiring soon!'
-                                          : 'Valid for 5 minutes',
+                                          : 'Valid for ${SupplierConfigBackup.cloneQrExpiryMs ~/ 60000} minutes',
                                       style: TextStyle(
                                         fontSize: 13,
                                         color: _remainingTime!.inMinutes < 2

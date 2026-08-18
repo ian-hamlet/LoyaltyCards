@@ -1,6 +1,8 @@
 # App Store Metadata Packet (v2.0.3+23)
 
-**Status: SUBMITTED FOR APP STORE REVIEW 2026-08-15 (both apps).** This is the content that was actually entered into ASC and submitted - Category, Subtitle, Description, What's New, and App Review Notes below are all live in ASC as of this submission. Release was set to **Manual** on both apps deliberately, since the two apps review at different speeds and this avoids one going live before the other. The customer app's Promotional Text was found blank in ASC despite being documented as already-live from a prior version - entered now, and worth remembering that "unchanged" in this doc doesn't guarantee a field is actually live; always verify directly in ASC.
+**Status: LIVE ON THE APP STORE (as of 2026-08-16), superseded by `APP_STORE_METADATA_PACKET_v2_0_4_24.md`** - this build contains TEST-016 (businesses set up with 3 or 4 required stamps can never issue a valid card); the fix build is in progress. Historical record of what was submitted below.
+
+**Original status note:** SUBMITTED FOR APP STORE REVIEW 2026-08-15 (both apps). This is the content that was actually entered into ASC and submitted - Category, Subtitle, Description, What's New, and App Review Notes below are all live in ASC as of this submission. Release was set to **Manual** on both apps deliberately, since the two apps review at different speeds and this avoids one going live before the other. The customer app's Promotional Text was found blank in ASC despite being documented as already-live from a prior version - entered now, and worth remembering that "unchanged" in this doc doesn't guarantee a field is actually live; always verify directly in ASC.
 
 Use this file as copy/paste source for App Store Connect listing fields.
 

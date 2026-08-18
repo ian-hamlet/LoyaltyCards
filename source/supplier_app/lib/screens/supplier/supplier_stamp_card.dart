@@ -166,7 +166,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       // Check timestamp (must be < 1 minute old)
       final now = DateTime.now().millisecondsSinceEpoch;
       final age = now - token.timestamp;
-      if (age > 60 * 1000) {
+      if (age > AppConstants.stampRequestExpiryMs) {
         Haptics.error();
         setState(() {
           _errorMessage = 'QR code expired. Customer needs to generate a new one.';
@@ -231,7 +231,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 spacing: 8,
                 runSpacing: 8,
                 alignment: WrapAlignment.center,
-                children: List.generate(7, (index) {
+                children: List.generate(5, (index) {
                   final count = index + 1;
                   final isSelected = selectedCount == count;
                   return ChoiceChip(
@@ -337,7 +337,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
 
   String _getExpiryTime(StampToken token) {
     final expiryTime = DateTime.fromMillisecondsSinceEpoch(token.timestamp)
-        .add(const Duration(minutes: 2));
+        .add(const Duration(milliseconds: AppConstants.stampExpiryMs));
     
     final hour = expiryTime.hour.toString().padLeft(2, '0');
     final minute = expiryTime.minute.toString().padLeft(2, '0');
@@ -1211,7 +1211,7 @@ class _StampTokenScreenState extends State<_StampTokenScreen> {
 
   void _updateRemainingTime() {
     final expiryTime = DateTime.fromMillisecondsSinceEpoch(widget.token.timestamp)
-        .add(const Duration(minutes: 2));
+        .add(const Duration(milliseconds: AppConstants.stampExpiryMs));
     final remaining = expiryTime.difference(DateTime.now());
     
     if (remaining.isNegative) {

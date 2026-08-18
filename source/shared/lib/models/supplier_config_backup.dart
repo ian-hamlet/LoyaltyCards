@@ -5,11 +5,20 @@ import 'business.dart';
 import 'operation_mode.dart';
 
 /// Represents a supplier configuration backup for cloning or recovery
-/// 
+///
 /// Two types:
-/// - "clone": 24-hour expiring QR for setting up additional devices
+/// - "clone": 5-minute expiring QR for setting up additional devices
 /// - "recovery": Non-expiring backup for disaster recovery
 class SupplierConfigBackup {
+  // Quality review 2026-08-17 (docs/quality/MAGIC_NUMBERS_REVIEW_2026-08-17.md
+  // N-005): this file previously had three separate doc comments claiming a
+  // "24-hour" expiry while the actual code always used 5 minutes - the
+  // 5-minute value is correct (confirmed 2026-08-17); the doc comments were
+  // wrong, not the code. Defined here rather than in AppConstants since this
+  // model file is deliberately kept Flutter-independent (see qr_tokens.dart's
+  // CardIssueToken.minStampsRequired for the same pattern).
+  static const int cloneQrExpiryMs = 300000; // 5 minutes
+
   final String type; // "clone" or "recovery"
   final int version; // Format version (1)
   final String businessId;
@@ -20,7 +29,7 @@ class SupplierConfigBackup {
   final String brandColor;
   final OperationMode operationMode;
   final DateTime timestamp;
-  final DateTime? expiresAt; // null for recovery, +24h for clone
+  final DateTime? expiresAt; // null for recovery, +5min for clone
   final String signature; // HMAC-SHA256 of payload
 
   SupplierConfigBackup({
@@ -42,7 +51,7 @@ class SupplierConfigBackup {
   /// Used for setting up additional devices while original still works
   static Future<SupplierConfigBackup> createCloneQR(Business business) async {
     final now = DateTime.now();
-    final expires = now.add(Duration(minutes: 5));
+    final expires = now.add(const Duration(milliseconds: cloneQrExpiryMs));
 
     final backup = SupplierConfigBackup(
       type: 'clone',

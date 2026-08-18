@@ -12,10 +12,15 @@ class TokenValidator {
     CardIssueToken token,
   ) async {
     // Check basic structure
-    if (!token.isValid()) {
+    // TEST-019: use validationError() rather than a generic message - a
+    // stampsRequired-out-of-range business (created before this app's
+    // bound tightened) is a permanent, unfixable-by-retrying state the
+    // customer needs a specific explanation for, not "try again".
+    final structureError = token.validationError();
+    if (structureError != null) {
       return ValidationResult(
         isValid: false,
-        error: 'Invalid token structure',
+        error: structureError,
       );
     }
 
@@ -51,7 +56,7 @@ class TokenValidator {
     // Secure mode: Check timestamp (reject tokens older than 5 minutes)
     final now = DateTime.now().millisecondsSinceEpoch;
     final age = now - token.timestamp;
-    if (age > 5 * 60 * 1000) {
+    if (age > AppConstants.cardIssueExpiryMs) {
       return ValidationResult(
         isValid: false,
         error: 'Token expired (older than 5 minutes)',
@@ -215,7 +220,7 @@ class TokenValidator {
     // Check timestamp (reject requests older than 1 minute)
     final now = DateTime.now().millisecondsSinceEpoch;
     final age = now - token.timestamp;
-    if (age > 60 * 1000) {
+    if (age > AppConstants.stampRequestExpiryMs) {
       return ValidationResult(
         isValid: false,
         error: 'Request expired (older than 1 minute)',

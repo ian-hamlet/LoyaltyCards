@@ -15,7 +15,7 @@ class AppConstants {
   static const String version = '0.1.0';
   
   // Defaults
-  static const int defaultStampsRequired = 10;
+  static const int defaultStampsRequired = 6;
   static const String defaultBrandColor = '#673AB7'; // Deep Purple
   
   // Database
@@ -34,12 +34,22 @@ class AppConstants {
   // Timing
   static const Duration animationDuration = Duration(milliseconds: 300);
   static const Duration qrScanSuccessDelay = Duration(milliseconds: 500);
+  static const Duration errorCooldownDuration = Duration(seconds: 2); // Shared by both apps' scan-error screens (N-009) - suppresses re-triggering an error dialog on every frame while an invalid/duplicate QR remains in camera view
   
   // Security Constants
   static const int stampRateLimitMs = 5000; // 5 seconds between stamps (prevents duplicate scans)
-  static const int issueIntervalMs = 30000; // 30 seconds between card issuances (supplier rate limit)
   static const int stampExpiryMs = 120000; // 2 minutes stamp token validity (timestamp tolerance)
-  
+  static const int cardIssueExpiryMs = 300000; // 5 minutes Secure Mode card-issue token validity (token_validator.dart)
+  static const int stampRequestExpiryMs = 60000; // 1 minute stamp-request token freshness window (distinct from stampExpiryMs, which times the *response* stamp token, not the request)
+
+  // Note: clone QR expiry (5 minutes) is NOT here - see
+  // SupplierConfigBackup.cloneQrExpiryMs in supplier_config_backup.dart
+  // instead. That model file is deliberately kept Flutter-independent
+  // (like qr_tokens.dart), so its own constant lives on the class itself
+  // rather than importing AppConstants (which pulls in flutter/material.dart).
+  static const Duration databaseOpenTimeout = Duration(seconds: 10); // Shared by both apps' database helpers - triggers recovery/deletion logic if exceeded
+  static const int stampsRequiredHardCeiling = 100; // Sanity ceiling on Business/Card.stampsRequired - a much looser bound than CardIssueToken.maxStampsRequired (currently 12), which is the actual currently-supported range
+
   // REQ-022: Simple Mode Enhanced Rate Limits
   static const int simpleModeDefaultScanIntervalMs = 30000; // 30 seconds default for simple mode (configurable per supplier)
   static const int simpleModeMinScanIntervalMs = 5000; // 5 seconds minimum (prevents abuse)

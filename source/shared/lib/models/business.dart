@@ -23,7 +23,13 @@ class Business {
     this.logoIndex = 0,
     this.mode = OperationMode.secure, // Default to secure for backward compatibility
     required this.createdAt,
-    this.scanInterval = 30000, // REQ-022: Default 30 seconds for simple mode
+    // REQ-022: Default for simple mode. Quality review 2026-08-17 (N-006):
+    // must match AppConstants.simpleModeDefaultScanIntervalMs
+    // (constants.dart) - kept as a literal here rather than importing
+    // AppConstants, since this file (like the other model classes) is
+    // deliberately kept Flutter-independent and AppConstants pulls in
+    // flutter/material.dart.
+    this.scanInterval = 30000,
   });
 
   /// Convert to JSON for persistence (EXCLUDES private key for safety)
@@ -49,8 +55,10 @@ class Business {
 
   /// Create from JSON (from database)
   factory Business.fromJson(Map<String, dynamic> json) {
-    // REQ-022: Read scan_interval_seconds from DB, convert to ms
-    final scanIntervalSeconds = json['scan_interval_seconds'] as int? ?? 30; // Default 30s
+    // REQ-022: Read scan_interval_seconds from DB, convert to ms.
+    // 30 must match AppConstants.simpleModeDefaultScanIntervalMs / 1000 - see
+    // the constructor default above for why this isn't imported directly.
+    final scanIntervalSeconds = json['scan_interval_seconds'] as int? ?? 30;
     final scanIntervalMs = scanIntervalSeconds * 1000;
     
     return Business(

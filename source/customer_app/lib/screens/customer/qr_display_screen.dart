@@ -265,8 +265,8 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                                 Expanded(
                                   child: Text(
                                     widget.mode == QRDisplayMode.stampRequest
-                                        ? 'Valid 1 min (expires ${_getExpiryTime(1)})'
-                                        : 'Valid 2 min (expires ${_getExpiryTime(2)})',
+                                        ? 'Valid ${_formatValidityMinutes(AppConstants.stampRequestExpiryMs)} (expires ${_getExpiryTime(AppConstants.stampRequestExpiryMs)})'
+                                        : 'Valid ${_formatValidityMinutes(AppConstants.stampExpiryMs)} (expires ${_getExpiryTime(AppConstants.stampExpiryMs)})',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.orange[900],
@@ -341,16 +341,26 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
     );
   }
 
-  String _getExpiryTime(int validityMinutes) {
+  // Quality review 2026-08-17 (N-003): takes milliseconds, matching
+  // AppConstants' unit, rather than a separately-hardcoded minutes value
+  // that could drift from the actual enforced window.
+  String _getExpiryTime(int validityMs) {
     if (_qrGeneratedTime == 0) return '--:--';
-    
+
     final expiryTime = DateTime.fromMillisecondsSinceEpoch(_qrGeneratedTime)
-        .add(Duration(minutes: validityMinutes));
-    
+        .add(Duration(milliseconds: validityMs));
+
     final hour = expiryTime.hour.toString().padLeft(2, '0');
     final minute = expiryTime.minute.toString().padLeft(2, '0');
-    
+
     return '$hour:$minute';
+  }
+
+  /// Derives the "Valid N min" display text directly from the constant,
+  /// so it can never drift from the value actually enforced.
+  String _formatValidityMinutes(int validityMs) {
+    final minutes = validityMs ~/ 60000;
+    return minutes == 1 ? '1 min' : '$minutes min';
   }
 }
 

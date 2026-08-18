@@ -8,6 +8,7 @@ import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
 import '../../services/supplier_database_helper.dart';
 import '../../services/backup_storage_service.dart';
+import '../../widgets/stamps_required_fix.dart';
 
 class SupplierIssueCard extends StatefulWidget {
   const SupplierIssueCard({super.key});
@@ -22,7 +23,24 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   
   Business? _business;
   CardIssueToken? _token;
+  // TEST-021: pre-built QR for _token, cached alongside it so build()
+  // never re-derives it. Null means either _token hasn't been generated
+  // yet, or (extremely unlikely given measured margins - see
+  // DEFECT_TRACKER.md TEST-021) the payload still didn't fit even
+  // compact-encoded.
+  QrCode? _cachedIssueQrCode;
+  // TEST-022 regression test hook: true when the cached QR had to fall
+  // back to compact encoding (payload too large for plain JSON), false
+  // when plain JSON was used - the common case, and the only one
+  // readable by a customer app older than TEST-021/022.
+  @visibleForTesting
+  bool issueQrUsedCompactEncodingForTesting = false;
   bool _isLoading = true;
+  // DECISION-017: true when _business.stampsRequired falls outside the
+  // currently-supported range (e.g. a legacy business from before
+  // TEST-017/020 tightened it) - short-circuits before ever generating a
+  // token that would just be rejected by the customer app anyway.
+  bool _businessOutOfRange = false;
   // CRASH-001: guards each distribution method against a fast double-tap
   // firing a second concurrent native call (Printing.layoutPdf /
   // Share.shareXFiles) before the first one completes.
@@ -51,6 +69,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _businessOutOfRange = false;
     });
 
     try {
@@ -59,6 +78,15 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       if (business == null) {
         setState(() {
           _errorMessage = 'Business not found. Please complete onboarding.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      if (!CardIssueToken.isStampsRequiredSupported(business.stampsRequired)) {
+        setState(() {
+          _business = business;
+          _businessOutOfRange = true;
           _isLoading = false;
         });
         return;
@@ -83,6 +111,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       setState(() {
         _business = business;
         _token = token;
+        _cachedIssueQrCode = _buildIssueQrCode(token);
         _isLoading = false;
       });
 
@@ -96,6 +125,50 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
         _errorMessage = 'Error generating token: $e';
         _isLoading = false;
       });
+    }
+  }
+
+  /// TEST-021 regression test hook - mirrors the Slider's onChanged
+  /// handler. Widget-test-driving the actual Slider to an exact high
+  /// value is fragile; this reaches the same code path directly.
+  @visibleForTesting
+  Future<void> setInitialStampCountForTesting(int count) async {
+    setState(() {
+      _initialStampCount = count;
+    });
+    await _loadBusinessAndGenerateToken();
+  }
+
+  // TEST-021: a card issued with pre-applied initial stamps embeds one
+  // signature per stamp - the same shape as the redemption QR TEST-020
+  // fixed - and had the same silent-failure capacity ceiling, just never
+  // fixed on this side.
+  //
+  // TEST-022: TEST-021's original fix compact-encoded unconditionally,
+  // which broke issuance for any customer app older than this fix (Base45
+  // is never valid JSON, so a pre-TEST-021 customer app's plain
+  // jsonDecode() fails outright - "not a valid QR code" for every
+  // issuance, not just the rare high-initial-stamp-count case TEST-021
+  // targeted). Plain JSON has been readable by every app version since
+  // day one, so prefer it whenever it actually fits - only the genuinely
+  // oversized legacy case (a business still configured above the
+  // supported range, with many pre-applied stamps) needs the compact
+  // fallback. The decode side on the customer app already tries plain
+  // JSON first (QRToken.fromQRString) before falling back to
+  // CardIssueQrCodec.decode(), so no change needed there.
+  QrCode? _buildIssueQrCode(CardIssueToken token) {
+    final plainJson = token.toQRString();
+    if (QrCapacity.fits(plainJson)) {
+      issueQrUsedCompactEncodingForTesting = false;
+      return QrCode.fromData(data: plainJson, errorCorrectLevel: QrErrorCorrectLevel.L);
+    }
+    issueQrUsedCompactEncodingForTesting = true;
+    try {
+      final compact = CardIssueQrCodec.encode(token);
+      return AlphanumericQr.build(compact);
+    } catch (e) {
+      AppLogger.error('Failed to build issue card QR', error: e, tag: 'IssueCard');
+      return null;
     }
   }
 
@@ -119,7 +192,17 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
+          : _businessOutOfRange
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: OutOfRangeStampsBanner(
+                      business: _business!,
+                      onFixed: _loadBusinessAndGenerateToken,
+                    ),
+                  ),
+                )
+              : _errorMessage != null
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(32),
@@ -328,20 +411,51 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                               const SizedBox(height: 16),
                               
                               // QR Code (slightly smaller for landscape fit)
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey[300]!),
+                              // TEST-021: alphanumeric-mode QR built ahead
+                              // of time by _buildIssueQrCode(), not the
+                              // plain byte-mode data: String path - see
+                              // DEFECT_TRACKER.md TEST-021.
+                              if (_cachedIssueQrCode != null)
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey[300]!),
+                                  ),
+                                  child: QrImageView.withQr(
+                                    qr: _cachedIssueQrCode!,
+                                    size: QRCodeSize.calculate(context),
+                                    backgroundColor: Colors.white,
+                                  ),
+                                )
+                              else
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const Icon(Icons.error_outline, color: Colors.orange, size: 40),
+                                      const SizedBox(height: 12),
+                                      const Text(
+                                        "This card's code is too large to display",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      const Text(
+                                        'Try reducing the number of pre-applied stamps for this card.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 13, color: Colors.black54),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                child: QrImageView(
-                                  data: _token!.toQRString(),
-                                  version: QrVersions.auto,
-                                  size: QRCodeSize.calculate(context),
-                                  backgroundColor: Colors.white,
-                                ),
-                              ),
                               
                               const SizedBox(height: 12),
                               
@@ -426,7 +540,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                             children: [
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed: _isPrinting ? null : _printToken,
+                                  onPressed: (_isPrinting || _cachedIssueQrCode == null) ? null : _printToken,
                                   icon: _isPrinting
                                       ? const SizedBox(
                                           height: 16,
@@ -445,7 +559,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed: _isSharing ? null : _shareToken,
+                                  onPressed: (_isSharing || _cachedIssueQrCode == null) ? null : _shareToken,
                                   icon: _isSharing
                                       ? const SizedBox(
                                           height: 16,
@@ -519,13 +633,13 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
 
   // Print issue card QR
   Future<void> _printToken() async {
-    if (_business == null || _token == null || _isPrinting) return;
+    if (_business == null || _token == null || _isPrinting || _cachedIssueQrCode == null) return;
 
     setState(() => _isPrinting = true);
 
     try {
       final result = await BackupStorageService.printIssueCard(
-        qrData: _token!.toQRString(),
+        qrCode: _cachedIssueQrCode!,
         businessName: _business!.name,
         initialStamps: _initialStampCount,
       );
@@ -553,7 +667,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
 
   // Share issue card QR via native share sheet
   Future<void> _shareToken() async {
-    if (_business == null || _token == null || _isSharing) return;
+    if (_business == null || _token == null || _isSharing || _cachedIssueQrCode == null) return;
 
     setState(() => _isSharing = true);
 
@@ -562,7 +676,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
       final sharePosition = Rect.fromLTWH(size.width / 2, size.height / 2, 10, 10);
 
       final result = await BackupStorageService.shareIssueCard(
-        qrData: _token!.toQRString(),
+        qrCode: _cachedIssueQrCode!,
         businessName: _business!.name,
         initialStamps: _initialStampCount,
         sharePositionOrigin: sharePosition,
@@ -588,6 +702,12 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
   void _startCountdown() {
     if (_token == null || _business?.mode != OperationMode.secure) return;
 
+    // Every QR regeneration (e.g. changing the initial stamp count) calls
+    // this again - without cancelling the previous timer first, each
+    // regeneration leaked an orphaned Timer.periodic that ran forever
+    // (found via TEST-021's widget test exercising multiple regenerations
+    // in Secure Mode).
+    _countdownTimer?.cancel();
     _updateRemainingTime();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _updateRemainingTime();
@@ -598,7 +718,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     if (_token == null) return;
 
     final expiryTime = DateTime.fromMillisecondsSinceEpoch(_token!.timestamp)
-        .add(const Duration(minutes: 5));
+        .add(const Duration(milliseconds: AppConstants.cardIssueExpiryMs));
     final remaining = expiryTime.difference(DateTime.now());
     
     if (remaining.isNegative) {
@@ -623,8 +743,8 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
     if (_token == null) return '--:--';
     
     final expiryTime = DateTime.fromMillisecondsSinceEpoch(_token!.timestamp)
-        .add(const Duration(minutes: 5));
-    
+        .add(const Duration(milliseconds: AppConstants.cardIssueExpiryMs));
+
     final hour = expiryTime.hour.toString().padLeft(2, '0');
     final minute = expiryTime.minute.toString().padLeft(2, '0');
     

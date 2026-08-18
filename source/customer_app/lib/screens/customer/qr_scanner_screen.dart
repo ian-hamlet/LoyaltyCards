@@ -55,7 +55,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   bool _isProcessing = false;
   String? _errorMessage;
   DateTime? _cooldownUntil;
-  static const Duration _errorCooldownDuration = Duration(seconds: 2);
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
 
   @override
@@ -108,7 +107,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     });
 
     try {
-      final token = QRToken.fromQRString(qrData);
+      QRToken? token = QRToken.fromQRString(qrData);
+
+      // TEST-021: a card issued with pre-applied initial stamps may be
+      // compact-encoded (gzip + Base45 + alphanumeric QR mode) instead of
+      // plain JSON, the same way TEST-020 compact-encodes the redemption
+      // QR - see DEFECT_TRACKER.md TEST-021. Base45's alphabet can never
+      // be valid JSON, so QRToken.fromQRString above already fails
+      // (returns null) on this data; only worth trying for addCard mode,
+      // since that's the only token type using this encoding.
+      if (token == null && widget.mode == QRScanMode.addCard) {
+        try {
+          token = CardIssueQrCodec.decode(qrData);
+        } catch (_) {
+          // Not a compact-encoded card issue token either - fall through
+          // to the "not valid" error below.
+        }
+      }
 
       if (token == null) {
         final message = widget.mode == QRScanMode.receiveStamp
@@ -143,7 +158,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     setState(() {
       _errorMessage = message;
       _isProcessing = false;
-      _cooldownUntil = DateTime.now().add(_errorCooldownDuration);
+      _cooldownUntil = DateTime.now().add(AppConstants.errorCooldownDuration);
     });
   }
 
@@ -156,7 +171,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Validate token
     final validation = await TokenValidator.validateCardIssueToken(token);
     if (!validation.isValid) {
-      _showScanError(ErrorMessageMapper.getUserMessage(validation.error ?? 'Invalid token'));
+      // TEST-019: TokenValidator now returns an already-specific,
+      // user-facing message for structural failures (see
+      // CardIssueToken.validationError()) - show it directly rather than
+      // through ErrorMessageMapper, which would otherwise discard it for
+      // a generic fallback since it doesn't match any of the mapper's
+      // known technical-error substrings.
+      _showScanError(validation.error ?? ErrorMessageMapper.getUserMessage('Invalid token'));
       return;
     }
 
@@ -762,17 +783,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             // could re-sign it), so record what it was actually signed for,
             // carrying forward the true original if oldStamp was itself
             // already a moved stamp from an earlier overflow event.
-            final newStamp = Stamp(
+            final newStamp = oldStamp.relocateTo(
               id: '${existingCard.id}_stamp_$newStampNumber',
               cardId: existingCard.id,
               stampNumber: newStampNumber,
-              timestamp: oldStamp.timestamp,
-              signature: oldStamp.signature,
               previousHash: i == 0 ? previousHash : stampsToMove[i - 1].signature,
-              deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
-              originalCardId: oldStamp.originalCardId ?? oldStamp.cardId,
-              originalStampNumber: oldStamp.originalStampNumber ?? oldStamp.stampNumber,
-              originalPreviousHash: oldStamp.originalPreviousHash ?? oldStamp.previousHash,
             );
 
             await stampRepo.insertStamp(newStamp, executor: txn);
@@ -815,14 +830,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               await stampRepo.deleteStamp(oldStamp.id, executor: txn);
 
               // Create on new card
-              final newStamp = Stamp(
+              //
+              // TEST-018: this branch previously built a plain Stamp(...)
+              // here and omitted originalCardId/originalStampNumber/
+              // originalPreviousHash entirely - silently dropping
+              // provenance for stamps in this specific three-way split
+              // (original card -> existing card -> new card for the
+              // remainder), which would break signature verification for
+              // them at redemption. relocateTo() sets these correctly.
+              final newStamp = oldStamp.relocateTo(
                 id: '${newCardId}_stamp_$newStampNumber',
                 cardId: newCardId,
                 stampNumber: newStampNumber,
-                timestamp: oldStamp.timestamp,
-                signature: oldStamp.signature,
                 previousHash: i == 0 ? null : remainingStamps[i - 1].signature,
-                deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
               );
 
               await stampRepo.insertStamp(newStamp, executor: txn);
@@ -878,22 +898,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             await stampRepo.deleteStamp(oldStamp.id, executor: txn);
 
             // Create on new card with renumbered stamp number
-            //
-            // originalCardId/originalStampNumber/originalPreviousHash: see
-            // the matching comment in the existing-card merge branch above -
-            // the carried-over signature was signed for oldStamp's position
-            // on its old card, not this new one.
-            final newStamp = Stamp(
+            final newStamp = oldStamp.relocateTo(
               id: '${newCardId}_stamp_$newStampNumber',
               cardId: newCardId,
               stampNumber: newStampNumber,
-              timestamp: oldStamp.timestamp,
-              signature: oldStamp.signature,
               previousHash: i == 0 ? null : stampsToMove[i - 1].signature,
-              deviceId: oldStamp.deviceId, // V-005: Preserve original device ID
-              originalCardId: oldStamp.originalCardId ?? oldStamp.cardId,
-              originalStampNumber: oldStamp.originalStampNumber ?? oldStamp.stampNumber,
-              originalPreviousHash: oldStamp.originalPreviousHash ?? oldStamp.previousHash,
             );
 
             await stampRepo.insertStamp(newStamp, executor: txn);

@@ -34,7 +34,6 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   // let the same code get reprocessed and rejected several times in a row
   // while the camera was still being aimed, showing the same error repeatedly.
   DateTime? _cooldownUntil;
-  static const Duration _errorCooldownDuration = Duration(seconds: 2);
 
   @override
   void initState() {
@@ -571,44 +570,18 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     AppLogger.qr('QR Data: ${qrData.substring(0, qrData.length > 100 ? 100 : qrData.length)}...');
 
     try {
-      // Try parsing as JSON token first (new format)
+      // Try parsing as JSON token first (plain-JSON format)
       final json = jsonDecode(qrData) as Map<String, dynamic>;
 
       // Immediate feedback that a readable code was recognized, distinct
       // from whether the scan ultimately succeeds - the main non-visual
       // signal that the camera registered anything at all. _showError
-      // below (and the legacy-format fallback in the catch block) covers
-      // all rejection paths.
+      // below (and the compact/legacy-format fallbacks in the catch
+      // block) covers all rejection paths.
       Haptics.success();
 
       if (json['type'] == 'redemption_request') {
-        final token = RedemptionRequestToken.fromJson(json);
-        AppLogger.qr('Redemption token parsed successfully');
-        AppLogger.qr('Card ID: ${token.cardId}');
-        AppLogger.qr('Stamps collected: ${token.stampsCollected}');
-        AppLogger.qr('Signatures to verify: ${token.stampProofs.length}');
-
-        // Structural check, including stampProofs.length == stampsCollected -
-        // without this, verifyRedemptionStampChain only confirms that
-        // whichever proofs WERE submitted are individually valid, never
-        // that their count actually backs the claimed stampsCollected used
-        // below to sign the reward.
-        if (!token.isValid()) {
-          AppLogger.error('Redemption rejected - malformed/inconsistent token for card ${token.cardId}', tag: 'Security');
-          _showError('Invalid redemption request.');
-          return;
-        }
-
-        // V-005: Check for device mismatch
-        if (token.hasDeviceMismatch()) {
-          AppLogger.warning('Device mismatch detected!', 'Security');
-          AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
-          AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
-          _showDeviceMismatchWarning(context, token);
-          return;
-        }
-
-        _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
+        _processRedemptionRequestToken(RedemptionRequestToken.fromJson(json));
         return;
       } else if (json['type'] == 'card_stamp_request') {
         // Customer is showing a stamp request QR, not a redemption QR
@@ -622,8 +595,22 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
         return;
       }
     } catch (e) {
-      AppLogger.debug('Failed to parse as JSON token: $e', 'QR');
-      
+      AppLogger.debug('Failed to parse as plain-JSON token: $e', 'QR');
+
+      // TEST-020: not valid JSON - try the compact gzip+Base45 redemption
+      // encoding before falling back further. Base45's alphabet (digits,
+      // uppercase letters, a handful of symbols - no `{`, `"`, or
+      // lowercase) can never be valid JSON text, so there's no ambiguity
+      // between this and the plain-JSON path above.
+      try {
+        final token = RedemptionQrCodec.decode(qrData);
+        Haptics.success();
+        _processRedemptionRequestToken(token);
+        return;
+      } catch (e2) {
+        AppLogger.debug('Failed to parse as compact redemption token: $e2', 'QR');
+      }
+
       // Fall back to legacy format: LOYALTYCARD:REDEEM:cardId:stamps
       if (qrData.startsWith('LOYALTYCARD:REDEEM:')) {
         final parts = qrData.split(':');
@@ -636,9 +623,41 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           return;
         }
       }
-      
+
       _showError('Unable to read this QR code. Please ask the customer to show their completed loyalty card.');
     }
+  }
+
+  /// Shared by both the plain-JSON and TEST-020 compact-decode success
+  /// paths in _processCardQR - validates a parsed [RedemptionRequestToken]
+  /// and proceeds to redemption confirmation or a rejection message.
+  void _processRedemptionRequestToken(RedemptionRequestToken token) {
+    AppLogger.qr('Redemption token parsed successfully');
+    AppLogger.qr('Card ID: ${token.cardId}');
+    AppLogger.qr('Stamps collected: ${token.stampsCollected}');
+    AppLogger.qr('Signatures to verify: ${token.stampProofs.length}');
+
+    // Structural check, including stampProofs.length == stampsCollected -
+    // without this, verifyRedemptionStampChain only confirms that
+    // whichever proofs WERE submitted are individually valid, never
+    // that their count actually backs the claimed stampsCollected used
+    // below to sign the reward.
+    if (!token.isValid()) {
+      AppLogger.error('Redemption rejected - malformed/inconsistent token for card ${token.cardId}', tag: 'Security');
+      _showError('Invalid redemption request.');
+      return;
+    }
+
+    // V-005: Check for device mismatch
+    if (token.hasDeviceMismatch()) {
+      AppLogger.warning('Device mismatch detected!', 'Security');
+      AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
+      AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
+      _showDeviceMismatchWarning(context, token);
+      return;
+    }
+
+    _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
   }
 
   void _showSecureModeRedemptionConfirmation(
@@ -795,7 +814,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     Haptics.error();
     setState(() {
       _isProcessing = false;
-      _cooldownUntil = DateTime.now().add(_errorCooldownDuration);
+      _cooldownUntil = DateTime.now().add(AppConstants.errorCooldownDuration);
     });
 
     AppFeedback.error(context, message);

@@ -310,6 +310,43 @@ void main() {
       expect(find.text('Open Redeem Screen'), findsOneWidget);
     });
 
+    testWidgets('TEST-020: a genuinely signed redemption request in the compact (gzip+Base45) encoding also redeems correctly', (tester) async {
+      // Same real end-to-end flow as the test above (real signatures, real
+      // chain verification, real UI), but feeding processCardQR the
+      // TEST-020 compact encoding instead of token.toQRString() - proves
+      // the new decode-fallback tier in _processCardQR actually reaches
+      // the same successful redemption path, not just that the codec
+      // round-trips in isolation (already covered by RedemptionQrCodec's
+      // own test suite in shared/test).
+      await setupBusiness(tester, mode: OperationMode.secure, stampsRequired: 12, name: 'Test Spa', brandColor: '#6A1B9A');
+      await pumpRedeemCardPushed(tester);
+
+      const cardId = 'card-secure-compact';
+      final proofs = await buildValidStampProofs(cardId: cardId, count: 12);
+      final token = RedemptionRequestToken(
+        cardId: cardId,
+        businessId: businessId,
+        stampsCollected: 12,
+        stampProofs: proofs,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      await processCardQR(tester, RedemptionQrCodec.encode(token));
+
+      expect(find.text('Reward Redeemed!'), findsOneWidget);
+      final redeemed = await tester.runAsync(() => businessRepo.hasBeenRedeemed(cardId));
+      expect(redeemed, isTrue);
+
+      // Same Done-button dismissal sequence as the plain-JSON test above.
+      await tester.ensureVisible(find.text('Done'));
+      await tester.tap(find.text('Done'));
+      await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 300)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+      expect(find.text('Open Redeem Screen'), findsOneWidget);
+    });
+
     testWidgets('a tampered stamp count is rejected with an error, not silently signed', (tester) async {
       await setupBusiness(tester, mode: OperationMode.secure, stampsRequired: 8, name: 'Test Spa', brandColor: '#6A1B9A');
       await pumpRedeemCardPushed(tester);

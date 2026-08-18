@@ -108,7 +108,7 @@ class KeyManager {
         return null;
       }
 
-      return _decodePublicKey(encoded);
+      return CryptoUtils.decodePublicKey(encoded);
     } catch (e) {
       AppLogger.error('Failed to retrieve public key for business $businessId: $e');
       return null;
@@ -196,7 +196,7 @@ class KeyManager {
 
   /// Decode public key from encoded string (for backup restore)
   ECPublicKey? decodePublicKey(String encoded) {
-    return _decodePublicKey(encoded);
+    return CryptoUtils.decodePublicKey(encoded);
   }
 
   /// Delete keys for a business
@@ -221,61 +221,6 @@ class KeyManager {
     return base64Encode(combined);
   }
 
-  /// Decode public key from base64 string
-  ECPublicKey? _decodePublicKey(String encoded) {
-    try {
-      final bytes = base64Decode(encoded);
-      
-      // Validate minimum length for headers (CR-1.1: bounds checking)
-      if (bytes.length < 8) {
-        AppLogger.error('Public key too short: ${bytes.length} bytes (supplier)');
-        return null;
-      }
-      
-      var offset = 0;
-      final xLength = _decodeLength(bytes, offset);
-      offset += 4;
-      
-      // Bounds check for x coordinate (CR-1.1)
-      if (offset + xLength > bytes.length) {
-        AppLogger.error('Invalid xLength: $xLength exceeds buffer (supplier)');
-        return null;
-      }
-      
-      final xBytes = bytes.sublist(offset, offset + xLength);
-      offset += xLength;
-      
-      // Validate remaining length for y header (CR-1.1)
-      if (offset + 4 > bytes.length) {
-        AppLogger.error('Insufficient bytes for yLength header (supplier)');
-        return null;
-      }
-      
-      final yLength = _decodeLength(bytes, offset);
-      offset += 4;
-      
-      // Bounds check for y coordinate (CR-1.1)
-      if (offset + yLength > bytes.length) {
-        AppLogger.error('Invalid yLength: $yLength exceeds buffer (supplier)');
-        return null;
-      }
-      
-      final yBytes = bytes.sublist(offset, offset + yLength);
-      
-      final x = BigInt.parse(xBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
-      final y = BigInt.parse(yBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(), radix: 16);
-      
-      final params = ECCurve_secp256r1();
-      final q = params.curve.createPoint(x, y);
-      
-      AppLogger.debug('Public key decoded successfully (supplier)', 'Crypto');
-      return ECPublicKey(q, params);
-    } catch (e) {
-      AppLogger.error('Failed to decode public key (supplier): $e');
-      return null;
-    }
-  }
-
   // Helper methods
   List<int> _encodeLength(int length) {
     return [
@@ -284,13 +229,6 @@ class KeyManager {
       (length >> 8) & 0xFF,
       length & 0xFF,
     ];
-  }
-
-  static int _decodeLength(List<int> bytes, int offset) {
-    return (bytes[offset] << 24) |
-        (bytes[offset + 1] << 16) |
-        (bytes[offset + 2] << 8) |
-        bytes[offset + 3];
   }
 
   /// Generate cryptographically secure random number generator

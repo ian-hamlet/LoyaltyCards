@@ -168,6 +168,69 @@ void main() {
       });
     });
 
+    group('relocateTo - TEST-018', () {
+      test('a never-relocated stamp records its own card/position as the original', () {
+        final oldStamp = Stamp(
+          id: 'card-a_stamp_5',
+          cardId: 'card-a',
+          stampNumber: 5,
+          timestamp: DateTime(2026, 1, 1),
+          signature: 'sig-5',
+          previousHash: 'hash-4',
+          deviceId: 'device-1',
+        );
+
+        final moved = oldStamp.relocateTo(
+          id: 'card-b_stamp_1',
+          cardId: 'card-b',
+          stampNumber: 1,
+          previousHash: null,
+        );
+
+        expect(moved.id, 'card-b_stamp_1');
+        expect(moved.cardId, 'card-b');
+        expect(moved.stampNumber, 1);
+        expect(moved.previousHash, isNull);
+        expect(moved.signature, 'sig-5'); // carried over unchanged - can't be re-signed
+        expect(moved.deviceId, 'device-1'); // V-005: preserved
+        expect(moved.originalCardId, 'card-a');
+        expect(moved.originalStampNumber, 5);
+        expect(moved.originalPreviousHash, 'hash-4');
+      });
+
+      test('an already-relocated stamp preserves its true original, not the intermediate card', () {
+        // Simulates a stamp that already moved once (card-a -> card-b) and
+        // is now being relocated a second time (card-b -> card-c) - the
+        // exact multi-hop scenario TEST-018 was found in.
+        final onceRelocated = Stamp(
+          id: 'card-b_stamp_1',
+          cardId: 'card-b',
+          stampNumber: 1,
+          timestamp: DateTime(2026, 1, 1),
+          signature: 'sig-5',
+          previousHash: null,
+          originalCardId: 'card-a',
+          originalStampNumber: 5,
+          originalPreviousHash: 'hash-4',
+        );
+
+        final movedAgain = onceRelocated.relocateTo(
+          id: 'card-c_stamp_1',
+          cardId: 'card-c',
+          stampNumber: 1,
+          previousHash: null,
+        );
+
+        expect(movedAgain.cardId, 'card-c');
+        // Must still point back to card-a (the TRUE original), not card-b
+        // (the intermediate stop) - this is what a hand-written `Stamp(...)`
+        // at one overflow call site got wrong before being fixed.
+        expect(movedAgain.originalCardId, 'card-a');
+        expect(movedAgain.originalStampNumber, 5);
+        expect(movedAgain.originalPreviousHash, 'hash-4');
+      });
+    });
+
     group('Edge Cases', () {
       test('handles very long signatures', () {
         final longSig = 'A' * 500;

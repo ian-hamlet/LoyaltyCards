@@ -40,7 +40,7 @@ class CryptoUtils {
   }) {
     try {
       // Decode the public key
-      final publicKey = _decodePublicKey(publicKeyEncoded);
+      final publicKey = decodePublicKey(publicKeyEncoded);
       if (publicKey == null) {
         AppLogger.error('Failed to decode public key for signature verification');
         return VerificationResult.failure('invalid_public_key');
@@ -74,7 +74,7 @@ class CryptoUtils {
         return VerificationResult.failure('invalid_signature_format');
       }
       
-      final rLength = _decodeLength(signatureBytes, offset);
+      final rLength = decodeLength(signatureBytes, offset);
       offset += 4;
       
       // Validate r bytes
@@ -92,7 +92,7 @@ class CryptoUtils {
         return VerificationResult.failure('invalid_signature_format');
       }
       
-      final sLength = _decodeLength(signatureBytes, offset);
+      final sLength = decodeLength(signatureBytes, offset);
       offset += 4;
       
       // Validate s bytes
@@ -222,13 +222,18 @@ class CryptoUtils {
   }
 
   /// Decode public key from custom base64-encoded format
-  /// 
+  ///
   /// Format: [x_length (4 bytes)][x_bytes][y_length (4 bytes)][y_bytes]
-  /// 
+  ///
   /// Returns ECPublicKey on success, null on failure
-  /// 
+  ///
   /// CR-1.1: Includes bounds checking to prevent out-of-bounds access
-  static ECPublicKey? _decodePublicKey(String encoded) {
+  ///
+  /// Quality review 2026-08-17 (N-008): public (not private) so
+  /// KeyManager (supplier_app) can delegate here instead of maintaining
+  /// its own byte-for-byte duplicate, the same way it already delegates
+  /// verifySignature() to this class.
+  static ECPublicKey? decodePublicKey(String encoded) {
     try {
       final bytes = base64Decode(encoded);
       
@@ -240,26 +245,26 @@ class CryptoUtils {
       
       // Read x coordinate
       var offset = 0;
-      final xLength = _decodeLength(bytes, offset);
+      final xLength = decodeLength(bytes, offset);
       offset += 4;
-      
+
       // Bounds check for x coordinate (CR-1.1)
       if (offset + xLength > bytes.length) {
         AppLogger.error('Invalid xLength: $xLength exceeds buffer');
         return null;
       }
-      
+
       final xBytes = bytes.sublist(offset, offset + xLength);
       offset += xLength;
-      
+
       // Validate remaining length for y header (CR-1.1)
       if (offset + 4 > bytes.length) {
         AppLogger.error('Insufficient bytes for yLength header');
         return null;
       }
-      
+
       // Read y coordinate
-      final yLength = _decodeLength(bytes, offset);
+      final yLength = decodeLength(bytes, offset);
       offset += 4;
       
       // Bounds check for y coordinate (CR-1.1)
@@ -293,7 +298,11 @@ class CryptoUtils {
   }
 
   /// Decode 4-byte length field (big-endian)
-  static int _decodeLength(List<int> bytes, int offset) {
+  ///
+  /// Public for the same reason as [decodePublicKey] (N-008) - also used
+  /// by KeyManager's signature-decoding logic in supplier_app, which has
+  /// its own encode side (signing) with no shared-package equivalent.
+  static int decodeLength(List<int> bytes, int offset) {
     return (bytes[offset] << 24) |
         (bytes[offset + 1] << 16) |
         (bytes[offset + 2] << 8) |

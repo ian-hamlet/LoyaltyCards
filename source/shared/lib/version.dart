@@ -472,6 +472,120 @@
 /// - Metadata packet renamed APP_STORE_METADATA_PACKET_v2_0_3_23.md,
 ///   carrying forward the Category/Subtitle corrections from build 22 and
 ///   adding What's New text for the Sharing feature.
+///
+/// Build 24 Changes (version bumped 2.0.3 -> 2.0.4):
+/// - Fixed TEST-016: CardIssueToken.isValid() rejected stampsRequired below
+///   5, but the onboarding "Stamps Required" slider allows a minimum of 3.
+///   Any business configured with 3 or 4 stamps could never issue a valid
+///   card - the token always failed validation on scan, in both Secure and
+///   Express Mode. Lowered the floor to 3 to match the slider. Build 23
+///   (v2.0.3+23) is affected and live on the App Store; this build
+///   supersedes it. Found while investigating macOS build feasibility for
+///   the supplier app (unrelated, separate branch - the macOS work itself
+///   is not part of this or any release).
+///
+/// Build 26 Changes (version bumped 2.0.4 -> 2.1.0 - minor, not a build-only
+/// bump: raises the supported stampsRequired ceiling, a real capability
+/// change, backward compatible - see TEST-020 below):
+/// - Fixed TEST-017: a Secure Mode redemption QR bundles one signature per
+///   stamp; at high stamp counts (or with overflow-relocated stamps, which
+///   add extra fields each) the plain-JSON payload could exceed a QR
+///   code's maximum encodable capacity, causing QrImageView to fail
+///   silently (a blank grey panel, no error - release-build default
+///   behavior for a widget that throws during build()). Interim fix
+///   lowered the max stampsRequired from 20 to 10 and added a graceful
+///   fallback UI; superseded by TEST-020 below.
+/// - Fixed TEST-018: the overflow-splitting logic (moving a completed
+///   card's leftover stamps onto another card) has three code paths that
+///   each build the relocated stamp's record - one of the three omitted
+///   `originalCardId`/`originalStampNumber`/`originalPreviousHash`
+///   entirely, silently dropping the provenance needed to verify that
+///   stamp's signature correctly at redemption. Fixed by adding
+///   `Stamp.relocateTo()`, which centralizes the whole construction
+///   (not just those three fields) so no call site can omit them again.
+/// - Fixed TEST-019: `CardIssueToken.isValid()` only ever returned
+///   true/false, so a business whose stored `stampsRequired` fell outside
+///   the supported range (e.g. one configured before TEST-017 tightened
+///   it) showed a generic "An error occurred. Please try again." on every
+///   scan, forever - misleading, since retrying can never help. Added
+///   `CardIssueToken.validationError()`, which reports a specific,
+///   actionable reason instead.
+/// - Fixed TEST-020 (the real fix superseding TEST-017's interim
+///   mitigation): replaced the plain-JSON/byte-mode redemption QR
+///   encoding with a compact one - gzip compression, Base45 text encoding
+///   (RFC 9285, chosen because its alphabet is exactly QR's more
+///   space-efficient "alphanumeric mode" character set), and an explicit
+///   `'v': 2` version field. Raised the stampsRequired ceiling from 10 to
+///   12 - measured safe (fits) even at 100% overflow-relocated stamps,
+///   the worst case, verified against the real `qr` package. New shared
+///   utilities: `Base45`, `AlphanumericQr`, `RedemptionQrCodec`. Also
+///   consolidated `customer_card_detail.dart` onto the existing
+///   `QRTokenGenerator.generateRedemptionRequest()` instead of a
+///   hand-rolled duplicate, which surfaced and fixed a real, separate
+///   inconsistency: that generator was previously only reachable from
+///   dead code and had drifted to omit device-mismatch detection (V-005).
+///   Full detail and measured sizes: DEFECT_TRACKER.md TEST-020.
+///
+/// Build 28 Changes (patch version bump 2.1.0 -> 2.1.1, not build-only -
+/// build 27 was committed to git but never built or uploaded to
+/// TestFlight, so this supersedes it entirely and carries its content
+/// forward; bumped to a real patch version rather than another build-only
+/// bump because DECISION-017 below is a genuine UX improvement, not just
+/// a bug fix. Build 26 was already uploaded to TestFlight without either
+/// of these, and Apple doesn't allow re-uploading a build number with
+/// different content):
+/// - Fixed TEST-021: issuing a card with many pre-applied initial stamps
+///   had the same silent QR-capacity failure as TEST-017, just never
+///   fixed on the issuance side. `supplier_issue_card.dart`'s on-screen
+///   QR, and `backup_storage_service.dart`'s Print/Share QR generation
+///   (which actually had a *lower* capacity ceiling, using error
+///   correction level M instead of the on-screen view's L), now use the
+///   same compact gzip+Base45+alphanumeric-mode encoding as TEST-020's
+///   redemption QR, via a new `CardIssueQrCodec`. `qr_scanner_screen.dart`
+///   (customer app) gained a matching decode-fallback tier. Doesn't
+///   affect any business created under the current 3-12 stampsRequired
+///   range - only a legacy business with a higher stored value (e.g. the
+///   20-stamp business used throughout this whole defect chain) could
+///   reach a high enough initial-stamp count to hit this. Incidental fix:
+///   `_startCountdown()` leaked a new Timer.periodic on every QR
+///   regeneration instead of cancelling the previous one. Full detail and
+///   measured sizes: DEFECT_TRACKER.md TEST-021.
+/// - DECISION-017: a business whose stampsRequired falls outside the
+///   supported range (e.g. a legacy business from before TEST-017/020
+///   tightened it) previously had no way to recover short of a full
+///   reset - which wipes every customer's card - even though changing
+///   stampsRequired going forward is actually safe (each existing card
+///   stores its own value at issuance, not read live from the business).
+///   Supplier app now: shows a proactive warning banner on Home the
+///   moment an out-of-range business is detected; blocks Issue Card from
+///   generating a doomed token/QR at all (the customer app would reject
+///   it anyway per TEST-019); and offers a scoped "Fix Now" flow (also
+///   reachable from Settings) to reconfigure into the supported range,
+///   deliberately not general free-editing. New
+///   `widgets/stamps_required_fix.dart`. The 3-12 bound is now a single
+///   source of truth (`CardIssueToken.minStampsRequired`/
+///   `maxStampsRequired`), referenced by the onboarding slider too,
+///   instead of being duplicated - the exact kind of drift that caused
+///   TEST-016/017/019. Full detail: DEFECT_TRACKER.md DECISION-017.
+///
+/// Build 29 Changes (build-only bump - build 28 was already uploaded to
+/// TestFlight without this fix, and Apple doesn't allow re-uploading a
+/// build number with different content):
+/// - Fixed TEST-022: TEST-021's compact issue-card QR encoding was
+///   unconditional (no size check), which broke card issuance for any
+///   customer app older than that fix - Base45 is never valid JSON, so a
+///   pre-TEST-021 customer app scanning ANY issuance from an updated
+///   supplier (not just a high-initial-stamp-count one) saw a generic
+///   "not a valid QR code" error. Confirmed on a real device: supplier
+///   v2.1.0+27, customer v2.0.3+23, ordinary issuance failed outright.
+///   `_buildIssueQrCode()` and `_buildRedemptionQrCode()` (the latter had
+///   the identical unconditional shape from TEST-020, fixed proactively)
+///   now check `QrCapacity.fits()` on the plain-JSON payload first and
+///   only fall back to compact encoding when it genuinely doesn't fit -
+///   plain JSON now covers every initial-stamp count up to 16, comfortably
+///   spanning the entire 3-12 supported range with huge margin. No decode
+///   -side changes needed - both apps already try plain JSON first.
+///   Full detail: DEFECT_TRACKER.md TEST-022.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.0.3+23';
+const String appVersion = '2.1.1+29';

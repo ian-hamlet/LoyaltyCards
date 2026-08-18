@@ -889,24 +889,19 @@ For best results:
   /// Generate QR code image WITH visual annotations for Simple Mode issue cards
   /// Includes business name and initial stamp count on the image
   static Future<Uint8List> generateIssueCardQRImageBytes({
-    required String qrData,
+    required QrCode qrCode,
     required String businessName,
     required int initialStamps,
     double size = 800.0,
   }) async {
-    // Generate QR code
-    final qrValidationResult = QrValidator.validate(
-      data: qrData,
-      version: QrVersions.auto,
-      errorCorrectionLevel: QrErrorCorrectLevel.M,
-    );
+    // TEST-021: qrCode is now built ahead of time by the caller (compact
+    // gzip+Base45+alphanumeric encoding via CardIssueQrCodec/AlphanumericQr
+    // - see DEFECT_TRACKER.md TEST-021) instead of being derived here from
+    // a raw data string via QrValidator.validate(). That path used
+    // errorCorrectionLevel M, which has *less* capacity than the L level
+    // QrImageView defaults to on-screen - the print/share QR was actually
+    // hitting this bug's capacity ceiling before the on-screen one did.
 
-    if (qrValidationResult.status != QrValidationStatus.valid) {
-      throw Exception('Failed to generate QR code: ${qrValidationResult.error}');
-    }
-
-    final qrCode = qrValidationResult.qrCode!;
-    
     // Create canvas with extra space for annotations
     final totalWidth = size;
     final totalHeight = size + 200; // Extra space for text
@@ -996,15 +991,15 @@ For best results:
 
   /// Print Simple Mode issue card QR
   static Future<BackupResult> printIssueCard({
-    required String qrData,
+    required QrCode qrCode,
     required String businessName,
     required int initialStamps,
   }) async {
     try {
       AppLogger.debug('=== printIssueCard START ===', 'BackupService');
-      
+
       final qrImageBytes = await generateIssueCardQRImageBytes(
-        qrData: qrData,
+        qrCode: qrCode,
         businessName: businessName,
         initialStamps: initialStamps,
       );
@@ -1142,16 +1137,16 @@ For best results:
 
   /// Share Simple Mode issue card via native share sheet
   static Future<BackupResult> shareIssueCard({
-    required String qrData,
+    required QrCode qrCode,
     required String businessName,
     required int initialStamps,
     Rect? sharePositionOrigin,
   }) async {
     try {
       AppLogger.debug('=== shareIssueCard START ===', 'BackupService');
-      
+
       final qrImageBytes = await generateIssueCardQRImageBytes(
-        qrData: qrData,
+        qrCode: qrCode,
         businessName: businessName,
         initialStamps: initialStamps,
       );

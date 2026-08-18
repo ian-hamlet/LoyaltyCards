@@ -96,6 +96,20 @@ class InitialStamp {
 
 /// Token for supplier to issue a new card to customer
 class CardIssueToken extends QRToken {
+  /// DECISION-017: the single source of truth for the supported
+  /// stampsRequired range, so the onboarding slider (supplier_onboarding.dart),
+  /// this token's own validation below, and the supplier-side
+  /// out-of-range detection (business_repository.dart /
+  /// supplier_home.dart / supplier_issue_card.dart / supplier_settings.dart)
+  /// can never drift apart the way they did across TEST-016/017/019 -
+  /// each of those bugs was a bound defined in one place not matching a
+  /// check defined in another.
+  static const int minStampsRequired = 3;
+  static const int maxStampsRequired = 12;
+
+  static bool isStampsRequiredSupported(int stampsRequired) =>
+      stampsRequired >= minStampsRequired && stampsRequired <= maxStampsRequired;
+
   final String businessId;
   final String businessName;
   final String publicKey;
@@ -177,27 +191,60 @@ class CardIssueToken extends QRToken {
   }
 
   /// Validate token structure
-  bool isValid() {
+  bool isValid() => validationError() == null;
+
+  /// TEST-019: like [isValid], but reports *why* when invalid, instead of
+  /// just true/false. A generic "invalid token" message is fine for a
+  /// genuinely malformed/corrupt scan (retrying makes sense), but the
+  /// stampsRequired-out-of-range case is different: it means the business's
+  /// own stored configuration is incompatible with this app version, which
+  /// no amount of retrying fixes - the customer needs to know that so they
+  /// don't keep re-scanning a QR that will always fail the same way.
+  String? validationError() {
     if (businessId.isEmpty || businessName.isEmpty || publicKey.isEmpty) {
-      return false;
+      return 'This QR code is missing required information.';
     }
     // TEST-016: must match the onboarding slider's minimum (min: 3 in
     // supplier_onboarding.dart) - this was previously 5, silently rejecting
     // every card issued by a business configured for 3 or 4 stamps.
-    if (stampsRequired < 3 || stampsRequired > 20) {
-      return false;
+    //
+    // TEST-017: upper bound originally lowered from 20 to 10 - a Secure
+    // Mode redemption QR bundles one signature per stamp, and at 20
+    // stamps the encoded payload sat at ~99.5% of the plain-JSON/byte-mode
+    // QR capacity even with zero overflow-relocated stamps.
+    //
+    // TEST-020: raised from 10 to 12 now that RedemptionQrCodec
+    // (gzip + Base45 + QR alphanumeric mode, see AlphanumericQr) is used
+    // for the actual redemption QR instead of plain JSON/byte mode - a
+    // 12-stamp card stays within capacity even at 100% overflow-relocated
+    // stamps (the worst case), measured against the real qr package. See
+    // DEFECT_TRACKER.md TEST-020 for the full size comparison.
+    // CustomerCardDetail's _qrTooLargeToRender fallback remains as a
+    // safety net for an already-issued pre-TEST-020 card, or any payload
+    // that still doesn't fit for some other reason.
+    //
+    // TEST-019: a business created before this bound was tightened still
+    // has its old, now-out-of-range stampsRequired stored, and issues
+    // tokens with it forever (it can't be changed after setup without a
+    // full reset that wipes customer data) - this is a real, permanent
+    // backward-compatibility gap, not a hypothetical one. Reported here
+    // with a specific, identifiable message (see ErrorMessageMapper) so
+    // the customer isn't just told to keep retrying a scan that can never
+    // succeed.
+    if (!isStampsRequiredSupported(stampsRequired)) {
+      return "This business's card is set up for $stampsRequired stamps, which this app version doesn't support (supported range: $minStampsRequired-$maxStampsRequired). This won't be fixed by scanning again - let the business know, they may need to update or reconfigure.";
     }
     if (!brandColor.startsWith('#') || brandColor.length != 7) {
-      return false;
+      return 'This QR code has invalid formatting.';
     }
     if (signature.isEmpty) {
-      return false;
+      return "This QR code couldn't be verified.";
     }
     // If there are initial stamps, cardId must be present
     if (initialStamps.isNotEmpty && (cardId == null || cardId!.isEmpty)) {
-      return false;
+      return 'This QR code is missing required information.';
     }
-    return true;
+    return null;
   }
 }
 

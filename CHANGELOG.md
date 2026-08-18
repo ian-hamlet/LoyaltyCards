@@ -7,9 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.3+23] - 2026-08-15 - CURRENT
+## [Unreleased]
 
-**Status:** 🟡 Build bump only (version stays 2.0.3) - built, uploaded, TestFlight-tested (Sharing feature and both bug fixes confirmed working), and **submitted for App Store review 2026-08-15** (both apps, Release set to Manual). Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
+**Status:** 🔵 In development on `feature/express-mode-cooldown-display` - minor UI enhancement, not yet targeted at a specific version/build number (may ship build-only or bundled with other pending work, TBD).
+
+### Added
+- **Express Mode: the configured scan cooldown is now shown in Settings' Business Information section.** Previously the per-business cooldown (`Business.scanInterval`, set via the slider on onboarding/Fix Now) had no way to be checked after setup short of re-opening that slider - now it's visible at a glance alongside Business Name, Stamps Required, and Operation Mode. Secure Mode businesses don't use a cooldown, so the row only appears for Express Mode. `source/supplier_app/lib/screens/supplier/supplier_settings.dart`.
+
+## [2.1.1+29] - 2026-08-17
+
+**Status:** 🟢 Built, delivered to TestFlight, real-device validated, ASC metadata confirmed, and submitted for App Store review 2026-08-18 (both apps) - awaiting Apple's decision. Supersedes v2.1.1+28, which shipped DECISION-017 and TEST-021 to TestFlight but not this fix, found via real-device testing of that exact build. Apple doesn't allow re-uploading the same build number with different content.
+
+### Fixed
+- **TEST-022: TEST-021's compact issue-card QR encoding was unconditional, breaking issuance for any customer app older than that fix.** A supplier on v2.1.0+27 or later compact-encodes every Issue Card QR regardless of size - Base45 is never valid JSON, so a customer app that predates TEST-021 fails to parse it at all (a generic "not a valid QR Code" error), for *every* issuance, not just the rare high-initial-stamp-count case TEST-021 targeted. Confirmed on a real device (supplier 27, customer 23). Fixed by preferring plain JSON whenever it fits (covers every initial-stamp count up to 16, comfortably spanning the whole 3-12 supported range), falling back to compact encoding only for the genuine legacy edge case. Applied the same fix proactively to the redemption QR (TEST-020), which had the identical unconditional-encoding shape. Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-022.
+
+## [2.1.1+28] - 2026-08-17
+
+**Status:** 🟢 Shipped to TestFlight, superseded by v2.1.1+29 for App Store submission (missing the TEST-022 fix above). Patch version bump (2.1.0 -> 2.1.1, not build-only). Real-device verified end-to-end, including the full DECISION-017 flow across both matched and mismatched supplier/customer version pairs - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. Supersedes v2.1.0+27, which shipped TEST-021 to TestFlight the night of 2026-08-16/17 but not DECISION-017. v2.1.0+26 was already built and uploaded to TestFlight before either fix below was found/added.
+
+### Added
+- **DECISION-017: a business whose stamps-required count falls outside the supported range can now fix it themselves, in-app.** Previously, a business in this state (e.g. one still configured for 20 stamps, from before this range tightened) had no way to recover short of a full reset, wiping every customer's card - a disproportionate response to a number being out of range, when changing it going forward is actually safe (each existing card keeps its own stamp count, unaffected by the business's current setting). The Supplier app now shows a proactive warning on Home and blocks Issue Card from generating a doomed QR at all, with a "Fix Now" flow (also available in Settings) to reconfigure into the supported range. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-017.
+
+### Fixed
+- **TEST-021: issuing a card with many pre-applied initial stamps could hit the same silent QR-capacity failure as TEST-017, never fixed on the issuance side.** Found by real-device testing of the v2.1.0+26 TestFlight build, using the same legacy 20-stamp business used throughout this whole defect chain. Applied the same compact encoding (`CardIssueQrCodec`, mirroring `RedemptionQrCodec`) to the supplier app's issue-card QR - on-screen, Print, and Share, the latter two having an even lower capacity ceiling than the on-screen view. Doesn't affect any business created under the current 3-12 range - and DECISION-017 above closes off the only path that could reach it anyway. Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-021.
+
+## [2.1.0+27] - 2026-08-17
+
+**Status:** 🟢 Shipped to TestFlight the night of 2026-08-16/17, superseded by v2.1.1+28 for App Store submission (missing DECISION-017 - see above). Carried TEST-021 only - see 2.1.1+28 above for full detail.
+
+## [2.1.0+26] - 2026-08-16
+
+**Status:** 🟢 Shipped to TestFlight, superseded by v2.1.0+27 for App Store submission (missing TEST-021 - see above). Minor version bump (2.0.4 -> 2.1.0, not a build-only bump - see Added). Real-device verified, including via this actual TestFlight build (12-stamp Secure Mode card with 100% overflow-relocated stamps redeems successfully; a 3/4-stamp business issues a working card end-to-end; the TEST-019 message confirmed against the 20-stamp legacy business; Express Mode and Recovery Backup restore also spot-checked). Supersedes 2.0.4+24 and the interim test-only build 2.0.4+25 (never a real release candidate). Also supersedes 2.0.3+23, which is **live on the App Store** but contains TEST-016 (carried forward and fixed here) and does not have any of the fixes below.
+
+### Added
+- **Raised the maximum Secure Mode `stampsRequired` from 10 to 12** (TEST-020) - a real, deliberate capability increase, not a side effect, which is why this is a minor version bump rather than a patch. Backward compatible: nothing that worked at 10 stamps changes.
+
+### Fixed
+- **TEST-016: Businesses set up with 3 or 4 required stamps could never issue a valid card.** The onboarding "Stamps Required" slider allows a minimum of 3, but `CardIssueToken.isValid()` rejected anything below 5 - any card issued by such a business always failed validation on scan, in both Secure and Express Mode, since both share the same token and validation path. Discovered while testing the supplier app on macOS (unrelated investigation - see `docs/project-management/DEFECT_TRACKER.md` TEST-016). Fixed by lowering the floor to 3 to match the slider. (Carried forward from 2.0.4+24, which never shipped.)
+- **TEST-017: Secure Mode redemption QR silently failed on higher-stamp-count or heavily overflow-relocated cards.** A redemption QR bundles one cryptographic signature per stamp; at high stamp counts the plain-JSON payload could exceed a QR code's maximum encodable capacity. `QrImageView` has no way to signal this ahead of time, so the failure only surfaced when the widget was actually painted - by which point Flutter's release-build default is to render nothing but a blank grey box, no error text. Interim fix (lowered the cap to 10, added a fallback UI) superseded by TEST-020's real fix below.
+- **TEST-018: Overflow-relocated stamps could lose the provenance needed to verify them at redemption.** When a completed card's leftover stamps spill onto another card, the app records each moved stamp's *original* card/position/hash, since its signature was signed against that original context and can't be recomputed for its new position. One of three code paths that do this move omitted those fields entirely, silently dropping them - a legitimately-earned stamp could then fail signature verification. Fixed by adding `Stamp.relocateTo()`, which centralizes the entire relocated-stamp construction so no path can omit the fields again.
+- **TEST-019: Generic "An error occurred" shown when a business's card configuration is incompatible with the app version.** A business created before TEST-017 tightened the stampsRequired bound (e.g. still configured for 20) failed `CardIssueToken.isValid()` on every card it issues, forever - but the customer only ever saw a generic, misleading "please try again" message. Added `CardIssueToken.validationError()` to report a specific, actionable reason instead.
+- **TEST-020: the real fix for TEST-017**, not just a narrower stopgap. Replaced the plain-JSON/byte-mode redemption QR encoding with gzip compression + Base45 text encoding (RFC 9285) + QR's more space-efficient "alphanumeric" encoding mode, plus an explicit format-version field. A 12-stamp card is now safe even if every one of its stamps was overflow-relocated - the worst case, verified against the real QR encoding library, not estimated. Also consolidated the customer app's redemption-QR generation onto its existing `QRTokenGenerator` instead of a hand-rolled duplicate, which surfaced and fixed a real, separate bug: that generator had silently drifted to omit device-mismatch detection (V-005). Full detail and measured payload sizes: `docs/project-management/DEFECT_TRACKER.md` TEST-020.
+
+## [2.0.4+24] - 2026-08-15
+
+**Status:** 🟡 SUPERSEDED by 2.1.0+26 - never built, uploaded, or submitted; folded into that release along with 2.0.4+25 (an interim build-number-only bump for on-device testing, never a real release candidate either).
+
+### Fixed
+- **TEST-016: Businesses set up with 3 or 4 required stamps could never issue a valid card.** The onboarding "Stamps Required" slider allows a minimum of 3, but `CardIssueToken.isValid()` rejected anything below 5 - any card issued by such a business always failed validation on scan, in both Secure and Express Mode, since both share the same token and validation path. Discovered while testing the supplier app on macOS (unrelated investigation - see `docs/project-management/DEFECT_TRACKER.md` TEST-016). Fixed by lowering the floor to 3 to match the slider.
+
+## [2.0.3+23] - 2026-08-15
+
+**Status:** 🟢 **LIVE ON THE APP STORE** (both apps) - built, uploaded, TestFlight-tested (Sharing feature and both bug fixes confirmed working), submitted for App Store review 2026-08-15, and approved and released 2026-08-16. **⚠️ Contains TEST-016** (see 2.1.0+26 above) - supersede with that build as soon as possible. Supersedes 2.0.3+22, which never produced an uploaded build; everything below is the complete state of the 2.0.3 line so far.
 
 ### Added
 - **Sharing feature (both apps):** new Settings section, "Sharing," with "Tell a Business" (QR code + native share-sheet link to LoyaltyCards Business - for a customer referring a shop, or a shop owner referring another shop) and "Tell a Friend" (same, but to LoyaltyCards - for customer-to-customer referral, or a shop pointing a new customer at the wallet app). Built as a reusable `AppReferralScreen` widget in the shared package rather than three near-identical screens, since the same pattern is needed in both apps. The supplier app also gets a small "Tell a Friend" shortcut icon on the Home screen's app bar, since a shop needs this one tap away during a live checkout interaction, not buried in Settings. Settings reordered in both apps to put Sharing alongside the other identity/account-level sections.

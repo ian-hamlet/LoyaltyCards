@@ -26,7 +26,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
   String _selectedColor = BrandColors.cardColorOptions.first;
   int _selectedLogoIndex = 0;
   OperationMode _selectedMode = OperationMode.simple; // Default to simple
-  int _scanIntervalSeconds = 30; // REQ-022: Default 30 seconds for simple mode
+  int _scanIntervalSeconds = AppConstants.simpleModeDefaultScanIntervalMs ~/ 1000; // REQ-022: Default for simple mode
   bool _isCreating = false;
 
   @override
@@ -201,7 +201,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     Tooltip(
                       triggerMode: TooltipTriggerMode.tap,
                       showDuration: const Duration(seconds: 10),
-                      message: 'Sets how many stamps a customer must collect before earning a reward. Lower values redeem faster; higher values encourage repeat visits. Range: 3-20 stamps.',
+                      message: 'Sets how many stamps a customer must collect before earning a reward. Lower values redeem faster; higher values encourage repeat visits. Range: ${CardIssueToken.minStampsRequired}-${CardIssueToken.maxStampsRequired} stamps.',
                       child: Icon(
                         Icons.info_outline,
                         size: 18,
@@ -215,7 +215,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      onPressed: _stampsRequired > 3
+                      onPressed: _stampsRequired > CardIssueToken.minStampsRequired
                           ? () {
                               Haptics.light();
                               setState(() => _stampsRequired--);
@@ -235,7 +235,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ),
                     ),
                     IconButton(
-                      onPressed: _stampsRequired < 20
+                      onPressed: _stampsRequired < CardIssueToken.maxStampsRequired
                           ? () {
                               Haptics.light();
                               setState(() => _stampsRequired++);
@@ -248,9 +248,9 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                 ),
                 Slider(
                   value: _stampsRequired.toDouble(),
-                  min: 3,
-                  max: 20,
-                  divisions: 17,
+                  min: CardIssueToken.minStampsRequired.toDouble(),
+                  max: CardIssueToken.maxStampsRequired.toDouble(),
+                  divisions: CardIssueToken.maxStampsRequired - CardIssueToken.minStampsRequired,
                   label: '$_stampsRequired',
                   onChanged: (value) {
                     setState(() => _stampsRequired = value.toInt());
@@ -278,12 +278,12 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       message: 'EXPRESS MODE\n'
                           '• Print reusable QR codes, customers self-serve (~2 sec/visit)\n'
                           '• No equipment needed at checkout\n'
-                          '• Protection: a cooldown you set (5-60 sec, default 30) between stamps\n'
+                          '• Protection: a cooldown you set (${AppConstants.simpleModeMinScanIntervalMs ~/ 1000}-${AppConstants.simpleModeMaxScanIntervalMs ~/ 1000} sec, default ${AppConstants.simpleModeDefaultScanIntervalMs ~/ 1000}) between stamps\n'
                           '• Best for: high-volume, low-value rewards (coffee, fast food)\n\n'
                           'SECURE MODE\n'
                           '• You generate every stamp from your device (~5-10 sec/visit)\n'
                           '• Requires a phone/iPad at checkout\n'
-                          '• Protection: each stamp is cryptographically signed; QR codes expire after 2 minutes and can\'t be reused or forged\n'
+                          '• Protection: each stamp is cryptographically signed; QR codes expire after ${AppConstants.stampExpiryMs ~/ 60000} minutes and can\'t be reused or forged\n'
                           '• Best for: high-value rewards where fraud prevention matters most (spas, salons, premium services)',
                       child: Icon(
                         Icons.info_outline,
@@ -361,7 +361,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       Tooltip(
                         triggerMode: TooltipTriggerMode.tap,
                         showDuration: const Duration(seconds: 10),
-                        message: 'Controls the minimum wait time between accepted stamp scans for a customer card. If scanned too soon, the scan is blocked and the customer must wait. Best used for Express mode reusable QR flows. Range: 5-60 seconds.',
+                        message: 'Controls the minimum wait time between accepted stamp scans for a customer card. If scanned too soon, the scan is blocked and the customer must wait. Best used for Express mode reusable QR flows. Range: ${AppConstants.simpleModeMinScanIntervalMs ~/ 1000}-${AppConstants.simpleModeMaxScanIntervalMs ~/ 1000} seconds.',
                         child: Icon(
                           Icons.info_outline,
                           size: 18,
@@ -375,7 +375,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: _scanIntervalSeconds > 5
+                        onPressed: _scanIntervalSeconds > AppConstants.simpleModeMinScanIntervalMs ~/ 1000
                             ? () {
                                 Haptics.light();
                                 setState(() => _scanIntervalSeconds -= 5);
@@ -395,7 +395,7 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                         ),
                       ),
                       IconButton(
-                        onPressed: _scanIntervalSeconds < 60
+                        onPressed: _scanIntervalSeconds < AppConstants.simpleModeMaxScanIntervalMs ~/ 1000
                             ? () {
                                 Haptics.light();
                                 setState(() => _scanIntervalSeconds += 5);
@@ -408,9 +408,9 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   ),
                   Slider(
                     value: _scanIntervalSeconds.toDouble(),
-                    min: 5,
-                    max: 60,
-                    divisions: 11,
+                    min: (AppConstants.simpleModeMinScanIntervalMs ~/ 1000).toDouble(),
+                    max: (AppConstants.simpleModeMaxScanIntervalMs ~/ 1000).toDouble(),
+                    divisions: (AppConstants.simpleModeMaxScanIntervalMs - AppConstants.simpleModeMinScanIntervalMs) ~/ 1000 ~/ 5,
                     label: '${_scanIntervalSeconds}s',
                     onChanged: (value) {
                       setState(() => _scanIntervalSeconds = value.toInt());
@@ -500,6 +500,15 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                     _buildLogoOption(13, 'Spa', Icons.spa),
                     _buildLogoOption(14, 'Gym', Icons.fitness_center),
                     _buildLogoOption(19, 'Pets', Icons.pets),
+                    // Added 2026-08-17 (DECISION-018)
+                    _buildLogoOption(20, 'Hair Salon', Icons.content_cut),
+                    _buildLogoOption(21, 'Car Wash', Icons.local_car_wash),
+                    _buildLogoOption(22, 'Auto Repair', Icons.car_repair),
+                    _buildLogoOption(23, 'Bookstore', Icons.menu_book),
+                    _buildLogoOption(24, 'Photography', Icons.camera_alt),
+                    _buildLogoOption(25, 'Bike Shop', Icons.pedal_bike),
+                    _buildLogoOption(26, 'Yoga Studio', Icons.self_improvement),
+                    _buildLogoOption(27, 'Toy Store', Icons.toys),
                   ],
                 ),
                 

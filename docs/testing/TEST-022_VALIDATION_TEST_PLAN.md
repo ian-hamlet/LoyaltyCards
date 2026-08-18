@@ -49,4 +49,10 @@ Record results directly in this file's Progress Log (add one below, following th
 
 ## Progress Log
 
-**v2.1.1+29 built and delivered to TestFlight 2026-08-18 - ready to test.** Not yet run.
+**v2.1.1+29 built and delivered to TestFlight 2026-08-18.**
+
+- [x] **Test 1** (matched-version issuance uses plain JSON) - ✅ PASSED
+- [x] **Test 2** (mismatched supplier/customer versions - the actual regression) - ✅ PASSED
+- [ ] **Test 3** (worst-case legacy fallback) - deliberately skipped. Real-world install base is currently a handful of downloads, with no large Secure Mode business anywhere near the legacy 20-stamp/heavy-overflow scenario this exercises - not worth the setup effort right now. The compact-encoding fallback path is still covered by TEST-020's own automated tests and its prior real-device verification, so this isn't going untested, just not re-verified here.
+
+**Result: TEST-022's fix is confirmed on real hardware.** Both the ordinary path and the actual mismatched-version regression this defect was about now work correctly on v2.1.1+29.

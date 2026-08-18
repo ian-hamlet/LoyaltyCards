@@ -102,8 +102,8 @@
 - [x] **Archive builds completed** for v2.1.1+29 — confirmed, built and delivered to TestFlight 2026-08-18
 - [x] **IPA files uploaded to App Store Connect** via Transporter — confirmed, delivered to TestFlight 2026-08-18
 - [x] **Build processing complete** in App Store Connect — implied by successful TestFlight delivery
-- [x] **Physical-device verification completed** — see above for TEST-016 through DECISION-017; TEST-022 is automated-test verified (new widget tests in `supplier_issue_card_test.dart` confirming plain-JSON preference for both an ordinary in-range business and a freshly-reconfigured one) but not yet separately physical-device confirmed - build now exists on TestFlight, see next item.
-- [ ] **TestFlight testing completed for TEST-022 specifically** — build now available; procedure in `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`, not yet run.
+- [x] **Physical-device verification completed** — see above for TEST-016 through DECISION-017; TEST-022 confirmed on v2.1.1+29 2026-08-18, see next item.
+- [x] **TestFlight testing completed for TEST-022 specifically** — ✅ CONFIRMED 2026-08-18 on v2.1.1+29: matched-version issuance and the actual mismatched-version regression both passed. Full log: `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`.
 - [x] **All automated tests passing** (shared 211, customer 131, supplier 83)
 - [x] **`flutter analyze` clean**
 - [x] **Critical bugs resolved** (TEST-016/017/018/019/021/022 fixed, TEST-020 supersedes TEST-017's interim mitigation, DECISION-017 closes the backward-compatibility gap TEST-019 left open; zero other CRITICAL/HIGH defects open)

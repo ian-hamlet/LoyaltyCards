@@ -65,12 +65,14 @@
 
 ## Status: this test plan is complete
 
-Every phase passed, including the extended Phase 7 exercise (full completion + overflow relocation + redemption of the legacy 20-stamp card). DECISION-017 works exactly as designed - self-service reconfiguration, no impact on existing cards, new issuance unblocked, and existing cards continue to interoperate correctly with overflow/redemption even after the business's live config changes. TEST-022 (found along the way) is fixed and tracked separately in `DEFECT_TRACKER.md`; v2.1.1+29 is now on TestFlight - final on-device confirmation is the one remaining step, see below.
+Every phase passed, including the extended Phase 7 exercise (full completion + overflow relocation + redemption of the legacy 20-stamp card). DECISION-017 works exactly as designed - self-service reconfiguration, no impact on existing cards, new issuance unblocked, and existing cards continue to interoperate correctly with overflow/redemption even after the business's live config changes. TEST-022 (found along the way) is fixed and tracked separately in `DEFECT_TRACKER.md`; final on-device confirmation on v2.1.1+29 passed 2026-08-18, see below.
 
 ## Remaining steps
 
 - [x] Build and upload v2.1.1+29 to TestFlight - done 2026-08-18.
-- [ ] Confirm TEST-022's fix (ordinary card issuance from a matched-or-mismatched supplier/customer pair) on an actual device - see `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md` for the procedure. Not yet run.
+- [x] Confirm TEST-022's fix (ordinary card issuance from a matched-or-mismatched supplier/customer pair) on an actual device - done 2026-08-18, both scenarios passed. Full log: `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`.
+
+**This test plan and its TEST-022 follow-up are both now complete.**
 
 ---
 

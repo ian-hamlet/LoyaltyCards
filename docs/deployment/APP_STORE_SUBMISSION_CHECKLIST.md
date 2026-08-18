@@ -140,7 +140,7 @@
 ### 📝 App Descriptions & Marketing
 
 - [x] **Subtitle** — entered for both apps 2026-08-15 - see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md)
-- [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — entered for both apps 2026-08-15, see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md). The customer app's Promotional Text was found blank in ASC despite being documented as already-live - worth remembering that "unchanged" in this doc doesn't guarantee it's actually live, always verify in ASC directly.
+- [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — entered for both apps 2026-08-15, see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md). The customer app's Promotional Text was found blank in ASC despite being documented as already-live - worth remembering that "unchanged" in this doc doesn't guarantee it's actually live, always verify in ASC directly. **Confirmed 2026-08-18:** the supplier app's Promotional Text had the identical gap - also found blank, re-entered from [`APP_STORE_METADATA_PACKET_v2_1_1_29.md`](APP_STORE_METADATA_PACKET_v2_1_1_29.md), which now keeps both apps' Promotional Text inline as a fallback reference instead of only pointing back at the v23 packet.
 - [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps) — unchanged, already correct
 
 ---
@@ -286,12 +286,12 @@ Answers decided (see also `APP_REVIEW_PACKET_v1_0_2_8.md`):
 #### Customer App
 - [x] **Price:** Free (no In-App Purchases) — set in ASC
 - [x] **Availability:** All countries/regions
-- [ ] **Release Date:** ⚠️ **Set to MANUAL release, not automatic.** The two apps are separate ASC submissions and routinely clear review at different speeds - if either is set to automatic release, it can go live while the other is still "In Review," which is a bad state for a paired system (e.g. a customer downloading the Sharing feature's "Tell a Business" flow before the Supplier app it points to has updated). Manual release lets you hold both approved builds and release them together once *both* have passed review.
+- [x] **Release Date:** Set to MANUAL release, not automatic — confirmed for v2.1.1+29 2026-08-18. The two apps are separate ASC submissions and routinely clear review at different speeds - if either is set to automatic release, it can go live while the other is still "In Review," which is a bad state for a paired system (e.g. a customer downloading the Sharing feature's "Tell a Business" flow before the Supplier app it points to has updated). Manual release lets you hold both approved builds and release them together once *both* have passed review.
 
 #### Supplier App
 - [x] **Price:** Free (no In-App Purchases) — set in ASC
 - [x] **Availability:** All countries/regions
-- [ ] **Release Date:** ⚠️ **Same as above - set to MANUAL release**, so this app doesn't go live before the Customer app (or vice versa) if their review times diverge.
+- [x] **Release Date:** Same as above - set to MANUAL release — confirmed for v2.1.1+29 2026-08-18, so this app doesn't go live before the Customer app (or vice versa) if their review times diverge.
 
 ---
 
@@ -519,9 +519,9 @@ Please test both apps together following the demo instructions.
 **v2.1.1+29 (current) — built and delivered to TestFlight 2026-08-18, ready for real-device validation:**
 
 1. [x] **Upload build to App Store Connect** (via Transporter) — build 29, both apps - confirmed by the user, delivered to TestFlight 2026-08-18
-2. [ ] **Select build** for Customer app submission — build 29, pending real-device validation first (see `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`)
+2. [ ] **Select build** for Customer app submission — build 29, real-device validation complete (see `docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`)
 3. [ ] **Select build** for Supplier app submission — build 29, same
-4. [ ] **Complete all required fields** in App Store Connect — only What's New needs updating (`APP_STORE_METADATA_PACKET_v2_1_1_29.md`); everything else already live from v2.0.3+23
+4. [x] **Complete all required fields** in App Store Connect — What's New updated, both apps' Promotional Text re-entered (both found blank), Release Date confirmed Manual for both apps - all confirmed 2026-08-18, see `APP_STORE_METADATA_PACKET_v2_1_1_29.md`
 5. [ ] **Screenshots** — unchanged, no screens affected by these fixes (QR appearance is visually similar regardless of underlying encoding; DECISION-017's banner/dialog are new UI, but not part of the staged screenshot set)
 6. [ ] **Submit for review**
 7. [ ] **Monitor review status**
@@ -583,7 +583,7 @@ All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages
 
 ---
 
-**Document Status:** 🟢 **v2.0.3+23 is LIVE ON THE APP STORE** (both apps), submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix shipped to **TestFlight as v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), but not submitted for App Store review since TEST-021 (the issue-card counterpart to TEST-017/020's fix) was found on that same TestFlight build. **v2.1.0+27** added TEST-021 and was built and uploaded to TestFlight. **v2.1.1+28** (patch version bump - DECISION-017 is a genuine UX improvement, not build-only) added a self-service fix for a business outside the supported stamps-required range, also built and uploaded to TestFlight, real-device verified end-to-end - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. That same testing found **TEST-022**, a cross-version compatibility regression from TEST-021. **v2.1.1+29** (build-only bump) adds that fix plus DECISION-019 (dedup/dead-code cleanup) and is the actual submission candidate - built and delivered to TestFlight 2026-08-18, not yet submitted for App Store review pending real-device validation (`docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`). See `RELEASES.md` for the release-branch record and `docs/project-management/DEFECT_TRACKER.md` for the defects.  
+**Document Status:** 🟢 **v2.0.3+23 is LIVE ON THE APP STORE** (both apps), submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix shipped to **TestFlight as v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), but not submitted for App Store review since TEST-021 (the issue-card counterpart to TEST-017/020's fix) was found on that same TestFlight build. **v2.1.0+27** added TEST-021 and was built and uploaded to TestFlight. **v2.1.1+28** (patch version bump - DECISION-017 is a genuine UX improvement, not build-only) added a self-service fix for a business outside the supported stamps-required range, also built and uploaded to TestFlight, real-device verified end-to-end - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. That same testing found **TEST-022**, a cross-version compatibility regression from TEST-021. **v2.1.1+29** (build-only bump) adds that fix plus DECISION-019 (dedup/dead-code cleanup) and is the actual submission candidate - built and delivered to TestFlight 2026-08-18, real-device validation and ASC metadata (Promotional Text both apps, Manual release both apps) confirmed 2026-08-18, not yet submitted for App Store review. See `RELEASES.md` for the release-branch record and `docs/project-management/DEFECT_TRACKER.md` for the defects.  
 **Maintained by:** Development Team  
 **Last Updated:** August 17, 2026
 

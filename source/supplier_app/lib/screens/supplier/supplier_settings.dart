@@ -276,6 +276,12 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             title: const Text('Operation Mode'),
             subtitle: Text(widget.business.mode.displayName),
           ),
+          if (widget.business.mode == OperationMode.simple)
+            ListTile(
+              leading: const Icon(Icons.timer),
+              title: const Text('Scan Cooldown'),
+              subtitle: Text('${widget.business.scanInterval ~/ 1000} seconds between accepted scans'),
+            ),
           ListTile(
             leading: const Icon(Icons.key),
             title: const Text('Business ID'),

@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.1+29] - 2026-08-17 - CURRENT
+## [Unreleased]
 
-**Status:** 🟡 Build-only bump - not yet built, uploaded, or submitted. Supersedes v2.1.1+28, which shipped DECISION-017 and TEST-021 to TestFlight but not this fix, found via real-device testing of that exact build. Apple doesn't allow re-uploading the same build number with different content.
+**Status:** 🔵 In development on `feature/express-mode-cooldown-display` - minor UI enhancement, not yet targeted at a specific version/build number (may ship build-only or bundled with other pending work, TBD).
+
+### Added
+- **Express Mode: the configured scan cooldown is now shown in Settings' Business Information section.** Previously the per-business cooldown (`Business.scanInterval`, set via the slider on onboarding/Fix Now) had no way to be checked after setup short of re-opening that slider - now it's visible at a glance alongside Business Name, Stamps Required, and Operation Mode. Secure Mode businesses don't use a cooldown, so the row only appears for Express Mode. `source/supplier_app/lib/screens/supplier/supplier_settings.dart`.
+
+## [2.1.1+29] - 2026-08-17
+
+**Status:** 🟢 Built, delivered to TestFlight, real-device validated, ASC metadata confirmed, and submitted for App Store review 2026-08-18 (both apps) - awaiting Apple's decision. Supersedes v2.1.1+28, which shipped DECISION-017 and TEST-021 to TestFlight but not this fix, found via real-device testing of that exact build. Apple doesn't allow re-uploading the same build number with different content.
 
 ### Fixed
 - **TEST-022: TEST-021's compact issue-card QR encoding was unconditional, breaking issuance for any customer app older than that fix.** A supplier on v2.1.0+27 or later compact-encodes every Issue Card QR regardless of size - Base45 is never valid JSON, so a customer app that predates TEST-021 fails to parse it at all (a generic "not a valid QR Code" error), for *every* issuance, not just the rare high-initial-stamp-count case TEST-021 targeted. Confirmed on a real device (supplier 27, customer 23). Fixed by preferring plain JSON whenever it fits (covers every initial-stamp count up to 16, comfortably spanning the whole 3-12 supported range), falling back to compact encoding only for the genuine legacy edge case. Applied the same fix proactively to the redemption QR (TEST-020), which had the identical unconditional-encoding shape. Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-022.

@@ -15,12 +15,12 @@ Use this file as the single copy/paste source for App Store Connect listing fiel
 - Release Version: 2.1.1
 - Build: 29
 - Primary Language: English (UK)
-- Privacy Policy URL: https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
-- Terms of Service URL: https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
-- Support URL: https://ian-hamlet.github.io/LoyaltyCards/support/
-- Accessibility Statement (not an App Store Connect field, linked from the site): https://ian-hamlet.github.io/LoyaltyCards/legal/accessibility-statement.html
+- Privacy Policy URL: https://loyaltycards-site.pages.dev/legal/privacy-policy.html
+- Terms of Service URL: https://loyaltycards-site.pages.dev/legal/terms-of-service.html
+- Support URL: https://loyaltycards-site.pages.dev/support/
+- Accessibility Statement (not an App Store Connect field, linked from the site): https://loyaltycards-site.pages.dev/legal/accessibility-statement.html
 - Support Contact Email: ian.hamlet@dotconnected.com
-- Marketing URL: https://ian-hamlet.github.io/LoyaltyCards/user/about.html
+- Marketing URL: https://loyaltycards-site.pages.dev/user/about.html
 
 **Status:** All shared values confirmed live in ASC, unchanged since v2.0.3+23.
 

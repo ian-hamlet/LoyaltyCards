@@ -3,12 +3,12 @@
 **LoyaltyCards v2.1.1+29**  
 **Customer App:** LoyaltyCards Customer Wallet  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** 🟡 v2.1.1+29 submitted for App Store review 2026-08-18, awaiting Apple's decision - v2.0.3+23 live but defective; v2.1.0+26, v2.1.0+27, and v2.1.1+28 all shipped to TestFlight but none has the TEST-022 fix  
-**Last Updated:** August 18, 2026
+**Target Release:** 🟢 v2.1.1+29 approved by Apple and released to the App Store 2026-08-19 (both apps) - supersedes v2.0.3+23, which was live but defective; v2.1.0+26, v2.1.0+27, and v2.1.1+28 all shipped to TestFlight but none had the TEST-022 fix  
+**Last Updated:** August 21, 2026
 
-**Status note:** 🟢 **v2.0.2+21 was live on the App Store** (shipped 2026-08-10 — see prior status below for that history), now superseded. 🟢 **v2.0.3+23 was submitted 2026-08-15, approved and released 2026-08-16** (both apps) - the Sharing feature and both bug fixes are confirmed working. Metadata from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered into ASC, build 23 selected on both apps, Release was set to **Manual** on both (the two apps review at different speeds, so release was held until both were approved). **⚠️ This live build contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - see `docs/project-management/DEFECT_TRACKER.md`. 🟡 **v2.1.0+26 fixed TEST-016 plus TEST-017 through TEST-020 and was built and uploaded to TestFlight**, but not submitted for App Store review before TEST-021 was found on that same TestFlight build - see `docs/project-management/DEFECT_TRACKER.md` TEST-021. 🟢 **v2.1.0+27 added TEST-021 and was built and uploaded to TestFlight** the night of 2026-08-16/17. 🟢 **v2.1.1+28 added DECISION-017 and was also built and uploaded to TestFlight**, real-device verified end-to-end - but that same testing round found TEST-022 (see below). 🟡 **v2.1.1+29 (current target) adds the TEST-022 fix** (plus DECISION-019's dedup/dead-code cleanup) - build-only bump, built and delivered to TestFlight 2026-08-18, real-device validated, metadata confirmed in ASC, and **submitted for App Store review 2026-08-18** (both apps), since Apple won't allow re-uploading build 28 with different content. v2.0.4+24 and the interim test build v2.0.4+25 are both folded into the v2.1.x line and were never their own release candidates.
+**Status note:** 🟢 **v2.0.2+21 was live on the App Store** (shipped 2026-08-10 — see prior status below for that history), now superseded. 🟢 **v2.0.3+23 was submitted 2026-08-15, approved and released 2026-08-16** (both apps) - the Sharing feature and both bug fixes are confirmed working. Metadata from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered into ASC, build 23 selected on both apps, Release was set to **Manual** on both (the two apps review at different speeds, so release was held until both were approved). **⚠️ This live build contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - see `docs/project-management/DEFECT_TRACKER.md`. 🟡 **v2.1.0+26 fixed TEST-016 plus TEST-017 through TEST-020 and was built and uploaded to TestFlight**, but not submitted for App Store review before TEST-021 was found on that same TestFlight build - see `docs/project-management/DEFECT_TRACKER.md` TEST-021. 🟢 **v2.1.0+27 added TEST-021 and was built and uploaded to TestFlight** the night of 2026-08-16/17. 🟢 **v2.1.1+28 added DECISION-017 and was also built and uploaded to TestFlight**, real-device verified end-to-end - but that same testing round found TEST-022 (see below). 🟢 **v2.1.1+29 (current) adds the TEST-022 fix** (plus DECISION-019's dedup/dead-code cleanup) - build-only bump, built and delivered to TestFlight 2026-08-18, real-device validated, metadata confirmed in ASC, submitted for App Store review 2026-08-18 (both apps), and **approved by Apple and released to the App Store 2026-08-19** (both apps), since Apple won't allow re-uploading build 28 with different content. v2.0.4+24 and the interim test build v2.0.4+25 are both folded into the v2.1.x line and were never their own release candidates.
 
-**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10**; v2.0.3+22 added the App Store Category/Subtitle corrections found post-launch but never produced an uploaded build; v2.0.3+23 added the Sharing feature (Tell a Business / Tell a Friend, both apps) plus two bug fixes found during TestFlight-prep testing (Express Mode stamp routing, a false error on opening Clone/Recovery Backup screens) — **built, uploaded, TestFlight-tested, submitted for App Store review 2026-08-15, and approved and released 2026-08-16**, but contains TEST-016 (see below); v2.0.4+24 fixed TEST-016 but never shipped - folded into v2.1.0+26; v2.1.0+26 carried TEST-016 forward and added the real fix for a QR-capacity failure found while testing it (TEST-017: redemption QR could silently fail to render at high stamp counts; TEST-018: a related stamp-provenance bug found along the way; TEST-019: a clearer error message for an affected business; TEST-020: the actual fix - compact gzip+Base45+alphanumeric-mode QR encoding, raising the safe stamps-required ceiling from 10 to 12) - **minor version bump (2.0.4 -> 2.1.0), deliberate given the real capability increase** - **built and uploaded to TestFlight**, where TEST-021 was then found (the same QR-capacity failure, never fixed on the issue-card side); v2.1.0+27 added that fix and was itself built and uploaded to TestFlight; v2.1.1+28 added DECISION-017 (self-service recovery for an out-of-range business, closing the gap TEST-019 left open) - **patch version bump** - built and uploaded to TestFlight, real-device verified end-to-end, where that same testing surfaced TEST-022 (a cross-version compatibility regression from TEST-021); v2.1.1+29 (current) adds that fix plus DECISION-019 (dedup/dead-code cleanup) - **build-only bump**, built and delivered to TestFlight 2026-08-18, real-device validation next.
+**Version history since v1.0.3+11** (the version this checklist was previously verified against): v1.6.0+16/+17 added app-wide biometric lock to the supplier app and required device auth before committing a business restore/clone, merged into `develop` via `feature/uireview`; v2.0.0+18 was a **major version bump** for a breaking QR token format change (new signed fields added during a security review mean pre-review printed QR codes fail signature verification against the new signed data — acceptable since the app has never had real-world users yet); v2.0.0+19 fixed a critical redemption-inflation gap and a repeat-customer lockout bug, renamed "Simple Mode" to "Express Mode" throughout all user-facing copy, and added the App Store metadata/public-site work described below — **submitted 2026-07-28, rejected for CRASH-001**; v2.0.1+20 fixed CRASH-001 (re-entrancy guard + PDF-bytes validation) and a dark-mode contrast bug (UI-001), but was never uploaded; v2.0.2+21 carried the same fixes plus the `IPHONEOS_DEPLOYMENT_TARGET` bump to 15.0 that Transporter required — **passed review and shipped 2026-08-10**; v2.0.3+22 added the App Store Category/Subtitle corrections found post-launch but never produced an uploaded build; v2.0.3+23 added the Sharing feature (Tell a Business / Tell a Friend, both apps) plus two bug fixes found during TestFlight-prep testing (Express Mode stamp routing, a false error on opening Clone/Recovery Backup screens) — **built, uploaded, TestFlight-tested, submitted for App Store review 2026-08-15, and approved and released 2026-08-16**, but contains TEST-016 (see below); v2.0.4+24 fixed TEST-016 but never shipped - folded into v2.1.0+26; v2.1.0+26 carried TEST-016 forward and added the real fix for a QR-capacity failure found while testing it (TEST-017: redemption QR could silently fail to render at high stamp counts; TEST-018: a related stamp-provenance bug found along the way; TEST-019: a clearer error message for an affected business; TEST-020: the actual fix - compact gzip+Base45+alphanumeric-mode QR encoding, raising the safe stamps-required ceiling from 10 to 12) - **minor version bump (2.0.4 -> 2.1.0), deliberate given the real capability increase** - **built and uploaded to TestFlight**, where TEST-021 was then found (the same QR-capacity failure, never fixed on the issue-card side); v2.1.0+27 added that fix and was itself built and uploaded to TestFlight; v2.1.1+28 added DECISION-017 (self-service recovery for an out-of-range business, closing the gap TEST-019 left open) - **patch version bump** - built and uploaded to TestFlight, real-device verified end-to-end, where that same testing surfaced TEST-022 (a cross-version compatibility regression from TEST-021); v2.1.1+29 (current) adds that fix plus DECISION-019 (dedup/dead-code cleanup) - **build-only bump**, built and delivered to TestFlight 2026-08-18, real-device validated, submitted for App Store review 2026-08-18, and **approved and released to the App Store 2026-08-19**.
 
 ---
 
@@ -91,7 +91,7 @@
 - [x] **`flutter analyze` clean**
 - ⚠️ **Missing TEST-022** (found via this build's own real-device testing, afterward - a cross-version compatibility regression TEST-021 introduced) — **do not submit this build for App Store review.** See v2.1.1+29 below.
 
-**v2.1.1+29 (current) — submitted for App Store review 2026-08-18:**
+**v2.1.1+29 (current) — LIVE ON THE APP STORE, approved and released 2026-08-19:**
 
 - [x] **Final build number incremented** in pubspec.yaml (both apps) — `2.1.1+29`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml`
 - [x] **Version number confirmed** — v2.1.1+29 (build-only bump from 2.1.1 - not a version change, since this is a bug fix, not a new capability; supersedes v2.1.1+28, since Apple won't allow re-uploading build 28 with different content)
@@ -109,7 +109,8 @@
 - [x] **Critical bugs resolved** (TEST-016/017/018/019/021/022 fixed, TEST-020 supersedes TEST-017's interim mitigation, DECISION-017 closes the backward-compatibility gap TEST-019 left open; zero other CRITICAL/HIGH defects open)
 - [x] **Metadata entered into App Store Connect** — What's New, both apps' Promotional Text, and Manual release confirmed - see `APP_STORE_METADATA_PACKET_v2_1_1_29.md`; all other fields unchanged from v2.0.3+23 and already live
 - [x] **Submitted for App Store review** — ✅ 2026-08-18, both apps
-- [x] **v2.0.3+23 status** — already approved and released 2026-08-16; v2.1.1+29 now submitted to supersede it and close out TEST-016 (live in v23)
+- [x] **Approved and released** — ✅ approved by Apple and released 2026-08-19 (both apps, via App Store Connect), now **LIVE on the App Store**
+- [x] **v2.0.3+23 status** — already approved and released 2026-08-16; v2.1.1+29 now live to supersede it and close out TEST-016 (live in v23)
 
 ---
 
@@ -141,7 +142,7 @@
 
 - [x] **Subtitle** — entered for both apps 2026-08-15 - see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md)
 - [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — entered for both apps 2026-08-15, see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md). The customer app's Promotional Text was found blank in ASC despite being documented as already-live - worth remembering that "unchanged" in this doc doesn't guarantee it's actually live, always verify in ASC directly. **Confirmed 2026-08-18:** the supplier app's Promotional Text had the identical gap - also found blank, re-entered from [`APP_STORE_METADATA_PACKET_v2_1_1_29.md`](APP_STORE_METADATA_PACKET_v2_1_1_29.md), which now keeps both apps' Promotional Text inline as a fallback reference instead of only pointing back at the v23 packet.
-- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps) — unchanged, already correct
+- [ ] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` (both apps) — **site migrated from GitHub Pages to Cloudflare Pages 2026-08-21; ASC still has the old `ian-hamlet.github.io` URL entered, needs updating for both apps** (see the migration note in `RELEASES.md`)
 
 ---
 
@@ -208,7 +209,7 @@ Answers decided (all consistent with actual app content), still need entering in
 
 #### Privacy Policy
 
-- [x] **Privacy Policy URL:** live — https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
+- [x] **Privacy Policy URL:** live — https://loyaltycards-site.pages.dev/legal/privacy-policy.html
   - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
 - [x] **Privacy Policy content accurate** — reviewed 2026-07-25, added disclosure of the
   hashed device identifier used for Secure Mode redemption fraud-prevention
@@ -217,32 +218,32 @@ Answers decided (all consistent with actual app content), still need entering in
   [docs/quality/REVIEW_ROLES.md](../quality/REVIEW_ROLES.md)
 - [x] **GDPR compliant** (privacy-first design)
 - [x] **App Privacy questionnaire updated for the customer app** — declares **Device ID** (Purpose: App Functionality/fraud prevention, Linked to identity: No, Used for tracking: No), resulting label "Data Not Linked to You" instead of the stale "Data Not Collected". Supplier app's answer is unaffected ("Data Not Collected" remains accurate). Suggested answers were in [APP_REVIEW_PACKET_v1_0_2_8.md](APP_REVIEW_PACKET_v1_0_2_8.md#app-privacy-data-collection-suggested-answers).
-- [x] Privacy Policy URL entered in App Store Connect (App Privacy section, both apps)
+- [ ] Privacy Policy URL entered in App Store Connect (App Privacy section, both apps) — **still points at the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration; needs re-entering with the URL above**
 
 ---
 
 #### Terms of Service
 
-- [x] **Terms of Service URL:** live — https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
+- [x] **Terms of Service URL:** live — https://loyaltycards-site.pages.dev/legal/terms-of-service.html
   - Source: [docs/legal/TERMS_OF_SERVICE.md](../legal/TERMS_OF_SERVICE.md)
 - [x] **Terms cover both customer and supplier use**
 - [x] **Fraud prevention disclaimers included**
 - [x] **Liability/data-integrity disclaimers strengthened** (2026-07-20) — explicit "not liable for user input errors or falsified data" language, and an explicit statement that suppliers (not LoyaltyCards) are responsible for verifying presented card/stamp data before issuing rewards, same standard as a paper card
-- [x] Entered into App Store Connect (both apps)
+- [ ] Entered into App Store Connect (both apps) — **still points at the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration; needs re-entering with the URL above**
 
 ---
 
 #### Support URL
 
-- [x] **Support URL:** live — https://ian-hamlet.github.io/LoyaltyCards/support/
+- [x] **Support URL:** live — https://loyaltycards-site.pages.dev/support/
 - [x] **Support contact method** — ian.hamlet@dotconnected.com; monitoring cadence still needs to be a real daily habit once live, not just documented
-- [x] Entered into App Store Connect (both apps)
+- [ ] Entered into App Store Connect (both apps) — **still points at the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration; needs re-entering with the URL above**
 
 ---
 
 #### Marketing URL
 
-- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` — the new About page explaining the two-app pairing and Express/Secure Mode with case studies. Entered into ASC for both apps.
+- [ ] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` — the new About page explaining the two-app pairing and Express/Secure Mode with case studies. **Not yet entered in ASC** - still has the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration.
 
 ---
 
@@ -429,8 +430,8 @@ Please test both apps together following the demo instructions.
 - [x] **Dark mode support** — both apps follow system light/dark appearance (`ThemeMode.system`, real distinct ColorScheme objects); the specific text-legibility risk was checked and ruled out 2026-07-20 (see `docs/legal/ACCESSIBILITY_STATEMENT.md`). Some branded badges keep a fixed light background in dark mode — a style inconsistency, not a functional gap, and doesn't block submission.
 
 #### Legal
-- [x] **Privacy policy accurate** and accessible — live at https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html, reviewed 2026-07-25 (see the App Store Connect reminder under "Privacy Policy" above — the *policy* is now accurate, but the separately-entered ASC questionnaire still needs updating)
-- [x] **Terms of service** available — live at https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html, strengthened 2026-07-20
+- [x] **Privacy policy accurate** and accessible — live at https://loyaltycards-site.pages.dev/legal/privacy-policy.html, reviewed 2026-07-25 (see the App Store Connect reminder under "Privacy Policy" above — the *policy* is now accurate, but the separately-entered ASC questionnaire still needs updating)
+- [x] **Terms of service** available — live at https://loyaltycards-site.pages.dev/legal/terms-of-service.html, strengthened 2026-07-20
 - [x] **No copyright infringement** (all content original or licensed)
 - [x] **Complies with export regulations** — standard cryptography only, see Export Compliance section above
 
@@ -516,7 +517,7 @@ Please test both apps together following the demo instructions.
 8. [ ] **Respond to App Review** if questions arise
 9. [ ] **Release approved apps**
 
-**v2.1.1+29 (current) — submitted for App Store review 2026-08-18:**
+**v2.1.1+29 (current) — LIVE ON THE APP STORE, approved and released 2026-08-19:**
 
 1. [x] **Upload build to App Store Connect** (via Transporter) — build 29, both apps - confirmed by the user, delivered to TestFlight 2026-08-18
 2. [x] **Select build** for Customer app submission — build 29
@@ -524,9 +525,9 @@ Please test both apps together following the demo instructions.
 4. [x] **Complete all required fields** in App Store Connect — What's New updated, both apps' Promotional Text re-entered (both found blank), Release Date confirmed Manual for both apps - all confirmed 2026-08-18, see `APP_STORE_METADATA_PACKET_v2_1_1_29.md`
 5. [x] **Screenshots** — unchanged, no screens affected by these fixes (QR appearance is visually similar regardless of underlying encoding; DECISION-017's banner/dialog are new UI, but not part of the staged screenshot set)
 6. [x] **Submit for review** — ✅ submitted 2026-08-18, both apps
-7. [ ] **Monitor review status**
-8. [ ] **Respond to App Review** if questions arise
-9. [ ] **Release approved apps** — Manual release, same reasoning as v2.0.3+23
+7. [x] **Monitor review status** — ✅ Apple approved both apps 2026-08-19
+8. [x] **Respond to App Review** if questions arise — not needed, no questions raised
+9. [x] **Release approved apps** — ✅ Manual release, both apps released together 2026-08-19, same reasoning as v2.0.3+23
 
 ---
 
@@ -568,24 +569,24 @@ Please test both apps together following the demo instructions.
 
 ## Quick Reference: Required URLs
 
-All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages.yml` + `site/`):
+All live as of 2026-08-21, hosted via Cloudflare Pages (see `.github/workflows/cloudflare-pages.yml` + `site/`; migrated from GitHub Pages that same day - see the migration note in `RELEASES.md`). **The pages themselves are live and correct at the URLs below, but ASC's own URL fields for both apps still have the old `ian-hamlet.github.io` host entered - see the checklist items above for what still needs updating:**
 
-1. **Privacy Policy:** https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
+1. **Privacy Policy:** https://loyaltycards-site.pages.dev/legal/privacy-policy.html
    - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
-2. **Terms of Service:** https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
+2. **Terms of Service:** https://loyaltycards-site.pages.dev/legal/terms-of-service.html
    - Source: [docs/legal/TERMS_OF_SERVICE.md](../legal/TERMS_OF_SERVICE.md)
-3. **Support:** https://ian-hamlet.github.io/LoyaltyCards/support/
+3. **Support:** https://loyaltycards-site.pages.dev/support/
    - Source: [docs/legal/SUPPORT_PAGE.md](../legal/SUPPORT_PAGE.md)
-4. **Accessibility Statement** (not an ASC field, linked from the site): https://ian-hamlet.github.io/LoyaltyCards/legal/accessibility-statement.html
-5. **Marketing:** https://ian-hamlet.github.io/LoyaltyCards/user/about.html — in use, entered in ASC for both apps
+4. **Accessibility Statement** (not an ASC field, linked from the site): https://loyaltycards-site.pages.dev/legal/accessibility-statement.html
+5. **Marketing:** https://loyaltycards-site.pages.dev/user/about.html — **not yet entered in ASC**, see above
 
 **Note:** the published HTML in `site/` was hand-converted from the Markdown sources above and is not auto-generated — any future edits to the Markdown need to be mirrored into the matching `site/**/*.html` file.
 
 ---
 
-**Document Status:** 🟢 **v2.0.3+23 is LIVE ON THE APP STORE** (both apps), submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix shipped to **TestFlight as v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), but not submitted for App Store review since TEST-021 (the issue-card counterpart to TEST-017/020's fix) was found on that same TestFlight build. **v2.1.0+27** added TEST-021 and was built and uploaded to TestFlight. **v2.1.1+28** (patch version bump - DECISION-017 is a genuine UX improvement, not build-only) added a self-service fix for a business outside the supported stamps-required range, also built and uploaded to TestFlight, real-device verified end-to-end - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. That same testing found **TEST-022**, a cross-version compatibility regression from TEST-021. **v2.1.1+29** (build-only bump) adds that fix plus DECISION-019 (dedup/dead-code cleanup) - built and delivered to TestFlight 2026-08-18, real-device validation and ASC metadata (Promotional Text both apps, Manual release both apps) confirmed 2026-08-18, and **submitted for App Store review 2026-08-18** (both apps), awaiting Apple's decision. `develop`, `main`, and `releases/v2.1.1-build29` are all at the same commit as of this submission. See `RELEASES.md` for the release-branch record and `docs/project-management/DEFECT_TRACKER.md` for the defects.  
+**Document Status:** 🟢 **v2.1.1+29 is LIVE ON THE APP STORE** (both apps), submitted for App Store review 2026-08-18, **approved and released 2026-08-19**, superseding v2.0.3+23 (which was live but contained TEST-016). **v2.0.3+23** was submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contained TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix shipped to **TestFlight as v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), but not submitted for App Store review since TEST-021 (the issue-card counterpart to TEST-017/020's fix) was found on that same TestFlight build. **v2.1.0+27** added TEST-021 and was built and uploaded to TestFlight. **v2.1.1+28** (patch version bump - DECISION-017 is a genuine UX improvement, not build-only) added a self-service fix for a business outside the supported stamps-required range, also built and uploaded to TestFlight, real-device verified end-to-end - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. That same testing found **TEST-022**, a cross-version compatibility regression from TEST-021. **v2.1.1+29** (build-only bump) adds that fix plus DECISION-019 (dedup/dead-code cleanup) - built and delivered to TestFlight 2026-08-18, real-device validation and ASC metadata (Promotional Text both apps, Manual release both apps) confirmed 2026-08-18, submitted for App Store review 2026-08-18 (both apps), and **approved by Apple and released to the App Store 2026-08-19** (both apps). `develop`, `main`, and `releases/v2.1.1-build29` are all at the same commit as of this release. See `RELEASES.md` for the release-branch record and `docs/project-management/DEFECT_TRACKER.md` for the defects.  
 **Maintained by:** Development Team  
-**Last Updated:** August 17, 2026
+**Last Updated:** August 21, 2026
 
 ---
 

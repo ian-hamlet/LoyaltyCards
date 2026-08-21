@@ -142,7 +142,7 @@
 
 - [x] **Subtitle** — entered for both apps 2026-08-15 - see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md)
 - [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — entered for both apps 2026-08-15, see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md). The customer app's Promotional Text was found blank in ASC despite being documented as already-live - worth remembering that "unchanged" in this doc doesn't guarantee it's actually live, always verify in ASC directly. **Confirmed 2026-08-18:** the supplier app's Promotional Text had the identical gap - also found blank, re-entered from [`APP_STORE_METADATA_PACKET_v2_1_1_29.md`](APP_STORE_METADATA_PACKET_v2_1_1_29.md), which now keeps both apps' Promotional Text inline as a fallback reference instead of only pointing back at the v23 packet.
-- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` (both apps) — unchanged, already correct
+- [x] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` (both apps) — unchanged, already correct
 
 ---
 
@@ -209,7 +209,7 @@ Answers decided (all consistent with actual app content), still need entering in
 
 #### Privacy Policy
 
-- [x] **Privacy Policy URL:** live — https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
+- [x] **Privacy Policy URL:** live — https://loyaltycards-site.pages.dev/legal/privacy-policy.html
   - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
 - [x] **Privacy Policy content accurate** — reviewed 2026-07-25, added disclosure of the
   hashed device identifier used for Secure Mode redemption fraud-prevention
@@ -224,7 +224,7 @@ Answers decided (all consistent with actual app content), still need entering in
 
 #### Terms of Service
 
-- [x] **Terms of Service URL:** live — https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
+- [x] **Terms of Service URL:** live — https://loyaltycards-site.pages.dev/legal/terms-of-service.html
   - Source: [docs/legal/TERMS_OF_SERVICE.md](../legal/TERMS_OF_SERVICE.md)
 - [x] **Terms cover both customer and supplier use**
 - [x] **Fraud prevention disclaimers included**
@@ -235,7 +235,7 @@ Answers decided (all consistent with actual app content), still need entering in
 
 #### Support URL
 
-- [x] **Support URL:** live — https://ian-hamlet.github.io/LoyaltyCards/support/
+- [x] **Support URL:** live — https://loyaltycards-site.pages.dev/support/
 - [x] **Support contact method** — ian.hamlet@dotconnected.com; monitoring cadence still needs to be a real daily habit once live, not just documented
 - [x] Entered into App Store Connect (both apps)
 
@@ -243,7 +243,7 @@ Answers decided (all consistent with actual app content), still need entering in
 
 #### Marketing URL
 
-- [x] **Marketing URL:** `https://ian-hamlet.github.io/LoyaltyCards/user/about.html` — the new About page explaining the two-app pairing and Express/Secure Mode with case studies. Entered into ASC for both apps.
+- [x] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` — the new About page explaining the two-app pairing and Express/Secure Mode with case studies. Entered into ASC for both apps.
 
 ---
 
@@ -430,8 +430,8 @@ Please test both apps together following the demo instructions.
 - [x] **Dark mode support** — both apps follow system light/dark appearance (`ThemeMode.system`, real distinct ColorScheme objects); the specific text-legibility risk was checked and ruled out 2026-07-20 (see `docs/legal/ACCESSIBILITY_STATEMENT.md`). Some branded badges keep a fixed light background in dark mode — a style inconsistency, not a functional gap, and doesn't block submission.
 
 #### Legal
-- [x] **Privacy policy accurate** and accessible — live at https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html, reviewed 2026-07-25 (see the App Store Connect reminder under "Privacy Policy" above — the *policy* is now accurate, but the separately-entered ASC questionnaire still needs updating)
-- [x] **Terms of service** available — live at https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html, strengthened 2026-07-20
+- [x] **Privacy policy accurate** and accessible — live at https://loyaltycards-site.pages.dev/legal/privacy-policy.html, reviewed 2026-07-25 (see the App Store Connect reminder under "Privacy Policy" above — the *policy* is now accurate, but the separately-entered ASC questionnaire still needs updating)
+- [x] **Terms of service** available — live at https://loyaltycards-site.pages.dev/legal/terms-of-service.html, strengthened 2026-07-20
 - [x] **No copyright infringement** (all content original or licensed)
 - [x] **Complies with export regulations** — standard cryptography only, see Export Compliance section above
 
@@ -571,14 +571,14 @@ Please test both apps together following the demo instructions.
 
 All live as of 2026-07-20, hosted via GitHub Pages (see `.github/workflows/pages.yml` + `site/`):
 
-1. **Privacy Policy:** https://ian-hamlet.github.io/LoyaltyCards/legal/privacy-policy.html
+1. **Privacy Policy:** https://loyaltycards-site.pages.dev/legal/privacy-policy.html
    - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
-2. **Terms of Service:** https://ian-hamlet.github.io/LoyaltyCards/legal/terms-of-service.html
+2. **Terms of Service:** https://loyaltycards-site.pages.dev/legal/terms-of-service.html
    - Source: [docs/legal/TERMS_OF_SERVICE.md](../legal/TERMS_OF_SERVICE.md)
-3. **Support:** https://ian-hamlet.github.io/LoyaltyCards/support/
+3. **Support:** https://loyaltycards-site.pages.dev/support/
    - Source: [docs/legal/SUPPORT_PAGE.md](../legal/SUPPORT_PAGE.md)
-4. **Accessibility Statement** (not an ASC field, linked from the site): https://ian-hamlet.github.io/LoyaltyCards/legal/accessibility-statement.html
-5. **Marketing:** https://ian-hamlet.github.io/LoyaltyCards/user/about.html — in use, entered in ASC for both apps
+4. **Accessibility Statement** (not an ASC field, linked from the site): https://loyaltycards-site.pages.dev/legal/accessibility-statement.html
+5. **Marketing:** https://loyaltycards-site.pages.dev/user/about.html — in use, entered in ASC for both apps
 
 **Note:** the published HTML in `site/` was hand-converted from the Markdown sources above and is not auto-generated — any future edits to the Markdown need to be mirrored into the matching `site/**/*.html` file.
 

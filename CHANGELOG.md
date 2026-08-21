@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [2.2.0+30] - 2026-08-21
 
-**Status:** 🔵 In development on `feature/express-mode-cooldown-display` - minor UI enhancement, not yet targeted at a specific version/build number (may ship build-only or bundled with other pending work, TBD).
+**Status:** 🔵 In development on `develop`/`feature/express-mode-cooldown-display` - not yet built or uploaded. **Minor version bump** (2.1.1 -> 2.2.0) - the editable scan cooldown is a genuine capability increase, not a build-only or patch change. A positioning/metadata update is also planned for this release but not yet done - see `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md` for the full sequencing.
 
 ### Added
 - **Express Mode: the configured scan cooldown is now shown in Settings' Business Information section.** Previously the per-business cooldown (`Business.scanInterval`, set via the slider on onboarding/Fix Now) had no way to be checked after setup short of re-opening that slider - now it's visible at a glance alongside Business Name, Stamps Required, and Operation Mode. Secure Mode businesses don't use a cooldown, so the row only appears for Express Mode. `source/supplier_app/lib/screens/supplier/supplier_settings.dart`.
+- **Express Mode: the scan cooldown is now editable after setup, not just at onboarding.** Tapping the row above opens the same stepper/slider control used during onboarding (`source/supplier_app/lib/widgets/scan_interval_editor.dart`), bounded to the same 5-60s range. Safe to change anytime - unlike `stampsRequired`, `scanInterval` isn't baked into issued cards; it's read live off the `Business` record each time a stamp is generated, so a change applies to the very next scan with no effect on cards already issued. See `docs/project-management/FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`.
 
 ## [2.1.1+29] - 2026-08-17
 

@@ -587,5 +587,24 @@
 ///   -side changes needed - both apps already try plain JSON first.
 ///   Full detail: DEFECT_TRACKER.md TEST-022.
 
+/// Build 30 Changes (minor version bump 2.1.1 -> 2.2.0 - a genuine
+/// capability increase, not build-only or a patch):
+/// - Supplier app: the Express Mode scan cooldown (`Business.scanInterval`)
+///   is now editable after setup from Settings, not just once at
+///   onboarding. New `widgets/scan_interval_editor.dart`, mirroring the
+///   existing `stamps_required_fix.dart` self-service pattern. Safe to
+///   change anytime - unlike `stampsRequired`, `scanInterval` is never
+///   baked into an issued card; it's read live off the `Business` record
+///   each time a stamp token is generated, so a change applies to the very
+///   next scan with no effect on any card already issued. Also added a
+///   read-only display of the current cooldown to the same screen.
+/// - Planned for this release, not yet done as of this version bump: a
+///   positioning/metadata update for both apps' App Store Connect listings,
+///   informed by a competitive assessment - see
+///   docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md and
+///   docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md. Update this entry
+///   once that's actually done, or split it into its own build if it slips
+///   to a later one.
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.1.1+29';
+const String appVersion = '2.2.0+30';

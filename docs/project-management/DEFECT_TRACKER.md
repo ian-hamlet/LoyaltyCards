@@ -2065,6 +2065,19 @@ This document tracks defects from two sources:
 - **Testing Verified:** Full suite green across all three packages (`shared`, `customer_app`, `supplier_app`); `flutter analyze` clean on every changed file. See test-run summary below this table for exact counts.
 - **Notes:** `docs/quality/MAGIC_NUMBERS_REVIEW_2026-08-17.md` updated in place to mark N-008/N-009 resolved and record the `issueIntervalMs` removal - that review is now fully closed (N-001 through N-009 all fixed).
 
+### DECISION-020: Make the Express Mode Scan Cooldown Editable After Setup
+
+- **Type:** Feature addition, consolidated from an earlier-session planning note
+- **Status:** ✅ FIXED
+- **Priority:** LOW (self-contained UX improvement)
+- **Screen/Feature:** `source/supplier_app/lib/widgets/scan_interval_editor.dart` (new), `source/supplier_app/lib/screens/supplier/supplier_settings.dart`
+- **Context:** `Business.scanInterval` (the Express Mode "Customer Scan Cooldown") could previously only be set once, at onboarding (`supplier_onboarding.dart`) - there was no way to change it afterward short of a full business reset. Plan captured in `docs/project-management/FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`, consolidated 2026-08-21 from a note drafted in an earlier Claude session.
+- **Investigation finding:** unlike `stampsRequired`, `scanInterval` is never baked into an issued card or `CardIssueToken` - it's read live off the `Business` record every time the supplier generates a new stamp (`supplier_stamp_card.dart`), and each `StampToken` signs its own value at that moment (V-010). So a change takes effect on the very next stamp generated, for every card old or new, and never invalidates a past stamp (each verifies against the value it was signed with, not the business's current value). Confirmed safe and cheap to add - no migration needed, `BusinessRepository.updateBusiness()` already supports it.
+- **Fix Applied:** new `showEditScanIntervalDialog()` in `scan_interval_editor.dart`, mirroring the existing `stamps_required_fix.dart` self-service pattern (stepper + slider UI matching onboarding, bounded to `AppConstants.simpleModeMin/MaxScanIntervalMs`). Wired into `supplier_settings.dart`'s existing (previously read-only) "Scan Cooldown" row - only shown for Express Mode, since Secure Mode never uses `scanInterval`. Dialog copy notes the change is immediately effective ("Applies to the next stamp scanned - no need to reissue existing cards"), unlike the `stampsRequired` fix's "only affects future cards" caveat.
+- **Testing Verified:** New `source/supplier_app/test/screens/supplier_settings_scan_interval_test.dart` (6 tests: row visibility by mode, dialog defaults, save persists to DB and updates the tile immediately, cancel leaves the value unchanged, stepper disables at bounds). Full suite green (shared 211, customer_app 131, supplier_app 89). `flutter analyze` clean.
+- **Target Build:** v2.2.0+30 (minor version bump - a genuine capability increase, not a bug fix or build-only change)
+- **Notes:** Landed alongside a broader consolidation of planning documents from earlier Claude sessions into `docs/project-management/`, `docs/marketing/`, and `docs/quality/` - see `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md` for the full set and the decided release sequencing.
+
 ---
 
 ## 📊 Defect Summary Statistics

@@ -17,18 +17,18 @@ Examples:
 
 ## Current Releases
 
-### v2.1.1+29 - Build 29 (🟡 Submitted for App Store review)
-- **Date:** August 17-18, 2026
-- **Platform:** Built and delivered to TestFlight 2026-08-18, real-device validated, metadata confirmed in ASC, **submitted for App Store review 2026-08-18** (both apps).
-- **Branch:** `develop`/`main`/`releases/v2.1.1-build29` (all three at the same commit as of this submission - see the merge/release-branch record below)
+### v2.1.1+29 - Build 29 (🟢 LIVE ON THE APP STORE)
+- **Date:** August 17-18, 2026 (built/submitted); August 19, 2026 (approved and released)
+- **Platform:** Built and delivered to TestFlight 2026-08-18, real-device validated, metadata confirmed in ASC, submitted for App Store review 2026-08-18, **approved by Apple and released to the App Store 2026-08-19** (both apps, via App Store Connect).
+- **Branch:** `develop`/`main`/`releases/v2.1.1-build29` (all three at the same commit as of this release - see the merge/release-branch record below)
 - **Version:** 2.1.1+29
-- **Status:** 🟡 Submitted for App Store review, awaiting Apple's decision. **Build-only bump** - v2.1.1+28 was already built and uploaded to TestFlight before TEST-022 was found via real-device testing of that exact build, and Apple doesn't allow re-uploading the same build number with different content. Real-device validation passed (`docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`, `docs/testing/V2_1_1_BUILD29_VALIDATION.md`); ASC metadata confirmed (`docs/deployment/APP_STORE_METADATA_PACKET_v2_1_1_29.md`). Release set to **Manual** on both apps, same reasoning as v2.0.3+23.
+- **Status:** 🟢 LIVE — available for download on the App Store. **Build-only bump** - v2.1.1+28 was already built and uploaded to TestFlight before TEST-022 was found via real-device testing of that exact build, and Apple doesn't allow re-uploading the same build number with different content. Real-device validation passed (`docs/testing/TEST-022_VALIDATION_TEST_PLAN.md`, `docs/testing/V2_1_1_BUILD29_VALIDATION.md`); ASC metadata confirmed (`docs/deployment/APP_STORE_METADATA_PACKET_v2_1_1_29.md`). Release was set to **Manual** on both apps, same reasoning as v2.0.3+23 - approved and released together 2026-08-19.
 - **Focus:** TEST-022 - the cross-version compatibility regression TEST-021 introduced - plus a quality-review cleanup pass (N-008/N-009/dead-code removal) that shipped in the same build.
 - **Major Changes:**
   - **TEST-022:** TEST-021's compact issue-card QR encoding was unconditional (no size gate), breaking issuance for any customer app older than that fix - not just the rare high-initial-stamp-count case it was written for. Confirmed on a real device (supplier 27, customer 23). Fixed by preferring plain JSON whenever it fits (covers every initial-stamp count up to 16), falling back to compact encoding only for the genuine legacy edge case. Applied the same fix proactively to the redemption QR (TEST-020), which had the identical unconditional-encoding shape.
   - **DECISION-019:** consolidated the duplicated public-key decode routine (N-008) and error-cooldown constant (N-009) flagged in the 2026-08-17 magic numbers review; removed the confirmed-dead `AppConstants.issueIntervalMs`. Internal cleanup only, no user-facing behavior change - automated-test verified (full suite green across all three packages), no dedicated device test needed.
   - Full detail: `docs/project-management/DEFECT_TRACKER.md` TEST-022 and DECISION-019.
-- **Next Steps:** Monitor App Store Connect for the review decision on both apps; release manually (together) once both are approved, same as v2.0.3+23.
+- **Next Steps:** None - live on the App Store. Monitor App Store Connect crash reports and reviews as usual.
 
 ### v2.1.1+28 - Build 28 (🟢 Shipped to TestFlight, superseded by v2.1.1+29 for submission)
 - **Date:** August 17, 2026
@@ -74,7 +74,7 @@ Examples:
 - **Branch:** main, develop, `releases/v2.0.3-build23`
 - **Version:** 2.0.3+23
 - **Status:** 🟢 LIVE — available for download on the App Store. Built, uploaded via Transporter, tested via TestFlight (Sharing feature and both bug fixes confirmed working on-device), submitted 2026-08-15, approved and released 2026-08-16. Release was set to **Manual** on both apps deliberately - the two apps review at different speeds, and manual release means neither goes live before the other is also approved.
-- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed in v2.1.0+26 (carried forward through v2.1.1+29, submitted for App Store review 2026-08-18 - see v2.1.1+29 above). Do not treat this build as fully correct despite being live.
+- **⚠️ Known defect (TEST-016):** businesses configured with 3 or 4 required stamps cannot issue a valid card, in either Secure or Express Mode - see `docs/project-management/DEFECT_TRACKER.md`. Fixed in v2.1.0+26 (carried forward through v2.1.1+29, now **live on the App Store as of 2026-08-19** - see v2.1.1+29 above). Do not treat this build as fully correct despite being live.
 - **Focus:** Companion-app/friend referral sharing (both apps), plus two bugs found during TestFlight-prep testing
 - **Major Changes:**
   - **Sharing feature:** new Settings section in both apps, "Tell a Business" (QR + share link to LoyaltyCards Business) and "Tell a Friend" (QR + share link to LoyaltyCards) - built as a reusable `AppReferralScreen` widget in the shared package. Supplier app also gets a "Tell a Friend" shortcut icon on the Home screen's app bar.
@@ -82,7 +82,7 @@ Examples:
   - **Fixed:** Clone to Another Device and Create Recovery Backup screens briefly showed a false "failed" error on open - their loading flag started `false` but `initState()` kicks off async auth-then-generate work immediately, leaving a gap before the flag caught up. Started both `true` instead.
   - Category/Subtitle corrections (queued since v2.0.2+21 shipped) finalized as real submission content - see `APP_STORE_METADATA_PACKET_v2_0_3_23.md`. Also caught the customer app's Promotional Text, which turned out blank in ASC despite being documented as already-live.
 - **Note:** v2.0.3+22 was build-bumped to +23 before ever producing an uploaded build, once the two bugs above were found during TestFlight-prep testing - see that packet's own superseded note.
-- **Next Steps:** v2.1.1+29 (TEST-016 fix plus TEST-017 through TEST-022, DECISION-017, and DECISION-019) has been built, shipped to TestFlight, real-device validated, and submitted for App Store review (2026-08-18) - monitoring for Apple's decision is next.
+- **Next Steps:** v2.1.1+29 (TEST-016 fix plus TEST-017 through TEST-022, DECISION-017, and DECISION-019) has been built, shipped to TestFlight, real-device validated, submitted for App Store review (2026-08-18), and **approved and released to the App Store (2026-08-19)** - see v2.1.1+29 above, now the live build.
 
 ### v2.0.2+21 - Build 21 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 10, 2026
@@ -338,7 +338,9 @@ When creating new releases:
 6. Build and upload to TestFlight/App Store
 7. Return to `develop` for continued work
 
-**⚠️ Note on step 4 - merging to `main` publishes the public site immediately, ahead of the actual App Store release.** `.github/workflows/pages.yml` deploys `site/` on every push to `main` that touches it - there's no separate "publish" step. So the moment `main` is equalized, the public site's version stamps and feature descriptions (About page, User Guide, Supplier Setup Guide) go live describing the *in-progress* version, potentially days before App Review actually approves it and it's downloadable. This happened with v2.0.3+23: `main` was equalized once TestFlight testing confirmed the build worked, but the app itself wasn't submitted for review yet at that point. In practice this is low-risk (a version stamp or a feature description being slightly ahead of what's downloadable isn't seriously misleading), but it's worth knowing about - if a release ever needs the site to stay in lockstep with what's actually live, merge `develop` → `main` only once the App Store submission is approved and released, not as soon as testing passes.
+**⚠️ Note on step 4 - merging to `main` publishes the public site immediately, ahead of the actual App Store release.** `.github/workflows/cloudflare-pages.yml` deploys `site/` to Cloudflare Pages (`https://loyaltycards-site.pages.dev`) on every push to `main` that touches it - there's no separate "publish" step. So the moment `main` is equalized, the public site's version stamps and feature descriptions (About page, User Guide, Supplier Setup Guide) go live describing the *in-progress* version, potentially days before App Review actually approves it and it's downloadable. This happened with v2.0.3+23: `main` was equalized once TestFlight testing confirmed the build worked, but the app itself wasn't submitted for review yet at that point. In practice this is low-risk (a version stamp or a feature description being slightly ahead of what's downloadable isn't seriously misleading), but it's worth knowing about - if a release ever needs the site to stay in lockstep with what's actually live, merge `develop` → `main` only once the App Store submission is approved and released, not as soon as testing passes.
+
+**Site hosting migrated 2026-08-21:** the public site moved from GitHub Pages (`ian-hamlet.github.io/LoyaltyCards`, tied to the maintainer's personal GitHub account) to Cloudflare Pages (`loyaltycards-site.pages.dev`), since much of `site/`'s content (privacy policy, ToS, support) is referenced directly in Apple's App Store Connect metadata and didn't belong on a personal account. Deploy is via `wrangler pages deploy` in `.github/workflows/cloudflare-pages.yml`, using a Pages-scoped Cloudflare API token (`CLOUDFLARE_API_TOKEN` repo secret) rather than Cloudflare's GitHub App, so Cloudflare is never granted read access to this repo. ASC URL fields (Privacy Policy, Terms of Service, Support, Marketing) for both apps still need updating to the new host - see `APP_STORE_SUBMISSION_CHECKLIST.md`.
 
 ---
 

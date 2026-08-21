@@ -1,6 +1,6 @@
 # Feature Plan: Make the Express Mode Scan Cooldown Editable After Setup
 
-**Status: ✅ DONE, 2026-08-21.** Implemented on `feature/express-mode-cooldown-display`: `source/supplier_app/lib/widgets/scan_interval_editor.dart` (new) + `supplier_settings.dart` (wired up). 6 new widget tests in `source/supplier_app/test/screens/supplier_settings_scan_interval_test.dart`, full suite green (89/89), `flutter analyze` clean. Not yet merged to `develop` or released - see `NEXT_ITERATION_PLANNING_2026-08-21.md` for this release's sequencing.
+**Status: ✅ DONE, 2026-08-21. Targeted at v2.2.0+30** (minor version bump, in development, not yet built). Implemented on `feature/express-mode-cooldown-display`, merged to `develop` (`cad0851`): `source/supplier_app/lib/widgets/scan_interval_editor.dart` (new) + `supplier_settings.dart` (wired up). 6 new widget tests in `source/supplier_app/test/screens/supplier_settings_scan_interval_test.dart`, full suite green (89/89), `flutter analyze` clean. See `docs/deployment/RELEASES.md` and `NEXT_ITERATION_PLANNING_2026-08-21.md` for this release's status and sequencing.
 
 **Source:** consolidated from `docs/review/scan-interval-settings-note.md`, 2026-08-21.
 

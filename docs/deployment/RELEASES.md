@@ -17,6 +17,19 @@ Examples:
 
 ## Current Releases
 
+### v2.2.0+30 - Build 30 (🔵 In development)
+- **Date:** August 21, 2026
+- **Platform:** Not yet built or uploaded.
+- **Branch:** `develop`/`feature/express-mode-cooldown-display` (`cad0851` - not yet merged to `main`, no release branch cut yet)
+- **Version:** 2.2.0+30
+- **Status:** 🔵 In development. **Minor version bump** (2.1.1 -> 2.2.0) - a genuine capability increase (the scan cooldown was previously fixed at onboarding-time only), not a build-only or patch bump.
+- **Focus:** Editable Express Mode scan cooldown (Supplier app), plus a positioning/metadata update for both apps' App Store Connect listings - see `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md` for the decided sequencing this release follows.
+- **Major Changes:**
+  - **Editable scan cooldown:** the Express Mode scan cooldown (`Business.scanInterval`) can now be changed after setup from Supplier app Settings, not just once at onboarding - new `widgets/scan_interval_editor.dart`, mirroring the existing `stamps_required_fix.dart` self-service pattern. Safe to change anytime: unlike `stampsRequired`, `scanInterval` is never baked into an issued card, so a change applies to the very next stamp scanned with no effect on any card already issued. ✅ Done 2026-08-21 - 6 new tests, full suite green (89/89), `flutter analyze` clean. Full detail: `docs/project-management/FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`.
+  - **Positioning/metadata update:** ⏳ planned, not yet done. Uses `docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md` and `docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md` to update both apps' App Store Connect subtitle/promotional text/description copy - see those docs for the drafted changes awaiting review.
+  - Also consolidated planning material from several earlier Claude sessions into `docs/project-management/`, `docs/marketing/`, and `docs/quality/` - not app behavior, but worth noting since it landed in the same commits. See `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md`.
+- **Next Steps:** Decide and apply the positioning/metadata update (see above), then build, TestFlight, real-device validate, merge `develop` → `main`, cut `releases/v2.2.0-build30`, and submit for App Store review - standard workflow.
+
 ### v2.1.1+29 - Build 29 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 17-18, 2026 (built/submitted); August 19, 2026 (approved and released)
 - **Platform:** Built and delivered to TestFlight 2026-08-18, real-device validated, metadata confirmed in ASC, submitted for App Store review 2026-08-18, **approved by Apple and released to the App Store 2026-08-19** (both apps, via App Store Connect).

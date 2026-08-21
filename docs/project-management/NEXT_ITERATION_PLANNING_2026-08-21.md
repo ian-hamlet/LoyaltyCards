@@ -46,22 +46,23 @@ Independent read-only review of `develop` @ `b0f6476`. Verdict: moderate, target
 
 Phasing has been discussed and decided - this supersedes the earlier unphased bucketing (kept below for the reasoning trail). Order:
 
-### 1. This release — in progress now
+### 1. This release — v2.2.0+30, in progress now
 
-1. **Editable Express Mode scan cooldown** (#2) - Supplier app Settings. ✅ Built 2026-08-21, tested, not yet merged/released - see `FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`.
-2. **Positioning/metadata update** (#3) - once the cooldown feature is in, use the competitive assessment (#4) and drafted positioning copy to update ASC metadata and produce updated documentation/positioning for this same release.
-3. Build, submit to TestFlight, and take through App Store review as the next release.
+1. **Editable Express Mode scan cooldown** (#2) - Supplier app Settings. ✅ Built 2026-08-21, tested, merged to `develop` (`cad0851`) - see `FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`.
+2. **Version bumped to 2.2.0+30** (minor bump - a genuine capability increase) - ✅ done 2026-08-21, all 6 version-tracking files updated (`pubspec.yaml` x3, `pubspec.lock` x2, `version.dart`), plus `RELEASES.md`, `CHANGELOG.md`, and `APP_STORE_SUBMISSION_CHECKLIST.md`. New metadata packet created: `docs/deployment/APP_STORE_METADATA_PACKET_v2_2_0_30.md`.
+3. **Positioning/metadata update** (#3) - ✅ Applied 2026-08-22 to `APP_STORE_METADATA_PACKET_v2_2_0_30.md` (both apps' Subtitle/Promotional Text/Description, plus the Supplier app's Keywords swap) - see `docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md`.
+4. Build, submit to TestFlight, and take through App Store review as v2.2.0+30.
 
 **CI gate (#6 step 1): explicitly deferred, not declined.** Decision: test runs stay manual/on-demand for now rather than automated on every push - revisit later if that stops being manageable.
 
 ### 2. After Apple approves this release
 
-4. **Complete the Cloudflare migration checklist** (#1) - update the 4 ASC URL fields to the new Cloudflare host, tick off the 5 pending checklist items, then disable GitHub Pages. This was always gated on "ride along with the next release" (see `CLOUDFLARE_MIGRATION_COMPLETION_PLAN.md`) - this release is that vehicle, since the cooldown feature + metadata update will already exercise the full build/submit/approve pipeline once. This is its own milestone/checkpoint once done, not a separate app version.
+5. **Complete the Cloudflare migration checklist** (#1) - update the 4 ASC URL fields to the new Cloudflare host, tick off the 5 pending checklist items, then disable GitHub Pages. This was always gated on "ride along with the next release" (see `CLOUDFLARE_MIGRATION_COMPLETION_PLAN.md`) - this release is that vehicle, since the cooldown feature + metadata update will already exercise the full build/submit/approve pipeline once. This is its own milestone/checkpoint once done, not a separate app version.
 
 ### 3. Future — unscheduled, explore later
 
-5. **Code quality refactor** (#6) - the screen-extraction work and everything else in the review.
-6. **Generalization ideas** (#5) - the standalone wallet mode, generic claim types, open protocol spec, and zone certificates.
+6. **Code quality refactor** (#6) - the screen-extraction work and everything else in the review.
+7. **Generalization ideas** (#5) - the standalone wallet mode, generic claim types, open protocol spec, and zone certificates.
 
 Both of these remain fully described in their own docs, unscheduled and unprioritized relative to each other, for whenever they're picked up.
 

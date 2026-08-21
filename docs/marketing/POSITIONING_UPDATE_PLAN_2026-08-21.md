@@ -1,6 +1,6 @@
 # Positioning Update Plan — App Store Metadata & Documentation
 
-**Source:** consolidated from `docs/review/LoyaltyCards-Positioning-Updates-DRAFT.md`, 2026-08-21. Status: **draft, not yet applied** to App Store Connect or any in-repo metadata packet.
+**Source:** consolidated from `docs/review/LoyaltyCards-Positioning-Updates-DRAFT.md`, 2026-08-21. **Status: ✅ Applied 2026-08-22** to `docs/deployment/APP_STORE_METADATA_PACKET_v2_2_0_30.md` (all suggested changes below adopted as-is, both apps). Not yet entered in App Store Connect - that happens at submission time, along with the rest of that packet's fields.
 
 ## Why these changes
 

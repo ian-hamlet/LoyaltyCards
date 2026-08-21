@@ -9,6 +9,7 @@ import 'supplier_onboarding.dart';
 import 'recovery_backup_screen.dart';
 import 'clone_device_screen.dart';
 import '../../widgets/stamps_required_fix.dart';
+import '../../widgets/scan_interval_editor.dart';
 
 /// Feature flag: Show dangerous reset button during testing phase
 /// Set to false before production App Store release
@@ -38,6 +39,9 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   // DECISION-017: local copy so the tile reflects a fix immediately,
   // without needing the whole screen to be popped/reloaded from Home.
   late int _stampsRequired = widget.business.stampsRequired;
+  // Same local-copy pattern as _stampsRequired above - reflects an edit
+  // immediately without reloading the whole screen from Home.
+  late int _scanInterval = widget.business.scanInterval;
 
   @override
   void initState() {
@@ -54,6 +58,17 @@ class _SupplierSettingsState extends State<SupplierSettings> {
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;
     setState(() => _stampsRequired = updated.stampsRequired);
+  }
+
+  Future<void> _editScanInterval() async {
+    final saved = await showEditScanIntervalDialog(
+      context,
+      widget.business.copyWith(scanInterval: _scanInterval),
+    );
+    if (!saved || !mounted) return;
+    final updated = await _businessRepo.getBusiness();
+    if (!mounted || updated == null) return;
+    setState(() => _scanInterval = updated.scanInterval);
   }
 
   Future<void> _loadSecuritySettings() async {
@@ -280,7 +295,9 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             ListTile(
               leading: const Icon(Icons.timer),
               title: const Text('Scan Cooldown'),
-              subtitle: Text('${widget.business.scanInterval ~/ 1000} seconds between accepted scans'),
+              subtitle: Text('${_scanInterval ~/ 1000} seconds between accepted scans, tap to change'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _editScanInterval,
             ),
           ListTile(
             leading: const Icon(Icons.key),

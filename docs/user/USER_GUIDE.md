@@ -387,7 +387,8 @@ When a card is completed, a new card is automatically created for the same busin
 5. **Danger Zone**
    - Reset Business Configuration
    - **⚠️ Use only if starting over**
-   - All customer cards become invalid
+   - **This is permanent for every customer's existing card, not just your own device.** Resetting deletes your business record and cryptographic keys and starts you over with a brand-new identity - there's no server to notify customers of this, so their existing cards simply stop being able to receive stamps or be redeemed here, silently, with no explanation shown to them. They'd need to be issued a fresh card from scratch. **The one way to avoid this:** if you made a Recovery Backup *before* resetting, restoring from it brings back your exact same identity and keys - every customer's existing card keeps working normally, as if nothing happened. Without a backup, this is irreversible.
+   - **Deleting the app from your device has the same effect as resetting**, for the same reason - it's a new identity on next setup, whether that's a reinstall or a different device. Restoring from a Recovery Backup before you delete/reinstall is what prevents this.
 
 ---
 

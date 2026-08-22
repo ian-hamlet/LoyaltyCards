@@ -180,11 +180,11 @@ Q4: Can you dedicate a device?
 
 ## 🔧 Changing Your Mode
 
-**Important:** The operation mode cannot be changed after initial setup without doing a complete business reset (which deletes all customer data).
+**Important:** The operation mode cannot be changed after initial setup without doing a complete business reset - see "Resetting Your Business or Deleting the App" below for exactly what that means for customers already holding a card from you.
 
 However, you can:
 1. Create a second business with the other mode (if you have multiple payment programs)
-2. Reset your business and start fresh with different mode (⚠️ loses all customer data)
+2. Reset your business and start fresh with different mode (⚠️ orphans every customer's existing card, unless you restore from a Recovery Backup afterward - see below)
 
 **Recommendation:** Take 5 minutes now to read this guide and make the right choice the first time.
 
@@ -198,9 +198,23 @@ Unlike Operation Mode, your Business Name, Icon, Brand Color, and Stamps Require
 
 **Your responsibility when raising Stamps Required:** an increase is never applied to a card someone is already collecting on, even after their next scan - it only takes effect for the *next* card a customer starts, once their current one is complete. This is deliberate: it means you can never make a deal worse for a customer already working toward it.
 
+**A customer whose card is already complete but not yet redeemed when you change the number:** their card keeps the number it completed under - it's already earned, so it doesn't retroactively change either way. As soon as that card completes, though, the app has already started them on their *next* card in the background (they don't need to redeem the old one first, or scan again, to begin it) - so a change you make while their old card is sitting there waiting for redemption still reaches them normally, on that next card's own first scan.
+
 **Express Mode specifically:** because a customer's card only updates when they scan, if a change needs to reach existing customers promptly, have them scan again (or regenerate/reprint any posted static stamp QR code, which also carries your current business info).
 
 Every edit you make - plus Recovery Backup, Clone, and Restore events - is recorded in a local **Audit Trail** (Settings → View Audit Trail), viewable and shareable as a PDF for your own records or for support. It stays on this device only - it's not included in your Recovery Backup and isn't sent anywhere.
+
+---
+
+## 🗑️ Resetting Your Business or Deleting the App - Impact on Customers
+
+There's no server behind LoyaltyCards - your business identity is just a record and a cryptographic key pair stored on this device. That's what makes it fast and private, but it also means **resetting your business (Settings → Danger Zone → Reset Business Configuration) or deleting the app entirely creates a brand-new identity the next time you set up**, with no way to reach customers to tell them.
+
+**What this means for a customer with a card already in circulation:** their card doesn't get deleted or changed on their phone - it just quietly stops working with your business. The next time they try to scan a stamp or redemption QR from you, your device won't recognize their card at all (it belongs to your *old* identity, which no longer exists here), so nothing happens for them - no error explaining why, since their app has no way to know you reset. They'd need to be issued a completely fresh card, as if they were a first-time customer.
+
+**The one thing that prevents this: a Recovery Backup made *before* you reset or delete.** Restoring from that backup brings back your exact same business identity and keys - not a copy, the same one - so every customer's existing card carries on exactly as before, completely unaffected. This is why "Create Recovery Backup" is flagged as critical, do-it-immediately advice from the moment you finish setup, and why it's worth re-doing after any profile edit you'd hate to lose. Without a backup, a reset or app deletion is not reversible for customers already holding a card from you.
+
+**This has nothing to do with switching devices the supported way.** Cloning to another device (Settings → Clone to Another Device) or restoring a Recovery Backup both carry your real identity forward intentionally - customers are unaffected either way. It's only an *unplanned* reset or reinstall, without a backup to restore from afterward, that causes this.
 
 ---
 
@@ -333,7 +347,7 @@ This message is shown when the app first requests Face ID permission. It explain
 ## ❓ Frequently Asked Questions
 
 **Q: Can I change modes later?**  
-A: No, not without resetting your business (deletes all customer data). Choose carefully now.
+A: No, not without resetting your business - which orphans every customer's existing card unless you restore from a Recovery Backup afterward (see "Resetting Your Business or Deleting the App" above). Choose carefully now.
 
 **Q: What if I'm not sure which mode?**  
 A: Start with EXPRESS MODE - it's the default and works for 80% of businesses.

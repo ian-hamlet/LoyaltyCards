@@ -118,6 +118,18 @@ void main() {
   /// inside `runAsync` gives that initState work genuine wall-clock time to
   /// finish, then a normal `pumpAndSettle()` processes the resulting
   /// `setState()` and any animations.
+  ///
+  /// Tried replacing this with a poll on the screen's own loading spinner
+  /// (`_isLoading`, cleared once `_loadBusiness()`'s real DB read
+  /// completes) instead of guessing a duration - reasonable in principle,
+  /// but it made `pumpAndSettle()` below time out specifically on the
+  /// Secure Mode path, which renders a live `MobileScanner` view once
+  /// loaded. Waiting materially longer (the poll loop can run up to ~5s of
+  /// real time) before that final settle call seems to shift the fake
+  /// camera platform into a state `pumpAndSettle()` can't resolve - not
+  /// investigated further, since this is exactly the kind of camera/timer
+  /// interaction that's opaque from outside mobile_scanner's internals.
+  /// Reverted to the fixed delay as the safe, known-working choice.
   Future<void> settleAfterMount(WidgetTester tester) async {
     await tester.pump();
     await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 300)));
@@ -281,11 +293,14 @@ void main() {
       // showDialog(), which only resolves once the dialog is dismissed -
       // awaiting the full call here would deadlock against itself, since
       // nothing dismisses the dialog until control returns to the test body.
-      await tester.runAsync(() async {
-        // ignore: avoid_dynamic_calls, discarded_futures
-        unawaited((state as dynamic).processManualRedemptionForTesting() as Future);
-        await Future.delayed(const Duration(milliseconds: 200));
-      });
+      // ignore: avoid_dynamic_calls, discarded_futures
+      unawaited((state as dynamic).processManualRedemptionForTesting() as Future);
+      await tester.pump();
+      for (var attempt = 0; attempt < 50; attempt++) {
+        if (find.text('Redemption Recorded!').evaluate().isNotEmpty) break;
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pump();
+      }
       await tester.pumpAndSettle();
 
       expect(find.text('Redemption Recorded!'), findsOneWidget);

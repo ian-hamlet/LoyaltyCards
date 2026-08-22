@@ -559,9 +559,9 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   /// State class is private, call it dynamically:
   /// `(tester.state(find.byType(SupplierRedeemCard)) as dynamic).processCardQRForTesting(qrData)`.
   @visibleForTesting
-  void processCardQRForTesting(String qrData) => _processCardQR(qrData);
+  Future<void> processCardQRForTesting(String qrData) => _processCardQR(qrData);
 
-  void _processCardQR(String qrData) {
+  Future<void> _processCardQR(String qrData) async {
     setState(() {
       _isProcessing = true;
     });
@@ -581,7 +581,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       Haptics.success();
 
       if (json['type'] == 'redemption_request') {
-        _processRedemptionRequestToken(RedemptionRequestToken.fromJson(json));
+        await _processRedemptionRequestToken(RedemptionRequestToken.fromJson(json));
         return;
       } else if (json['type'] == 'card_stamp_request') {
         // Customer is showing a stamp request QR, not a redemption QR
@@ -605,7 +605,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       try {
         final token = RedemptionQrCodec.decode(qrData);
         Haptics.success();
-        _processRedemptionRequestToken(token);
+        await _processRedemptionRequestToken(token);
         return;
       } catch (e2) {
         AppLogger.debug('Failed to parse as compact redemption token: $e2', 'QR');
@@ -619,7 +619,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           final stamps = int.tryParse(parts[3]) ?? 0;
           AppLogger.qr('Legacy redemption format detected');
           Haptics.success();
-          _showSecureModeRedemptionConfirmation(context, cardId, stamps);
+          await _showSecureModeRedemptionConfirmation(context, cardId, stamps);
           return;
         }
       }
@@ -631,7 +631,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   /// Shared by both the plain-JSON and TEST-020 compact-decode success
   /// paths in _processCardQR - validates a parsed [RedemptionRequestToken]
   /// and proceeds to redemption confirmation or a rejection message.
-  void _processRedemptionRequestToken(RedemptionRequestToken token) {
+  Future<void> _processRedemptionRequestToken(RedemptionRequestToken token) async {
     AppLogger.qr('Redemption token parsed successfully');
     AppLogger.qr('Card ID: ${token.cardId}');
     AppLogger.qr('Stamps collected: ${token.stampsCollected}');
@@ -653,14 +653,14 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       AppLogger.warning('Device mismatch detected!', 'Security');
       AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
       AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
-      _showDeviceMismatchWarning(context, token);
+      await _showDeviceMismatchWarning(context, token);
       return;
     }
 
-    _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
+    await _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
   }
 
-  void _showSecureModeRedemptionConfirmation(
+  Future<void> _showSecureModeRedemptionConfirmation(
     BuildContext context,
     String cardId,
     int stamps, {
@@ -821,7 +821,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   }
   
   /// V-005: Show warning when card is being redeemed on a different device
-  void _showDeviceMismatchWarning(BuildContext context, RedemptionRequestToken token) async {
+  Future<void> _showDeviceMismatchWarning(BuildContext context, RedemptionRequestToken token) async {
     setState(() {
       _isProcessing = false;
     });
@@ -881,7 +881,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     if (result == true) {
       // User chose to proceed despite mismatch
       AppLogger.warning('Supplier chose to proceed with device mismatch', 'Security');
-      _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
+      await _showSecureModeRedemptionConfirmation(context, token.cardId, token.stampsCollected, token: token);
     } else {
       // User cancelled
       AppLogger.warning('Supplier cancelled redemption due to device mismatch', 'Security');

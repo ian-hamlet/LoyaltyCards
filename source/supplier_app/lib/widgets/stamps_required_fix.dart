@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
+import '../models/audit_entry.dart';
 import '../services/business_repository.dart';
+import '../services/audit_trail_repository.dart';
 
 /// DECISION-017: proactive detection + self-service fix for a business
 /// whose stampsRequired falls outside the app's currently-supported
@@ -67,11 +69,15 @@ class OutOfRangeStampsBanner extends StatelessWidget {
 
 /// Shows a dialog letting the supplier pick a new stampsRequired value
 /// within the currently-supported range, and saves it via
-/// [BusinessRepository.updateBusiness]. Only ever offered when the
-/// business is already out of range - not general free-editing, which
-/// stays deliberately locked to avoid a business owner casually changing
-/// the target stamp count mid-operation and confusing customers with
-/// in-progress cards. Returns true if the business was actually updated.
+/// [BusinessRepository.updateBusiness]. Originally offered only when the
+/// business was already out of range (the "Fix Now" flow, still true for
+/// [OutOfRangeStampsBanner] above); confirmed 2026-08-22
+/// (Requirements/DISCUSSION_Business_Field_Editing.md) as also reachable
+/// as general free-editing from Settings, any time - see the directional
+/// policy in that doc's §4.1 for how a change actually propagates to
+/// in-progress cards (decrease applies on next scan; increase only to the
+/// next card, after redemption). Returns true if the business was
+/// actually updated.
 Future<bool> showFixStampsRequiredDialog(BuildContext context, Business business) async {
   int selected = business.stampsRequired.clamp(
     CardIssueToken.minStampsRequired,
@@ -123,6 +129,11 @@ Future<bool> showFixStampsRequiredDialog(BuildContext context, Business business
             onPressed: () async {
               try {
                 await BusinessRepository().updateBusiness(business.copyWith(stampsRequired: selected));
+                await AuditTrailRepository().logEntry(
+                  businessId: business.id,
+                  propertyName: AuditProperty.stampsRequired,
+                  newValue: '$selected',
+                );
                 if (dialogContext.mounted) Navigator.pop(dialogContext, true);
               } catch (e) {
                 if (dialogContext.mounted) {

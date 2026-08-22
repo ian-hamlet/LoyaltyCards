@@ -7,7 +7,9 @@ import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/key_manager.dart';
 import '../../services/biometric_auth_service.dart';
+import '../../services/audit_trail_repository.dart';
 import '../../models/biometric_auth_result.dart';
+import '../../models/audit_entry.dart';
 
 /// Screen for generating clone QR code to set up business on additional devices
 /// Clone QR expires in 5 minutes (see SupplierConfigBackup.cloneQrExpiryMs) and allows another device to get full business config
@@ -110,6 +112,14 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
       );
 
       final cloneQR = await SupplierConfigBackup.createCloneQR(businessWithKeys);
+
+      // Requirements/DISCUSSION_Business_Field_Editing.md §7: log the
+      // initiated event (source device's side) - not the clone QR's
+      // contents, which include the private key.
+      await AuditTrailRepository().logEntry(
+        businessId: widget.business.id,
+        propertyName: AuditProperty.cloneQrGenerated,
+      );
 
       if (mounted) {
         setState(() {

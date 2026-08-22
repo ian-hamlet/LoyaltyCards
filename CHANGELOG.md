@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0+31] - 2026-08-22
+
+**Status:** 🔵 In development on `feature/businessedit` - not yet merged to `develop`/`main`, not yet built or uploaded. **Build-only bump** - a large addition, but folded into the same not-yet-shipped 2.2.0 line as v2.2.0+30 rather than its own version, since nothing has been uploaded under 2.2.0 yet.
+
+### Added
+- **Supplier app: Business Name, Icon, and Brand Color are now editable after setup**, joining the already-editable Stamps Required (DECISION-017's "Fix Now" flow, now generally available rather than only when out of range) and Scan Cooldown (v2.2.0+30). Only Operation Mode (Secure vs Express) remains permanently locked. New editor dialogs mirror the existing self-service pattern. `source/supplier_app/lib/widgets/business_name_editor.dart`, `business_icon_editor.dart`, `business_color_editor.dart`, `supplier_settings.dart`.
+- **`stampsRequired` changes on an in-progress customer card now follow a customer-protective directional policy**, instead of being impossible to change after issuance: a decrease applies on the customer's very next scan (reusing the existing TEST-018 overflow-relocation machinery unmodified for any resulting over-completion); an increase never applies retroactively to a card already in progress - only to the *next* card, created once the current one completes and redeems. `StampToken` gained optional, unsigned snapshot fields carrying the business's current name/icon/color/stampsRequired, decoded as nullable for full backward compatibility with older tokens. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-021.
+- **New local audit trail (Supplier app)**: records initial business values at setup, every subsequent profile field edit, and Recovery Backup/Clone-generated/Restore/Clone-received events (the latter two also recording the inherited baseline). Per-device only, never synced or backed up, no length cap, cleared by "Delete All Data". Viewable and shareable as a PDF from a new "View Audit Trail" row at the bottom of Settings.
+
+### Fixed
+- **A `stampsRequired` decrease that pushed a card to completion could silently drop the customer's just-earned stamp.** Found during this feature's own testing, not a pre-existing report - the directional-policy write briefly persisted an intermediate card state that failed an existing validation check, silently aborting (and rolling back) the whole stamp-crediting transaction. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-021.
+
 ## [2.2.0+30] - 2026-08-21
 
 **Status:** 🔵 In development on `develop`/`feature/express-mode-cooldown-display` - not yet built or uploaded. **Minor version bump** (2.1.1 -> 2.2.0) - the editable scan cooldown is a genuine capability increase, not a build-only or patch change. A positioning/metadata update is also planned for this release but not yet done - see `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md` for the full sequencing.

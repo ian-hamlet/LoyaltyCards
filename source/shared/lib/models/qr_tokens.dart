@@ -345,6 +345,20 @@ class StampToken extends QRToken {
   final int? expiryDate; // Optional expiry timestamp (null = no expiry)
   final int? scanInterval; // Supplier's configured rate limit in ms (null = use default)
 
+  // Business profile snapshot fields (Requirements/DISCUSSION_Business_Field_Editing.md
+  // §4). Populated by the supplier app at token-generation time as a
+  // snapshot of the CURRENT Business record - deliberately outside
+  // getSignatureData() below, since these are informational/display-only,
+  // not trust-bearing (stamp-chain integrity doesn't depend on them). All
+  // nullable: an older supplier app that never sends them, or an
+  // already-in-circulation older-format token, decodes fine with these
+  // simply absent - no crash, no behavior change from before this field
+  // existed.
+  final String? businessName;
+  final String? brandColor;
+  final int? logoIndex;
+  final int? stampsRequired;
+
   StampToken({
     required this.id,
     required this.cardId,
@@ -357,6 +371,10 @@ class StampToken extends QRToken {
     this.stampCount = 1, // Default: 1 stamp (backward compatible)
     this.expiryDate, // Optional expiry
     this.scanInterval, // Optional rate limit override
+    this.businessName,
+    this.brandColor,
+    this.logoIndex,
+    this.stampsRequired,
   }) : super(type: 'stamp_token', timestamp: timestamp);
 
   factory StampToken.fromJson(Map<String, dynamic> json) {
@@ -375,6 +393,10 @@ class StampToken extends QRToken {
       stampCount: json['stampCount'] as int? ?? 1, // REQ-022: Default 1 for backward compatibility
       expiryDate: json['expiryDate'] as int?, // REQ-022: Optional expiry
       scanInterval: json['scanInterval'] as int?, // REQ-022: Optional rate limit
+      businessName: json['businessName'] as String?,
+      brandColor: json['brandColor'] as String?,
+      logoIndex: json['logoIndex'] as int?,
+      stampsRequired: json['stampsRequired'] as int?,
     );
   }
 
@@ -392,7 +414,7 @@ class StampToken extends QRToken {
       'additionalStamps': additionalStamps.map((s) => s.toJson()).toList(),
       'stampCount': stampCount, // REQ-022
     };
-    
+
     // Only include optional fields if they have values
     // Use local variables to allow null-safety promotion
     final expiry = expiryDate;
@@ -403,7 +425,23 @@ class StampToken extends QRToken {
     if (interval != null) {
       json['scanInterval'] = interval;
     }
-    
+    final name = businessName;
+    if (name != null) {
+      json['businessName'] = name;
+    }
+    final color = brandColor;
+    if (color != null) {
+      json['brandColor'] = color;
+    }
+    final logo = logoIndex;
+    if (logo != null) {
+      json['logoIndex'] = logo;
+    }
+    final required = stampsRequired;
+    if (required != null) {
+      json['stampsRequired'] = required;
+    }
+
     return json;
   }
 

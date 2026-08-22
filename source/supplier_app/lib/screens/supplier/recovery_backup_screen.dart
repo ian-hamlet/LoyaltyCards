@@ -9,7 +9,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/backup_storage_service.dart';
 import '../../services/key_manager.dart';
 import '../../services/biometric_auth_service.dart';
+import '../../services/audit_trail_repository.dart';
 import '../../models/biometric_auth_result.dart';
+import '../../models/audit_entry.dart';
 import 'package:intl/intl.dart';
 
 /// Screen for creating and exporting supplier configuration backups
@@ -155,6 +157,14 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       final backup =
           await SupplierConfigBackup.createRecoveryBackup(businessWithKeys);
       AppLogger.debug('Backup created, QR string length: ${backup.toQRString().length}', 'Backup');
+
+      // Requirements/DISCUSSION_Business_Field_Editing.md §7: log the
+      // initiated event - the audit trail records that a backup was made,
+      // not the backup's contents (which include the private key).
+      await AuditTrailRepository().logEntry(
+        businessId: widget.business.id,
+        propertyName: AuditProperty.recoveryBackupCreated,
+      );
       
       AppLogger.debug('Generating QR image bytes...', 'Backup');
       final qrBytes = await BackupStorageService.generateQRImageBytes(backup);

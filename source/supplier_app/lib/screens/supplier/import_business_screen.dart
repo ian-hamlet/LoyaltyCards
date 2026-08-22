@@ -6,6 +6,8 @@ import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
 import '../../services/biometric_auth_service.dart';
+import '../../services/audit_trail_repository.dart';
+import '../../models/audit_entry.dart';
 import '../../utils/error_message_mapper.dart';
 import 'supplier_home.dart';
 import 'package:pointycastle/ecc/api.dart';
@@ -226,6 +228,25 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
       AppLogger.database('Saving business to database');
       await _businessRepo.insertBusiness(business);
       AppLogger.database('Business saved to database');
+
+      // Requirements/DISCUSSION_Business_Field_Editing.md §7: a
+      // restore/clone-receive is a new starting point for the audit trail,
+      // same shape as fresh setup - log the marker event, then the
+      // inherited values as the new baseline.
+      final auditTrailRepo = AuditTrailRepository();
+      await auditTrailRepo.logEntry(
+        businessId: business.id,
+        propertyName: backup.type == 'clone' ? AuditProperty.configuredViaClone : AuditProperty.restoredFromBackup,
+      );
+      await auditTrailRepo.logProfileSnapshot(
+        businessId: business.id,
+        name: business.name,
+        logoIndex: business.logoIndex,
+        brandColor: business.brandColor,
+        stampsRequired: business.stampsRequired,
+        mode: business.mode,
+        scanIntervalMs: business.scanInterval,
+      );
 
       AppLogger.business('Business import complete: ${business.name}');
 

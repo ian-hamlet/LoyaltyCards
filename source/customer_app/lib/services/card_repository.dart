@@ -101,12 +101,17 @@ class CardRepository {
   }
 
   /// Update an existing card
-  Future<void> updateCard(models.Card card) async {
+  ///
+  /// Accepts an optional [executor] (same pattern as [updateStampCount])
+  /// so a profile-snapshot update (Requirements/DISCUSSION_Business_Field_Editing.md
+  /// §4.1) can be folded into the same atomic transaction as the stamp
+  /// credit it rides alongside, instead of being a separate write.
+  Future<void> updateCard(models.Card card, {DatabaseExecutor? executor}) async {
     // Runtime validation (works in ALL build modes)
     _validateCard(card);
-    
-    final db = await _dbHelper.database;
-    
+
+    final db = executor ?? await _dbHelper.database;
+
     try {
       await db.update(
         'cards',

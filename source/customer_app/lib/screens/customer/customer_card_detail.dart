@@ -1039,6 +1039,15 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
         AppLogger.business('No existing cards with space found - creating new card');
         
         // Auto-create new card for continued loyalty
+        //
+        // businessName/brandColor/logoIndex are already kept fresh on the
+        // old card by every ordinary stamp scan (see
+        // QrScannerScreen._handleStampToken §4.1), so cloning them here is
+        // already correct. stampsRequired uses the separately-tracked
+        // snapshot, falling back to the old card's own value if none was
+        // ever seen - see the matching comment in
+        // QrScannerScreen._handleRedemptionToken (Requirements/
+        // DISCUSSION_Business_Field_Editing.md §4.1).
         final newCardId = '${_card!.businessId}_${DateTime.now().millisecondsSinceEpoch}';
         final newCard = models.Card(
           id: newCardId,
@@ -1048,7 +1057,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
           brandColor: _card!.brandColor,
           logoIndex: _card!.logoIndex,
           mode: _card!.mode,
-          stampsRequired: _card!.stampsRequired,
+          stampsRequired: _card!.latestStampsRequiredSnapshot ?? _card!.stampsRequired,
           stampsCollected: 0,
           createdAt: now,
           updatedAt: now,

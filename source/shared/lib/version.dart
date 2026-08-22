@@ -598,13 +598,42 @@
 ///   each time a stamp token is generated, so a change applies to the very
 ///   next scan with no effect on any card already issued. Also added a
 ///   read-only display of the current cooldown to the same screen.
-/// - Planned for this release, not yet done as of this version bump: a
-///   positioning/metadata update for both apps' App Store Connect listings,
+/// - Positioning/metadata update for both apps' App Store Connect listings,
 ///   informed by a competitive assessment - see
 ///   docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md and
-///   docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md. Update this entry
-///   once that's actually done, or split it into its own build if it slips
-///   to a later one.
+///   docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md. Applied to
+///   APP_STORE_METADATA_PACKET_v2_2_0_30.md 2026-08-22.
+///
+/// Build 31 Changes (build-only bump, same 2.2.0 line - large addition to
+/// the same in-development, not-yet-shipped release rather than its own
+/// version, since nothing has been uploaded under 2.2.0 yet):
+/// - Supplier app: business profile fields (Name, Icon, Brand Color) are now
+///   editable after setup, alongside the already-editable Stamps Required
+///   and Scan Cooldown - only `mode` remains permanently locked. New editor
+///   dialogs mirror the existing `stamps_required_fix.dart`/
+///   `scan_interval_editor.dart` self-service pattern.
+/// - `stampsRequired` changes on an in-progress (non-redeemed) card now
+///   follow a directional policy: a decrease applies on the customer's next
+///   scan (reusing the existing TEST-018 overflow-relocation machinery for
+///   any resulting over-completion, not a new instant-complete path); an
+///   increase never applies retroactively - only to the next card, created
+///   once the current one completes and redeems. `StampToken` gained
+///   optional, unsigned snapshot fields (`businessName`, `brandColor`,
+///   `logoIndex`, `stampsRequired`) to carry this - kept outside
+///   `getSignatureData()` so stamp-chain integrity is unaffected, decoded as
+///   nullable for backward compatibility with older tokens/app versions.
+/// - New local audit trail (Supplier app only, per-device, not synced):
+///   records initial business values at setup, every subsequent profile
+///   field edit, and Recovery Backup/Clone-initiated and
+///   Restore/Clone-received events, each with a timestamp, the field/event
+///   name, the new value, and the app version that made the change. Viewable
+///   and shareable (PDF, reusing the existing `BackupStorageService`
+///   print/share pattern) from a new dedicated screen off Settings.
+///   Cleared by "Delete All Data" like every other business-scoped table.
+///   Full detail: docs/project-management/Requirements/
+///   DISCUSSION_Business_Field_Editing.md. Implementation record:
+///   docs/project-management/DEFECT_TRACKER.md DECISION-021. App Store
+///   metadata: docs/deployment/APP_STORE_METADATA_PACKET_v2_2_0_31.md.
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.0+30';
+const String appVersion = '2.2.0+31';

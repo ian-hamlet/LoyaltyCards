@@ -119,6 +119,13 @@ class QRTokenGenerator {
   /// - [stampCount]: Number of stamps this token grants (1-N, default 1)
   /// - [expiryDate]: Optional expiry timestamp (null = no expiry)
   /// - [scanInterval]: Optional supplier-specific rate limit in ms
+  ///
+  /// Business profile snapshot (Requirements/DISCUSSION_Business_Field_Editing.md
+  /// §4) - [businessName]/[brandColor]/[logoIndex]/[stampsRequired], all
+  /// optional: pass the CURRENT Business record's values at generation
+  /// time. Not part of the signed payload (see StampToken.getSignatureData) -
+  /// purely informational, letting the customer app pick up a supplier's
+  /// profile edits without needing a brand-new card.
   Future<StampToken> generateStampToken({
     required String businessId,
     required String cardId,
@@ -128,6 +135,10 @@ class QRTokenGenerator {
     int stampCount = 1, // REQ-022
     int? expiryDate, // REQ-022
     int? scanInterval, // REQ-022
+    String? businessName,
+    String? brandColor,
+    int? logoIndex,
+    int? stampsRequired,
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
@@ -209,6 +220,10 @@ class QRTokenGenerator {
       stampCount: stampCount, // REQ-022
       expiryDate: expiryDate, // REQ-022
       scanInterval: scanInterval, // REQ-022
+      businessName: businessName,
+      brandColor: brandColor,
+      logoIndex: logoIndex,
+      stampsRequired: stampsRequired,
     );
   }
 }

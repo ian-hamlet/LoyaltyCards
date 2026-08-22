@@ -191,6 +191,20 @@ class SupplierDatabaseHelper {
       )
     ''');
 
+    // Local audit trail - business config changes, backup/clone events
+    // (Requirements/DISCUSSION_Business_Field_Editing.md §7)
+    await db.execute('''
+      CREATE TABLE audit_trail (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        business_id TEXT NOT NULL,
+        timestamp INTEGER NOT NULL,
+        property_name TEXT NOT NULL,
+        new_value TEXT,
+        app_version TEXT NOT NULL,
+        FOREIGN KEY (business_id) REFERENCES business (id) ON DELETE CASCADE
+      )
+    ''');
+
     // Create indexes
     await db.execute('''
       CREATE INDEX idx_issued_cards_business ON issued_cards (business_id)
@@ -202,6 +216,10 @@ class SupplierDatabaseHelper {
 
     await db.execute('''
       CREATE INDEX idx_redemptions_business ON redemptions (business_id)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_audit_trail_business ON audit_trail (business_id)
     ''');
   }
 
@@ -253,6 +271,28 @@ class SupplierDatabaseHelper {
         ALTER TABLE business ADD COLUMN scan_interval_seconds INTEGER NOT NULL DEFAULT 30
       ''');
       AppLogger.database('Migration complete: scan_interval_seconds column added (default: 30s)');
+    }
+
+    // Migration from v5 to v6: Add audit_trail table (local record of
+    // business config changes, backup/clone events - see
+    // Requirements/DISCUSSION_Business_Field_Editing.md §7)
+    if (oldVersion < 6) {
+      AppLogger.database('Migration v5 → v6: Adding audit_trail table');
+      await db.execute('''
+        CREATE TABLE audit_trail (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          business_id TEXT NOT NULL,
+          timestamp INTEGER NOT NULL,
+          property_name TEXT NOT NULL,
+          new_value TEXT,
+          app_version TEXT NOT NULL,
+          FOREIGN KEY (business_id) REFERENCES business (id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('''
+        CREATE INDEX idx_audit_trail_business ON audit_trail (business_id)
+      ''');
+      AppLogger.database('Migration complete: audit_trail table added');
     }
   }
 
@@ -398,7 +438,7 @@ class SupplierDatabaseHelper {
       );
       
       final tableNames = tables.map((t) => t['name'] as String).toSet();
-      final requiredTables = {'business', 'issued_cards', 'stamp_history', 'redemptions', 'app_settings'};
+      final requiredTables = {'business', 'issued_cards', 'stamp_history', 'redemptions', 'app_settings', 'audit_trail'};
       
       if (!requiredTables.every((table) => tableNames.contains(table))) {
         AppLogger.error('Critical tables missing. Expected: $requiredTables, Found: $tableNames');
@@ -451,6 +491,7 @@ class SupplierDatabaseHelper {
     await db.delete('stamp_history');
     await db.delete('redemptions');
     await db.delete('app_settings');
+    await db.delete('audit_trail');
     AppLogger.database('All tables cleared');
   }
 

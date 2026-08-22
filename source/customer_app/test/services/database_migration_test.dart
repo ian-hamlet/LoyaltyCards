@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:customer_app/services/database_helper.dart';
+import 'package:shared/shared.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'dart:io';
@@ -361,7 +362,12 @@ void main() {
       final upgradedDb = await dbHelper.database;
 
       expect(upgradedDb.isOpen, isTrue);
-      expect(await upgradedDb.getVersion(), 8);
+      // References the constant rather than a hardcoded literal - this test
+      // upgrades from a hand-built v7 database to whatever the app's
+      // current target version is, not specifically v8, so a later schema
+      // bump (e.g. v9's latest_stamps_required_snapshot column) shouldn't
+      // need this test edited too.
+      expect(await upgradedDb.getVersion(), AppConstants.databaseVersion);
 
       // The pre-existing card and stamp row must survive untouched.
       final cards = await upgradedDb.query('cards', where: 'id = ?', whereArgs: ['card-v7-1']);
@@ -399,6 +405,150 @@ void main() {
       final movedStamp = await upgradedDb.query('stamps', where: 'id = ?', whereArgs: ['card-v7-1_stamp_2']);
       expect(movedStamp.first['original_card_id'], 'card-source');
       expect(movedStamp.first['original_stamp_number'], 6);
+    });
+  });
+
+  group('v8 -> v9 Migration (latest_stamps_required_snapshot column)', () {
+    const testDbName = 'test_database_migration_v8_v9.db';
+    late String testDbPath;
+
+    setUp(() async {
+      await DatabaseHelper.resetForTesting(testDatabaseName: testDbName);
+      final databasesPath = await getDatabasesPath();
+      testDbPath = join(databasesPath, testDbName);
+      if (await File(testDbPath).exists()) {
+        await File(testDbPath).delete();
+      }
+    });
+
+    tearDown(() async {
+      await DatabaseHelper().close();
+      if (await File(testDbPath).exists()) {
+        await File(testDbPath).delete();
+      }
+      final databasesPath = await getDatabasesPath();
+      final directory = Directory(databasesPath);
+      final backupFiles = directory
+          .listSync()
+          .whereType<File>()
+          .where((file) => basename(file.path).startsWith('backup_'))
+          .toList();
+      for (final backup in backupFiles) {
+        await backup.delete();
+      }
+    });
+
+    test('existing v8 card rows survive the upgrade with latest_stamps_required_snapshot defaulting to NULL',
+        () async {
+      // Build a real v8 database by hand - the shape DatabaseHelper._onCreate
+      // produced before the v9 migration added
+      // latest_stamps_required_snapshot to cards (Requirements/
+      // DISCUSSION_Business_Field_Editing.md §4.1).
+      final v8Db = await databaseFactory.openDatabase(
+        testDbPath,
+        options: OpenDatabaseOptions(
+          version: 8,
+          onCreate: (db, version) async {
+            await db.execute('''
+              CREATE TABLE cards (
+                id TEXT PRIMARY KEY,
+                business_id TEXT NOT NULL,
+                business_name TEXT NOT NULL,
+                business_public_key TEXT NOT NULL,
+                stamps_required INTEGER NOT NULL,
+                stamps_collected INTEGER NOT NULL,
+                brand_color TEXT NOT NULL,
+                logo_index INTEGER NOT NULL DEFAULT 0,
+                mode TEXT NOT NULL DEFAULT 'secure',
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                is_redeemed INTEGER NOT NULL DEFAULT 0,
+                redeemed_at INTEGER,
+                device_id TEXT
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE stamps (
+                id TEXT PRIMARY KEY,
+                card_id TEXT NOT NULL,
+                stamp_number INTEGER NOT NULL,
+                timestamp INTEGER NOT NULL,
+                signature TEXT NOT NULL,
+                previous_hash TEXT,
+                device_id TEXT,
+                original_card_id TEXT,
+                original_stamp_number INTEGER,
+                original_previous_hash TEXT,
+                FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE transactions (
+                id TEXT PRIMARY KEY,
+                card_id TEXT NOT NULL,
+                type TEXT NOT NULL,
+                timestamp INTEGER NOT NULL,
+                business_name TEXT NOT NULL,
+                details TEXT,
+                FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE CASCADE
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE app_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+              )
+            ''');
+          },
+        ),
+      );
+
+      await v8Db.insert('cards', {
+        'id': 'card-v8-1',
+        'business_id': 'business-v8-1',
+        'business_name': 'Pre-Migration Business',
+        'business_public_key': 'test-key',
+        'stamps_required': 8,
+        'stamps_collected': 3,
+        'brand_color': '#123456',
+        'logo_index': 0,
+        'mode': 'secure',
+        'created_at': 1749600000000,
+        'updated_at': 1749600000000,
+        'is_redeemed': 0,
+      });
+      await v8Db.close();
+
+      // Open through the real DatabaseHelper - sqflite sees on-disk
+      // user_version=8 vs the app's current target and runs the real
+      // onUpgrade path.
+      final dbHelper = DatabaseHelper();
+      final upgradedDb = await dbHelper.database;
+
+      expect(upgradedDb.isOpen, isTrue);
+      expect(await upgradedDb.getVersion(), AppConstants.databaseVersion);
+
+      final cards = await upgradedDb.query('cards', where: 'id = ?', whereArgs: ['card-v8-1']);
+      expect(cards.length, 1);
+      expect(cards.first['business_name'], 'Pre-Migration Business');
+      expect(cards.first['stamps_required'], 8);
+
+      // The new column must exist and default to NULL for a card that
+      // predates the concept of a tracked snapshot - this is the condition
+      // the redemption handlers' `?? card.stampsRequired` fallback depends
+      // on to behave exactly as before for a pre-migration card.
+      expect(cards.first.containsKey('latest_stamps_required_snapshot'), isTrue);
+      expect(cards.first['latest_stamps_required_snapshot'], isNull);
+
+      // A freshly-updated post-migration card can now populate it.
+      await upgradedDb.update(
+        'cards',
+        {'latest_stamps_required_snapshot': 12},
+        where: 'id = ?',
+        whereArgs: ['card-v8-1'],
+      );
+      final updatedCard = await upgradedDb.query('cards', where: 'id = ?', whereArgs: ['card-v8-1']);
+      expect(updatedCard.first['latest_stamps_required_snapshot'], 12);
     });
   });
 }

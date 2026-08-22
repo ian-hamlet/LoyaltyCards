@@ -583,7 +583,7 @@ This approach solves the real-world user pain point (having to rotate camera eve
 
 ## 💡 Philosophy
 
-LoyaltyCards is built on three principles:
+LoyaltyCards is built on four principles:
 
 1. **Privacy First**
    - No personal data collection, ever
@@ -600,6 +600,11 @@ LoyaltyCards is built on three principles:
    - Express mode for high-trust environments
    - Secure mode for validation when needed
    - Balance convenience with security
+
+4. **No Strings Attached**
+   - Free, with no revenue model behind it - there's no pressure for a business to "perform" for us
+   - No sales targets - if LoyaltyCards isn't the right fit for a business, that's fine
+   - Made to be a genuinely useful, no-catch tool for small businesses that already put their customers first
 
 ---
 

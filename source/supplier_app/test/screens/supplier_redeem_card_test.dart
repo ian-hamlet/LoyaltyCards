@@ -173,18 +173,42 @@ void main() {
     }
   }
 
-  /// Calls the test-only QR handler and gives its fire-and-forget internal
-  /// async work (business lookup, chain verification, signing, DB writes)
-  /// real wall-clock time to complete before returning control to the
-  /// fake-async test zone - see the top-of-file note on why this is
-  /// necessary for `supplier_redeem_card.dart` specifically.
+  /// Terminal on-screen markers `_processCardQR`'s various outcomes can
+  /// leave behind - the union of what every test below asserts on right
+  /// after calling [processCardQR]. Deliberately NOT awaiting
+  /// `processCardQRForTesting`'s full returned Future here: on the
+  /// successful-redemption path it chains through
+  /// `_showSecureModeRedemptionConfirmation`'s `await Navigator.push(...)`,
+  /// which only resolves once the pushed `_RedemptionTokenScreen` is popped
+  /// - i.e. once a *later* line in the test taps "Done". Fully awaiting it
+  /// here would deadlock: this call can never return until the test does
+  /// something that itself only happens after this call returns.
+  const knownOutcomeMarkers = [
+    'Reward Redeemed!',
+    "Unable to verify this card's stamps. Redemption denied.",
+    'This card has already been redeemed.',
+    'Device Mismatch',
+    "isn't ready to redeem yet",
+    'Unable to read this QR code',
+  ];
+
+  /// Calls the test-only QR handler and polls for one of
+  /// [knownOutcomeMarkers] to appear, rather than guessing a fixed delay -
+  /// see the top-of-file note on why real I/O needs `runAsync` at all under
+  /// `flutter_test`'s fake-async zone.
   Future<void> processCardQR(WidgetTester tester, String qrData) async {
     final state = tester.state(find.byType(SupplierRedeemCard));
-    await tester.runAsync(() async {
-      // ignore: avoid_dynamic_calls
-      (state as dynamic).processCardQRForTesting(qrData);
-      await Future.delayed(const Duration(milliseconds: 1500));
-    });
+    // ignore: avoid_dynamic_calls, discarded_futures
+    unawaited((state as dynamic).processCardQRForTesting(qrData) as Future<void>);
+    await tester.pump();
+    for (var attempt = 0; attempt < 50; attempt++) {
+      final reachedOutcome = knownOutcomeMarkers.any(
+        (marker) => find.textContaining(marker).evaluate().isNotEmpty,
+      );
+      if (reachedOutcome) break;
+      await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+      await tester.pump();
+    }
     // Plain, duration-stepped pumps before pumpAndSettle: the confirmation
     // flow's tail end (on the valid-token path) does a real Navigator.push,
     // whose ~300ms page-transition animation needs actual frame-pumping to

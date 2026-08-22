@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **A `stampsRequired` decrease that pushed a card to completion could silently drop the customer's just-earned stamp.** Found during this feature's own testing, not a pre-existing report - the directional-policy write briefly persisted an intermediate card state that failed an existing validation check, silently aborting (and rolling back) the whole stamp-crediting transaction. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-021.
+- **Editing two Business Information fields in one Settings visit could silently revert the first edit.** Reported by the user testing the new editors on the macOS build: rename the business, then change the brand color without leaving Settings, and the rename was lost. Every editor seeded its dialog from a one-time snapshot of the business taken when Settings first opened, rather than the latest edited state - since each editor persists a full-row replace, the second edit overwrote the first back to its original value. Fixed for all five editors (Name, Icon, Brand Color, Stamps Required, Scan Cooldown) at once. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-021.
 
 ## [2.2.0+30] - 2026-08-21
 

@@ -50,6 +50,24 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   late int _logoIndex = widget.business.logoIndex;
   late String _brandColor = widget.business.brandColor;
 
+  /// The business as it stands right now, including any edits already made
+  /// this session - NOT `widget.business`, which is a one-time snapshot
+  /// from when this screen was first opened and never updates after that.
+  /// Every editor below must seed its dialog from this, not from
+  /// `widget.business` directly - each editor dialog persists a full-row
+  /// replace (`BusinessRepository().updateBusiness(business.copyWith(...))`),
+  /// so seeding it from the stale widget prop would silently revert any
+  /// field already edited earlier in this same session (e.g. edit Name,
+  /// then edit Brand Color without leaving this screen - the Color save
+  /// would overwrite Name back to its original value too).
+  Business get _currentBusiness => widget.business.copyWith(
+        name: _businessName,
+        logoIndex: _logoIndex,
+        brandColor: _brandColor,
+        stampsRequired: _stampsRequired,
+        scanInterval: _scanInterval,
+      );
+
   @override
   void initState() {
     super.initState();
@@ -57,10 +75,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   }
 
   Future<void> _editStampsRequired() async {
-    final saved = await showFixStampsRequiredDialog(
-      context,
-      widget.business.copyWith(stampsRequired: _stampsRequired),
-    );
+    final saved = await showFixStampsRequiredDialog(context, _currentBusiness);
     if (!saved || !mounted) return;
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;
@@ -68,10 +83,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   }
 
   Future<void> _editScanInterval() async {
-    final saved = await showEditScanIntervalDialog(
-      context,
-      widget.business.copyWith(scanInterval: _scanInterval),
-    );
+    final saved = await showEditScanIntervalDialog(context, _currentBusiness);
     if (!saved || !mounted) return;
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;
@@ -79,10 +91,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   }
 
   Future<void> _editBusinessName() async {
-    final saved = await showEditBusinessNameDialog(
-      context,
-      widget.business.copyWith(name: _businessName),
-    );
+    final saved = await showEditBusinessNameDialog(context, _currentBusiness);
     if (!saved || !mounted) return;
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;
@@ -90,10 +99,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   }
 
   Future<void> _editBusinessIcon() async {
-    final saved = await showEditBusinessIconDialog(
-      context,
-      widget.business.copyWith(logoIndex: _logoIndex),
-    );
+    final saved = await showEditBusinessIconDialog(context, _currentBusiness);
     if (!saved || !mounted) return;
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;
@@ -101,10 +107,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   }
 
   Future<void> _editBrandColor() async {
-    final saved = await showEditBrandColorDialog(
-      context,
-      widget.business.copyWith(brandColor: _brandColor),
-    );
+    final saved = await showEditBrandColorDialog(context, _currentBusiness);
     if (!saved || !mounted) return;
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;

@@ -190,6 +190,20 @@ However, you can:
 
 ---
 
+## ✏️ Editing Your Business Profile
+
+Unlike Operation Mode, your Business Name, Icon, Brand Color, and Stamps Required are **not locked in at setup** - all four can be changed anytime from Settings, no reset required.
+
+**Your responsibility when lowering Stamps Required:** customers already partway through a card are protected automatically - a decrease takes effect on their card the next time they scan (if that scan would now complete or overflow their card, it's handled the same way any other completion is - the extra stamps simply carry onto their next card). You don't have to do anything else; just be aware existing customers won't see the change until their next scan, not the instant you save it.
+
+**Your responsibility when raising Stamps Required:** an increase is never applied to a card someone is already collecting on, even after their next scan - it only takes effect for the *next* card a customer starts, once their current one is complete. This is deliberate: it means you can never make a deal worse for a customer already working toward it.
+
+**Express Mode specifically:** because a customer's card only updates when they scan, if a change needs to reach existing customers promptly, have them scan again (or regenerate/reprint any posted static stamp QR code, which also carries your current business info).
+
+Every edit you make - plus Recovery Backup, Clone, and Restore events - is recorded in a local **Audit Trail** (Settings → View Audit Trail), viewable and shareable as a PDF for your own records or for support. It stays on this device only - it's not included in your Recovery Backup and isn't sent anywhere.
+
+---
+
 ## 🔐 Security Notes for Both Modes
 
 ### Express Mode Security:
@@ -203,7 +217,7 @@ However, you can:
 - **Hash Chain:** Stamps form a chain - any modification is detected
 - **Time-Limited QR Codes:** Stamps expire after 2 minutes, can't be reused
 - **Supplier Verification:** You control redemption with your device
-- **Timestamped Records:** Every stamp is timestamped and hash-chained (not a browsable audit log in the app itself)
+- **Timestamped Records:** Every stamp is timestamped and hash-chained (stamp-by-stamp history isn't browsable in the app itself, but every change you make to your business profile is - see "Editing Your Business Profile" below)
 - **Key Backup:** Your private key is protected and backed up
 
 **Both modes include:**
@@ -335,6 +349,9 @@ A: That's the sweet spot where either mode works. Choose based on your comfort l
 
 **Q: Can I use both modes?**  
 A: Not on the same business. You'd need to create a second business profile for the other mode.
+
+**Q: Can I change my Stamps Required number later, unlike the mode?**  
+A: Yes - Stamps Required, Name, Icon, and Brand Color can all be edited anytime from Settings; only the mode is locked. See "Editing Your Business Profile" above for how a Stamps Required change affects customers already partway through a card.
 
 ---
 

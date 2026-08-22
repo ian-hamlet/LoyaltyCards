@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
+import '../models/audit_entry.dart';
 import '../services/business_repository.dart';
+import '../services/audit_trail_repository.dart';
 
 /// Lets a supplier edit their Express Mode scan cooldown after setup,
 /// instead of only being able to set it once during onboarding. Unlike
@@ -84,6 +86,11 @@ Future<bool> showEditScanIntervalDialog(BuildContext context, Business business)
               try {
                 await BusinessRepository().updateBusiness(
                   business.copyWith(scanInterval: selected * 1000),
+                );
+                await AuditTrailRepository().logEntry(
+                  businessId: business.id,
+                  propertyName: AuditProperty.scanCooldown,
+                  newValue: '${selected}s',
                 );
                 if (dialogContext.mounted) Navigator.pop(dialogContext, true);
               } catch (e) {

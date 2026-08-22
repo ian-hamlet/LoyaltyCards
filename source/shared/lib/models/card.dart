@@ -17,6 +17,19 @@ class Card {
   final DateTime? redeemedAt; // Timestamp when card was redeemed (null if not redeemed)
   final String? deviceId; // Device ID where card was created (V-005 multi-device detection)
 
+  // Requirements/DISCUSSION_Business_Field_Editing.md §4.1: the latest
+  // stampsRequired value seen in any StampToken snapshot for this card,
+  // regardless of whether it's higher or lower than [stampsRequired]
+  // above. Deliberately tracked SEPARATELY from [stampsRequired] itself -
+  // this card's own [stampsRequired] only ever decreases while the card is
+  // in progress (never a retroactive increase), but a genuine increase
+  // still needs to be known *somewhere* so the next card, created at
+  // redemption, can start at the business's actual current value instead
+  // of this card's frozen-lower one. Null until the first snapshot-bearing
+  // stamp token is scanned (an old-format token, or one from an app
+  // version that predates this field, never sets it).
+  final int? latestStampsRequiredSnapshot;
+
   Card({
     required this.id,
     required this.businessId,
@@ -32,6 +45,7 @@ class Card {
     this.isRedeemed = false,
     this.redeemedAt,
     this.deviceId,
+    this.latestStampsRequiredSnapshot,
   });
 
   /// Check if card is complete (all stamps collected)
@@ -57,6 +71,7 @@ class Card {
       'redeemed_at': redeemedAt?.millisecondsSinceEpoch,
       'is_redeemed': isRedeemed ? 1 : 0,
       'device_id': deviceId,
+      'latest_stamps_required_snapshot': latestStampsRequiredSnapshot,
     };
   }
 
@@ -79,6 +94,7 @@ class Card {
           : null,
       isRedeemed: (json['is_redeemed'] as int?) == 1,
       deviceId: json['device_id'] as String?,
+      latestStampsRequiredSnapshot: json['latest_stamps_required_snapshot'] as int?,
     );
   }
 
@@ -97,6 +113,7 @@ class Card {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isRedeemed,
+    int? latestStampsRequiredSnapshot,
   }) {
     return Card(
       id: id ?? this.id,
@@ -112,6 +129,8 @@ class Card {
       redeemedAt: redeemedAt ?? this.redeemedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deviceId: deviceId,
+      latestStampsRequiredSnapshot: latestStampsRequiredSnapshot ?? this.latestStampsRequiredSnapshot,
     );
   }
 

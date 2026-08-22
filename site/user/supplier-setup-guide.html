@@ -40,7 +40,7 @@
 <div class="wrap">
   <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
   <h1>Supplier Setup Guide: Choosing Your Operation Mode</h1>
-  <p class="meta">For business owners setting up LoyaltyCards on their device &nbsp;·&nbsp; Version 2.0.4+24 &nbsp;·&nbsp; Last Updated: August 16, 2026</p>
+  <p class="meta">For business owners setting up LoyaltyCards on their device &nbsp;·&nbsp; Version 2.2.0+31 &nbsp;·&nbsp; Last Updated: August 22, 2026</p>
 
   <div class="callout"><strong>Don't have the app installed yet?</strong> <a href="../marketing/get-the-app-business-flyer.html">Get LoyaltyCards Business</a> from the App Store first &mdash; this is the app <em>for your business</em>, with a QR code straight to its own App Store listing. (It's different from the LoyaltyCards Customer Wallet app your customers use &mdash; see "Help new customers find the app" further down for that one.) The rest of this guide assumes LoyaltyCards Business is already installed.</div>
 
@@ -128,9 +128,16 @@ Q4: Can you dedicate a device?
   <h2>Changing Your Mode</h2>
   <p><strong>Important:</strong> the operation mode cannot be changed after initial setup without a complete business reset (which deletes all customer data). You can create a second business profile with the other mode if you run multiple programs, or reset and start fresh (losing all customer data). Take the time to choose correctly the first time.</p>
 
+  <h2>Editing Your Business Profile</h2>
+  <p>Unlike the mode, your Business Name, Icon, Brand Color, and Stamps Required are <strong>not locked in at setup</strong> &mdash; all four can be changed anytime from Settings, no reset required.</p>
+  <p><strong>Lowering Stamps Required:</strong> customers already partway through a card are protected automatically &mdash; the change applies to their card on their next scan (if that scan now completes or overflows the card, the extra stamps simply carry onto their next card, same as any other over-collection). You don't have to do anything else.</p>
+  <p><strong>Raising Stamps Required:</strong> never applied to a card someone is already collecting on, even after their next scan &mdash; it only takes effect for the <em>next</em> card a customer starts, once their current one is complete. You can't make a deal worse for a customer already working toward it.</p>
+  <p><strong>Express Mode:</strong> since a customer's card only updates when they scan, if a change needs to reach existing customers promptly, have them scan again (or regenerate/reprint your posted stamp QR code, which also carries your current business info).</p>
+  <p>Every edit you make &mdash; plus Recovery Backup, Clone, and Restore events &mdash; is recorded in a local <strong>Audit Trail</strong> (Settings &rarr; View Audit Trail), viewable and shareable as a PDF. It stays on this device only &mdash; not included in your Recovery Backup, not sent anywhere.</p>
+
   <h2>Security Notes for Both Modes</h2>
   <p><strong>Express Mode:</strong> you set a minimum wait between stamp scans during setup (5&ndash;60 seconds, defaults to 30); relies on honest customer behavior; only your staff can issue new cards; all stamps are timestamped.</p>
-  <p><strong>Secure Mode:</strong> each stamp is signed with your private key (cryptographically impossible to forge); stamps form a hash chain so any modification is detected; QR codes expire after 2 minutes; you control redemption with your device; every stamp is timestamped and hash-chained (not a browsable audit log in the app itself).</p>
+  <p><strong>Secure Mode:</strong> each stamp is signed with your private key (cryptographically impossible to forge); stamps form a hash chain so any modification is detected; QR codes expire after 2 minutes; you control redemption with your device; every stamp is timestamped and hash-chained &mdash; stamp-by-stamp history isn't browsable in the app itself, but every change you make to your business profile is (see "Editing Your Business Profile" above).</p>
   <p><strong>Both modes:</strong> a baseline rate limit between stamp scans (Express Mode: you configure it, 5&ndash;60 seconds; Secure Mode: primarily protected by each QR's own 2-minute expiry); timestamp tracking for all operations; customer data encrypted on your device; no cloud storage or third-party servers.</p>
 
   <h2>Face ID / Touch ID / Passcode Protection</h2>
@@ -159,6 +166,7 @@ Q4: Can you dedicate a device?
   <p><strong>Can customers cheat Express Mode?</strong> The scan cooldown you set during setup (5&ndash;60 seconds, defaults to 30) makes mass fraud impractical. It's designed for honest customers in trust-based environments.</p>
   <p><strong>What if my reward value is between $20-50?</strong> That's the sweet spot where either mode works. Choose based on your comfort level: Express for speed, Secure for control.</p>
   <p><strong>Can I use both modes?</strong> Not on the same business &mdash; you'd need a second business profile for the other mode.</p>
+  <p><strong>Can I change my Stamps Required number later, unlike the mode?</strong> Yes &mdash; Stamps Required, Name, Icon, and Brand Color can all be edited anytime from Settings; only the mode is locked. See "Editing Your Business Profile" above for how a Stamps Required change affects customers already partway through a card.</p>
 
   <h2>Need Help?</h2>
   <p>See the full <a href="user-guide.html">User Guide</a> for how the apps work end-to-end, or visit <a href="../support/">Support</a> to get in touch.</p>

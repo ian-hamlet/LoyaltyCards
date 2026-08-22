@@ -37,7 +37,7 @@ This index provides a complete overview of all requirements for the LoyaltyCards
 |----|-------|----------|--------|
 | [REQ-004](REQ-004_Zero_Entry_Card_Issuance.md) | Zero Data Entry Card Issuance | Functional | Draft |
 | [REQ-007](REQ-007_Visual_Stamp_Card_Display.md) | Visual Stamp Card Display | Functional | Draft |
-| [REQ-008](REQ-008_Configurable_Stamp_Requirements.md) | Configurable Stamp Requirements | Functional | Draft |
+| [REQ-008](REQ-008_Configurable_Stamp_Requirements.md) | Configurable Stamp Requirements | Functional | Draft — post-setup editing shipped 2026-08-22, see REQ-008 "Post-Setup Editability" |
 | [REQ-011](REQ-011_Offline_Capability.md) | Offline Capability | Non-Functional (Performance) | Draft |
 | [REQ-013](REQ-013_GDPR_Compliance.md) | GDPR Compliance | Non-Functional (Legal) | Draft |
 | [REQ-014](REQ-014_Performance_Requirements.md) | Performance Requirements | Non-Functional (Performance) | Draft |

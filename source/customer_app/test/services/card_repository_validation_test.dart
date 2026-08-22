@@ -21,16 +21,16 @@ void main() {
     repository = CardRepository(dbHelper);
   });
 
-  tearDown() async {
+  tearDown(() async {
     try {
       await dbHelper.clearAllData();
       await dbHelper.close();
     } catch (e) {
       // Ignore cleanup errors
     }
-  };
+  });
 
-  tearDownAll() async {
+  tearDownAll(() async {
     // Clean up test database file
     try {
       await DatabaseHelper.resetForTesting();
@@ -39,7 +39,7 @@ void main() {
     } catch (e) {
       // Ignore
     }
-  };
+  });
 
   /// Helper function to create test cards
   Card createTestCard({

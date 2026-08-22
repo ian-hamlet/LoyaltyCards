@@ -173,7 +173,8 @@ class DatabaseHelper {
         updated_at INTEGER NOT NULL,
         is_redeemed INTEGER NOT NULL DEFAULT 0,
         redeemed_at INTEGER,
-        device_id TEXT
+        device_id TEXT,
+        latest_stamps_required_snapshot INTEGER
       )
     ''');
 
@@ -338,6 +339,22 @@ class DatabaseHelper {
         ALTER TABLE stamps ADD COLUMN original_previous_hash TEXT
       ''');
       AppLogger.database('Migration complete: original stamp context columns added');
+    }
+
+    // Migration from v8 to v9: Add latest_stamps_required_snapshot column
+    //
+    // Requirements/DISCUSSION_Business_Field_Editing.md §4.1: tracks the
+    // most recent stampsRequired value seen in any StampToken snapshot for
+    // this card, separately from the card's own (only-ever-decreasing)
+    // stampsRequired - needed so a genuine increase is known somewhere for
+    // the *next* card (created at redemption) to pick up, without ever
+    // being applied retroactively to this card while it's in progress.
+    if (oldVersion < 9) {
+      AppLogger.database('Migration v8 → v9: Adding latest_stamps_required_snapshot column to cards table');
+      await db.execute('''
+        ALTER TABLE cards ADD COLUMN latest_stamps_required_snapshot INTEGER
+      ''');
+      AppLogger.database('Migration complete: latest_stamps_required_snapshot column added');
     }
   }
 

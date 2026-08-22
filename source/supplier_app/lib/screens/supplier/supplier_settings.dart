@@ -10,6 +10,10 @@ import 'recovery_backup_screen.dart';
 import 'clone_device_screen.dart';
 import '../../widgets/stamps_required_fix.dart';
 import '../../widgets/scan_interval_editor.dart';
+import '../../widgets/business_name_editor.dart';
+import '../../widgets/business_icon_editor.dart';
+import '../../widgets/business_color_editor.dart';
+import 'audit_trail_screen.dart';
 
 /// Feature flag: Show dangerous reset button during testing phase
 /// Set to false before production App Store release
@@ -42,6 +46,9 @@ class _SupplierSettingsState extends State<SupplierSettings> {
   // Same local-copy pattern as _stampsRequired above - reflects an edit
   // immediately without reloading the whole screen from Home.
   late int _scanInterval = widget.business.scanInterval;
+  late String _businessName = widget.business.name;
+  late int _logoIndex = widget.business.logoIndex;
+  late String _brandColor = widget.business.brandColor;
 
   @override
   void initState() {
@@ -49,12 +56,12 @@ class _SupplierSettingsState extends State<SupplierSettings> {
     _loadSecuritySettings();
   }
 
-  Future<void> _fixStampsRequired() async {
-    final fixed = await showFixStampsRequiredDialog(
+  Future<void> _editStampsRequired() async {
+    final saved = await showFixStampsRequiredDialog(
       context,
       widget.business.copyWith(stampsRequired: _stampsRequired),
     );
-    if (!fixed || !mounted) return;
+    if (!saved || !mounted) return;
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;
     setState(() => _stampsRequired = updated.stampsRequired);
@@ -69,6 +76,39 @@ class _SupplierSettingsState extends State<SupplierSettings> {
     final updated = await _businessRepo.getBusiness();
     if (!mounted || updated == null) return;
     setState(() => _scanInterval = updated.scanInterval);
+  }
+
+  Future<void> _editBusinessName() async {
+    final saved = await showEditBusinessNameDialog(
+      context,
+      widget.business.copyWith(name: _businessName),
+    );
+    if (!saved || !mounted) return;
+    final updated = await _businessRepo.getBusiness();
+    if (!mounted || updated == null) return;
+    setState(() => _businessName = updated.name);
+  }
+
+  Future<void> _editBusinessIcon() async {
+    final saved = await showEditBusinessIconDialog(
+      context,
+      widget.business.copyWith(logoIndex: _logoIndex),
+    );
+    if (!saved || !mounted) return;
+    final updated = await _businessRepo.getBusiness();
+    if (!mounted || updated == null) return;
+    setState(() => _logoIndex = updated.logoIndex);
+  }
+
+  Future<void> _editBrandColor() async {
+    final saved = await showEditBrandColorDialog(
+      context,
+      widget.business.copyWith(brandColor: _brandColor),
+    );
+    if (!saved || !mounted) return;
+    final updated = await _businessRepo.getBusiness();
+    if (!mounted || updated == null) return;
+    setState(() => _brandColor = updated.brandColor);
   }
 
   Future<void> _loadSecuritySettings() async {
@@ -254,21 +294,37 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ListTile(
             leading: const Icon(Icons.business),
             title: const Text('Business Name'),
-            subtitle: Text(widget.business.name),
+            subtitle: Text(_businessName),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _editBusinessName,
+          ),
+          ListTile(
+            leading: Icon(BusinessIcons.getIcon(_logoIndex)),
+            title: const Text('Icon'),
+            subtitle: Text(BusinessIcons.getIconName(_logoIndex)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _editBusinessIcon,
           ),
           ListTile(
             leading: const Icon(Icons.palette),
             title: const Text('Brand Color'),
-            subtitle: Text(widget.business.brandColor),
-            trailing: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: BrandColors.fromHex(widget.business.brandColor),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey),
-              ),
+            subtitle: Text(_brandColor),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: BrandColors.fromHex(_brandColor),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey),
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
+              ],
             ),
+            onTap: _editBrandColor,
           ),
           ListTile(
             leading: Icon(
@@ -278,13 +334,14 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             title: const Text('Stamps Required'),
             subtitle: Text(
               CardIssueToken.isStampsRequiredSupported(_stampsRequired)
-                  ? '$_stampsRequired stamps'
+                  ? '$_stampsRequired stamps, tap to change'
                   : '$_stampsRequired stamps - not supported by this app version, tap to fix',
             ),
-            trailing: CardIssueToken.isStampsRequiredSupported(_stampsRequired)
-                ? null
-                : const Icon(Icons.chevron_right, color: Colors.orange),
-            onTap: CardIssueToken.isStampsRequiredSupported(_stampsRequired) ? null : _fixStampsRequired,
+            trailing: Icon(
+              Icons.chevron_right,
+              color: CardIssueToken.isStampsRequiredSupported(_stampsRequired) ? null : Colors.orange,
+            ),
+            onTap: _editStampsRequired,
           ),
           ListTile(
             leading: const Icon(Icons.security),
@@ -565,6 +622,39 @@ class _SupplierSettingsState extends State<SupplierSettings> {
                 ),
               ],
             ),
+          ),
+
+          const Divider(height: 32),
+
+          // Audit Trail Section - deliberately last (§7.4: "bottom of the
+          // business settings page")
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Audit Trail',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.history),
+            title: const Text('View Audit Trail'),
+            subtitle: const Text(
+              'Local record of changes to this business - readable and shareable for support',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Haptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AuditTrailScreen(business: widget.business),
+                ),
+              );
+            },
           ),
         ],
       ),

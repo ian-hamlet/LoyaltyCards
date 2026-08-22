@@ -617,4 +617,134 @@ void main() {
       expect(decoded.scanInterval, original.scanInterval);
     });
   });
+
+  group('Requirements/DISCUSSION_Business_Field_Editing.md §4 - StampToken business profile snapshot', () {
+    test('StampToken - carries and round-trips businessName/brandColor/logoIndex/stampsRequired', () {
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        businessName: 'Test Coffee Shop',
+        brandColor: '#FF5733',
+        logoIndex: 5,
+        stampsRequired: 8,
+      );
+
+      expect(token.businessName, 'Test Coffee Shop');
+      expect(token.brandColor, '#FF5733');
+      expect(token.logoIndex, 5);
+      expect(token.stampsRequired, 8);
+
+      final json = token.toJson();
+      expect(json['businessName'], 'Test Coffee Shop');
+      expect(json['brandColor'], '#FF5733');
+      expect(json['logoIndex'], 5);
+      expect(json['stampsRequired'], 8);
+
+      final decoded = StampToken.fromJson(json);
+      expect(decoded.businessName, 'Test Coffee Shop');
+      expect(decoded.brandColor, '#FF5733');
+      expect(decoded.logoIndex, 5);
+      expect(decoded.stampsRequired, 8);
+    });
+
+    test('StampToken - snapshot fields are absent from JSON when null (no regression for old readers)', () {
+      final token = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+      );
+
+      final json = token.toJson();
+      expect(json.containsKey('businessName'), false);
+      expect(json.containsKey('brandColor'), false);
+      expect(json.containsKey('logoIndex'), false);
+      expect(json.containsKey('stampsRequired'), false);
+    });
+
+    test('StampToken - backward compatible: an old-format JSON (no snapshot keys) decodes with all four null', () {
+      final oldFormatJson = {
+        'type': 'stamp_token',
+        'id': 'stamp-1',
+        'cardId': 'card-123',
+        'businessId': 'business-123',
+        'stampNumber': 1,
+        'previousHash': '',
+        'signature': 'test-signature',
+        'timestamp': 1234567890000,
+        'additionalStamps': [],
+      };
+
+      final token = StampToken.fromJson(oldFormatJson);
+      expect(token.businessName, isNull);
+      expect(token.brandColor, isNull);
+      expect(token.logoIndex, isNull);
+      expect(token.stampsRequired, isNull);
+    });
+
+    test('StampToken - snapshot fields are NOT part of the signed data (§4 point 2: informational, not trust-bearing)', () {
+      final withSnapshot = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        businessName: 'Original Name',
+        brandColor: '#111111',
+        logoIndex: 1,
+        stampsRequired: 6,
+      );
+      final differentSnapshot = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        businessName: 'Completely Different Name',
+        brandColor: '#EEEEEE',
+        logoIndex: 27,
+        stampsRequired: 12,
+      );
+
+      // Same signature data despite wildly different snapshot values -
+      // changing these fields can never invalidate or spoof a signature.
+      expect(withSnapshot.getSignatureData(), differentSnapshot.getSignatureData());
+    });
+
+    test('StampToken - toQRString/fromQRString roundtrip preserves the business profile snapshot', () {
+      final original = StampToken(
+        id: 'stamp-1',
+        cardId: 'card-123',
+        businessId: 'business-123',
+        stampNumber: 1,
+        previousHash: '',
+        signature: 'test-signature',
+        timestamp: 1234567890000,
+        businessName: 'Test Coffee Shop',
+        brandColor: '#FF5733',
+        logoIndex: 5,
+        stampsRequired: 8,
+      );
+
+      final qrString = original.toQRString();
+      final decoded = QRToken.fromQRString(qrString) as StampToken;
+
+      expect(decoded.businessName, original.businessName);
+      expect(decoded.brandColor, original.brandColor);
+      expect(decoded.logoIndex, original.logoIndex);
+      expect(decoded.stampsRequired, original.stampsRequired);
+    });
+  });
 }

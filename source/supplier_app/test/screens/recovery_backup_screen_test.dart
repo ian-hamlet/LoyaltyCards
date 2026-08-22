@@ -8,8 +8,11 @@ import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pointycastle/export.dart';
 import 'package:shared/shared.dart' hide Card;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supplier_app/screens/supplier/recovery_backup_screen.dart';
+import 'package:supplier_app/services/business_repository.dart';
 import 'package:supplier_app/services/key_manager.dart';
+import 'package:supplier_app/services/supplier_database_helper.dart';
 
 /// CRASH-001 regression test (wider-audit fix) for the Recovery Backup
 /// screen's Print Backup / Share via Email / Save to Files buttons - the
@@ -29,6 +32,8 @@ import 'package:supplier_app/services/key_manager.dart';
 /// always pop itself before any button under test ever appears.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
 
   const printingChannel = MethodChannel('net.nfet.printing');
   const shareChannel = MethodChannel('dev.fluttercommunity.plus/share');
@@ -58,6 +63,10 @@ void main() {
 
     FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform({});
     keyManager = KeyManager();
+    // _generateBackup() now also logs an audit trail entry (Requirements/
+    // DISCUSSION_Business_Field_Editing.md §7), which needs a real
+    // database - this screen never touched SQLite before that.
+    await SupplierDatabaseHelper.resetForTesting(testDatabaseName: 'test_recovery_backup_screen.db');
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       printingChannel,
@@ -137,7 +146,7 @@ void main() {
       await keyManager.storePublicKey(businessId, keyPair.publicKey as ECPublicKey);
       final publicKeyEncoded = (await keyManager.getPublicKeyString(businessId))!;
 
-      return Business(
+      final business = Business(
         id: businessId,
         name: 'Test Coffee Shop',
         publicKey: publicKeyEncoded,
@@ -147,6 +156,12 @@ void main() {
         mode: OperationMode.simple,
         createdAt: DateTime.now(),
       );
+      // audit_trail has a FOREIGN KEY on business_id (matches every other
+      // child table's pattern) - a real business row is needed for
+      // _generateBackup()'s new audit log call to succeed, same as any
+      // real caller of this screen (always an already-persisted business).
+      await BusinessRepository().insertBusiness(business);
+      return business;
     });
     return business!;
   }

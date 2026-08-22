@@ -300,6 +300,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         stampNumber: token.currentStamps + 1,
         previousHash: previousHash,
         additionalStampCount: additionalStampCount,
+        businessName: _business!.name,
+        brandColor: _business!.brandColor,
+        logoIndex: _business!.logoIndex,
+        stampsRequired: _business!.stampsRequired,
       );
 
       // NOTE: Stamps are logged when CUSTOMER successfully scans and validates,
@@ -393,6 +397,10 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         stampCount: _stampCount, // REQ-022: Multi-denomination support
         expiryDate: expiryTimestamp, // REQ-022: Optional expiry
         scanInterval: _business!.scanInterval, // REQ-022: Supplier-specific rate limit
+        businessName: _business!.name,
+        brandColor: _business!.brandColor,
+        logoIndex: _business!.logoIndex,
+        stampsRequired: _business!.stampsRequired,
       );
 
       if (mounted) {

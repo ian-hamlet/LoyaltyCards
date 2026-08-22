@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:pointycastle/ecc/api.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
+import '../../services/audit_trail_repository.dart';
 import 'supplier_home.dart';
 import 'how_it_works.dart';
 import 'import_business_screen.dart';
@@ -92,7 +93,19 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
       // Save to database
       AppLogger.database('Saving business configuration to database');
       await _businessRepo.insertBusiness(business);
-      
+
+      // Requirements/DISCUSSION_Business_Field_Editing.md §7: log the
+      // initial values as the audit trail's baseline.
+      await AuditTrailRepository().logProfileSnapshot(
+        businessId: business.id,
+        name: business.name,
+        logoIndex: business.logoIndex,
+        brandColor: business.brandColor,
+        stampsRequired: business.stampsRequired,
+        mode: business.mode,
+        scanIntervalMs: business.scanInterval,
+      );
+
       AppLogger.business('Business setup complete');
 
       if (mounted) {

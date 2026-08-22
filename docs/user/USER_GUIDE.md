@@ -31,7 +31,7 @@ Last Updated: July 21, 2026
    - They'll scan your card or you scan redemption QR
    - New card created automatically
 
-**That's it! No account, no email, no personal info needed.**
+**That's it! No account, no email, no personal info needed — by design, there's no personal data to hack.**
 
 ---
 
@@ -363,21 +363,28 @@ When a card is completed, a new card is automatically created for the same busin
 
 **Settings Menu:**
 
-1. **Business Information**
-   - View business name
-   - View brand color
-   - View stamps required
+1. **Business Information** - tap any row below to edit it directly, no reset required:
+   - Business Name
+   - Icon
+   - Brand Color
+   - Stamps Required
+   - Scan Cooldown (Express Mode only)
+   - Operation Mode - **view only.** This is the one field that can never be changed after setup (see "Choosing Your Operation Mode" above) - changing it would require a full business reset.
    - View Business ID
 
-2. **Backup & Recovery**
+   **Your responsibility when changing Stamps Required:** a customer already partway through a card is never made worse off by a change you make - a *lower* number applies to their card automatically on their next scan; a *higher* number only ever applies to a customer's *next* card, once their current one is complete, never retroactively. You don't need to do anything special to make this happen - it's automatic - but in Express Mode, a customer's card only actually updates when they scan again, so if you want a change to reach existing customers quickly, have them scan (or regenerate/reprint any posted static QR code, since it also carries the current business info).
+
+2. **View Audit Trail** - a running, on-this-device-only log of every change you make here (and of backup/clone/restore events), with the date, what changed, and the app version. Nothing is sent anywhere or backed up with your recovery backup - it exists purely so you (or support) can look back at what changed and when. Print or share it as a PDF from the same screen. Cleared if you ever reset your business configuration.
+
+3. **Backup & Recovery**
    - **Create Recovery Backup** ← CRITICAL - Do immediately
    - **Clone to Another Device** ← Set up multiple devices
 
-3. **App Information**
+4. **App Information**
    - View app version
    - Check for updates
 
-4. **Danger Zone**
+5. **Danger Zone**
    - Reset Business Configuration
    - **⚠️ Use only if starting over**
    - All customer cards become invalid

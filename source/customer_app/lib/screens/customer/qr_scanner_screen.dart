@@ -353,12 +353,20 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     if (mounted) {
       // Success! Return to home with success message
-      final stampText = initialStampCount > 0 
-          ? ' with $initialStampCount stamp${initialStampCount > 1 ? 's' : ''}' 
+      final stampText = initialStampCount > 0
+          ? ' with $initialStampCount stamp${initialStampCount > 1 ? 's' : ''}'
           : '';
       Navigator.pop(context, 'Card added: ${card.businessName}$stampText');
     }
   }
+
+  /// Test-only entry point that bypasses the camera, mirroring
+  /// SupplierRedeemCard.processCardQRForTesting - same reasoning: driving
+  /// _handleQRCode directly is the only way to exercise this screen's real
+  /// scan-handling logic under flutter_test, since there's no camera
+  /// hardware to feed it a QR string.
+  @visibleForTesting
+  Future<void> handleQRCodeForTesting(String qrData) => _handleQRCode(qrData);
 
   Future<void> _handleStampToken(QRToken token) async {
     // Get device ID for multi-device tracking (V-005)
@@ -514,6 +522,40 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       }
     }
 
+    // Requirements/DISCUSSION_Business_Field_Editing.md §4.1: apply this
+    // token's business-profile snapshot, if it carries one. Name/icon/color
+    // are purely cosmetic - always take the freshest known value. stampsRequired
+    // follows the directional policy: an in-progress card only ever moves
+    // DOWN (never a retroactive increase); any snapshot value (higher or
+    // lower) is also recorded separately in latestStampsRequiredSnapshot,
+    // for the *next* card to pick up at redemption (see
+    // _handleRedemptionToken/CustomerCardDetail._processRedemption) - never
+    // applied retroactively to this card. An older token/app version that
+    // never sends these fields changes nothing here.
+    bool cardProfileChanged = false;
+    if (token.businessName != null && token.businessName != card!.businessName) {
+      card = card!.copyWith(businessName: token.businessName);
+      cardProfileChanged = true;
+    }
+    if (token.brandColor != null && token.brandColor != card!.brandColor) {
+      card = card!.copyWith(brandColor: token.brandColor);
+      cardProfileChanged = true;
+    }
+    if (token.logoIndex != null && token.logoIndex != card!.logoIndex) {
+      card = card!.copyWith(logoIndex: token.logoIndex);
+      cardProfileChanged = true;
+    }
+    if (token.stampsRequired != null) {
+      if (token.stampsRequired != card!.latestStampsRequiredSnapshot) {
+        card = card!.copyWith(latestStampsRequiredSnapshot: token.stampsRequired);
+        cardProfileChanged = true;
+      }
+      if (token.stampsRequired! < card!.stampsRequired) {
+        card = card!.copyWith(stampsRequired: token.stampsRequired);
+        cardProfileChanged = true;
+      }
+    }
+
     // Add stamp to card
     AppLogger.database('Saving Main Stamp');
     
@@ -573,6 +615,22 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       await dbHelper.runInTransaction((txn) async {
         await stampRepo.insertStamp(stamp, executor: txn);
         AppLogger.database('Main stamp saved to DB');
+
+        if (cardProfileChanged) {
+          // A stampsRequired decrease can make the in-memory card's current
+          // stampsCollected momentarily exceed the new target - the
+          // completion/overflow check just below resolves this properly
+          // (updateStampCount bypasses validation and is not affected by
+          // this), but a direct write of `card` as-is here would trip
+          // CardRepository's stampsCollected <= stampsRequired invariant.
+          // Cap only the copy written here; `card` itself (used below for
+          // newTotalStamps) is untouched.
+          final cardForWrite = card!.stampsCollected > card!.stampsRequired
+              ? card!.copyWith(stampsCollected: card!.stampsRequired)
+              : card!;
+          await repository.updateCard(cardForWrite, executor: txn);
+          AppLogger.database('Card profile snapshot applied (§4.1)');
+        }
 
         final stampTransaction = models.Transaction(
           id: const Uuid().v4(),
@@ -1031,12 +1089,21 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       final newCard = models.Card(
         id: newCardId,
         businessId: card.businessId,
+        // businessName/brandColor/logoIndex are already kept fresh on the
+        // old card by every ordinary stamp scan (see _handleStampToken
+        // §4.1), so cloning them here is already correct. stampsRequired is
+        // the one field that's deliberately NOT kept fresh on an
+        // in-progress card (an increase never applies retroactively) - the
+        // snapshot recorded separately is what carries a genuine increase
+        // forward to this new card. Falls back to the old card's own value
+        // if no snapshot was ever seen (old-format tokens, or no scan since
+        // the last change).
         businessName: card.businessName,
         businessPublicKey: card.businessPublicKey,
         brandColor: card.brandColor,
         logoIndex: card.logoIndex,
         mode: card.mode,
-        stampsRequired: card.stampsRequired,
+        stampsRequired: card.latestStampsRequiredSnapshot ?? card.stampsRequired,
         stampsCollected: 0,
         createdAt: now,
         updatedAt: now,

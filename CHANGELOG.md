@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0+32] - 2026-08-23
+
+**Status:** 🟢 Merged to `develop`/`main`, ready for TestFlight/App Store build. **Build-only bump** - consolidates the macOS supplier port, several real-device-found bug fixes, and test-suite quality fixes into one shippable build on top of v2.2.0+31; none of it is new App-Store-facing capability. All automated tests passing (shared 216/216, customer_app 138/138, supplier_app 104/104), `flutter analyze` clean of errors on all three packages.
+
+### Added
+- **Supplier app: macOS desktop build.** A practical build for a business running the supplier app on a Mac rather than iOS - not an App Store submission target. See `docs/testing/MACOS_SUPPLIER_PORT_NOTES.md` and `docs/project-management/DEFECT_TRACKER.md` DECISION-022.
+
+### Fixed
+- **macOS code signing was unstable across rebuilds.** `CODE_SIGN_STYLE = Automatic` with only `DEVELOPMENT_TEAM` set still defaulted to ad-hoc "Sign to Run Locally" signing for local Debug builds, which isn't stable across rebuilds and broke Keychain's "Always Allow" persistence (prompting for the login password on every QR generation). Fixed by also setting `CODE_SIGN_IDENTITY = "Apple Development"` explicitly.
+- **macOS printing was unavailable ("printing not available, see the developer").** The `com.apple.security.print` App Sandbox entitlement was missing from both apps' macOS entitlements files - added alongside the existing camera entitlement.
+- **A `stampsRequired` increase that completed a card via an ordinary stamp scan never took effect on the next card.** The successor card is auto-created at completion time regardless of whether completion came from a stamp scan or a redemption scan, but only the redemption code path had been fixed to apply a pending increase to it. Found via real-device testing; fixed with a test-first regression test added before the fix. Full detail: `docs/project-management/DEFECT_TRACKER.md` DECISION-021.
+- **Two Supplier app redemption handlers were declared `void async` instead of `Future<void> async`**, making them structurally impossible for any caller to await - root cause of intermittent test flakiness found during this work. `supplier_redeem_card.dart`.
+- **iOS build hygiene:** both apps' `ios/Podfile` now force every pod's `IPHONEOS_DEPLOYMENT_TARGET` to match the project's own (15.0), silencing an Xcode deployment-target warning, matching the existing macOS Podfile pattern.
+- **Test-suite quality:** fixed a hanging background test (missing fake `MobileScannerPlatform.stop()` override), a silently-dead `tearDown()`/`tearDownAll()` pair (missing outer call parens), and replaced several blind `Future.delayed()` test waits with condition-polling loops against real state.
+
+### Documentation
+- Supplier Setup Guide and User Guide now explain the directional-policy edge cases (a decrease/increase landing on an already-complete card) and make explicit what happens to customers with cards in circulation if a business resets its configuration or deletes the app (a fresh, unrelated identity is always generated unless restored from a Recovery Backup, permanently orphaning their cards).
+
 ## [2.2.0+31] - 2026-08-22
 
 **Status:** 🔵 In development on `feature/businessedit` - not yet merged to `develop`/`main`, not yet built or uploaded. **Build-only bump** - a large addition, but folded into the same not-yet-shipped 2.2.0 line as v2.2.0+30 rather than its own version, since nothing has been uploaded under 2.2.0 yet.

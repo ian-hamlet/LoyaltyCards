@@ -1,10 +1,10 @@
 # App Store Submission Checklist
 
-**LoyaltyCards v2.2.0+30**  
+**LoyaltyCards v2.2.0+32**  
 **Customer App:** LoyaltyCards Customer Wallet  
 **Supplier App:** LoyaltyCards Business  
-**Target Release:** 🔵 v2.2.0+30 in development, not yet built or uploaded - supersedes v2.1.1+29, which is live and defect-free but predates the editable scan cooldown feature and the planned positioning/metadata update  
-**Last Updated:** August 21, 2026
+**Target Release:** 🟢 v2.2.0+32 merged to `develop`/`main`, ready to build - not yet uploaded. Supersedes v2.1.1+29, which is live but predates the editable scan cooldown, editable business profile fields, and directional `stampsRequired` policy. Consolidates v2.2.0+30 and v2.2.0+31, neither of which was ever built or uploaded.  
+**Last Updated:** August 23, 2026
 
 **Status note:** 🟢 **v2.0.2+21 was live on the App Store** (shipped 2026-08-10 — see prior status below for that history), now superseded. 🟢 **v2.0.3+23 was submitted 2026-08-15, approved and released 2026-08-16** (both apps) - the Sharing feature and both bug fixes are confirmed working. Metadata from `APP_STORE_METADATA_PACKET_v2_0_3_23.md` entered into ASC, build 23 selected on both apps, Release was set to **Manual** on both (the two apps review at different speeds, so release was held until both were approved). **⚠️ This live build contains TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - see `docs/project-management/DEFECT_TRACKER.md`. 🟡 **v2.1.0+26 fixed TEST-016 plus TEST-017 through TEST-020 and was built and uploaded to TestFlight**, but not submitted for App Store review before TEST-021 was found on that same TestFlight build - see `docs/project-management/DEFECT_TRACKER.md` TEST-021. 🟢 **v2.1.0+27 added TEST-021 and was built and uploaded to TestFlight** the night of 2026-08-16/17. 🟢 **v2.1.1+28 added DECISION-017 and was also built and uploaded to TestFlight**, real-device verified end-to-end - but that same testing round found TEST-022 (see below). 🟢 **v2.1.1+29 added the TEST-022 fix** (plus DECISION-019's dedup/dead-code cleanup) - build-only bump, built and delivered to TestFlight 2026-08-18, real-device validated, metadata confirmed in ASC, submitted for App Store review 2026-08-18 (both apps), and **approved by Apple and released to the App Store 2026-08-19** (both apps) - **this is the current live version.** 🔵 **v2.2.0+30 (current target) adds an editable Express Mode scan cooldown** (Supplier app Settings) - minor version bump, a genuine capability increase rather than a bug fix. A positioning/metadata update is also planned for this release, informed by `docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md` and `docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md`, but not yet decided/applied. Not yet built or uploaded. v2.0.4+24 and the interim test build v2.0.4+25 are both folded into the v2.1.x line and were never their own release candidates.
 
@@ -91,22 +91,29 @@
 - [x] **`flutter analyze` clean**
 - ⚠️ **Missing TEST-022** (found via this build's own real-device testing, afterward - a cross-version compatibility regression TEST-021 introduced) — **do not submit this build for App Store review.** See v2.1.1+29 below.
 
-**v2.2.0+30 (current target) — in development:**
+**v2.2.0+30 (superseded by v2.2.0+32, never built or uploaded):**
 
-- [x] **Final build number incremented** in pubspec.yaml (both apps + shared) — `2.2.0+30`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml` and `pubspec.lock`, plus `source/shared/lib/version.dart`
-- [x] **Version number confirmed** — v2.2.0+30 (minor version bump from 2.1.1 - a genuine capability increase, the scan cooldown was previously fixed at onboarding-time only, not just a bug fix)
-- [x] **Feature complete: editable scan cooldown** — `widgets/scan_interval_editor.dart` (new), wired into `supplier_settings.dart`. 6 new tests, full suite green (89/89), `flutter analyze` clean. Full detail: `docs/project-management/FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`.
-- [x] **Positioning/metadata update decided and applied** — ✅ applied 2026-08-22 to `APP_STORE_METADATA_PACKET_v2_2_0_30.md`, see `docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md`
-- [x] **All code merged to `develop`** — done 2026-08-21 (`cad0851`)
-- [ ] **`develop` merged to `main` branch**
-- [ ] **Release branch created** `releases/v2.2.0-build30`
-- [ ] **Archive builds completed** for v2.2.0+30
+- Editable scan cooldown feature only, folded into v2.2.0+32 below along with v2.2.0+31. Neither +30 nor +31 was ever built or uploaded - see v2.2.0+32 for the current checklist state.
+
+**v2.2.0+31 (superseded by v2.2.0+32, never built or uploaded):**
+
+- Supplier-editable business profile fields, directional `stampsRequired` policy, and local audit trail, folded into v2.2.0+32 below. Never built or uploaded.
+
+**v2.2.0+32 (current target) — merged, ready to build:**
+
+- [x] **Final build number incremented** in pubspec.yaml (both apps + shared) — `2.2.0+32`, confirmed in `source/{customer_app,supplier_app,shared}/pubspec.yaml` and `pubspec.lock`, plus `source/shared/lib/version.dart`
+- [x] **Version number confirmed** — v2.2.0+32 (build-only bump from 2.2.0+31 - consolidates +30 and +31, neither ever built/uploaded, plus a macOS desktop port, a real-device-found `stampsRequired` fix, and test-suite quality fixes; no new App-Store-facing capability beyond what +30/+31 already added)
+- [x] **Feature complete** — everything under v2.2.0+30 and v2.2.0+31 above, plus: macOS desktop build for the Supplier app (dev/business convenience, not an App Store target - see `docs/testing/MACOS_SUPPLIER_PORT_NOTES.md`, `docs/project-management/DEFECT_TRACKER.md` DECISION-022); fixed a `stampsRequired` increase not reaching the next card when completion came via an ordinary stamp scan (DECISION-021); iOS Podfile deployment-target hygiene; test-suite quality fixes. Full detail: `CHANGELOG.md` [2.2.0+32].
+- [x] **All code merged to `develop`** — 2026-08-23, fast-forward from `feature/businessedit`
+- [x] **`develop` merged to `main` branch** — 2026-08-23, fast-forward
+- [x] **Release branch created** `releases/v2.2.0-build32`
+- [ ] **Archive builds completed** for v2.2.0+32
 - [ ] **IPA files uploaded to App Store Connect** via Transporter
 - [ ] **Build processing complete** in App Store Connect
-- [ ] **Physical-device verification completed** — the editable cooldown is automated-test verified only so far; worth a quick real-device check of the Settings flow before submission, though risk is low (same pattern as the already-verified `stampsRequired` fix)
-- [x] **All automated tests passing** (shared 211, customer 131, supplier 89)
-- [x] **`flutter analyze` clean**
-- [ ] **Metadata entered into App Store Connect** — packet complete and ready (`APP_STORE_METADATA_PACKET_v2_2_0_30.md`), not yet entered in ASC - happens at submission time
+- [ ] **Physical-device verification completed** — the editable cooldown and business-profile editors are automated-test verified plus real-device tested during development (macOS); a fresh end-to-end iOS pass is still worth doing before submission
+- [x] **All automated tests passing** (shared 216, customer 138, supplier 104)
+- [x] **`flutter analyze` clean** of errors on all three packages (pre-existing lint-level info/warnings remain, unchanged by this work)
+- [ ] **Metadata entered into App Store Connect** — packet complete and ready (`APP_STORE_METADATA_PACKET_v2_2_0_32.md`), not yet entered in ASC - happens at submission time
 - [ ] **Submitted for App Store review**
 - [ ] **v2.1.1+29 status** — already approved and released 2026-08-19; no defect to supersede this time, this is a feature release
 
@@ -538,13 +545,17 @@ Please test both apps together following the demo instructions.
 8. [ ] **Respond to App Review** if questions arise
 9. [ ] **Release approved apps**
 
-**v2.2.0+30 (current target) — in development, not yet built:**
+**v2.2.0+30 / v2.2.0+31 (superseded by v2.2.0+32, never built or uploaded):**
 
-1. [ ] **Upload build to App Store Connect** (via Transporter) — build 30, both apps
-2. [ ] **Select build** for Customer app submission — build 30
-3. [ ] **Select build** for Supplier app submission — build 30
-4. [ ] **Complete all required fields** in App Store Connect — packet ready (`APP_STORE_METADATA_PACKET_v2_2_0_30.md`, positioning update applied 2026-08-22), not yet entered in ASC
-5. [ ] **Screenshots** — likely unchanged (the editable-cooldown UI is a Settings-screen addition, not part of the staged screenshot set), confirm once the positioning copy decision is made in case it affects this
+- Neither reached this stage - both superseded before ever being built. See v2.2.0+32 below.
+
+**v2.2.0+32 (current target) — merged, ready to build:**
+
+1. [ ] **Upload build to App Store Connect** (via Transporter) — build 32, both apps
+2. [ ] **Select build** for Customer app submission — build 32
+3. [ ] **Select build** for Supplier app submission — build 32
+4. [ ] **Complete all required fields** in App Store Connect — packet ready (`APP_STORE_METADATA_PACKET_v2_2_0_32.md`, positioning unchanged from +30/+31), not yet entered in ASC. Also re-enter the Privacy Policy/Terms/Support/Marketing URLs (still point at the old GitHub Pages host).
+5. [ ] **Screenshots** — likely unchanged (the editable-cooldown and business-profile-editor UI are Settings-screen additions, not part of the staged screenshot set)
 6. [ ] **Submit for review**
 7. [ ] **Monitor review status**
 8. [ ] **Respond to App Review** if questions arise
@@ -619,9 +630,9 @@ All live as of 2026-08-21, hosted via Cloudflare Pages (see `.github/workflows/c
 
 ---
 
-**Document Status:** 🟢 **v2.1.1+29 is LIVE ON THE APP STORE** (both apps), submitted for App Store review 2026-08-18, **approved and released 2026-08-19**, superseding v2.0.3+23 (which was live but contained TEST-016). **v2.0.3+23** was submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contained TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix shipped to **TestFlight as v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), but not submitted for App Store review since TEST-021 (the issue-card counterpart to TEST-017/020's fix) was found on that same TestFlight build. **v2.1.0+27** added TEST-021 and was built and uploaded to TestFlight. **v2.1.1+28** (patch version bump - DECISION-017 is a genuine UX improvement, not build-only) added a self-service fix for a business outside the supported stamps-required range, also built and uploaded to TestFlight, real-device verified end-to-end - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. That same testing found **TEST-022**, a cross-version compatibility regression from TEST-021. **v2.1.1+29** (build-only bump) adds that fix plus DECISION-019 (dedup/dead-code cleanup) - built and delivered to TestFlight 2026-08-18, real-device validation and ASC metadata (Promotional Text both apps, Manual release both apps) confirmed 2026-08-18, submitted for App Store review 2026-08-18 (both apps), and **approved by Apple and released to the App Store 2026-08-19** (both apps) - **this is the current live version**. 🔵 **v2.2.0+30 (current target, in development)** adds an editable Express Mode scan cooldown (Supplier app Settings, done 2026-08-21) plus a planned positioning/metadata update informed by a competitive assessment (`docs/marketing/`) - **minor version bump**, not yet built or uploaded. Code merged to `develop` 2026-08-21 (`cad0851`); not yet merged to `main`, no release branch cut yet. See `RELEASES.md` for the release-branch record, `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md` for this release's sequencing, and `docs/project-management/DEFECT_TRACKER.md` for the defects.  
+**Document Status:** 🟢 **v2.1.1+29 is LIVE ON THE APP STORE** (both apps), submitted for App Store review 2026-08-18, **approved and released 2026-08-19**, superseding v2.0.3+23 (which was live but contained TEST-016). **v2.0.3+23** was submitted 2026-08-15, approved and released 2026-08-16, superseding v2.0.2+21 (shipped 2026-08-10 — the project's first public release). ⚠️ **v2.0.3+23 contained TEST-016** (businesses with 3 or 4 required stamps can't issue a valid card) - fix shipped to **TestFlight as v2.1.0+26** (minor version bump, also fixes TEST-017 through TEST-020, a redemption QR-capacity failure found while testing TEST-016 and everything it surfaced along the way), but not submitted for App Store review since TEST-021 (the issue-card counterpart to TEST-017/020's fix) was found on that same TestFlight build. **v2.1.0+27** added TEST-021 and was built and uploaded to TestFlight. **v2.1.1+28** (patch version bump - DECISION-017 is a genuine UX improvement, not build-only) added a self-service fix for a business outside the supported stamps-required range, also built and uploaded to TestFlight, real-device verified end-to-end - see `docs/testing/DECISION-017_LEGACY_BUSINESS_TEST_PLAN.md`. That same testing found **TEST-022**, a cross-version compatibility regression from TEST-021. **v2.1.1+29** (build-only bump) adds that fix plus DECISION-019 (dedup/dead-code cleanup) - built and delivered to TestFlight 2026-08-18, real-device validation and ASC metadata (Promotional Text both apps, Manual release both apps) confirmed 2026-08-18, submitted for App Store review 2026-08-18 (both apps), and **approved by Apple and released to the App Store 2026-08-19** (both apps) - **this is the current live version**. 🟢 **v2.2.0+32 (current target, merged and ready to build)** consolidates v2.2.0+30 (editable Express Mode scan cooldown) and v2.2.0+31 (editable business profile fields, directional `stampsRequired` policy, local audit trail) - neither ever built or uploaded - plus a macOS desktop build for the Supplier app, a real-device-found `stampsRequired` fix, and test-suite quality fixes. **Build-only bump** relative to +31. Merged `feature/businessedit` → `develop` → `main` 2026-08-23, release branch `releases/v2.2.0-build32` cut. Not yet built or uploaded. See `RELEASES.md` for the release-branch record, `docs/project-management/DEFECT_TRACKER.md` DECISION-021/DECISION-022 for the defects, and `CHANGELOG.md` [2.2.0+32] for the full change list.  
 **Maintained by:** Development Team  
-**Last Updated:** August 21, 2026
+**Last Updated:** August 23, 2026
 
 ---
 

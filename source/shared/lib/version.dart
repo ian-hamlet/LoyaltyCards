@@ -634,6 +634,49 @@
 ///   DISCUSSION_Business_Field_Editing.md. Implementation record:
 ///   docs/project-management/DEFECT_TRACKER.md DECISION-021. App Store
 ///   metadata: docs/deployment/APP_STORE_METADATA_PACKET_v2_2_0_31.md.
+///
+/// Build 32 Changes (build-only bump, same 2.2.0 line - consolidates
+/// everything below into one shippable build; none of it is new
+/// App-Store-facing capability):
+/// - Supplier app macOS port merged in (was developed on a separate branch):
+///   a practical desktop build for a business running the supplier app on a
+///   Mac, not an App Store submission target. Code signing fixed - an
+///   explicit `CODE_SIGN_IDENTITY = "Apple Development"` is required
+///   alongside `DEVELOPMENT_TEAM` or Xcode silently falls back to unstable
+///   ad-hoc signing for local Debug builds. Printing fixed by adding the
+///   missing `com.apple.security.print` App Sandbox entitlement (was
+///   already required for camera). See
+///   docs/testing/MACOS_SUPPLIER_PORT_NOTES.md and
+///   docs/project-management/DEFECT_TRACKER.md DECISION-022.
+/// - Bug fix: a `stampsRequired` increase failed to reach the auto-created
+///   successor card when the current card completed via an ordinary stamp
+///   scan rather than a redemption scan (the successor is created at
+///   completion time either way, but only the redemption code path was
+///   applying `latestStampsRequiredSnapshot` to it) - found via real-device
+///   testing, fixed with a test-first regression test added before the fix.
+///   Full detail: DEFECT_TRACKER.md DECISION-021.
+/// - Bug fix: two Supplier app redemption handlers
+///   (`supplier_redeem_card.dart`) were declared `void async` instead of
+///   `Future<void> async`, making them structurally impossible for any
+///   caller to await - root cause of intermittent test flakiness reported
+///   during this work.
+/// - iOS build hygiene: both apps' `ios/Podfile` now force every pod's
+///   `IPHONEOS_DEPLOYMENT_TARGET` to match the project's own (15.0),
+///   matching the existing macOS Podfile pattern and silencing an Xcode
+///   warning.
+/// - Test-suite quality: fixed a hanging background test (missing fake
+///   `MobileScannerPlatform.stop()` override), a silently-dead
+///   `tearDown()`/`tearDownAll()` pair (missing outer call parens), and
+///   replaced several blind `Future.delayed()` test waits with
+///   condition-polling loops against real state instead of a fixed guess at
+///   how long an async chain takes.
+/// - Documentation: Supplier Setup Guide and User Guide now explain the
+///   directional-policy edge cases (a decrease/increase landing on an
+///   already-complete card) and make explicit what happens to customers
+///   with cards in circulation if a business resets its configuration or
+///   deletes the app (a fresh, unrelated identity is always generated
+///   unless restored from a Recovery Backup, permanently orphaning their
+///   cards).
 
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.0+31';
+const String appVersion = '2.2.0+32';

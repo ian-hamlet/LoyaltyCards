@@ -17,33 +17,39 @@ Examples:
 
 ## Current Releases
 
-### v2.2.0+31 - Build 31 (🔵 In development)
-- **Date:** August 22, 2026
+### v2.2.0+32 - Build 32 (🔵 Merged, ready to build)
+- **Date:** August 23, 2026
 - **Platform:** Not yet built or uploaded.
-- **Branch:** `feature/businessedit` (not yet merged to `develop`/`main`, no release branch cut yet - held pending explicit instruction)
-- **Version:** 2.2.0+31
-- **Status:** 🔵 In development. **Build-only bump** - a large addition, folded into the same not-yet-shipped 2.2.0 line as v2.2.0+30 below rather than its own version, since nothing has been uploaded under 2.2.0 yet.
+- **Branch:** merged `feature/businessedit` → `develop` → `main` (fast-forward), release branch `releases/v2.2.0-build32` cut from `main`.
+- **Version:** 2.2.0+32
+- **Status:** 🔵 Merged, ready to build. **Build-only bump** - consolidates v2.2.0+30 and v2.2.0+31 below (neither of which was ever built/uploaded) plus a round of real-device-found fixes and a macOS desktop port for the Supplier app, none of which is new App-Store-facing capability.
+- **Focus:** Everything below in v2.2.0+30 and v2.2.0+31 (editable scan cooldown, editable business profile fields, directional `stampsRequired` policy, local audit trail), plus: a macOS desktop build for the Supplier app (dev/business convenience, not an App Store target); a real-device-found bug where a `stampsRequired` increase never reached the next card when completion came via an ordinary stamp scan rather than a redemption; macOS code signing and printing fixes; iOS Podfile deployment-target hygiene; and a round of test-suite quality fixes (a hanging test, dead `tearDown`/`tearDownAll`, blind test delays replaced with condition polling). Full detail: `CHANGELOG.md` [2.2.0+32], `docs/project-management/DEFECT_TRACKER.md` DECISION-021 and DECISION-022, `docs/testing/MACOS_SUPPLIER_PORT_NOTES.md`.
+- **Testing:** shared 216/216, customer_app 138/138, supplier_app 104/104 (the 3 `supplier_redeem_card_test.dart` failures noted as "pre-existing, unrelated" under v2.2.0+31 below are now fixed - see CHANGELOG). `flutter analyze` clean of errors across all three packages (only pre-existing lint-level info/warnings remain, unchanged by this work).
+- **Next Steps:** Build (`source/build_both_apps.sh`), upload to TestFlight via Transporter, real-device validate, enter metadata into App Store Connect (`APP_STORE_METADATA_PACKET_v2_2_0_32.md`), and submit for App Store review.
+
+### v2.2.0+31 - Build 31 (🟡 Superseded by v2.2.0+32, never built or uploaded)
+- **Date:** August 22, 2026
+- **Status:** 🟡 Superseded - folded into v2.2.0+32 above without ever being built or uploaded.
 - **Focus:** Supplier-editable business profile fields (Name, Icon, Brand Color, and now generally-editable Stamps Required), the directional-policy stamp-exchange mechanism protecting customers already collecting, and a new local audit trail for support visibility. See `docs/project-management/Requirements/DISCUSSION_Business_Field_Editing.md` for the full design and `docs/project-management/DEFECT_TRACKER.md` DECISION-021 for the implementation record, including a real production bug found and fixed during this work's own test development.
 - **Major Changes:**
   - **Editable Name/Icon/Brand Color:** new self-service editor dialogs in Supplier Settings, matching the existing Stamps Required/Scan Cooldown pattern. Stamps Required is now freely editable (previously only via DECISION-017's out-of-range "Fix Now" flow). Only Operation Mode remains locked.
   - **Directional `stampsRequired` policy:** a decrease applies to an in-progress card on the customer's next scan (reusing TEST-018's overflow-relocation machinery unmodified); an increase never applies retroactively, only to the next card at redemption. Carried via new unsigned `StampToken` snapshot fields, backward-compatible with older tokens/app versions.
   - **Local audit trail:** per-device, never synced, unbounded log of business-config history and backup/clone events, viewable and shareable as PDF from Settings.
   - **Bug fix:** a `stampsRequired` decrease that pushed a card to completion could silently roll back the customer's just-earned stamp (a validation-ordering issue in the new directional-policy write) - found and fixed via this feature's own test development, not a field report.
-- **Testing:** shared 216/216, customer_app 137/137, supplier_app 97/100 (3 pre-existing `supplier_redeem_card_test.dart` failures, confirmed unrelated to this work). `flutter analyze` clean across all three packages.
-- **Next Steps:** Commit and push to `feature/businessedit` (do **not** merge). Merge to `develop`/`main`, build, TestFlight, real-device validate, and submit only on separate explicit instruction.
+- **Testing (at the time):** shared 216/216, customer_app 137/137, supplier_app 97/100 (3 `supplier_redeem_card_test.dart` failures, believed unrelated to this work at the time - since root-caused and fixed under v2.2.0+32 above, see CHANGELOG). `flutter analyze` clean across all three packages.
 
-### v2.2.0+30 - Build 30 (🔵 In development)
+### v2.2.0+30 - Build 30 (🟡 Superseded by v2.2.0+32, never built or uploaded)
 - **Date:** August 21, 2026
 - **Platform:** Not yet built or uploaded.
 - **Branch:** `develop`/`feature/express-mode-cooldown-display` (`cad0851` - not yet merged to `main`, no release branch cut yet)
 - **Version:** 2.2.0+30
-- **Status:** 🔵 In development. **Minor version bump** (2.1.1 -> 2.2.0) - a genuine capability increase (the scan cooldown was previously fixed at onboarding-time only), not a build-only or patch bump.
+- **Status:** 🟡 Superseded by v2.2.0+32 above, never built or uploaded. **Minor version bump** (2.1.1 -> 2.2.0) - a genuine capability increase (the scan cooldown was previously fixed at onboarding-time only), not a build-only or patch bump.
 - **Focus:** Editable Express Mode scan cooldown (Supplier app), plus a positioning/metadata update for both apps' App Store Connect listings - see `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md` for the decided sequencing this release follows.
 - **Major Changes:**
   - **Editable scan cooldown:** the Express Mode scan cooldown (`Business.scanInterval`) can now be changed after setup from Supplier app Settings, not just once at onboarding - new `widgets/scan_interval_editor.dart`, mirroring the existing `stamps_required_fix.dart` self-service pattern. Safe to change anytime: unlike `stampsRequired`, `scanInterval` is never baked into an issued card, so a change applies to the very next stamp scanned with no effect on any card already issued. ✅ Done 2026-08-21 - 6 new tests, full suite green (89/89), `flutter analyze` clean. Full detail: `docs/project-management/FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`.
   - **Positioning/metadata update:** ✅ Applied 2026-08-22 to `docs/deployment/APP_STORE_METADATA_PACKET_v2_2_0_30.md` (all suggested changes from `docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md`, informed by `docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md`, adopted as-is for both apps' subtitle/promotional text/description copy). Not yet entered in App Store Connect - that happens at submission time. Also extended to the printable marketing flyers/handouts (`marketing/`, `site/marketing/`) and `site/user/about.html` on 2026-08-22, which weren't in the original plan's scope but carry the same claims.
   - Also consolidated planning material from several earlier Claude sessions into `docs/project-management/`, `docs/marketing/`, and `docs/quality/` - not app behavior, but worth noting since it landed in the same commits. See `docs/project-management/NEXT_ITERATION_PLANNING_2026-08-21.md`.
-- **Next Steps:** Build, TestFlight, real-device validate, merge `develop` → `main`, cut `releases/v2.2.0-build30`, enter the metadata into App Store Connect, and submit for App Store review - standard workflow.
+- **Next Steps:** None for this build specifically - superseded by v2.2.0+32 above before ever being built.
 
 ### v2.1.1+29 - Build 29 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 17-18, 2026 (built/submitted); August 19, 2026 (approved and released)

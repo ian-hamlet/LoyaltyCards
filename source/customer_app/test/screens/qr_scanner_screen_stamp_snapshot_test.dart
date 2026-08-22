@@ -209,6 +209,36 @@ void main() {
       // But the higher value is known, for the *next* card at redemption.
       expect(updated.latestStampsRequiredSnapshot, 10);
     });
+
+    testWidgets('an increase that completes the card via a stamp scan (not redemption) still applies to the next card',
+        (tester) async {
+      // Real-world defect report: business at 3, card at 2/3. Business
+      // raised to 5. Next scan (+1 = 3/3) correctly leaves the completing
+      // card at its original 3 (never worsen an in-progress card), but the
+      // auto-created next card was found to still require 3, not 5 - the
+      // increase never took effect at all. Root cause: unlike
+      // _handleRedemptionToken (already fixed to read
+      // latestStampsRequiredSnapshot), the ordinary "CARD COMPLETE -
+      // AUTO-CREATING NEW CARD" continuation reached when a stamp SCAN
+      // itself completes a card - not a separate redemption action -
+      // still built the new card from card.stampsRequired directly. This
+      // is actually the more common way a card completes in Express Mode,
+      // since redemption is a distinct, later action.
+      await seedCard(tester, dbName: 'test_snapshot_increase_completes_card.db', stampsRequired: 3, stampsCollected: 2);
+
+      await scan(tester, stampToken(snapshotStampsRequired: 5));
+
+      final oldCard = await tester.runAsync(() => cardRepo.getCardById('card-snapshot-test'));
+      expect(oldCard!.stampsRequired, 3, reason: 'the completing card itself must never be worsened');
+      expect(oldCard.stampsCollected, 3);
+      expect(oldCard.isComplete, isTrue);
+
+      final allCards = await tester.runAsync(() => cardRepo.getCardsByBusiness(businessId));
+      expect(allCards!.length, 2, reason: 'completing the card at exact target must auto-create a fresh next card');
+      final newCard = allCards.firstWhere((c) => c.id != oldCard.id);
+      expect(newCard.stampsRequired, 5, reason: 'the next card is exactly where a pending increase should take effect');
+      expect(newCard.stampsCollected, 0);
+    });
   });
 
   group('§4.1 - name/icon/color are purely cosmetic, always take the freshest value', () {

@@ -867,7 +867,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               brandColor: card.brandColor,
               logoIndex: card.logoIndex,
               mode: card.mode,
-              stampsRequired: card.stampsRequired,
+              // §4.1: this new card is exactly the "next card" a pending
+              // increase should take effect on - card.stampsRequired alone
+              // would still be whatever the just-completed card required,
+              // since an increase never mutates that field directly.
+              stampsRequired: card.latestStampsRequiredSnapshot ?? card.stampsRequired,
               stampsCollected: remainingOverflow,
               createdAt: now,
               updatedAt: now,
@@ -930,7 +934,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             brandColor: card.brandColor,
             logoIndex: card.logoIndex,
             mode: card.mode, // Preserve the operation mode
-            stampsRequired: card.stampsRequired,
+            // §4.1: this new card is exactly the "next card" a pending
+            // increase should take effect on - card.stampsRequired alone
+            // would still be whatever the just-completed card required,
+            // since an increase never mutates that field directly.
+            stampsRequired: card.latestStampsRequiredSnapshot ?? card.stampsRequired,
             stampsCollected: overflow,
             createdAt: now,
             updatedAt: now,

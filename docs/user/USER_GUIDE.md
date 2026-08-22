@@ -31,7 +31,7 @@ Last Updated: July 21, 2026
    - They'll scan your card or you scan redemption QR
    - New card created automatically
 
-**That's it! No account, no email, no personal info needed.**
+**That's it! No account, no email, no personal info needed — by design, there's no personal data to hack.**
 
 ---
 

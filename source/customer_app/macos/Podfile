@@ -38,5 +38,12 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)
+    # Some pods (e.g. app_settings) ship a lower MACOSX_DEPLOYMENT_TARGET
+    # in their own podspec than this project's platform line above -
+    # Xcode then warns that the pod's target predates our supported range.
+    # Force every pod target to match, silencing that warning.
+    target.build_configurations.each do |config|
+      config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.15'
+    end
   end
 end

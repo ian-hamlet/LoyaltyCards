@@ -17,15 +17,15 @@ Examples:
 
 ## Current Releases
 
-### v2.2.0+32 - Build 32 (🔵 Merged, ready to build)
-- **Date:** August 23, 2026
-- **Platform:** Not yet built or uploaded.
+### v2.2.0+32 - Build 32 (🟢 TestFlight-validated, ready to submit for App Store review)
+- **Date:** August 23, 2026 (merged, built, uploaded, and TestFlight-tested)
+- **Platform:** Built and uploaded to App Store Connect via Transporter, both apps. Basic TestFlight testing completed the same day - no blockers found.
 - **Branch:** merged `feature/businessedit` → `develop` → `main` (fast-forward), release branch `releases/v2.2.0-build32` cut from `main`.
 - **Version:** 2.2.0+32
-- **Status:** 🔵 Merged, ready to build. **Build-only bump** - consolidates v2.2.0+30 and v2.2.0+31 below (neither of which was ever built/uploaded) plus a round of real-device-found fixes and a macOS desktop port for the Supplier app, none of which is new App-Store-facing capability.
+- **Status:** 🟢 TestFlight-validated, ready for App Store submission. **Build-only bump** - consolidates v2.2.0+30 and v2.2.0+31 below (neither of which was ever built/uploaded) plus a round of real-device-found fixes and a macOS desktop port for the Supplier app, none of which is new App-Store-facing capability.
 - **Focus:** Everything below in v2.2.0+30 and v2.2.0+31 (editable scan cooldown, editable business profile fields, directional `stampsRequired` policy, local audit trail), plus: a macOS desktop build for the Supplier app (dev/business convenience, not an App Store target); a real-device-found bug where a `stampsRequired` increase never reached the next card when completion came via an ordinary stamp scan rather than a redemption; macOS code signing and printing fixes; iOS Podfile deployment-target hygiene; and a round of test-suite quality fixes (a hanging test, dead `tearDown`/`tearDownAll`, blind test delays replaced with condition polling). Full detail: `CHANGELOG.md` [2.2.0+32], `docs/project-management/DEFECT_TRACKER.md` DECISION-021 and DECISION-022, `docs/testing/MACOS_SUPPLIER_PORT_NOTES.md`.
-- **Testing:** shared 216/216, customer_app 138/138, supplier_app 104/104 (the 3 `supplier_redeem_card_test.dart` failures noted as "pre-existing, unrelated" under v2.2.0+31 below are now fixed - see CHANGELOG). `flutter analyze` clean of errors across all three packages (only pre-existing lint-level info/warnings remain, unchanged by this work).
-- **Next Steps:** Build (`source/build_both_apps.sh`), upload to TestFlight via Transporter, real-device validate, enter metadata into App Store Connect (`APP_STORE_METADATA_PACKET_v2_2_0_32.md`), and submit for App Store review.
+- **Testing:** shared 216/216, customer_app 138/138, supplier_app 104/104 (the 3 `supplier_redeem_card_test.dart` failures noted as "pre-existing, unrelated" under v2.2.0+31 below are now fixed - see CHANGELOG). `flutter analyze` clean of errors across all three packages (only pre-existing lint-level info/warnings remain, unchanged by this work). Basic TestFlight validation completed 2026-08-23, both apps.
+- **Next Steps:** Enter metadata into App Store Connect (`APP_STORE_METADATA_PACKET_v2_2_0_32.md`), re-enter the Privacy Policy/Terms/Support/Marketing URLs (still point at the old GitHub Pages host - see `APP_STORE_SUBMISSION_CHECKLIST.md`), select build 32 for both apps, and submit for App Store review.
 
 ### v2.2.0+31 - Build 31 (🟡 Superseded by v2.2.0+32, never built or uploaded)
 - **Date:** August 22, 2026

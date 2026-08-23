@@ -1,6 +1,6 @@
 # App Store Metadata Packet (v2.2.0+32)
 
-**Status: 🟢 MERGED to `develop`/`main`, ready to build, 2026-08-23.** Not yet built, uploaded, or submitted. **Build-only bump** (2.2.0+31 -> 2.2.0+32) - consolidates v2.2.0+30 and v2.2.0+31 below into the first actual build/submission under the 2.2.0 line (neither +30 nor +31 was ever built or uploaded), plus a round of real-device-found fixes since +31. Since this is the first 2.2.0 build to actually ship, "What's New" below covers everything back to the last live version, v2.1.1+29 - not just the delta since +31.
+**Status: 🟢 Built, uploaded to TestFlight, and TestFlight-tested, 2026-08-23.** Ready to enter this packet's fields into App Store Connect and submit for App Store review. **Build-only bump** (2.2.0+31 -> 2.2.0+32) - consolidates v2.2.0+30 and v2.2.0+31 below into the first actual build/submission under the 2.2.0 line (neither +30 nor +31 was ever built or uploaded), plus a round of real-device-found fixes since +31. Since this is the first 2.2.0 build to actually ship, "What's New" below covers everything back to the last live version, v2.1.1+29 - not just the delta since +31.
 
 No positioning changes this release - Subtitle, Promotional Text, Keywords, and Description are unchanged from v2.2.0+30/+31 below. Only "What's New" and the App Review Notes change.
 

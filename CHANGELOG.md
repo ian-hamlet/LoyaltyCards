@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.2.0+32] - 2026-08-23
 
-**Status:** 🟢 Built, uploaded to TestFlight, and basic TestFlight testing completed (both apps) - ready for App Store submission. **Build-only bump** - consolidates the macOS supplier port, several real-device-found bug fixes, and test-suite quality fixes into one shippable build on top of v2.2.0+31; none of it is new App-Store-facing capability. All automated tests passing (shared 216/216, customer_app 138/138, supplier_app 104/104), `flutter analyze` clean of errors on all three packages.
+**Status:** 🟢 Built, uploaded to TestFlight, TestFlight-tested, and submitted for App Store review (both apps), 2026-08-23 - awaiting Apple's decision. **Build-only bump** - consolidates the macOS supplier port, several real-device-found bug fixes, and test-suite quality fixes into one shippable build on top of v2.2.0+31; none of it is new App-Store-facing capability. All automated tests passing (shared 216/216, customer_app 138/138, supplier_app 104/104), `flutter analyze` clean of errors on all three packages.
 
 ### Added
 - **Supplier app: macOS desktop build.** A practical build for a business running the supplier app on a Mac rather than iOS - not an App Store submission target. See `docs/testing/MACOS_SUPPLIER_PORT_NOTES.md` and `docs/project-management/DEFECT_TRACKER.md` DECISION-022.

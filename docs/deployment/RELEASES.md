@@ -347,10 +347,10 @@ git branch -a | grep releases
 
 Release branches should:
 - ✅ Never be deleted
-- ✅ Never have new commits (read-only snapshot)
-- ✅ Always match what was uploaded to TestFlight/App Store
+- ✅ Never have code changes once cut - the app code must always match what was uploaded to TestFlight/App Store
+- ✅ Documentation/status updates are allowed while the build is under review (e.g. recording TestFlight testing results, submission date, review status, approval/release date) - a review cycle can take days, and tracking its progress on the release branch in real time is more useful than only updating once it's fully resolved. `main`/`develop` get the same doc updates in step, so the branches don't drift.
 
-If you need to deploy a fix, create a **new release branch** with incremented build number.
+If you need to deploy a code fix, create a **new release branch** with incremented build number - never patch app code on an existing one.
 
 ## Tags vs Branches
 

@@ -69,18 +69,15 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ---
 
-## � Project Management (8+ files)
+## � Project Management (5 active + archive)
 
 **Location:** `docs/project-management/`
 
-### [docs/project-management/NEXT_ACTIONS.md](docs/project-management/NEXT_ACTIONS.md)
-**Purpose:** Current project status, completed phases, prioritized next actions, and future enhancements backlog.
-
-### [docs/project-management/PROJECT_DEVELOPMENT_PLAN.md](docs/project-management/PROJECT_DEVELOPMENT_PLAN.md)
-**Purpose:** Master development plan with phase breakdown, task estimates, and completion tracking.
+### [docs/project-management/PROJECT_HISTORY.md](docs/project-management/PROJECT_HISTORY.md)
+**Purpose:** Condensed decision/requirements history and key architectural decisions - start here for "how did we get here."
 
 ### [docs/project-management/DEFECT_TRACKER.md](docs/project-management/DEFECT_TRACKER.md)
-**Purpose:** Log of all defects discovered with status, priority, and resolution tracking.
+**Purpose:** Log of all defects discovered with status, priority, and resolution tracking. Living document - current status of record.
 
 ### [docs/project-management/DEFECT_WORKFLOW.md](docs/project-management/DEFECT_WORKFLOW.md)
 **Purpose:** Process for logging, prioritizing, and resolving defects during development or testing.
@@ -88,11 +85,8 @@ These documents contain proven prompt templates for triggering comprehensive cod
 ### [docs/project-management/FEEDBACK_CHANGE_TRACKER.md](docs/project-management/FEEDBACK_CHANGE_TRACKER.md)
 **Purpose:** Single intake log for post-testing feedback items with mandatory user-doc and maintenance-doc impact checks.
 
-### [docs/project-management/VERSION_MANAGEMENT_ANALYSIS.md](docs/project-management/VERSION_MANAGEMENT_ANALYSIS.md)
-**Purpose:** Analysis of version numbering strategy and build management approach.
-
-### [docs/project-management/KNOWN_ISSUES_AND_RISKS.md](docs/project-management/KNOWN_ISSUES_AND_RISKS.md)
-**Purpose:** Documented known issues, technical debt, and project risks with mitigation strategies.
+### `docs/archive/project-management/` (Archived, 2026-08-24)
+**Purpose:** Superseded planning snapshots and one-time reports, kept for reference: `NEXT_ACTIONS.md`, `PROJECT_DEVELOPMENT_PLAN.md`, `VERSION_MANAGEMENT_ANALYSIS.md`, `KNOWN_ISSUES_AND_RISKS.md`, `VERSION_INCONSISTENCY_REPORT.md`, `CLOUDFLARE_MIGRATION_COMPLETION_PLAN.md`, `FEATURE_PLAN_SCAN_INTERVAL_EDITABLE.md`, `NEXT_ITERATION_PLANNING_2026-08-21.md`, `BRANCH_STATUS_2026-07-26.md`, `CRASH-001-stamp-print-race-condition.md`, `UI-001-how-it-works-dark-mode-contrast.md`. See [PROJECT_HISTORY.md](docs/project-management/PROJECT_HISTORY.md) for the full superseded-document index and why each moved.
 
 ### Requirements Folder (24 files)
 **Location:** `docs/project-management/Requirements/`
@@ -200,33 +194,27 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ---
 
-## ✅ Quality Assurance (8 files)
+## ✅ Quality Assurance (5 active + archive)
 
 **Location:** `docs/quality/`
-
-### [docs/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md](docs/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md)
-**Purpose:** Most recent comprehensive code review report assessing production readiness after critical security fixes (✅ Production Ready status).
-
-### [docs/quality/EXPERT_ARCHITECTURAL_REVIEW.md](docs/quality/EXPERT_ARCHITECTURAL_REVIEW.md)
-**Purpose:** Expert-level architectural review covering design patterns, code organization, scalability, and maintainability.
-
-### [docs/quality/TEST_COMPLETION_REPORT.md](docs/quality/TEST_COMPLETION_REPORT.md)
-**Purpose:** Summary of test suite status, coverage metrics (264 tests total), and testing milestones.
 
 ### [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md)
 **Purpose:** Overall testing strategy including unit tests, integration tests, device testing approach, and quality gates.
 
 ### [docs/quality/VULNERABILITIES.md](docs/quality/VULNERABILITIES.md)
-**Purpose:** Log of discovered security vulnerabilities, their severity, remediation status, and lessons learned.
+**Purpose:** Log of discovered security vulnerabilities, their severity, remediation status, and lessons learned. Living document, still being appended to.
 
-### [docs/quality/LESSONS_LEARNED.md](docs/quality/LESSONS_LEARNED.md)
-**Purpose:** Comprehensive lessons learned from AI-driven development approach including what worked, what didn't, and recommendations for future projects.
+### [docs/quality/REVIEW_ROLES.md](docs/quality/REVIEW_ROLES.md)
+**Purpose:** Defines the review methodology roles used for code/quality review passes.
 
-### [docs/quality/PROCESS_IMPROVEMENTS.md](docs/quality/PROCESS_IMPROVEMENTS.md)
-**Purpose:** Process improvement recommendations based on development experience including workflow enhancements and quality gates.
+### [docs/quality/REVIEW_MATRIX.md](docs/quality/REVIEW_MATRIX.md)
+**Purpose:** Live-updated index of review passes - role, last reviewed, findings, status.
 
-### [docs/quality/REVIEW_PROCESS_EXPLANATION.md](docs/quality/REVIEW_PROCESS_EXPLANATION.md)
-**Purpose:** Explanation of code review process and why comprehensive security audits are essential even with AI-generated code.
+### [docs/quality/CODE_QUALITY_REVIEW_2026-08-21.md](docs/quality/CODE_QUALITY_REVIEW_2026-08-21.md)
+**Purpose:** Most recent engineering assessment - the review this project's current code-quality refactor pass is executing.
+
+### `docs/archive/quality/` (Archived, 2026-08-24)
+**Purpose:** One-time review reports and retrospectives from earlier in the project, kept for reference: `EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md`, `EXPERT_ARCHITECTURAL_REVIEW.md`, `TEST_COMPLETION_REPORT.md`, `LESSONS_LEARNED.md`, `PROCESS_IMPROVEMENTS.md`, `REVIEW_PROCESS_EXPLANATION.md`, `MAGIC_NUMBERS_REVIEW_2026-08-17.md`, `FUNCTIONAL_REVIEW_2026-07-26.md`. See [PROJECT_HISTORY.md](docs/project-management/PROJECT_HISTORY.md) for the full superseded-document index and why each moved.
 
 ---
 
@@ -317,7 +305,7 @@ These documents contain proven prompt templates for triggering comprehensive cod
 4. [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md) - Testing approach
 
 ### For Project Managers
-1. [docs/project-management/NEXT_ACTIONS.md](docs/project-management/NEXT_ACTIONS.md) - Current status
+1. [docs/project-management/PROJECT_HISTORY.md](docs/project-management/PROJECT_HISTORY.md) - Condensed history and current status
 2. [docs/project-management/DEFECT_TRACKER.md](docs/project-management/DEFECT_TRACKER.md) - Bug tracking
 3. [docs/meta/PROJECT_METADATA.md](docs/meta/PROJECT_METADATA.md) - Project info
 4. [CHANGELOG.md](CHANGELOG.md) - Release history
@@ -329,7 +317,7 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ### For QA/Testers
 1. [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md) - Test approach
-2. [docs/quality/TEST_COMPLETION_REPORT.md](docs/quality/TEST_COMPLETION_REPORT.md) - Test status (264 tests)
+2. [docs/archive/quality/TEST_COMPLETION_REPORT.md](docs/archive/quality/TEST_COMPLETION_REPORT.md) - Test status (264 tests)
 3. [docs/deployment/TESTFLIGHT_TESTING_GUIDE.md](docs/deployment/TESTFLIGHT_TESTING_GUIDE.md) - How to test
 
 ### For New Team Members
@@ -338,7 +326,7 @@ These documents contain proven prompt templates for triggering comprehensive cod
 1. **Start Here (30 min):**
    - [README.md](README.md)
    - [docs/meta/PROJECT_METADATA.md](docs/meta/PROJECT_METADATA.md)
-   - [docs/project-management/NEXT_ACTIONS.md](docs/project-management/NEXT_ACTIONS.md)
+   - [docs/project-management/PROJECT_HISTORY.md](docs/project-management/PROJECT_HISTORY.md)
 
 2. **Understand Architecture (1 hour):**
    - [docs/technical/Architecture/DECISION_P2P_Architecture.md](docs/technical/Architecture/DECISION_P2P_Architecture.md)
@@ -352,11 +340,11 @@ These documents contain proven prompt templates for triggering comprehensive cod
 4. **Learn AI Workflow (1 hour):**
    - [docs/development/AI_PROMPTING_GUIDE.md](docs/development/AI_PROMPTING_GUIDE.md) ⭐
    - [docs/development/DEVELOPMENT_STANDARDS.md](docs/development/DEVELOPMENT_STANDARDS.md) ⭐
-   - [docs/quality/LESSONS_LEARNED.md](docs/quality/LESSONS_LEARNED.md)
+   - [docs/archive/quality/LESSONS_LEARNED.md](docs/archive/quality/LESSONS_LEARNED.md)
 
 5. **Quality & Testing (1 hour):**
    - [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md)
-   - [docs/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md](docs/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md)
+   - [docs/archive/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md](docs/archive/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md)
    - [docs/development/CODE_REVIEW_PROMPT_TEMPLATE.md](docs/development/CODE_REVIEW_PROMPT_TEMPLATE.md) ⭐
 
 ---
@@ -364,9 +352,8 @@ These documents contain proven prompt templates for triggering comprehensive cod
 ## 🔄 Document Maintenance
 
 **Update Frequency:**
-- **docs/project-management/NEXT_ACTIONS.md**: After each development session
+- **docs/project-management/DEFECT_TRACKER.md**: After each development session, and when bugs discovered/fixed
 - **CHANGELOG.md**: With every significant commit
-- **docs/project-management/DEFECT_TRACKER.md**: When bugs discovered/fixed
 - **docs/quality/** reviews: After comprehensive code reviews
 - **DOCUMENTATION_INDEX.md** (this file): When structure changes
 

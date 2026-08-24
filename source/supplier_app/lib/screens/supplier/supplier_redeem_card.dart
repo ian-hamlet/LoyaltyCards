@@ -4,9 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:qr_flutter/qr_flutter.dart';
-import 'dart:convert';
-import '../../services/business_repository.dart';
-import '../../services/key_manager.dart';
+import '../../controllers/controller_results.dart';
+import '../../controllers/supplier_redeem_card_controller.dart';
 import '../../services/device_orientation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,9 +21,18 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     facing: CameraFacing.back,
     autoStart: true,
   );
-  final BusinessRepository _businessRepo = BusinessRepository();
-  
-  Business? _business;
+
+  // All business/crypto logic for this screen lives in the controller, so
+  // it can be tested without pumping a widget tree - see
+  // controllers/supplier_redeem_card_controller.dart for the convention.
+  // Dialog/navigation orchestration (device-mismatch warning, manual
+  // redemption confirmation, the final Navigator.push to show the
+  // redemption QR) stays here deliberately - see the ForTesting hooks below
+  // for why this screen keeps widget-level test coverage alongside the
+  // controller's own.
+  final SupplierRedeemCardController _controller = SupplierRedeemCardController();
+
+  Business? get _business => _controller.business;
   bool _isProcessing = false;
   bool _isLoading = true;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
@@ -43,17 +51,13 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   }
 
   Future<void> _loadBusiness() async {
-    try {
-      final business = await _businessRepo.getBusiness();
-      if (!mounted) return;
-      setState(() {
-        _business = business;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-    }
+    // Matches the pre-extraction behavior exactly: isLoading clears either
+    // way, and a load failure just leaves _business null (build() then
+    // shows the loading spinner indefinitely) - not ideal, but not this
+    // extraction's concern to change.
+    await _controller.loadBusiness();
+    if (!mounted) return;
+    setState(() => _isLoading = false);
   }
 
   /// Load saved camera rotation preference from SharedPreferences
@@ -489,68 +493,55 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   Future<void> _processManualRedemption() async {
     setState(() => _isProcessing = true);
 
-    try {
-      // Log the redemption with timestamp
-      final now = DateTime.now();
-      final cardId = 'simple_redemption_${now.millisecondsSinceEpoch}';
-      
-      await _businessRepo.logRedemption(
-        cardId: cardId,
-        stampsRedeemed: _business!.stampsRequired,
-        businessId: _business!.id,
-      );
+    final result = await _controller.recordManualRedemption();
+    if (!mounted) return;
 
-      AppLogger.business('Simple Mode Redemption Logged');
-      AppLogger.debug('Business: ${_business!.name}', 'Redemption');
-      AppLogger.debug('Stamps: ${_business!.stampsRequired}', 'Redemption');
-      AppLogger.debug('Timestamp: ${now.toIso8601String()}', 'Redemption');
-
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        
-        // Show success message
-        await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            icon: const Icon(Icons.celebration, color: Colors.green, size: 64),
-            title: const Text('Redemption Recorded!'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Redeemed: ${_business!.stampsRequired} stamps',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Time: ${now.hour}:${now.minute.toString().padLeft(2, '0')}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Date: ${now.day}/${now.month}/${now.year}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-            actions: [
-              FilledButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Return to home
-                },
-                child: const Text('Done'),
-              ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        _showError('Error recording redemption: $e');
-      }
+    if (!result.isSuccess) {
+      setState(() => _isProcessing = false);
+      _showError(result.errorMessage!);
+      return;
     }
+
+    setState(() => _isProcessing = false);
+
+    final now = result.redeemedAt!;
+
+    // Show success message
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.celebration, color: Colors.green, size: 64),
+        title: const Text('Redemption Recorded!'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Redeemed: ${result.stampsRedeemed} stamps',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Time: ${now.hour}:${now.minute.toString().padLeft(2, '0')}',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Date: ${now.day}/${now.month}/${now.year}',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Return to home
+            },
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Test-only entry point for [_processCardQR] - lets widget tests
@@ -566,65 +557,22 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       _isProcessing = true;
     });
 
-    AppLogger.qr('Processing Redemption QR');
-    AppLogger.qr('QR Data: ${qrData.substring(0, qrData.length > 100 ? 100 : qrData.length)}...');
+    final result = await _controller.parseRedemptionQr(qrData, onTokenRecognized: Haptics.success);
+    if (!mounted) return;
 
-    try {
-      // Try parsing as JSON token first (plain-JSON format)
-      final json = jsonDecode(qrData) as Map<String, dynamic>;
+    if (!result.isSuccess) {
+      _showError(result.errorMessage!);
+      return;
+    }
 
-      // Immediate feedback that a readable code was recognized, distinct
-      // from whether the scan ultimately succeeds - the main non-visual
-      // signal that the camera registered anything at all. _showError
-      // below (and the compact/legacy-format fallbacks in the catch
-      // block) covers all rejection paths.
-      Haptics.success();
-
-      if (json['type'] == 'redemption_request') {
-        await _processRedemptionRequestToken(RedemptionRequestToken.fromJson(json));
-        return;
-      } else if (json['type'] == 'card_stamp_request') {
-        // Customer is showing a stamp request QR, not a redemption QR
-        // This means their card isn't complete yet
-        final stampToken = CardStampRequestToken.fromJson(json);
-        final stampsCollected = stampToken.currentStamps;
-        _showError('This card isn\'t ready to redeem yet.\n\nCustomer has $stampsCollected stamps but needs all stamps to be complete before redeeming.');
-        return;
-      } else {
-        _showError('Please scan a completed loyalty card for redemption.');
-        return;
-      }
-    } catch (e) {
-      AppLogger.debug('Failed to parse as plain-JSON token: $e', 'QR');
-
-      // TEST-020: not valid JSON - try the compact gzip+Base45 redemption
-      // encoding before falling back further. Base45's alphabet (digits,
-      // uppercase letters, a handful of symbols - no `{`, `"`, or
-      // lowercase) can never be valid JSON text, so there's no ambiguity
-      // between this and the plain-JSON path above.
-      try {
-        final token = RedemptionQrCodec.decode(qrData);
-        Haptics.success();
-        await _processRedemptionRequestToken(token);
-        return;
-      } catch (e2) {
-        AppLogger.debug('Failed to parse as compact redemption token: $e2', 'QR');
-      }
-
-      // Fall back to legacy format: LOYALTYCARD:REDEEM:cardId:stamps
-      if (qrData.startsWith('LOYALTYCARD:REDEEM:')) {
-        final parts = qrData.split(':');
-        if (parts.length >= 4) {
-          final cardId = parts[2];
-          final stamps = int.tryParse(parts[3]) ?? 0;
-          AppLogger.qr('Legacy redemption format detected');
-          Haptics.success();
-          await _showSecureModeRedemptionConfirmation(context, cardId, stamps);
-          return;
-        }
-      }
-
-      _showError('Unable to read this QR code. Please ask the customer to show their completed loyalty card.');
+    final token = result.token;
+    if (token != null) {
+      await _processRedemptionRequestToken(token);
+    } else {
+      // Legacy format (LOYALTYCARD:REDEEM:...) - never carried a full
+      // token, so no validateRedemptionToken() step, straight to
+      // confirmation - matches the pre-extraction call shape exactly.
+      await _showSecureModeRedemptionConfirmation(context, result.cardId!, result.stampsCollected!);
     }
   }
 
@@ -632,28 +580,14 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
   /// paths in _processCardQR - validates a parsed [RedemptionRequestToken]
   /// and proceeds to redemption confirmation or a rejection message.
   Future<void> _processRedemptionRequestToken(RedemptionRequestToken token) async {
-    AppLogger.qr('Redemption token parsed successfully');
-    AppLogger.qr('Card ID: ${token.cardId}');
-    AppLogger.qr('Stamps collected: ${token.stampsCollected}');
-    AppLogger.qr('Signatures to verify: ${token.stampProofs.length}');
+    final validation = _controller.validateRedemptionToken(token);
 
-    // Structural check, including stampProofs.length == stampsCollected -
-    // without this, verifyRedemptionStampChain only confirms that
-    // whichever proofs WERE submitted are individually valid, never
-    // that their count actually backs the claimed stampsCollected used
-    // below to sign the reward.
-    if (!token.isValid()) {
-      AppLogger.error('Redemption rejected - malformed/inconsistent token for card ${token.cardId}', tag: 'Security');
-      _showError('Invalid redemption request.');
-      return;
-    }
-
-    // V-005: Check for device mismatch
-    if (token.hasDeviceMismatch()) {
-      AppLogger.warning('Device mismatch detected!', 'Security');
-      AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
-      AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
-      await _showDeviceMismatchWarning(context, token);
+    if (!validation.isSuccess) {
+      if (validation.failureReason == SupplierScanFailureReason.deviceMismatch) {
+        await _showDeviceMismatchWarning(context, token);
+      } else {
+        _showError(validation.errorMessage!);
+      }
       return;
     }
 
@@ -666,148 +600,34 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     int stamps, {
     RedemptionRequestToken? token,
   }) async {
-    // Get business info to sign the redemption token
-    final businessRepo = BusinessRepository();
-    final business = await businessRepo.getBusiness();
-
+    final result = await _controller.confirmRedemption(cardId, stamps, token: token);
     if (!mounted) return;
 
-    if (business == null) {
-      _showError('Business not configured');
+    if (!result.isSuccess) {
+      _showError(result.errorMessage!);
       return;
     }
-
-    // V-013: refuse to redeem a card that's already been redeemed. Previously
-    // nothing checked this - the only "already redeemed" state was the
-    // isRedeemed flag on the customer's own device, which they fully
-    // control (e.g. a restored pre-redemption local backup resets it).
-    final alreadyRedeemed = await businessRepo.hasBeenRedeemed(cardId);
-    if (!mounted) return;
-    if (alreadyRedeemed) {
-      AppLogger.warning('Redemption rejected - card $cardId already redeemed', 'Security');
-      _showError('This card has already been redeemed.');
-      return;
-    }
-
-    // V-012: independently verify the customer's claimed stamps before
-    // signing off on a reward. Previously this flow trusted `stamps`
-    // (the customer's self-reported count) outright, with no cryptographic
-    // check at all - a fabricated or replayed redemption request would be
-    // signed just as readily as a genuine one.
-    //
-    // Express/Simple Mode is intentionally honor-based (no stamp signatures
-    // exist to check - see V-001), so verification only applies to Secure
-    // Mode businesses.
-    if (business.mode == OperationMode.secure) {
-      if (token == null) {
-        AppLogger.error(
-          'Secure Mode redemption via unsigned/legacy format rejected for card $cardId',
-          tag: 'Security',
-        );
-        _showError('This redemption method isn\'t supported for Secure Mode. Ask the customer to update their app.');
-        return;
-      }
-
-      final chainResult = CryptoUtils.verifyRedemptionStampChain(
-        cardId: cardId,
-        stampProofs: token.stampProofs,
-        businessPublicKey: business.publicKey,
-      );
-
-      if (!chainResult.isValid) {
-        AppLogger.error(
-          'Redemption rejected - stamp chain verification failed for card $cardId: ${chainResult.failureReason}',
-          tag: 'Security',
-        );
-        _showError('Unable to verify this card\'s stamps. Redemption denied.');
-        return;
-      }
-
-      // The chain check above only confirms the submitted proofs are
-      // individually genuine and unique - it says nothing about whether
-      // that's actually enough to complete THIS business's card. Without
-      // this, a customer with a few genuinely-earned stamps on a card
-      // that needs many more could still get a full reward signed.
-      if (token.stampsCollected < business.stampsRequired) {
-        AppLogger.error(
-          'Redemption rejected - card $cardId claims ${token.stampsCollected} stamps but business requires ${business.stampsRequired}',
-          tag: 'Security',
-        );
-        _showError('This card isn\'t complete yet.');
-        return;
-      }
-
-      AppLogger.business('Redemption stamp chain verified ($stamps stamps)');
-    }
-
-    // Generate redemption token
-    final now = DateTime.now();
-    final keyManager = KeyManager();
-    final privateKey = await keyManager.getPrivateKey(business.id);
-    
-    if (privateKey == null) {
-      _showError('Private key not found');
-      return;
-    }
-
-    // Signature data - single source of truth in SignatureFormat.redemptionTokenData,
-    // shared with RedemptionToken.getSignatureData()
-    final signatureData = SignatureFormat.redemptionTokenData(
-      cardId: cardId,
-      stampsRedeemed: stamps,
-      timestampMs: now.millisecondsSinceEpoch,
-    );
-    final signature = await keyManager.signData(signatureData, privateKey);
-    
-    if (signature == null) {
-      _showError('Failed to sign redemption token');
-      return;
-    }
-
-    final redemptionToken = RedemptionToken(
-      cardId: cardId,
-      businessId: business.id,
-      stampsRedeemed: stamps,
-      signature: signature,
-      timestamp: now.millisecondsSinceEpoch,
-    );
-
-    AppLogger.business('Redemption Token Generated');
-    AppLogger.debug('Card ID: $cardId', 'Redemption');
-    AppLogger.debug('Stamps redeemed: $stamps', 'Redemption');
-    AppLogger.debug('Signature: ${signature.substring(0, 20)}...', 'Redemption');
-    AppLogger.debug('Token type: redemption_token', 'Redemption');
-
-    // Log the redemption for analytics
-    await businessRepo.logRedemption(
-      cardId: cardId,
-      stampsRedeemed: stamps,
-      businessId: business.id,
-    );
-    AppLogger.database('Redemption logged to database');
 
     // Show QR code for customer to scan
-    if (mounted) {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => _RedemptionTokenScreen(
-            token: redemptionToken,
-            stampsRedeemed: stamps,
-          ),
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _RedemptionTokenScreen(
+          token: result.redemptionToken!,
+          stampsRedeemed: result.stampsRedeemed!,
         ),
-      );
+      ),
+    );
 
-      // Return to previous screen after showing token
-      if (mounted) {
-        Navigator.pop(context, true);
-      }
-      
-      // Reset processing flag only after all navigation completes
-      setState(() {
-        _isProcessing = false;
-      });
+    // Return to previous screen after showing token
+    if (mounted) {
+      Navigator.pop(context, true);
     }
+
+    // Reset processing flag only after all navigation completes
+    setState(() {
+      _isProcessing = false;
+    });
   }
 
   void _showError(String message) {

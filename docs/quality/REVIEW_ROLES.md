@@ -54,7 +54,7 @@ To run one role:
 > Run a **[ROLE NAME]** review of the LoyaltyCards codebase (customer_app,
 > supplier_app, shared), using that role's checklist in
 > docs/quality/REVIEW_ROLES.md. First skim docs/quality/VULNERABILITIES.md and
-> docs/quality/FUNCTIONAL_REVIEW_2026-07-26.md so you don't re-surface issues
+> docs/project-management/DEFECT_TRACKER.md so you don't re-surface issues
 > already tracked there. Report findings with severity (Critical/High/Medium/Low)
 > and file:line references, and for each recommend either a fix or
 > accept-as-risk with reasoning. When done, update that role's row in

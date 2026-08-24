@@ -56,14 +56,14 @@ See [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md) for com
 
 ### Development Documentation
 - [docs/quality/TESTING_STRATEGY.md](docs/quality/TESTING_STRATEGY.md) - Testing approach and coverage
-- [docs/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md](docs/quality/EXPERT_CODE_REVIEW_PRODUCTION_READINESS.md) - Production readiness assessment
+- [docs/project-management/PROJECT_HISTORY.md](docs/project-management/PROJECT_HISTORY.md) - Condensed decision/requirements history and architecture rationale
 - [docs/technical/SECURITY_MODEL.md](docs/technical/SECURITY_MODEL.md) - Security architecture
 - [docs/technical/DATABASE_SCHEMA.md](docs/technical/DATABASE_SCHEMA.md) - Database design
 - [docs/development/](docs/development/) - AI prompts and development standards ⭐
 - [source/README.md](source/README.md) - Source code structure
 
 ### Planning & Process
-- [docs/project-management/NEXT_ACTIONS.md](docs/project-management/NEXT_ACTIONS.md) - Current status and roadmap
+- [docs/project-management/DEFECT_TRACKER.md](docs/project-management/DEFECT_TRACKER.md) - Current status: open items, in-progress work, and release targets
 - [docs/meta/PROJECT_METADATA.md](docs/meta/PROJECT_METADATA.md) - Project information
 - [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
 - [docs/deployment/RELEASES.md](docs/deployment/RELEASES.md) - Release branch documentation
@@ -135,7 +135,7 @@ See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for complete navigation of 
 This project uses AI-driven development with comprehensive documentation of the process:
 - All AI prompts documented in `docs/development/`
 - Development standards in `docs/development/DEVELOPMENT_STANDARDS.md`
-- Lessons learned in `docs/quality/LESSONS_LEARNED.md`
+- Lessons learned in `docs/archive/quality/LESSONS_LEARNED.md`
 
 ## Getting Started
 

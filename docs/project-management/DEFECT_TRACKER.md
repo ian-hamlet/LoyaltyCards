@@ -5,6 +5,8 @@ Update# Defect Tracker - v1.0.0+6 Pre-Release
 **Target Version:** v1.0.0 (Public Release)  
 **Last Updated:** June 11, 2026
 
+**Note (2026-08-24):** `CRASH-001-stamp-print-race-condition.md` and `UI-001-how-it-works-dark-mode-contrast.md` moved to `docs/archive/project-management/` as part of a documentation consolidation pass. Links to them in entries below predate that move.
+
 ---
 
 ## ✅ CRITICAL STATUS UPDATE
@@ -2117,6 +2119,18 @@ This document tracks defects from two sources:
 - **Testing Verified:** Both apps confirmed building cleanly (`flutter build macos`) and running end-to-end after the fixes above - real QR scanned, stamp added, business created, on real Mac hardware (2018 Intel MacBook). Signing fix additionally verified via `codesign -dvv` on a clean rebuild of both apps (real `Apple Development` identity, correct Team ID, not ad-hoc). Full three-package automated test suite is unaffected (macOS platform folders and scaffolding aren't exercised by `flutter test`, which runs against the host platform's VM, not a macOS app build) - see DECISION-021 above for the current automated-test state.
 - **Target Build:** N/A - not a versioned app release; this is build/tooling scaffolding only, carried on `feature/businessedit` (merged in from the now-deleted `feature/macos-supplier-port`, fast-forwarded 2026-08-23).
 - **Notes:** No customer-facing or supplier-facing documentation (`USER_GUIDE.md`, `SUPPLIER_SETUP_GUIDE.md`) mentions macOS support, deliberately - this isn't an announced or shipped capability, just a development convenience. Revisit this section (and decide on distribution) before ever describing macOS support publicly.
+
+---
+
+### Q-012: Migration Backup File Copy May Not Close the Live Connection Actually Being Upgraded
+
+- **Source:** `docs/quality/FUNCTIONAL_REVIEW_2026-07-26.md` (2026-07-26 functional review), agent-reported and source-grounded but not independently re-verified line-by-line at the time - carried forward here 2026-08-24 as a proper tracked entry ahead of that review document being archived, so this open item isn't orphaned.
+- **Status:** 📋 OPEN - BACKLOG (low severity, not yet independently re-verified)
+- **Priority:** LOW
+- **Screen/Feature:** Both apps - `database_helper.dart` / `supplier_database_helper.dart`, migration backup/restore path
+- **Description:** Migration backup/restore only closes the cached `_database` field if it's non-null - during a first-cold-boot upgrade that field is still `null` (only set after `_initDatabase()` returns), so the connection mid-`onUpgrade` may not be closed before the backup file copy runs underneath it. Flagged as lower-confidence pending a closer read of sqflite's exact connection lifecycle here.
+- **Note:** the review's other two open-at-the-time items from the same pass don't need separate tracking - Q-011 (camera orientation workaround) was fully investigated and closed within that same document (verified the `mobile_scanner` 7.2.0→7.4.0 bump doesn't touch iOS initial-orientation detection; conclusion was to keep the existing manual-rotation workaround as-is, not a pending action), and Q-013 (unreachable Simple Mode redemption-confirmation code) was closed as verified-intentional (Express Mode deliberately doesn't track redemption stats). Neither is an open action item.
+- **Target Build:** Unscheduled - low severity, needs investigation before a fix can even be scoped.
 
 ---
 

@@ -1,4 +1,12 @@
 include: package:flutter_lints/flutter.yaml
 
+linter:
+  # flutter_lints already enables prefer_const_constructors_in_immutables and
+  # avoid_print by default - this adds the one genuinely new rule from the
+  # 2026-08-21 code quality review's step 5 (docs/quality/CODE_QUALITY_REVIEW_2026-08-21.md),
+  # kept deliberately small rather than adopting a large external lint package.
+  rules:
+    prefer_const_constructors: true
+
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

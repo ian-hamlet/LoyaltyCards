@@ -45,7 +45,6 @@
 - Maintenance docs
   - `docs/deployment/SUPPORT_PROCEDURES.md`
   - `docs/deployment/TESTFLIGHT_TESTING_GUIDE.md`
-  - `docs/project-management/NEXT_ACTIONS.md`
   - `docs/project-management/DEFECT_TRACKER.md`
 
 ---

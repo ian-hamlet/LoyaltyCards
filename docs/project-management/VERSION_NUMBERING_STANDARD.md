@@ -56,7 +56,6 @@ major.minor.patch+build
 |------|----------------|--------|-------------------|
 | `README.md` | Every release | `v0.3.0+1` or `Status: v0.3.0+1` | N/A (no historical content) |
 | `docs/meta/PROJECT_METADATA.md` | Every release | `v0.3.0+1 Production - Build 23 in TestFlight` | N/A (no historical content) |
-| `docs/project-management/NEXT_ACTIONS.md` | Every release | Version references in current status | DO NOT change old phase completions |
 | `docs/deployment/RELEASES.md` | Every release | Add new release section, update current status | DO NOT remove/edit historical releases |
 | `docs/user/USER_GUIDE.md` | Every release | Update version in header | DO NOT touch historical notes |
 | `docs/user/ABOUT_LOYALTYCARDS.md` | Every release | Update version number displayed to users | DO NOT change feature descriptions |
@@ -68,7 +67,7 @@ major.minor.patch+build
 | `CHANGELOG.md` | Historical record | Keep all entries, add new entries at top |
 | `source/shared/lib/version.dart` | Historical build notes | Keep all build entries, add new at bottom |
 | `docs/quality/VULNERABILITIES.md` | Historical record | Keep version context, add new section if needed |
-| `docs/quality/LESSONS_LEARNED.md` | Historical record | Archive at version boundary, start fresh |
+| `docs/archive/quality/LESSONS_LEARNED.md` | Historical record | Archived - see `docs/project-management/PROJECT_HISTORY.md` |
 | `docs/technical/PERFORMANCE_BASELINES.md` | Historical record | Keep baseline data, add new benchmarks when needed |
 | All docs in `docs/project-management/Requirements/` | Requirements are static | Version context only, don't change requirement text |
 
@@ -125,11 +124,6 @@ Update **only the current-release sections** in these files:
 - **Status**: v1.0.1+7 Release Candidate - Build 7
 ```
 
-**docs/project-management/NEXT_ACTIONS.md**
-```markdown
-**Current Version:** v1.0.1+7
-```
-
 **docs/user/USER_GUIDE.md**
 ```markdown
 **Version 0.3.0+1**
@@ -181,7 +175,6 @@ When bumping to a new version, use this checklist:
 ### Documentation Updates
 - [ ] `README.md` — Status line updated
 - [ ] `docs/meta/PROJECT_METADATA.md` — Status updated
-- [ ] `docs/project-management/NEXT_ACTIONS.md` — Current version updated
 - [ ] `docs/user/USER_GUIDE.md` — Version header updated
 - [ ] `docs/user/ABOUT_LOYALTYCARDS.md` — Version number updated
 
@@ -217,7 +210,7 @@ When bumping to a new version, use this checklist:
 **Action:** Feature release
 
 1. Update pubspec files: `0.4.0+1`
-2. Update all doc files (README, NEXT_ACTIONS, etc.) to `0.4.0+1`
+2. Update all doc files (README, PROJECT_METADATA, etc.) to `0.4.0+1`
 3. Add build notes to `version.dart`
 4. Add release entry to `CHANGELOG.md`
 
@@ -283,11 +276,10 @@ Documentation is derived from this.
 3. `source/shared/pubspec.yaml`
 4. `README.md`
 5. `docs/meta/PROJECT_METADATA.md`
-6. `docs/project-management/NEXT_ACTIONS.md`
-7. `docs/user/USER_GUIDE.md`
-8. `docs/user/ABOUT_LOYALTYCARDS.md`
-9. `CHANGELOG.md` (new entry only)
-10. `source/shared/lib/version.dart` (new build notes, if significant)
+6. `docs/user/USER_GUIDE.md`
+7. `docs/user/ABOUT_LOYALTYCARDS.md`
+8. `CHANGELOG.md` (new entry only)
+9. `source/shared/lib/version.dart` (new build notes, if significant)
 
 ---
 

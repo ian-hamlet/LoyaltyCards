@@ -5,9 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
-import '../../services/qr_token_generator.dart';
-import '../../services/key_manager.dart';
-import '../../services/business_repository.dart';
+import '../../controllers/supplier_stamp_card_controller.dart';
 import '../../services/supplier_database_helper.dart';
 import '../../services/device_orientation_service.dart';
 import '../../services/backup_storage_service.dart'; // REQ-022
@@ -25,10 +23,13 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     facing: CameraFacing.back,
     autoStart: true,
   );
-  final BusinessRepository _businessRepo = BusinessRepository();
-  final QRTokenGenerator _tokenGenerator = QRTokenGenerator(KeyManager());
-  
-  Business? _business;
+
+  // All business/crypto logic for this screen lives in the controller, so
+  // it can be tested without pumping a widget tree - see
+  // controllers/supplier_stamp_card_controller.dart for the convention.
+  final SupplierStampCardController _controller = SupplierStampCardController();
+
+  Business? get _business => _controller.business;
   StampToken? _stampToken; // For simple mode QR display
   bool _isProcessing = false;
   bool _isPrinting = false; // CRASH-001: guards against concurrent print jobs
@@ -52,26 +53,25 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   }
 
   Future<void> _loadBusiness() async {
-    try {
-      final business = await _businessRepo.getBusiness();
-      if (!mounted) return;
-      setState(() {
-        _business = business;
-      });
+    final result = await _controller.loadBusiness();
+    if (!mounted) return;
 
-      // Auto-generate QR for simple mode
-      if (business?.mode == OperationMode.simple) {
-        // Small delay to ensure widget is built
-        await Future.delayed(const Duration(milliseconds: 100));
-        if (mounted) {
-          await _generateSimpleModeStampQR();
-        }
-      }
-    } catch (e) {
-      if (!mounted) return;
+    if (!result.isSuccess) {
       setState(() {
-        _errorMessage = 'Error loading business: $e';
+        _errorMessage = result.errorMessage;
       });
+      return;
+    }
+
+    setState(() {}); // Rebuild to pick up the newly-loaded _business getter
+
+    // Auto-generate QR for simple mode
+    if (_business?.mode == OperationMode.simple) {
+      // Small delay to ensure widget is built
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (mounted) {
+        await _generateSimpleModeStampQR();
+      }
     }
   }
 
@@ -121,84 +121,23 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       _errorMessage = null;
     });
 
-    try {
-      // Parse QR token
-      final token = QRToken.fromQRString(qrData);
+    final result = await _controller.parseStampRequest(
+      qrData,
+      onTokenRecognized: Haptics.success,
+    );
+    if (!mounted) return;
 
-      if (token is! CardStampRequestToken) {
-        Haptics.error();
-        setState(() {
-          _errorMessage = 'Invalid QR code. Please scan a stamp request QR.';
-          _isProcessing = false;
-        });
-        return;
-      }
-
-      // A readable, correctly-typed code was recognized - the main
-      // non-visual signal that the camera registered anything at all,
-      // distinct from whether the request is ultimately accepted below.
-      Haptics.success();
-
-      // Validate token
-      if (!token.isValid()) {
-        Haptics.error();
-        setState(() {
-          _errorMessage = 'Invalid token format';
-          _isProcessing = false;
-        });
-        return;
-      }
-
-      // Check business ID matches
-      if (token.businessId != _business!.id) {
-        Haptics.error();
-        setState(() {
-          _errorMessage = 'This card belongs to a different business';
-          _isProcessing = false;
-        });
-        return;
-      }
-
-      // Log card activity (tracks unique cards using the system)
-      await _businessRepo.logCardActivity(token.cardId, _business!.id);
-      if (!mounted) return;
-
-      // Check timestamp (must be < 1 minute old)
-      final now = DateTime.now().millisecondsSinceEpoch;
-      final age = now - token.timestamp;
-      if (age > AppConstants.stampRequestExpiryMs) {
-        Haptics.error();
-        setState(() {
-          _errorMessage = 'QR code expired. Customer needs to generate a new one.';
-          _isProcessing = false;
-        });
-        return;
-      }
-
-      // Generate stamp token
-      final previousHash = token.lastStampHash; // Use customer's last stamp hash
-
-      AppLogger.business(
-        'Processing stamp request - Card: ${token.cardId.substring(0, 8)}, '
-        'Stamps: ${token.currentStamps} → ${token.currentStamps + 1}'
-      );
-      AppLogger.debug(
-        'Last stamp hash: "${token.lastStampHash.isEmpty ? "(empty)" : token.lastStampHash.substring(0, 20) + "..."}"',
-        'Stamp'
-      );
-
-      if (mounted) {
-        // Show stamp count selector, then generate and show stamp token QR
-        _showStampCountSelector(token, previousHash);
-      }
-    } catch (e) {
-      if (!mounted) return;
+    if (!result.isSuccess) {
       Haptics.error();
       setState(() {
-        _errorMessage = 'Error processing QR: $e';
+        _errorMessage = result.errorMessage;
         _isProcessing = false;
       });
+      return;
     }
+
+    // Show stamp count selector, then generate and show stamp token QR
+    _showStampCountSelector(result.token!, result.previousHash!);
   }
 
   void _showStampCountSelector(CardStampRequestToken token, String previousHash) {
@@ -291,34 +230,18 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
     String previousHash,
     int stampCount,
   ) async {
-    try {
-      final additionalStampCount = stampCount - 1; // First stamp is main, rest are additional
-      
-      final stampToken = await _tokenGenerator.generateStampToken(
-        businessId: _business!.id,
-        cardId: token.cardId,
-        stampNumber: token.currentStamps + 1,
-        previousHash: previousHash,
-        additionalStampCount: additionalStampCount,
-        businessName: _business!.name,
-        brandColor: _business!.brandColor,
-        logoIndex: _business!.logoIndex,
-        stampsRequired: _business!.stampsRequired,
-      );
+    final result = await _controller.generateStampToken(token, previousHash, stampCount);
+    if (!mounted) return;
 
-      // NOTE: Stamps are logged when CUSTOMER successfully scans and validates,
-      // not when supplier generates the token. This prevents counting stamps
-      // that were generated but never received due to errors.
-
-      if (mounted) {
-        _showStampTokenQR(stampToken, token.currentStamps, stampCount);
-      }
-    } catch (e) {
+    if (!result.isSuccess) {
       setState(() {
-        _errorMessage = 'Error generating stamp: $e';
+        _errorMessage = result.errorMessage;
         _isProcessing = false;
       });
+      return;
     }
+
+    _showStampTokenQR(result.stampToken!, token.currentStamps, stampCount);
   }
 
   void _showStampTokenQR(StampToken token, int currentStamps, int stampCount) {
@@ -373,51 +296,24 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
       _errorMessage = null;
     });
 
-    try {
-      // REQ-022: Validate stamp count
-      if (_stampCount < 1 || _stampCount > _business!.stampsRequired) {
-        throw Exception('Invalid stamp count: must be 1-${_business!.stampsRequired}');
-      }
-      
-      // Calculate expiry timestamp if applicable
-      int? expiryTimestamp;
-      if (_expiryDate != null) {
-        expiryTimestamp = _expiryDate!.millisecondsSinceEpoch;
-        AppLogger.debug('Token expiry set to: ${_expiryDate}', 'StampToken');
-      }
-      
-      // For simple mode, generate a generic stamp token
-      // It's reusable and doesn't require customer card info
-      final stampToken = await _tokenGenerator.generateStampToken(
-        businessId: _business!.id,
-        cardId: 'express-mode-stamp', // Generic ID for express mode
-        stampNumber: 1, // Generic stamp number
-        previousHash: '', // No hash chain in simple mode
-        additionalStampCount: 0,
-        stampCount: _stampCount, // REQ-022: Multi-denomination support
-        expiryDate: expiryTimestamp, // REQ-022: Optional expiry
-        scanInterval: _business!.scanInterval, // REQ-022: Supplier-specific rate limit
-        businessName: _business!.name,
-        brandColor: _business!.brandColor,
-        logoIndex: _business!.logoIndex,
-        stampsRequired: _business!.stampsRequired,
-      );
+    final result = await _controller.generateExpressModeToken(
+      stampCount: _stampCount,
+      expiryDate: _expiryDate,
+    );
+    if (!mounted) return;
 
-      if (mounted) {
-        setState(() {
-          _stampToken = stampToken;
-          _isProcessing = false;
-        });
-        AppLogger.debug('Generated $_stampCount-stamp token for ${_business!.name}', 'StampToken');
-      }
-    } catch (e) {
-      AppLogger.error('Failed to generate simple mode token: $e', tag: 'StampToken');
-      if (!mounted) return;
+    if (!result.isSuccess) {
       setState(() {
-        _errorMessage = 'Error generating stamp: $e';
+        _errorMessage = result.errorMessage;
         _isProcessing = false;
       });
+      return;
     }
+
+    setState(() {
+      _stampToken = result.stampToken;
+      _isProcessing = false;
+    });
   }
 
   /// CRASH-001 regression test hook: lets the widget test invoke the print

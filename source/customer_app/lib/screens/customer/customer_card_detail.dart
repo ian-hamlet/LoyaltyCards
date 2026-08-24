@@ -2,17 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:shared/models/card.dart' as models;
-import 'package:shared/models/transaction.dart' as models;
-import 'dart:convert';
-import '../../services/card_repository.dart';
-import '../../services/stamp_repository.dart';
-import '../../services/transaction_repository.dart';
-import '../../services/database_helper.dart';
-import '../../services/device_service.dart';
-import '../../utils/error_message_mapper.dart';
-import '../../services/qr_token_generator.dart';
+import '../../controllers/customer_card_detail_controller.dart';
 import 'qr_scanner_screen.dart';
-import 'package:uuid/uuid.dart';
 
 class CustomerCardDetail extends StatefulWidget {
   final String cardId;
@@ -24,33 +15,23 @@ class CustomerCardDetail extends StatefulWidget {
 }
 
 class _CustomerCardDetailState extends State<CustomerCardDetail> {
-  final CardRepository _cardRepo = CardRepository(DatabaseHelper());
-  final StampRepository _stampRepo = StampRepository(DatabaseHelper());
-  
-  models.Card? _card;
-  List<Stamp> _stamps = [];
+  // All business/QR logic for this screen lives in the controller, so it can
+  // be tested without pumping a widget tree - see
+  // controllers/customer_card_detail_controller.dart for the convention.
+  late final CustomerCardDetailController _controller =
+      CustomerCardDetailController(cardId: widget.cardId);
+
   bool _isLoading = true;
-  String? _currentDeviceId; // V-005: Cache device ID for QR generation
 
-  // Q-007: cache the generated QR string instead of calling _generateCardQR()
-  // directly in build() - that embeds a live timestamp, so any incidental
-  // rebuild (rotation, an unrelated setState elsewhere on screen) produced
-  // a visibly different QR code even though nothing the user did changed.
-  // Recomputed only when card/stamp data is actually reloaded.
-  String? _cachedQRData;
-
-  // TEST-017/TEST-020: a redemption QR for a high-stamp-count Secure Mode
-  // card (or one with several overflow-relocated stamps) can exceed a QR
-  // code's maximum encodable capacity. TEST-020 makes this dramatically
-  // less likely (gzip+Base45+alphanumeric-mode encoding via
-  // RedemptionQrCodec/AlphanumericQr - see DEFECT_TRACKER.md), but doesn't
-  // make it impossible for an arbitrarily large payload, and an
-  // already-issued pre-TEST-020 card could still be affected. Built once
-  // when card data loads, alongside _qrTooLargeToRender for the build()
-  // method to check without redoing the (non-trivial - tries QR versions
-  // 1-40) work on every rebuild.
-  QrCode? _cachedRedemptionQrCode;
-  bool _qrTooLargeToRender = false;
+  // Read-through aliases onto the controller's state. build() below is
+  // unchanged by the extraction: it still reads _card/_stamps/_cachedQRData/
+  // _cachedRedemptionQrCode/_qrTooLargeToRender, they are simply no longer
+  // duplicated into this class.
+  models.Card? get _card => _controller.card;
+  List<Stamp> get _stamps => _controller.stamps;
+  String? get _cachedQRData => _controller.cachedQrData;
+  QrCode? get _cachedRedemptionQrCode => _controller.redemptionQrCode;
+  bool get _qrTooLargeToRender => _controller.qrTooLargeToRender;
 
   @override
   void initState() {
@@ -60,118 +41,18 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
 
   Future<void> _loadCardData() async {
     setState(() => _isLoading = true);
-    
-    // V-005: Get device ID for redemption QR (fetch once, cache in state)
-    _currentDeviceId = await DeviceService.getDeviceId();
-    try {
-      final card = await _cardRepo.getCardById(widget.cardId);
-      final stamps = await _stampRepo.getStampsByCard(widget.cardId);
-      
-      AppLogger.debug('Card data loaded: ${card?.businessName} (${card?.id})', 'CardDetail');
-      AppLogger.debug('Stamps collected: ${card?.stampsCollected}', 'CardDetail');
-      AppLogger.debug('Stamp records in DB: ${stamps.length}', 'CardDetail');
-      for (var stamp in stamps) {
-        AppLogger.debug('  Stamp #${stamp.stampNumber} at ${stamp.timestamp}', 'CardDetail');
-      }
 
-      if (!mounted) return;
-      setState(() {
-        _card = card;
-        _stamps = stamps;
-        _isLoading = false;
-        // _generateCardQR()/_buildRedemptionQrCode() read _card/_stamps,
-        // which were just assigned above in this same synchronous
-        // callback, so this reflects the freshly-loaded data.
-        if (card != null && card.isComplete && !card.isRedeemed) {
-          _cachedQRData = null;
-          _cachedRedemptionQrCode = _buildRedemptionQrCode();
-          _qrTooLargeToRender = _cachedRedemptionQrCode == null;
-        } else {
-          _cachedRedemptionQrCode = null;
-          _qrTooLargeToRender = false;
-          _cachedQRData = _generateCardQR();
-        }
-      });
-    } catch (e) {
-      AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load card'));
+    final result = await _controller.load();
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (!result.isSuccess) {
+      AppFeedback.error(context, result.errorMessage!);
     }
   }
 
-  // TEST-020: builds the redemption QR as an alphanumeric-mode QrCode via
-  // RedemptionQrCodec (gzip + Base45) instead of the plain-JSON byte-mode
-  // string _generateCardQR() used to produce for this case - see
-  // DEFECT_TRACKER.md TEST-020 for the size comparison that motivated
-  // this. Returns null if the payload doesn't fit even at the largest QR
-  // version, or if the generator rejects inconsistent card/stamp data -
-  // either way, the caller falls back to the "too large to display" panel
-  // (stamp history below it still proves what's been earned).
-  // TEST-022: same fix as the supplier app's issue-card QR - prefer plain
-  // JSON (readable by any supplier app version) whenever it actually
-  // fits, and only fall back to the compact encoding for the genuinely
-  // oversized case (high stamp count and/or heavily overflow-relocated).
-  // The decode side (supplier_redeem_card.dart) already tries plain JSON
-  // first, so no change needed there.
-  QrCode? _buildRedemptionQrCode() {
-    if (_card == null) return null;
-    AppLogger.qr('Card is COMPLETE - generating REDEMPTION QR (TEST-020 compact encoding)');
-    AppLogger.qr('Including ${_stamps.length} stamps for redemption');
-    try {
-      final token = QRTokenGenerator().generateRedemptionRequest(
-        card: _card!,
-        stamps: _stamps,
-        cardDeviceId: _card!.deviceId, // V-005: Device where card was created
-        currentDeviceId: _currentDeviceId, // V-005: Device showing redemption QR (cached)
-      );
-      final plainJson = token.toQRString();
-      if (QrCapacity.fits(plainJson)) {
-        return QrCode.fromData(data: plainJson, errorCorrectLevel: QrErrorCorrectLevel.L);
-      }
-      final compact = RedemptionQrCodec.encode(token);
-      return AlphanumericQr.build(compact);
-    } catch (e) {
-      AppLogger.error('Failed to build redemption QR', error: e, tag: 'QR');
-      return null;
-    }
-  }
-
-  String _generateCardQR() {
-    if (_card == null) return '';
-
-    // If card has been redeemed, don't generate any QR
-    if (_card!.isRedeemed) {
-      AppLogger.qr('Card REDEEMED - no QR generation');
-      return 'REDEEMED'; // Special marker to show redeemed message instead of QR
-    }
-
-    // Redemption QR (card complete) is handled separately by
-    // _buildRedemptionQrCode() - TEST-020.
-
-    // Otherwise, generate stamp request QR
-    String lastStampHash = '';
-    if (_stamps.isNotEmpty) {
-      lastStampHash = _stamps.last.signature;
-      AppLogger.qr('Including lastStampHash from stamp #${_stamps.last.stampNumber}');
-      final hashPreview = lastStampHash.length > 20 ? '${lastStampHash.substring(0, 20)}...' : lastStampHash;
-      AppLogger.qr('Hash = "$hashPreview"');
-    } else {
-      AppLogger.qr('No stamps, lastStampHash will be empty');
-    }
-    
-    final qrData = {
-      'type': 'card_stamp_request',
-      'cardId': _card!.id,
-      'businessId': _card!.businessId,
-      'currentStamps': _card!.stampsCollected,
-      'publicKey': _card!.businessPublicKey,
-      'lastStampHash': lastStampHash,  // NOW INCLUDED!
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    
-    return jsonEncode(qrData);
-  }
+  String _generateCardQR() => _controller.generateCardQr();
 
   @override
   Widget build(BuildContext context) {
@@ -999,79 +880,25 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
   }
 
   Future<void> _processRedemption() async {
-    try {
-      final now = DateTime.now();
-      
-      // Mark card as redeemed
-      await _cardRepo.markCardAsRedeemed(_card!.id);
-      
-      // Log redemption transaction
-      final transactionRepo = TransactionRepository(DatabaseHelper());
-      final redemptionTransaction = models.Transaction(
-        id: const Uuid().v4(),
-        cardId: _card!.id,
-        type: TransactionType.redemption,
-        timestamp: now,
-        businessName: _card!.businessName,
-        details: 'Reward redeemed: ${_card!.stampsCollected} stamps',
-      );
-      await transactionRepo.insertTransaction(redemptionTransaction);
-      
-      AppLogger.business('Simple Mode Redemption');
-      AppLogger.debug('Card ID: ${_card!.id}', 'Redemption');
-      AppLogger.debug('Business: ${_card!.businessName}', 'Redemption');
-      AppLogger.debug('Stamps: ${_card!.stampsCollected}', 'Redemption');
-      AppLogger.debug('Redeemed at: ${now.toIso8601String()}', 'Redemption');
-      
-      // Check for existing card with available space before creating new card
-      final existingCard = await _cardRepo.findCardWithSpace(_card!.businessId);
-      // Q-004 fix: track whether a new card was actually created so the
-      // success dialog below can say so accurately - it previously claimed
-      // "a new card has been added" unconditionally, even when an existing
-      // under-filled card was reused instead.
-      bool newCardCreated = false;
+    // The confirmation dialog above has already run - everything the
+    // controller does here is database work, and the dialog below renders
+    // purely from its result.
+    final result = await _controller.processRedemption();
 
-      if (existingCard != null) {
-        AppLogger.business('Found existing card with space: ${existingCard.id}');
-        AppLogger.business('  Existing card has ${existingCard.stampsCollected}/${existingCard.stampsRequired} stamps');
-        AppLogger.business('  Skipping new card creation - will use existing card');
-      } else {
-        AppLogger.business('No existing cards with space found - creating new card');
-        
-        // Auto-create new card for continued loyalty
-        //
-        // businessName/brandColor/logoIndex are already kept fresh on the
-        // old card by every ordinary stamp scan (see
-        // QrScannerScreen._handleStampToken §4.1), so cloning them here is
-        // already correct. stampsRequired uses the separately-tracked
-        // snapshot, falling back to the old card's own value if none was
-        // ever seen - see the matching comment in
-        // QrScannerScreen._handleRedemptionToken (Requirements/
-        // DISCUSSION_Business_Field_Editing.md §4.1).
-        final newCardId = '${_card!.businessId}_${DateTime.now().millisecondsSinceEpoch}';
-        final newCard = models.Card(
-          id: newCardId,
-          businessId: _card!.businessId,
-          businessName: _card!.businessName,
-          businessPublicKey: _card!.businessPublicKey,
-          brandColor: _card!.brandColor,
-          logoIndex: _card!.logoIndex,
-          mode: _card!.mode,
-          stampsRequired: _card!.latestStampsRequiredSnapshot ?? _card!.stampsRequired,
-          stampsCollected: 0,
-          createdAt: now,
-          updatedAt: now,
-        );
-        
-        await _cardRepo.insertCard(newCard);
-        AppLogger.database('New card auto-created: $newCardId');
-        newCardCreated = true;
-      }
-      
-      // Reload card data
-      await _loadCardData();
-      
+    if (!result.isSuccess) {
       if (mounted) {
+        AppFeedback.error(context, result.errorMessage!);
+      }
+      return;
+    }
+
+    final now = result.redeemedAt!;
+    final newCardCreated = result.newCardCreated;
+
+    // Reload card data
+    await _loadCardData();
+
+    if (mounted) {
         // Show success message
         await showDialog(
           context: context,
@@ -1167,12 +994,6 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
             ],
           ),
         );
-      }
-    } catch (e) {
-      AppLogger.error('Error redeeming card', error: e, tag: 'CardDetail');
-      if (mounted) {
-        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'redeem card'));
-      }
     }
   }
 }

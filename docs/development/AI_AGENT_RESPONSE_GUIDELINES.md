@@ -47,7 +47,7 @@ File: DECISION_P2P_Architecture.md
 **Format 2: Full Path (preferred for multiple files)**
 ```
 - docs/deployment/APP_STORE_SUBMISSION_CHECKLIST.md
-- docs/project-management/NEXT_ACTIONS.md
+- docs/project-management/DEFECT_TRACKER.md
 - docs/technical/Architecture/DECISION_P2P_Architecture.md
 ```
 
@@ -237,7 +237,7 @@ When introducing project structure:
 ```
 Start by reading these files in order:
 1. README.md (project root)
-2. docs/project-management/NEXT_ACTIONS.md
+2. docs/project-management/DEFECT_TRACKER.md
 3. docs/technical/Architecture/DECISION_P2P_Architecture.md
 4. source/README.md
 ```

@@ -7,8 +7,8 @@
 **Apps under test:** Supplier App (LoyaltyCards Business) and Customer App (LoyaltyCards Customer Wallet)
 
 **Related:**
-- [`CRASH-001-stamp-print-race-condition.md`](../project-management/CRASH-001-stamp-print-race-condition.md) - full crash analysis and fix details
-- [`UI-001-how-it-works-dark-mode-contrast.md`](../project-management/UI-001-how-it-works-dark-mode-contrast.md) - dark mode fix details
+- [`CRASH-001-stamp-print-race-condition.md`](../archive/project-management/CRASH-001-stamp-print-race-condition.md) - full crash analysis and fix details
+- [`UI-001-how-it-works-dark-mode-contrast.md`](../archive/project-management/UI-001-how-it-works-dark-mode-contrast.md) - dark mode fix details
 - [`CHANGELOG.md`](../../CHANGELOG.md) - `[2.0.1+20]` entry
 
 ---

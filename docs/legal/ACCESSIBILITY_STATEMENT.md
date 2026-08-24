@@ -322,7 +322,7 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 - [ ] Professional third-party accessibility audit
 - [ ] WCAG 2.1 Level AA certification
 
-**Note:** An earlier draft of this document referenced planned NFC support as a non-visual alternative to QR scanning. That is not on the current product roadmap (see `docs/project-management/NEXT_ACTIONS.md`) and has been removed from this statement to avoid committing to an unplanned feature. QR scanning (Barrier 1 below) remains a visual-only requirement for now.
+**Note:** An earlier draft of this document referenced planned NFC support as a non-visual alternative to QR scanning. That is not on the current product roadmap (see `docs/project-management/DEFECT_TRACKER.md`) and has been removed from this statement to avoid committing to an unplanned feature. QR scanning (Barrier 1 below) remains a visual-only requirement for now.
 
 ---
 

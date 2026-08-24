@@ -17,16 +17,16 @@ Examples:
 
 ## Current Releases
 
-### v2.2.0+32 - Build 32 (🟢 Submitted for App Store review)
-- **Date:** August 23, 2026 (merged, built, uploaded, TestFlight-tested, and submitted)
-- **Platform:** Built and uploaded to App Store Connect via Transporter, both apps. Basic TestFlight testing completed the same day - no blockers found. Metadata entered from `APP_STORE_METADATA_PACKET_v2_2_0_32.md`, Privacy Policy/Support/Marketing URLs updated to the Cloudflare Pages host (both apps), and both apps submitted for App Store review - all the same day.
+### v2.2.0+32 - Build 32 (🟢 LIVE ON THE APP STORE)
+- **Date:** August 23, 2026 (merged, built, uploaded, TestFlight-tested, and submitted); August 24, 2026 (approved and released)
+- **Platform:** Built and uploaded to App Store Connect via Transporter, both apps. Basic TestFlight testing completed the same day - no blockers found. Metadata entered from `APP_STORE_METADATA_PACKET_v2_2_0_32.md`, Privacy Policy/Support/Marketing URLs updated to the Cloudflare Pages host (both apps), submitted for App Store review 2026-08-23, and **approved by Apple and released to the App Store 2026-08-24** (both apps, via App Store Connect).
 - **Branch:** merged `feature/businessedit` → `develop` → `main` (fast-forward), release branch `releases/v2.2.0-build32` cut from `main`.
 - **Version:** 2.2.0+32
-- **Status:** 🟢 Submitted for App Store review, awaiting Apple's decision. **Build-only bump** - consolidates v2.2.0+30 and v2.2.0+31 below (neither of which was ever built/uploaded) plus a round of real-device-found fixes and a macOS desktop port for the Supplier app, none of which is new App-Store-facing capability.
+- **Status:** 🟢 LIVE — available for download on the App Store. **Build-only bump** - consolidates v2.2.0+30 and v2.2.0+31 below (neither of which was ever built/uploaded) plus a round of real-device-found fixes and a macOS desktop port for the Supplier app, none of which is new App-Store-facing capability. Supersedes v2.1.1+29 as the current live version.
 - **Focus:** Everything below in v2.2.0+30 and v2.2.0+31 (editable scan cooldown, editable business profile fields, directional `stampsRequired` policy, local audit trail), plus: a macOS desktop build for the Supplier app (dev/business convenience, not an App Store target); a real-device-found bug where a `stampsRequired` increase never reached the next card when completion came via an ordinary stamp scan rather than a redemption; macOS code signing and printing fixes; iOS Podfile deployment-target hygiene; and a round of test-suite quality fixes (a hanging test, dead `tearDown`/`tearDownAll`, blind test delays replaced with condition polling). Full detail: `CHANGELOG.md` [2.2.0+32], `docs/project-management/DEFECT_TRACKER.md` DECISION-021 and DECISION-022, `docs/testing/MACOS_SUPPLIER_PORT_NOTES.md`.
 - **Testing:** shared 216/216, customer_app 138/138, supplier_app 104/104 (the 3 `supplier_redeem_card_test.dart` failures noted as "pre-existing, unrelated" under v2.2.0+31 below are now fixed - see CHANGELOG). `flutter analyze` clean of errors across all three packages (only pre-existing lint-level info/warnings remain, unchanged by this work). Basic TestFlight validation completed 2026-08-23, both apps.
 - **Correction found during submission:** unlike Privacy Policy, App Store Connect has no dedicated "Terms of Service URL" field - the only ASC mechanism is the app-level License Agreement (EULA), a text box for a Custom License Agreement, not a URL field. This project doesn't use it; the Terms of Service URL lives only on the app's own linked pages. The submission checklist previously implied a direct field existed for this - corrected 2026-08-23.
-- **Next Steps:** Monitor App Store Connect for review status; respond to App Review if questions arise; release both apps manually once approved (same reasoning as prior versions - hold until both apps clear review, since they're a paired system).
+- **Next Steps:** None - live on the App Store. Monitor App Store Connect for crash reports/reviews as usual.
 
 ### v2.2.0+31 - Build 31 (🟡 Superseded by v2.2.0+32, never built or uploaded)
 - **Date:** August 22, 2026

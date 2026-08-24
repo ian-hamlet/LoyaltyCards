@@ -1,8 +1,10 @@
 # Cloudflare Pages Migration — Completion Plan
 
+**Status: ✅ COMPLETE as of 2026-08-24.** All 5 steps in the completion checklist below are done - ASC's Privacy Policy, Support, and Marketing URL fields updated to the Cloudflare host (confirmed 2026-08-23, Terms of Service has no ASC field), and GitHub Pages unpublished (confirmed 2026-08-24 - `https://ian-hamlet.github.io/LoyaltyCards/` now returns 404). Cloudflare Pages (`https://loyaltycards-site.pages.dev`) is the sole live host for `site/`.
+
 **Source:** consolidated from `docs/review/loyaltycards-handoff-2026-08-21.md` (a session handoff note), 2026-08-21.
 
-## Status as of 2026-08-21
+## Status as of 2026-08-21 (historical - see completion note above)
 
 The public site (`site/` — Privacy Policy, Terms of Service, Support, Accessibility Statement, About/marketing pages) has been migrated off GitHub Pages to Cloudflare Pages:
 
@@ -17,23 +19,23 @@ The public site (`site/` — Privacy Policy, Terms of Service, Support, Accessib
 
 ## What's not done yet
 
-**App Store Connect's own URL fields still point at the OLD `ian-hamlet.github.io` host, for both apps** (LoyaltyCards Customer Wallet and LoyaltyCards Business):
+Nothing - see the completion note at the top. Original blockers, for the historical record:
+
+**App Store Connect's own URL fields pointed at the OLD `ian-hamlet.github.io` host, for both apps** (LoyaltyCards Customer Wallet and LoyaltyCards Business):
 - Privacy Policy URL
-- Terms of Service URL
+- Terms of Service URL (turned out ASC has no dedicated field for this - see the checklist's correction note)
 - Support URL
 - Marketing URL
 
-None of these have been re-entered in ASC yet. The pages themselves are live and correct at the new Cloudflare URLs — only the ASC fields lag. `docs/deployment/APP_STORE_SUBMISSION_CHECKLIST.md` has 5 checklist items deliberately left unchecked (`[ ]`) for this, each with an inline note.
+**Deliberate decision (carried forward from the handoff note):** hold off updating ASC and disabling GitHub Pages until the *next* release is built, submitted, and approved — so this cutover rides along with a real release rather than happening as a bare metadata-only change outside the normal release cadence. That release was v2.2.0+32 - approved and released 2026-08-24 (see `RELEASES.md`).
 
-**Deliberate decision (carried forward from the handoff note):** hold off updating ASC and disabling GitHub Pages until the *next* release is built, submitted, and approved — so this cutover rides along with a real release rather than happening as a bare metadata-only change outside the normal release cadence.
+## Completion checklist (all done)
 
-## Completion checklist, for whenever the next release goes out
-
-1. Build/version-bump as normal for the new release (standard `RELEASES.md` workflow: `develop` → `main` → release branch → build → TestFlight → submit).
-2. Once Apple approves and releases it, update the four ASC URL fields (both apps) to the `loyaltycards-site.pages.dev` equivalents — exact URLs are listed in `APP_STORE_SUBMISSION_CHECKLIST.md` under "Quick Reference: Required URLs".
-3. Tick off the 5 pending checklist items in `APP_STORE_SUBMISSION_CHECKLIST.md` once ASC actually reflects the new URLs.
-4. Only then: disable GitHub Pages for `ian-hamlet/LoyaltyCards` (repo **Settings → Pages**) so the old URL stops resolving.
-5. Create `releases/v{new-version}-build{number}` from `main` per the usual workflow, and keep `main`/`develop` in sync as usual.
+1. ✅ Build/version-bump as normal for the new release (v2.2.0+32: `develop` → `main` → release branch → build → TestFlight → submit).
+2. ✅ ASC URL fields (both apps) updated to the `loyaltycards-site.pages.dev` equivalents — confirmed 2026-08-23, ahead of Apple's approval (see `APP_STORE_SUBMISSION_CHECKLIST.md` under "Quick Reference: Required URLs").
+3. ✅ The pending checklist items in `APP_STORE_SUBMISSION_CHECKLIST.md` ticked off.
+4. ✅ GitHub Pages for `ian-hamlet/LoyaltyCards` unpublished (repo **Settings → Pages**) 2026-08-24 - `https://ian-hamlet.github.io/LoyaltyCards/` now returns 404.
+5. ✅ `releases/v2.2.0-build32` created from `main`, `develop` kept in sync throughout.
 
 ## Key reference docs (in-repo)
 

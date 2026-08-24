@@ -171,7 +171,7 @@
 
 - [x] **Subtitle** — entered for both apps 2026-08-15 - see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md)
 - [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — entered for both apps 2026-08-15, see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md). The customer app's Promotional Text was found blank in ASC despite being documented as already-live - worth remembering that "unchanged" in this doc doesn't guarantee it's actually live, always verify in ASC directly. **Confirmed 2026-08-18:** the supplier app's Promotional Text had the identical gap - also found blank, re-entered from [`APP_STORE_METADATA_PACKET_v2_1_1_29.md`](APP_STORE_METADATA_PACKET_v2_1_1_29.md), which now keeps both apps' Promotional Text inline as a fallback reference instead of only pointing back at the v23 packet.
-- [ ] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` (both apps) — **site migrated from GitHub Pages to Cloudflare Pages 2026-08-21; ASC still has the old `ian-hamlet.github.io` URL entered, needs updating for both apps** (see the migration note in `RELEASES.md`)
+- [x] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` (both apps) — site migrated from GitHub Pages to Cloudflare Pages 2026-08-21; updated in ASC for both apps, confirmed 2026-08-23 (see the migration note in `RELEASES.md`)
 
 ---
 
@@ -625,7 +625,7 @@ All live as of 2026-08-21, hosted via Cloudflare Pages (see `.github/workflows/c
 3. **Support:** https://loyaltycards-site.pages.dev/support/
    - Source: [docs/legal/SUPPORT_PAGE.md](../legal/SUPPORT_PAGE.md)
 4. **Accessibility Statement** (not an ASC field, linked from the site): https://loyaltycards-site.pages.dev/legal/accessibility-statement.html
-5. **Marketing:** https://loyaltycards-site.pages.dev/user/about.html — **not yet entered in ASC**, see above
+5. **Marketing:** https://loyaltycards-site.pages.dev/user/about.html — entered in ASC for both apps, confirmed 2026-08-23
 
 **Note:** the published HTML in `site/` was hand-converted from the Markdown sources above and is not auto-generated — any future edits to the Markdown need to be mirrored into the matching `site/**/*.html` file.
 

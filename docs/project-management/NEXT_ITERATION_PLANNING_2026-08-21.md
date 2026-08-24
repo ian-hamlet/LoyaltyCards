@@ -57,7 +57,7 @@ Phasing has been discussed and decided - this supersedes the earlier unphased bu
 
 ### 2. After Apple approves this release
 
-5. **Complete the Cloudflare migration checklist** (#1) - update the 4 ASC URL fields to the new Cloudflare host, tick off the 5 pending checklist items, then disable GitHub Pages. This was always gated on "ride along with the next release" (see `CLOUDFLARE_MIGRATION_COMPLETION_PLAN.md`) - this release is that vehicle, since the cooldown feature + metadata update will already exercise the full build/submit/approve pipeline once. This is its own milestone/checkpoint once done, not a separate app version.
+5. ✅ **Complete the Cloudflare migration checklist** (#1) - update the 4 ASC URL fields to the new Cloudflare host, tick off the 5 pending checklist items, then disable GitHub Pages. This was always gated on "ride along with the next release" (see `CLOUDFLARE_MIGRATION_COMPLETION_PLAN.md`) - v2.2.0+32 was that vehicle (approved and released 2026-08-24). **Done:** ASC URL fields updated 2026-08-23, GitHub Pages unpublished 2026-08-24 (`ian-hamlet.github.io/LoyaltyCards` now 404s). Cloudflare Pages is the sole live host for `site/`.
 
 ### 3. Future — unscheduled, explore later
 

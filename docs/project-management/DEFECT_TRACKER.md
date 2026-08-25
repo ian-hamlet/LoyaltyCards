@@ -2134,6 +2134,22 @@ This document tracks defects from two sources:
 
 ---
 
+### DECISION-023: Code Quality Refactor Follow-Up — Deliberately Deferred Items
+
+- **Source:** `docs/quality/CODE_QUALITY_REFACTOR_2026-08-24.md` (execution of `CODE_QUALITY_REVIEW_2026-08-21.md` plus two follow-up code-review passes on the resulting diff, `feature/code-quality-refactor` branch) - carried forward here as tracked backlog items ahead of that doc eventually being archived the same way `FUNCTIONAL_REVIEW_2026-07-26.md` was, so none of these are orphaned when that happens.
+- **Status:** 📋 OPEN - BACKLOG (all items below LOW priority, no correctness risk in current state)
+- **Priority:** LOW
+- **Context:** The controller-extraction refactor and its follow-up review pass deliberately left five items unaddressed as out-of-scope-for-that-branch judgment calls, not oversights. None are defects - see `CODE_QUALITY_REFACTOR_2026-08-24.md`'s "Deliberately not fixed" section for the full reasoning behind each.
+- **Open items:**
+  1. **Migrate `Share`/`Share.shareXFiles` → `SharePlus.instance.share()`** across both apps. Widest surface of the five (every share flow: backup, stamp tokens, issue cards, audit trail). Not currently broken - deprecated, not removed - but a future `share_plus` major bump could remove it outright. Recommended as its own small branch with on-device verification before merge, since native share-sheet behavior isn't meaningfully covered by `flutter test`.
+  2. **Migrate `QrPainter`'s deprecated `color` param** to `eyeStyle`/`dataModuleStyle`. Low risk, visual-only.
+  3. **Migrate `pw.Table.fromTextArray` → `TableHelper.fromTextArray`** in `audit_trail_pdf_service.dart`. Single call site, mechanical.
+  4. **Consider folding `BackupResult`/`VerificationResult`** into the `SupplierResult`/`ControllerResult` base-class pattern introduced 2026-08-24, and/or a `source/shared/` base unifying the two apps' result classes, if the duplication becomes a real maintenance cost.
+  5. **CI gate + broader lint adoption** (`CODE_QUALITY_REVIEW_2026-08-21.md` steps 1 and 5) - explicitly deferred at the user's request when the refactor branch started, not part of any pass since.
+- **Target Build:** Unscheduled - none of these block a release; pick up opportunistically or when item 1's schedule risk (a `share_plus` major version bump) becomes concrete.
+
+---
+
 ## 📊 Defect Summary Statistics
 
 ### By Priority

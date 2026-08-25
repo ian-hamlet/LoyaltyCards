@@ -1,0 +1,14 @@
+A free digital stamp card — thought you might like a look
+
+You know how it works already — same as your paper card, just on the phone. Customers scan a QR code to get a card, scan again each visit to get a stamp, and show you the finished card when it's time for the free one. No app account, no email, nothing to sign up for on either side.
+
+Why I built it: no real reason beyond wanting to make something useful and give it away. It's free — not "free trial," actually free, no subscription, ever. There's no server behind it either, so there's no customer data sitting anywhere to worry about, get hacked, or accidentally misuse. Everything just lives on your phone and the customer's phone.
+
+What it needs from you: nothing, to try it. No hardware, no fee, no commitment — the simplest version is just two printed QR codes on the counter.
+
+The one honest catch right now: it's iPhone only for the moment. If most of your regulars carry Android, it won't be much use to them yet — I wanted to say that upfront rather than have you find out after setting it up. I'm gauging exactly this kind of feedback before deciding whether it's worth building the Android version.
+
+No pressure at all — have a play with it, and if it's not for you or doesn't fit how you run things, no problem, I'd just genuinely like to know why. If it does click, even better.
+
+Get the app: https://apple.co/4hFWKsh
+Full setup guide: https://loyaltycards-site.pages.dev/user/supplier-setup-guide.html

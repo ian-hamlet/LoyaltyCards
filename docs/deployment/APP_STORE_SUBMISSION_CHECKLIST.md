@@ -142,7 +142,7 @@
 
 - [x] **Subtitle** — entered for both apps 2026-08-15 - see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md)
 - [x] **Promotional Text, Keywords, Description, App Review Notes, What's New** — entered for both apps 2026-08-15, see [`APP_STORE_METADATA_PACKET_v2_0_3_23.md`](APP_STORE_METADATA_PACKET_v2_0_3_23.md). The customer app's Promotional Text was found blank in ASC despite being documented as already-live - worth remembering that "unchanged" in this doc doesn't guarantee it's actually live, always verify in ASC directly. **Confirmed 2026-08-18:** the supplier app's Promotional Text had the identical gap - also found blank, re-entered from [`APP_STORE_METADATA_PACKET_v2_1_1_29.md`](APP_STORE_METADATA_PACKET_v2_1_1_29.md), which now keeps both apps' Promotional Text inline as a fallback reference instead of only pointing back at the v23 packet.
-- [ ] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` (both apps) — **site migrated from GitHub Pages to Cloudflare Pages 2026-08-21; ASC still has the old `ian-hamlet.github.io` URL entered, needs updating for both apps** (see the migration note in `RELEASES.md`)
+- [x] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` (both apps) — **Confirmed 2026-08-25:** ASC has the Cloudflare Pages URL entered for both apps.
 
 ---
 
@@ -218,7 +218,7 @@ Answers decided (all consistent with actual app content), still need entering in
   [docs/quality/REVIEW_ROLES.md](../quality/REVIEW_ROLES.md)
 - [x] **GDPR compliant** (privacy-first design)
 - [x] **App Privacy questionnaire updated for the customer app** — declares **Device ID** (Purpose: App Functionality/fraud prevention, Linked to identity: No, Used for tracking: No), resulting label "Data Not Linked to You" instead of the stale "Data Not Collected". Supplier app's answer is unaffected ("Data Not Collected" remains accurate). Suggested answers were in [APP_REVIEW_PACKET_v1_0_2_8.md](APP_REVIEW_PACKET_v1_0_2_8.md#app-privacy-data-collection-suggested-answers).
-- [ ] Privacy Policy URL entered in App Store Connect (App Privacy section, both apps) — **still points at the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration; needs re-entering with the URL above**
+- [x] Privacy Policy URL entered in App Store Connect (App Privacy section, both apps) — **Confirmed 2026-08-25:** ASC has the Cloudflare Pages URL entered.
 
 ---
 
@@ -229,7 +229,7 @@ Answers decided (all consistent with actual app content), still need entering in
 - [x] **Terms cover both customer and supplier use**
 - [x] **Fraud prevention disclaimers included**
 - [x] **Liability/data-integrity disclaimers strengthened** (2026-07-20) — explicit "not liable for user input errors or falsified data" language, and an explicit statement that suppliers (not LoyaltyCards) are responsible for verifying presented card/stamp data before issuing rewards, same standard as a paper card
-- [ ] Entered into App Store Connect (both apps) — **still points at the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration; needs re-entering with the URL above**
+- [x] Entered into App Store Connect (both apps) — **Confirmed 2026-08-25:** ASC has the Cloudflare Pages URL entered.
 
 ---
 
@@ -237,13 +237,13 @@ Answers decided (all consistent with actual app content), still need entering in
 
 - [x] **Support URL:** live — https://loyaltycards-site.pages.dev/support/
 - [x] **Support contact method** — ian.hamlet@dotconnected.com; monitoring cadence still needs to be a real daily habit once live, not just documented
-- [ ] Entered into App Store Connect (both apps) — **still points at the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration; needs re-entering with the URL above**
+- [x] Entered into App Store Connect (both apps) — **Confirmed 2026-08-25:** ASC has the Cloudflare Pages URL entered.
 
 ---
 
 #### Marketing URL
 
-- [ ] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` — the new About page explaining the two-app pairing and Express/Secure Mode with case studies. **Not yet entered in ASC** - still has the old `ian-hamlet.github.io` URL as of the 2026-08-21 Cloudflare Pages migration.
+- [x] **Marketing URL:** `https://loyaltycards-site.pages.dev/user/about.html` — the new About page explaining the two-app pairing and Express/Secure Mode with case studies. **Confirmed 2026-08-25:** ASC has the Cloudflare Pages URL entered.
 
 ---
 
@@ -569,7 +569,7 @@ Please test both apps together following the demo instructions.
 
 ## Quick Reference: Required URLs
 
-All live as of 2026-08-21, hosted via Cloudflare Pages (see `.github/workflows/cloudflare-pages.yml` + `site/`; migrated from GitHub Pages that same day - see the migration note in `RELEASES.md`). **The pages themselves are live and correct at the URLs below, but ASC's own URL fields for both apps still have the old `ian-hamlet.github.io` host entered - see the checklist items above for what still needs updating:**
+All live as of 2026-08-21, hosted via Cloudflare Pages (see `.github/workflows/cloudflare-pages.yml` + `site/`; migrated from GitHub Pages that same day - see the migration note in `RELEASES.md`). **Confirmed 2026-08-25:** ASC's own URL fields for both apps have been updated to the Cloudflare Pages host below - see the checklist items above.
 
 1. **Privacy Policy:** https://loyaltycards-site.pages.dev/legal/privacy-policy.html
    - Source: [docs/legal/PRIVACY_POLICY.md](../legal/PRIVACY_POLICY.md)
@@ -578,7 +578,7 @@ All live as of 2026-08-21, hosted via Cloudflare Pages (see `.github/workflows/c
 3. **Support:** https://loyaltycards-site.pages.dev/support/
    - Source: [docs/legal/SUPPORT_PAGE.md](../legal/SUPPORT_PAGE.md)
 4. **Accessibility Statement** (not an ASC field, linked from the site): https://loyaltycards-site.pages.dev/legal/accessibility-statement.html
-5. **Marketing:** https://loyaltycards-site.pages.dev/user/about.html — **not yet entered in ASC**, see above
+5. **Marketing:** https://loyaltycards-site.pages.dev/user/about.html — entered in ASC, confirmed 2026-08-25
 
 **Note:** the published HTML in `site/` was hand-converted from the Markdown sources above and is not auto-generated — any future edits to the Markdown need to be mirrored into the matching `site/**/*.html` file.
 

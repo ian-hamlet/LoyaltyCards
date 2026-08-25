@@ -11,7 +11,7 @@
 
 - [x] Xcode 26.3 installed
 - [x] Apple Developer account active ($99/year)
-- [x] Privacy Policy live at: https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
+- [x] Privacy Policy live at: https://loyaltycards-site.pages.dev/legal/privacy-policy.html
 - [x] Version: v1.0.1+7
 - [x] Custom app icons installed
 - [x] Bundle IDs ready:
@@ -271,7 +271,7 @@ ls -lh build/ios/ipa/supplier_app.ipa
 
 **Fill in App Information:**
 
-1. **Privacy Policy URL:** `https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY`
+1. **Privacy Policy URL:** `https://loyaltycards-site.pages.dev/legal/privacy-policy.html`
 2. **Category:**
    - Primary: Lifestyle
    - Secondary: Business (optional)
@@ -382,7 +382,7 @@ Requires customers to have LoyaltyCards app installed.
    - **What to Test:** "Initial pilot testing of loyalty card functionality"
    - **Beta App Description:** (copy from App Information description)
    - **Feedback Email:** ian.hamlet@dotConnected.com
-   - **Privacy Policy URL:** https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
+   - **Privacy Policy URL:** https://loyaltycards-site.pages.dev/legal/privacy-policy.html
 
 6. **Export Compliance:**
    - Does your app use encryption? **YES**
@@ -466,7 +466,7 @@ flutter build ipa --release
 
 **Privacy Policy URL:**
 ```
-https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
+https://loyaltycards-site.pages.dev/legal/privacy-policy.html
 ```
 
 **Support Email:**

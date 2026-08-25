@@ -733,7 +733,7 @@ _(Cannot easily test without actual restore, so skip to Scenario 2)_
 
 **Feedback Email:** ian.hamlet@dotConnected.com  
 **GitHub:** https://github.com/ian-hamlet/LoyaltyCards  
-**Privacy Policy:** https://ian-hamlet.github.io/LoyaltyCards/PRIVACY_POLICY
+**Privacy Policy:** https://loyaltycards-site.pages.dev/legal/privacy-policy.html
 
 ---
 

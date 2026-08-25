@@ -53,18 +53,25 @@ class SupplierRedeemCardController {
   Future<SupplierLoadResult> loadBusiness() async {
     try {
       _business = await _businessRepo.getBusiness();
-      return SupplierLoadResult.success();
+      return const SupplierLoadResult.success();
     } catch (e) {
-      return SupplierLoadResult.failure(SupplierScanFailureReason.loadFailed, null);
+      return SupplierLoadResult.failure(SupplierScanFailureReason.loadFailed, 'Error loading business: $e');
     }
   }
 
   /// Record an Express/Simple Mode redemption - honor-based, no signature
   /// to verify (see V-001). Uses the business loaded by [loadBusiness].
+  ///
+  /// Returns a failure result rather than throwing if no business is loaded
+  /// - unlike this controller's other methods, this one is reachable via
+  /// the screen's `processManualRedemptionForTesting()` hook without going
+  /// through the UI's own `_business == null` guard first, and the
+  /// pre-extraction code degraded gracefully here (its try/catch wrapped
+  /// the equivalent null-dereference too), not a genuine unreachable state.
   Future<ManualRedemptionResult> recordManualRedemption() async {
     final business = _business;
     if (business == null) {
-      throw StateError('recordManualRedemption() called before a business was loaded');
+      return ManualRedemptionResult.failure(SupplierScanFailureReason.loadFailed, 'Business not configured');
     }
 
     try {
@@ -197,7 +204,7 @@ class SupplierRedeemCardController {
         'Redemption rejected - malformed/inconsistent token for card ${token.cardId}',
         tag: 'Security',
       );
-      return TokenValidationResult.failure(SupplierScanFailureReason.invalidToken, 'Invalid redemption request.');
+      return const TokenValidationResult.failure(SupplierScanFailureReason.invalidToken, 'Invalid redemption request.');
     }
 
     // V-005: Check for device mismatch
@@ -205,10 +212,10 @@ class SupplierRedeemCardController {
       AppLogger.warning('Device mismatch detected!', 'Security');
       AppLogger.warning('Card device: ${token.cardDeviceId}', 'Security');
       AppLogger.warning('Current device: ${token.currentDeviceId}', 'Security');
-      return TokenValidationResult.failure(SupplierScanFailureReason.deviceMismatch, null);
+      return const TokenValidationResult.failure(SupplierScanFailureReason.deviceMismatch, null);
     }
 
-    return TokenValidationResult.valid();
+    return const TokenValidationResult.valid();
   }
 
   /// Verify (Secure Mode only), sign, and log a redemption - the core

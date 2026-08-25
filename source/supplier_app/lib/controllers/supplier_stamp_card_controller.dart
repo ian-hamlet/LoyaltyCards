@@ -48,7 +48,7 @@ class SupplierStampCardController {
   Future<SupplierLoadResult> loadBusiness() async {
     try {
       _business = await _businessRepo.getBusiness();
-      return SupplierLoadResult.success();
+      return const SupplierLoadResult.success();
     } catch (e) {
       return SupplierLoadResult.failure(
         SupplierScanFailureReason.loadFailed,

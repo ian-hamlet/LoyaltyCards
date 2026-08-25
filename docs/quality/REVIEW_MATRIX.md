@@ -16,6 +16,7 @@ row each time a role from [REVIEW_ROLES.md](REVIEW_ROLES.md) is run.
 | Test Coverage / QA | 2026-07-25 | 2/3/2/1 | 1 of 2 Criticals fixed 2026-07-25 (Q-002 regression tests added); supplier_redeem_card.dart coverage in progress; rest open | [REVIEW_ROLES.md #6](REVIEW_ROLES.md#6-test-coverage--qa) |
 | Performance / Battery | 2026-07-25 | 0/0/0/1 | Findings Open (accept-as-risk) | [REVIEW_ROLES.md #7](REVIEW_ROLES.md#7-performance--battery) |
 | Legal / Privacy | 2026-07-25 | 0/0/1/1 | Medium item: docs fixed 2026-07-25 | [REVIEW_ROLES.md #8](REVIEW_ROLES.md#8-legal--privacy) |
+| Code Quality / Reuse (controller extraction) | 2026-08-24 | –/1/5/3 | Fixed (9 of 9); 5 items deliberately deferred/out of scope, documented | [CODE_QUALITY_REFACTOR_2026-08-24.md](CODE_QUALITY_REFACTOR_2026-08-24.md) |
 
 **Cross-role convergences (see [REVIEW_ROLES.md](REVIEW_ROLES.md) top-of-doc
 note for detail):**

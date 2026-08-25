@@ -104,11 +104,16 @@ void main() {
   });
 
   group('recordManualRedemption', () {
-    test('throws if called before loadBusiness()', () {
-      expect(
-        () => controller.recordManualRedemption(),
-        throwsA(isA<StateError>()),
-      );
+    test('fails gracefully (not a thrown exception) if called before loadBusiness()', () async {
+      // Reachable via the screen's processManualRedemptionForTesting() hook
+      // without going through the UI's own _business == null guard first -
+      // must degrade gracefully, not throw, matching the pre-extraction
+      // code's own try/catch-everything behavior here.
+      final result = await controller.recordManualRedemption();
+
+      expect(result.isSuccess, isFalse);
+      expect(result.failureReason, SupplierScanFailureReason.loadFailed);
+      expect(result.errorMessage, isNotNull);
     });
 
     test('logs the redemption using the business\'s stampsRequired', () async {

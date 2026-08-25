@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart' show Rect;
 import 'package:share_plus/share_plus.dart';
 import 'package:printing/printing.dart';
@@ -10,34 +9,20 @@ import 'package:intl/intl.dart';
 import 'package:shared/shared.dart';
 import '../models/audit_entry.dart';
 import '../models/backup_result.dart';
+import 'backup/backup_filename.dart';
+import 'backup/pdf_validation.dart';
 
 /// Generates, prints, and shares the local audit trail as a simple PDF
 /// table (Requirements/DISCUSSION_Business_Field_Editing.md §7.4). A
 /// small, focused sibling to BackupStorageService rather than another
 /// addition to that already-large file - reuses the same PDF-validation
-/// and file-naming conventions, not the same class.
+/// and file-naming conventions (via `PdfValidation`/`BackupFilename`,
+/// factored out of the backup services during a follow-up code-quality
+/// pass), not the same class.
 class AuditTrailPdfService {
-  static const _pdfMagic = [0x25, 0x50, 0x44, 0x46, 0x2D]; // "%PDF-"
-
-  static bool _isValidPdfBytes(Uint8List bytes) {
-    return bytes.length >= _pdfMagic.length &&
-        _pdfMagic.indexed.every((entry) => bytes[entry.$1] == entry.$2);
-  }
-
-  /// Same safety net as BackupStorageService._generateValidatedPdfBytes -
-  /// converts a malformed-PDF edge case into a caught Dart exception
-  /// instead of handing bad bytes to the native print/share plugin.
-  static Future<Uint8List> _generateValidatedPdfBytes(pw.Document pdf) async {
-    final bytes = await pdf.save();
-    if (!_isValidPdfBytes(bytes)) {
-      throw StateError('Generated PDF is empty or has an invalid header');
-    }
-    return bytes;
-  }
-
   static String _fileName(Business business) {
-    final timestamp = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final businessName = business.name.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '-');
+    final timestamp = BackupFilename.dateStamp(DateTime.now());
+    final businessName = BackupFilename.sanitizeBusinessName(business.name);
     return 'LoyaltyCards-AuditTrail-$businessName-$timestamp.pdf';
   }
 
@@ -91,7 +76,7 @@ class AuditTrailPdfService {
     try {
       final pdf = await _generatePdf(business, entries);
       await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => _generateValidatedPdfBytes(pdf),
+        onLayout: (PdfPageFormat format) async => PdfValidation.generateValidatedPdfBytes(pdf),
         name: _fileName(business),
       );
       return BackupResult.success();
@@ -108,7 +93,7 @@ class AuditTrailPdfService {
   static Future<BackupResult> shareAuditTrail(Business business, List<AuditEntry> entries, {Rect? sharePositionOrigin}) async {
     try {
       final pdf = await _generatePdf(business, entries);
-      final bytes = await _generateValidatedPdfBytes(pdf);
+      final bytes = await PdfValidation.generateValidatedPdfBytes(pdf);
 
       final tempDir = await getTemporaryDirectory();
       final fileName = _fileName(business);

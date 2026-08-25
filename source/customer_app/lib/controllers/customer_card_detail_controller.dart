@@ -166,7 +166,7 @@ class CustomerCardDetailController {
         _cachedQrData = generateCardQr();
       }
 
-      return CardDetailLoadResult.success();
+      return const CardDetailLoadResult.success();
     } catch (e) {
       AppLogger.error('Error loading card data', error: e, tag: 'CardDetail');
       return CardDetailLoadResult.failure(

@@ -9,9 +9,10 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:shared/shared.dart';
 import '../../models/backup_result.dart';
+import 'backup_error_classification.dart';
+import 'backup_filename.dart';
 import 'pdf_validation.dart';
 
 /// Simple Mode issue-card QR distribution (Print, Share) and the
@@ -28,8 +29,8 @@ class IssueCardBackupService {
     required DateTime date,
     required String extension,
   }) {
-    final timestamp = DateFormat('yyyy-MM-dd').format(date);
-    final sanitizedBusinessName = businessName.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '-');
+    final timestamp = BackupFilename.dateStamp(date);
+    final sanitizedBusinessName = BackupFilename.sanitizeBusinessName(businessName);
     final stampLabel = initialStamps == 0 ? 'NoStamps' : (initialStamps == 1 ? '1Stamp' : '${initialStamps}Stamps');
 
     return 'LoyaltyCards-IssueCard-$stampLabel-$sanitizedBusinessName-$timestamp.$extension';
@@ -178,6 +179,12 @@ class IssueCardBackupService {
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
 
       final errorString = e.toString().toLowerCase();
+      if (BackupErrorClassification.isDiskFullError(errorString)) {
+        return BackupResult.failure(
+          BackupFailureReason.diskFull,
+          'Not enough storage space. Free up space and try again.',
+        );
+      }
       if (errorString.contains('cancel')) {
         return BackupResult.failure(
           BackupFailureReason.userCancelled,

@@ -9,6 +9,15 @@
 /// and any success payload as further fields.
 ///
 /// `throw` remains reserved for genuine programmer error / unreachable states.
+///
+/// [CardDetailLoadResult] and [RedemptionResult] share that exact shape via
+/// the generic [ControllerResult] base - a follow-up code-quality pass found
+/// them (and their supplier_app counterparts) hand-copying the common three
+/// fields. `ScanResult` below deliberately stays standalone: it names its
+/// message field `message` rather than `errorMessage` (used on success too,
+/// not just failure), and unifying that naming would mean touching the ~24
+/// call sites across qr_scanner_controller.dart/qr_scanner_screen.dart/their
+/// tests for no behavioral benefit.
 library;
 
 /// Why a `CustomerCardDetailController` operation failed.
@@ -20,30 +29,37 @@ enum CardDetailFailureReason {
   redeemFailed,
 }
 
+/// Shared shape for [CardDetailLoadResult] and [RedemptionResult]: a
+/// success/failure flag, a nullable [CardDetailFailureReason], and an error
+/// message (always null on success, matching both classes' original
+/// behavior). Each subclass's own `.success()`/`.failure()` constructor
+/// signature is unchanged from before this base existed.
+abstract class ControllerResult {
+  final bool isSuccess;
+  final CardDetailFailureReason? failureReason;
+  final String? errorMessage;
+
+  const ControllerResult.success()
+      : isSuccess = true,
+        failureReason = null,
+        errorMessage = null;
+
+  const ControllerResult.failure(this.failureReason, this.errorMessage) : isSuccess = false;
+}
+
 /// Outcome of `CustomerCardDetailController.load()`.
 ///
 /// On success the loaded card, stamps and derived QR artefacts are readable
 /// from the controller's own getters - there is no payload here, because the
 /// screen renders from the controller rather than from a snapshot.
-class CardDetailLoadResult {
-  final bool isSuccess;
-  final CardDetailFailureReason? failureReason;
-  final String? errorMessage;
+class CardDetailLoadResult extends ControllerResult {
+  const CardDetailLoadResult.success() : super.success();
 
-  CardDetailLoadResult.success()
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
-
-  CardDetailLoadResult.failure(this.failureReason, this.errorMessage) : isSuccess = false;
+  const CardDetailLoadResult.failure(super.failureReason, super.errorMessage) : super.failure();
 }
 
 /// Outcome of `CustomerCardDetailController.processRedemption()`.
-class RedemptionResult {
-  final bool isSuccess;
-  final CardDetailFailureReason? failureReason;
-  final String? errorMessage;
-
+class RedemptionResult extends ControllerResult {
   /// Q-004: whether a genuinely new card was inserted, as opposed to an
   /// existing under-filled card being reused. The success dialog must render
   /// this rather than assume it - claiming "a new card has been added"
@@ -54,15 +70,12 @@ class RedemptionResult {
   /// shows the same instant that was written to the database.
   final DateTime? redeemedAt;
 
-  RedemptionResult.success({required this.newCardCreated, required this.redeemedAt})
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
+  RedemptionResult.success({required this.newCardCreated, required this.redeemedAt}) : super.success();
 
-  RedemptionResult.failure(this.failureReason, this.errorMessage)
-      : isSuccess = false,
-        newCardCreated = false,
-        redeemedAt = null;
+  RedemptionResult.failure(super.failureReason, super.errorMessage)
+      : newCardCreated = false,
+        redeemedAt = null,
+        super.failure();
 }
 
 /// Why a `QrScannerController` scan did not end in a credited stamp / added

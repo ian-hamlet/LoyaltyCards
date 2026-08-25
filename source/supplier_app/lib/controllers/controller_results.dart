@@ -7,6 +7,14 @@
 /// design: a bool `isSuccess`, a nullable failure reason enum, a message, and
 /// any success payload as further fields. `throw` remains reserved for
 /// genuine programmer error / unreachable states.
+///
+/// Every class below shares that exact 3-field shape (`isSuccess`,
+/// `failureReason`, `errorMessage`) via the [SupplierResult] base - a
+/// follow-up code-quality pass found the original 7 classes hand-copying
+/// those fields and their `.success()`/`.failure()` constructors instead of
+/// sharing one base. Only ever add a payload field a class actually needs,
+/// exactly as before - the base just removes the duplication of the common
+/// three.
 library;
 
 import 'package:shared/models/qr_tokens.dart';
@@ -35,9 +43,6 @@ enum SupplierScanFailureReason {
   /// Generating the outgoing stamp/redemption token failed.
   generationFailed,
 
-  /// Redemption-specific: the card this token identifies wasn't found.
-  cardNotFound,
-
   /// Redemption-specific: signature/chain verification failed.
   verificationFailed,
 
@@ -57,59 +62,62 @@ enum SupplierScanFailureReason {
   unexpectedError,
 }
 
-/// Outcome of `loadBusiness()` on either supplier-screen controller.
-class SupplierLoadResult {
+/// Shared shape for every result class below: a success/failure flag, a
+/// nullable [SupplierScanFailureReason], and an error message (always null
+/// on success, matching every one of these classes' original behavior).
+/// Subclasses add whatever payload fields their own operation needs and
+/// forward to [SupplierResult.success]/[SupplierResult.failure] from their
+/// own `.success()`/`.failure()` constructors - the public API of every
+/// subclass (name, constructor signature, field names) is unchanged from
+/// before this base existed.
+abstract class SupplierResult {
   final bool isSuccess;
   final SupplierScanFailureReason? failureReason;
   final String? errorMessage;
 
-  SupplierLoadResult.success()
+  const SupplierResult.success()
       : isSuccess = true,
         failureReason = null,
         errorMessage = null;
 
-  SupplierLoadResult.failure(this.failureReason, this.errorMessage) : isSuccess = false;
+  const SupplierResult.failure(this.failureReason, this.errorMessage) : isSuccess = false;
+}
+
+/// Outcome of `loadBusiness()` on either supplier-screen controller.
+class SupplierLoadResult extends SupplierResult {
+  const SupplierLoadResult.success() : super.success();
+
+  const SupplierLoadResult.failure(super.failureReason, super.errorMessage) : super.failure();
 }
 
 /// Outcome of `SupplierStampCardController.parseStampRequest()`.
 ///
-/// [token]/[previousHash] are only meaningful when [isSuccess] is true - the
-/// [token] is already known valid at that point, so the State class doesn't
-/// need to re-null-check it before showing the stamp-count selector dialog.
-class ParsedStampRequest {
-  final bool isSuccess;
-  final SupplierScanFailureReason? failureReason;
-  final String? errorMessage;
+/// [token]/[previousHash] are only meaningful when [SupplierResult.isSuccess]
+/// is true - the [token] is already known valid at that point, so the State
+/// class doesn't need to re-null-check it before showing the stamp-count
+/// selector dialog.
+class ParsedStampRequest extends SupplierResult {
   final CardStampRequestToken? token;
   final String? previousHash;
 
-  ParsedStampRequest.success(this.token, this.previousHash)
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
+  ParsedStampRequest.success(this.token, this.previousHash) : super.success();
 
-  ParsedStampRequest.failure(this.failureReason, this.errorMessage)
-      : isSuccess = false,
-        token = null,
-        previousHash = null;
+  ParsedStampRequest.failure(super.failureReason, super.errorMessage)
+      : token = null,
+        previousHash = null,
+        super.failure();
 }
 
 /// Outcome of `SupplierStampCardController.generateStampToken()` /
 /// `generateExpressModeToken()`.
-class StampGenerationResult {
-  final bool isSuccess;
-  final SupplierScanFailureReason? failureReason;
-  final String? errorMessage;
+class StampGenerationResult extends SupplierResult {
   final StampToken? stampToken;
 
-  StampGenerationResult.success(this.stampToken)
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
+  StampGenerationResult.success(this.stampToken) : super.success();
 
-  StampGenerationResult.failure(this.failureReason, this.errorMessage)
-      : isSuccess = false,
-        stampToken = null;
+  StampGenerationResult.failure(super.failureReason, super.errorMessage)
+      : stampToken = null,
+        super.failure();
 }
 
 /// Outcome of `SupplierRedeemCardController.parseRedemptionQr()`.
@@ -119,80 +127,56 @@ class StampGenerationResult {
 /// cardId/stamp count, exactly mirroring the pre-extraction code's own
 /// `_showSecureModeRedemptionConfirmation(context, cardId, stamps)` call
 /// with no `token:` argument.
-class ParsedRedemptionQr {
-  final bool isSuccess;
-  final SupplierScanFailureReason? failureReason;
-  final String? errorMessage;
+class ParsedRedemptionQr extends SupplierResult {
   final String? cardId;
   final int? stampsCollected;
   final RedemptionRequestToken? token;
 
-  ParsedRedemptionQr.success({required this.cardId, required this.stampsCollected, this.token})
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
+  ParsedRedemptionQr.success({required this.cardId, required this.stampsCollected, this.token}) : super.success();
 
-  ParsedRedemptionQr.failure(this.failureReason, this.errorMessage)
-      : isSuccess = false,
-        cardId = null,
+  ParsedRedemptionQr.failure(super.failureReason, super.errorMessage)
+      : cardId = null,
         stampsCollected = null,
-        token = null;
+        token = null,
+        super.failure();
 }
 
 /// Outcome of `SupplierRedeemCardController.validateRedemptionToken()`.
 ///
-/// A [failureReason] of [SupplierScanFailureReason.deviceMismatch] means
-/// this isn't a hard failure - the State class shows the device-mismatch
-/// confirmation dialog rather than a plain error, and may call
-/// `confirmRedemption` afterwards anyway if the supplier chooses to proceed.
-class TokenValidationResult {
-  final bool isSuccess;
-  final SupplierScanFailureReason? failureReason;
-  final String? errorMessage;
+/// A [SupplierResult.failureReason] of
+/// [SupplierScanFailureReason.deviceMismatch] means this isn't a hard
+/// failure - the State class shows the device-mismatch confirmation dialog
+/// rather than a plain error, and may call `confirmRedemption` afterwards
+/// anyway if the supplier chooses to proceed.
+class TokenValidationResult extends SupplierResult {
+  const TokenValidationResult.valid() : super.success();
 
-  TokenValidationResult.valid()
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
-
-  TokenValidationResult.failure(this.failureReason, this.errorMessage) : isSuccess = false;
+  const TokenValidationResult.failure(super.failureReason, super.errorMessage) : super.failure();
 }
 
 /// Outcome of `SupplierRedeemCardController.confirmRedemption()`.
-class RedemptionConfirmResult {
-  final bool isSuccess;
-  final SupplierScanFailureReason? failureReason;
-  final String? errorMessage;
+class RedemptionConfirmResult extends SupplierResult {
   final RedemptionToken? redemptionToken;
   final int? stampsRedeemed;
 
-  RedemptionConfirmResult.success(this.redemptionToken, this.stampsRedeemed)
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
+  RedemptionConfirmResult.success(this.redemptionToken, this.stampsRedeemed) : super.success();
 
-  RedemptionConfirmResult.failure(this.failureReason, this.errorMessage)
-      : isSuccess = false,
-        redemptionToken = null,
-        stampsRedeemed = null;
+  RedemptionConfirmResult.failure(super.failureReason, super.errorMessage)
+      : redemptionToken = null,
+        stampsRedeemed = null,
+        super.failure();
 }
 
 /// Outcome of `SupplierRedeemCardController.recordManualRedemption()`
 /// (Express/Simple Mode's honor-based redemption path).
-class ManualRedemptionResult {
-  final bool isSuccess;
-  final SupplierScanFailureReason? failureReason;
-  final String? errorMessage;
+class ManualRedemptionResult extends SupplierResult {
   final DateTime? redeemedAt;
   final int? stampsRedeemed;
 
-  ManualRedemptionResult.success(this.redeemedAt, this.stampsRedeemed)
-      : isSuccess = true,
-        failureReason = null,
-        errorMessage = null;
+  ManualRedemptionResult.success(this.redeemedAt, this.stampsRedeemed) : super.success();
 
-  ManualRedemptionResult.failure(this.failureReason, this.errorMessage)
-      : isSuccess = false,
-        redeemedAt = null,
-        stampsRedeemed = null;
+  ManualRedemptionResult.failure(super.failureReason, super.errorMessage)
+      : redeemedAt = null,
+        stampsRedeemed = null,
+        super.failure();
 }

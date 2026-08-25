@@ -12,6 +12,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared/shared.dart';
 import '../../models/backup_result.dart';
+import 'backup_error_classification.dart';
+import 'backup_filename.dart';
 import 'pdf_validation.dart';
 
 /// Recovery/Clone config backup distribution (Print, Share via Email, Save
@@ -47,6 +49,12 @@ class ConfigBackupService {
       AppLogger.error('Stack trace: $stackTrace', tag: 'BackupService');
 
       final errorString = e.toString().toLowerCase();
+      if (BackupErrorClassification.isDiskFullError(errorString)) {
+        return BackupResult.failure(
+          BackupFailureReason.diskFull,
+          'Not enough storage space. Free up space and try again.',
+        );
+      }
       if (errorString.contains('cancel')) {
         return BackupResult.failure(
           BackupFailureReason.userCancelled,
@@ -197,7 +205,7 @@ The QR code image is attached to this email.
           BackupFailureReason.permissionDenied,
           'Storage permission denied. Enable in Settings.',
         );
-      } else if (errorString.contains('space') || errorString.contains('disk full')) {
+      } else if (BackupErrorClassification.isDiskFullError(errorString)) {
         return BackupResult.failure(
           BackupFailureReason.diskFull,
           'Not enough storage space. Free up space and try again.',
@@ -397,8 +405,8 @@ The QR code image is attached to this email.
 
   /// Generate consistent file names for backups
   static String _generateFileName(SupplierConfigBackup backup, String extension) {
-    final timestamp = DateFormat('yyyy-MM-dd').format(backup.timestamp);
-    final businessName = backup.businessName.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '-');
+    final timestamp = BackupFilename.dateStamp(backup.timestamp);
+    final businessName = BackupFilename.sanitizeBusinessName(backup.businessName);
     final type = backup.type == 'recovery' ? 'Recovery' : 'Clone';
 
     return 'LoyaltyCards-$type-$businessName-$timestamp.$extension';

@@ -17,6 +17,16 @@ Examples:
 
 ## Current Releases
 
+### v2.2.1+33 - Build 33 (🔵 In development, TestFlight validation round)
+- **Date:** August 25, 2026
+- **Platform:** Not yet built or uploaded. Working on `feature/code-quality-refactor`/`develop` to run some TestFlight validation builds before deciding whether to promote to `main` - `main` deliberately left untouched pending explicit instruction.
+- **Branch:** `feature/code-quality-refactor` merged into `develop` (fast-forward); `main` not touched.
+- **Version:** 2.2.1+33
+- **Status:** 🔵 In development. **Patch version bump** (2.2.0 -> 2.2.1) on top of v2.2.0+32 - not build-only, since splitting `backup_storage_service.dart` surfaced a real bug present in the currently-live 2.2.0+32 print paths (missing disk-full detection - see Focus below); the controller-extraction refactor and docs consolidation are otherwise internal quality work, and the marketing-file sync isn't app code at all.
+- **Focus:** Executes `docs/quality/CODE_QUALITY_REVIEW_2026-08-21.md` (steps 2-4) - extracts business/crypto logic out of five oversized files (`customer_card_detail.dart`, `qr_scanner_screen.dart`, `supplier_stamp_card.dart`, `supplier_redeem_card.dart`, `backup_storage_service.dart`) into a new `lib/controllers/` convention. Splitting `backup_storage_service.dart` found and fixed a real live bug: the three backup print paths never detected a disk-full error (only `saveToFiles` did), so a supplier hitting it saw a raw exception instead of "Not enough storage space" - fixed, the detection itself tightened (was a bare `contains('space')`), and the one missing save-path check (`saveSimpleTokenToFiles`) closed too. Plus two follow-up code-review passes' worth of further fixes (see `docs/project-management/DEFECT_TRACKER.md` DECISION-023 for what was fixed vs. deliberately deferred). Also archives 19 superseded planning/review docs and adds `docs/project-management/PROJECT_HISTORY.md`. Full detail: `CHANGELOG.md` [2.2.1+33], `docs/quality/CODE_QUALITY_REFACTOR_2026-08-24.md`.
+- **Testing:** shared 216/216, customer_app 186/186, supplier_app 141/141 (up from 458 total before this branch, now 543). `flutter analyze` clean of errors across all three packages.
+- **Next Steps:** Build and run TestFlight validation on this branch/`develop`; decide on merging to `main` afterward - explicitly not done yet.
+
 ### v2.2.0+32 - Build 32 (🟢 LIVE ON THE APP STORE)
 - **Date:** August 23, 2026 (merged, built, uploaded, TestFlight-tested, and submitted); August 24, 2026 (approved and released)
 - **Platform:** Built and uploaded to App Store Connect via Transporter, both apps. Basic TestFlight testing completed the same day - no blockers found. Metadata entered from `APP_STORE_METADATA_PACKET_v2_2_0_32.md`, Privacy Policy/Support/Marketing URLs updated to the Cloudflare Pages host (both apps), submitted for App Store review 2026-08-23, and **approved by Apple and released to the App Store 2026-08-24** (both apps, via App Store Connect).

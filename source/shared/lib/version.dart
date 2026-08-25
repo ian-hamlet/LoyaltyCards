@@ -678,5 +678,38 @@
 ///   unless restored from a Recovery Backup, permanently orphaning their
 ///   cards).
 
+/// Build 33 Changes:
+/// - Patch version bump (2.2.0 -> 2.2.1) for a TestFlight validation round
+///   on `feature/code-quality-refactor`/`develop`, before any merge to
+///   `main`. Not build-only: closes a real bug in the currently-live
+///   2.2.0+32 backup print paths (see the disk-space fix below), found
+///   during this work rather than introduced by it.
+/// - Extracted business/crypto logic out of five oversized files
+///   (`customer_card_detail.dart`, `qr_scanner_screen.dart`,
+///   `supplier_stamp_card.dart`, `supplier_redeem_card.dart`,
+///   `backup_storage_service.dart`) into a new `lib/controllers/`
+///   convention - plain Dart classes, no UI imports, Result objects instead
+///   of thrown exceptions, testable without a widget tree. Adds 81 new
+///   tests (customer_app 138→186, supplier_app 104→141); shared unchanged.
+///   Full detail: `docs/quality/CODE_QUALITY_REFACTOR_2026-08-24.md`.
+/// - Bug fix (the reason for the patch bump): the three backup services'
+///   print paths (`printBackup`/`printSimpleToken`/`printIssueCard`) never
+///   detected a disk-full error - a supplier hitting it while printing saw
+///   a raw exception message instead of "Not enough storage space." Present
+///   in 2.2.0+32; found while splitting `backup_storage_service.dart`, not
+///   introduced by it. Also tightened the detection string (was a bare
+///   `contains('space')`, misfiring on unrelated messages) and added the
+///   one missing save-path check (`saveSimpleTokenToFiles`).
+/// - Consolidated superseded planning docs and one-time review reports into
+///   `docs/archive/`, added `docs/project-management/PROJECT_HISTORY.md` as
+///   a condensed decision/requirements history.
+/// - Marketing: added personal-note handout formats (A5 print, email,
+///   plain-text message) for supplier pilot outreach; synced
+///   `site/marketing/` with the current 4-up business handout and the new
+///   personal-note files (previously only in `marketing/supplier_app/`,
+///   never published); added a "Marketing Materials" section to the
+///   Cloudflare Pages site index so all five flyers/handouts are
+///   discoverable, not just one.
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.0+32';
+const String appVersion = '2.2.1+33';

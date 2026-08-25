@@ -694,7 +694,7 @@ packages:
       path: "../shared"
       relative: true
     source: path
-    version: "2.2.0+32"
+    version: "2.2.1+33"
   shared_preferences:
     dependency: "direct main"
     description:

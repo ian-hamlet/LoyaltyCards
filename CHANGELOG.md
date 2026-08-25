@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.1+33] - 2026-08-25
+
+**Status:** 🔵 In development on `feature/code-quality-refactor`/`develop` - not yet built or uploaded, preparing for a TestFlight validation round. `main` deliberately left untouched pending explicit instruction. **Patch version bump** (2.2.0 -> 2.2.1) on top of v2.2.0+32 - not build-only, since this closes a real bug present in the currently-live 2.2.0+32 backup print paths (see Fixed below), found during this work rather than introduced by it; everything else here is internal refactor/docs/marketing with no App-Store-facing capability change. All automated tests passing (shared 216/216, customer_app 186/186, supplier_app 141/141), `flutter analyze` clean of errors on all three packages.
+
+### Fixed
+- **The three backup services' print paths never detected a disk-full error.** `printBackup`/`printSimpleToken`/`printIssueCard` had no disk-space check at all (only `saveToFiles` did) - a supplier hitting it while printing a backup, stamp token, or issue-card QR saw a raw "Failed to print: ..." exception message instead of "Not enough storage space. Free up space and try again." Present in the live 2.2.0+32 monolithic `backup_storage_service.dart`; found while splitting it into focused services, not introduced by that split. Also tightened the detection itself - the pre-existing check was a bare `errorString.contains('space')`, which could misclassify any unrelated error mentioning "namespace"/"workspace"/"whitespace" - into a new `BackupErrorClassification.isDiskFullError()` helper matching specific phrases, with its own test coverage; and closed the one save path that was still missing the check (`saveSimpleTokenToFiles`).
+
+### Changed
+- **Extracted business/crypto logic out of five oversized files** into a new `lib/controllers/` convention (plain Dart classes, no UI imports, Result objects instead of thrown exceptions) so it's testable without a widget tree: `customer_card_detail.dart`, `qr_scanner_screen.dart`, `supplier_stamp_card.dart`, `supplier_redeem_card.dart`, and a split of the monolithic `backup_storage_service.dart` into focused services (see Fixed above for the bug found along the way). Executes `docs/quality/CODE_QUALITY_REVIEW_2026-08-21.md` (steps 2-4; the CI-gate step remains deliberately deferred). Adds 81 new tests. Two follow-up code-review passes fixed a real regression (a controller method threw instead of degrading gracefully, self-corrected within this same unshipped branch) plus a handful of duplication gaps; full record in `docs/quality/CODE_QUALITY_REFACTOR_2026-08-24.md` and `docs/project-management/DEFECT_TRACKER.md` DECISION-023.
+- **Documentation consolidation:** archived 19 superseded planning snapshots and one-time review reports to `docs/archive/`; added `docs/project-management/PROJECT_HISTORY.md` as a condensed decision/requirements history replacing them as the fast "how did we get here" read.
+
+### Added (marketing, no app code)
+- Personal-note handout formats (A5 print, email, plain-text message) for supplier pilot outreach.
+- Synced `site/marketing/` (the Cloudflare Pages-published copy) with the current 4-up business handout and the new personal-note files, which had only ever landed in `marketing/supplier_app/`.
+- Added a "Marketing Materials" section to the public site index so all five flyers/handouts are discoverable, not just one.
+
 ## [2.2.0+32] - 2026-08-23
 
 **Status:** 🟢 LIVE — approved by Apple and released to the App Store 2026-08-24 (both apps). Built, uploaded to TestFlight, TestFlight-tested, and submitted for App Store review 2026-08-23. **Build-only bump** - consolidates the macOS supplier port, several real-device-found bug fixes, and test-suite quality fixes into one shippable build on top of v2.2.0+31; none of it is new App-Store-facing capability. All automated tests passing (shared 216/216, customer_app 138/138, supplier_app 104/104), `flutter analyze` clean of errors on all three packages.

@@ -21,8 +21,11 @@ class KeyManager {
   // with a real Apple Developer team - not available for local/ad-hoc
   // debug builds. Falling back to the legacy Keychain API avoids that
   // entitlement requirement entirely.
+  // flutter_secure_storage 11.0.0 removed the encryptedSharedPreferences
+  // option (Jetpack Security backend dropped); the default AndroidOptions()
+  // now always uses Android Keystore-backed AES-GCM/RSA-OAEP, so no
+  // replacement flag is needed here.
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
     mOptions: MacOsOptions(usesDataProtectionKeychain: false),
   );

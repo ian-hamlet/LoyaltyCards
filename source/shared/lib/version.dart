@@ -711,5 +711,36 @@
 ///   Cloudflare Pages site index so all five flyers/handouts are
 ///   discoverable, not just one.
 
+/// Build 34 Changes:
+/// - Build-only bump for a TestFlight validation round on
+///   `feature/android-port`, ahead of Android bring-up. No app-visible
+///   behavior change; this build validates the package/tooling migration
+///   below still ships correctly.
+/// - Package updates: `app_settings` 6.1.1 → 9.0.0 (shared),
+///   `flutter_secure_storage` 10.3.1 → 11.0.0 (supplier_app). The latter
+///   removed the `encryptedSharedPreferences` Android option `KeyManager`
+///   was pinning; updated to the new default `AndroidOptions()` (Keystore
+///   AES-GCM/RSA-OAEP) before any Android code depended on the old flag.
+///   Full detail: `docs/technical/PACKAGE_UPDATE_MIGRATION_2026-08-26.md`.
+/// - iOS + macOS: both apps fully migrated off CocoaPods to Swift Package
+///   Manager (`app_settings` 8.0+ dropped CocoaPods support entirely).
+///   Removed both apps' `ios/Podfile(.lock)` and `macos/Podfile(.lock)`,
+///   ran `pod deintegrate`, cleaned the dangling `Pods-Runner` xcconfig
+///   includes. Requires `flutter config --enable-swift-package-manager`
+///   locally (a machine-wide Flutter setting, not project config) - anyone
+///   building this branch on a different machine needs to run that once.
+/// - Cleaned up two long-standing macOS build warnings surfaced by the SPM
+///   migration: a dead `assets/images/` declaration in both apps'
+///   `pubspec.yaml` (directory never existed, no code referenced it), and
+///   the stock Flutter-generated "Run script... does not specify any
+///   outputs" warning on the `Flutter Assemble` phase (added
+///   `alwaysOutOfDate = 1`, matching the fix already used by the adjacent
+///   phase in the same project).
+/// - Updated `build_both_apps.sh`'s header comment, which warned about a
+///   concurrent-build CocoaPods sandbox error that can no longer happen
+///   now that neither app uses CocoaPods.
+/// - All three test suites re-verified green after every step above:
+///   shared 216/216, customer_app 186/186, supplier_app 141/141.
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.1+33';
+const String appVersion = '2.2.1+34';

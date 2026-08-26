@@ -8,9 +8,9 @@
 #   bash source/build_both_apps.sh
 #
 # Run this alone - don't start a second build of either app while this is
-# running. Two concurrent `flutter clean`/`pod install` runs against the
-# same app directory will corrupt each other's Pods sandbox and fail with
-# "The sandbox is not in sync with the Podfile.lock."
+# running. Two concurrent `flutter clean`/`flutter build` runs against the
+# same app directory will race on shared build output (build/, DerivedData)
+# and can corrupt each other's build.
 #
 # Output IPAs land at:
 #   customer_app/build/ios/ipa/customer_app.ipa

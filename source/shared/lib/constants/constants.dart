@@ -58,6 +58,10 @@ class AppConstants {
   // Companion App Store links (each app points to the other)
   static const String customerAppStoreUrl = 'https://apple.co/4bYdQ0T'; // LoyaltyCards Customer Wallet
   static const String supplierAppStoreUrl = 'https://apple.co/4hFWKsh'; // LoyaltyCards Business
+
+  // Documentation links (Cloudflare Pages - see RELEASES.md's 2026-08-21 migration note)
+  static const String supplierSetupGuideUrl = 'https://loyaltycards-site.pages.dev/user/supplier-setup-guide.html';
+  static const String userGuideUrl = 'https://loyaltycards-site.pages.dev/user/user-guide.html';
 }
 
 /// Typography scale for consistent text sizing

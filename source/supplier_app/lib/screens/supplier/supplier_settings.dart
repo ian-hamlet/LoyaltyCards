@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/business_repository.dart';
 import '../../services/key_manager.dart';
 import '../../services/biometric_auth_service.dart';
@@ -189,6 +190,21 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           context,
           'Could not save app lock setting. Please try again.',
         );
+      }
+    }
+  }
+
+  Future<void> _openGuide(String url, String label) async {
+    Haptics.light();
+    try {
+      final launched = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      if (!launched && mounted) {
+        AppFeedback.error(context, 'Could not open $label');
+      }
+    } catch (e) {
+      AppLogger.error('Error opening $label', error: e, tag: 'Settings');
+      if (mounted) {
+        AppFeedback.error(context, 'Could not open $label');
       }
     }
   }
@@ -551,6 +567,39 @@ class _SupplierSettingsState extends State<SupplierSettings> {
             leading: const Icon(Icons.info_outline),
             title: const Text('Version'),
             subtitle: Text(appVersion),
+          ),
+          const Divider(height: 32),
+
+          // Help & Guides Section
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Help & Guides',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.menu_book),
+            title: const Text('Supplier Setup Guide'),
+            subtitle: const Text(
+              'Step-by-step guide to setting up and running your business',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () => _openGuide(AppConstants.supplierSetupGuideUrl, 'the setup guide'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('User Guide'),
+            subtitle: const Text(
+              'Full guide for how the Business and Customer apps work together',
+              style: TextStyle(fontSize: 12),
+            ),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () => _openGuide(AppConstants.userGuideUrl, 'the user guide'),
           ),
           const Divider(height: 32),
 

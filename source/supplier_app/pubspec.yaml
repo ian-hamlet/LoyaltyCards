@@ -46,6 +46,9 @@ dependencies:
   printing: ^5.13.4             # Print PDF functionality
   pdf: ^3.11.1                  # Generate PDF documents
 
+  # Web links (Settings -> Help & Guides)
+  url_launcher: ^6.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

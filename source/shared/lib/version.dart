@@ -742,5 +742,30 @@
 /// - All three test suites re-verified green after every step above:
 ///   shared 216/216, customer_app 186/186, supplier_app 141/141.
 
+/// Build 35 Changes:
+/// - Build-only bump for a TestFlight validation round on
+///   `feature/android-port` (supplier_app, real iPhone), following up on
+///   build 34's SPM migration.
+/// - Bundled `NotoSans-Regular.ttf`/`NotoSans-Bold.ttf` (SIL OFL, Latin/
+///   Greek/Cyrillic) as offline assets and wired them through a shared
+///   `PdfFonts` helper into all four PDF-generating services
+///   (`ConfigBackupService`, `IssueCardBackupService`,
+///   `SimpleTokenBackupService`, `AuditTrailPdfService`). Fixes a real
+///   rendering bug, not just a log warning: the `pdf` package's default
+///   Helvetica is WinAnsi-only, so a business name with accents beyond
+///   Latin-1, Cyrillic, Greek, etc. would previously mis-render in printed
+///   backup/audit-trail PDFs. Verified with a mixed-script business name
+///   (`Café Münster – Kафе`) - renders correctly; full CJK coverage is out
+///   of scope (would require a much larger, separate font bundle).
+/// - Confirmed on a real iPhone via Xcode that build 34's printing flow
+///   works correctly end-to-end (the earlier reported hang did not
+///   reproduce there or in any environment tested - see
+///   `docs/technical/PACKAGE_UPDATE_MIGRATION_2026-08-26.md`).
+/// - Verified the CRASH-001 double-tap/re-entrancy guards (print/share
+///   button busy-state flags, `PdfValidation`'s pre-native PDF byte check)
+///   are untouched by the SPM migration or the font change, and that
+///   `PrintingPlugin` registers exactly once on both iOS and macOS with no
+///   leftover CocoaPods references on either platform.
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.1+34';
+const String appVersion = '2.2.1+35';

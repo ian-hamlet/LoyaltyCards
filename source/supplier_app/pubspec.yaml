@@ -4,7 +4,7 @@ publish_to: 'none'
 
 # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
 # source/shared/lib/version.dart: 
-version: 2.2.1+34
+version: 2.2.1+35
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -60,4 +60,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # NotoSans-Regular/Bold: embedded in generated PDFs (backup/audit-trail
+  # printing) so business names with non-Latin characters render correctly.
+  # The `pdf` package's default Helvetica is WinAnsi-only. SIL OFL 1.1
+  # licensed - see assets/fonts/NotoSans-OFL.txt.
+  assets:
+    - assets/fonts/NotoSans-Regular.ttf
+    - assets/fonts/NotoSans-Bold.ttf
 

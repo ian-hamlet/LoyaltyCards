@@ -13,6 +13,7 @@ import 'package:shared/shared.dart';
 import '../../models/backup_result.dart';
 import 'backup_error_classification.dart';
 import 'backup_filename.dart';
+import 'pdf_fonts.dart';
 import 'pdf_validation.dart';
 
 /// Simple Mode issue-card QR distribution (Print, Share) and the
@@ -206,6 +207,7 @@ class IssueCardBackupService {
   }) async {
     final pdf = pw.Document();
     final qrImage = pw.MemoryImage(qrImageBytes);
+    final theme = await PdfFonts.theme();
 
     final stampInfo = initialStamps == 0
         ? 'New card with no initial stamps'
@@ -214,6 +216,7 @@ class IssueCardBackupService {
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
+        theme: theme,
         build: (pw.Context context) {
           return pw.Center(
             child: pw.Column(

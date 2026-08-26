@@ -14,6 +14,7 @@ import 'package:shared/shared.dart';
 import '../../models/backup_result.dart';
 import 'backup_error_classification.dart';
 import 'backup_filename.dart';
+import 'pdf_fonts.dart';
 import 'pdf_validation.dart';
 
 /// Express Mode stamp-token QR distribution (Print, Share via Email, Save
@@ -359,6 +360,7 @@ For best results:
   }) async {
     final pdf = pw.Document();
     final qrImage = pw.MemoryImage(qrImageBytes);
+    final theme = await PdfFonts.theme();
 
     final stampText = stampCount == 1 ? '1 Stamp' : '$stampCount Stamps';
     final expiryText = expiryDate != null
@@ -368,6 +370,7 @@ For best results:
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
+        theme: theme,
         build: (pw.Context context) {
           return pw.Center(
             child: pw.Column(

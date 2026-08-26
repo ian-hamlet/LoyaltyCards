@@ -10,6 +10,7 @@ import 'package:shared/shared.dart';
 import '../models/audit_entry.dart';
 import '../models/backup_result.dart';
 import 'backup/backup_filename.dart';
+import 'backup/pdf_fonts.dart';
 import 'backup/pdf_validation.dart';
 
 /// Generates, prints, and shares the local audit trail as a simple PDF
@@ -29,10 +30,12 @@ class AuditTrailPdfService {
   static Future<pw.Document> _generatePdf(Business business, List<AuditEntry> entries) async {
     final pdf = pw.Document();
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+    final theme = await PdfFonts.theme();
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.letter,
+        theme: theme,
         build: (context) => [
           pw.Header(
             level: 0,

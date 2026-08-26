@@ -14,6 +14,7 @@ import 'package:shared/shared.dart';
 import '../../models/backup_result.dart';
 import 'backup_error_classification.dart';
 import 'backup_filename.dart';
+import 'pdf_fonts.dart';
 import 'pdf_validation.dart';
 
 /// Recovery/Clone config backup distribution (Print, Share via Email, Save
@@ -260,10 +261,12 @@ The QR code image is attached to this email.
   ) async {
     final pdf = pw.Document();
     final qrImage = pw.MemoryImage(qrImageBytes);
+    final theme = await PdfFonts.theme();
 
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.letter,
+        theme: theme,
         build: (pw.Context context) {
           return pw.Center(
             child: pw.Column(

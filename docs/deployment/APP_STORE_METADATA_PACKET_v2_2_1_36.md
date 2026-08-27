@@ -1,8 +1,9 @@
 # App Store Metadata Packet (v2.2.1+36)
 
-**Status: 🟡 DRAFT — not yet submitted.** Built, uploaded to TestFlight, and TestFlight-tested
-(both apps) as of 2026-08-27. This packet is prepared ahead of merging `fix/ios-print-sharepdf-hang`
-into `develop` and submitting for App Store review.
+**Status: 🔵 SUBMITTED — awaiting App Store review.** Built, uploaded to TestFlight, TestFlight-tested
+(both apps), metadata entered into App Store Connect from this packet, and **submitted for App
+Store review 2026-08-27** (both apps). `fix/ios-print-sharepdf-hang` merged to `develop`, `develop`
+merged to `main`, and release branch `releases/v2.2.1-build36` cut, all 2026-08-27.
 
 **First 2.2.1 build actually submitted for review** - +33, +34, and +35 were TestFlight-only
 validation rounds on `feature/android-port`, never submitted. Per the same convention used for

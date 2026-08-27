@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -19,6 +18,10 @@ import 'package:supplier_app/services/supplier_database_helper.dart';
 /// same unguarded-button gap as the original Stamp Setup crash, found by
 /// auditing every call site of BackupStorageService's print/share/save
 /// methods. See docs/project-management/CRASH-001-stamp-print-race-condition.md.
+/// `printBackup()` since switched from `Printing.layoutPdf` to
+/// `Printing.sharePdf` (2026-08-27, see `ConfigBackupService.printBackup`'s
+/// doc comment) - the guard tested here is independent of which `printing`
+/// API is used underneath.
 ///
 /// Same method-channel-interception approach as the other CRASH-001 tests.
 /// This screen additionally requires biometric authentication before it
@@ -42,24 +45,12 @@ void main() {
   const businessId = 'business-recovery-backup-test';
 
   late KeyManager keyManager;
-  late int printPdfCallCount;
+  late int sharePdfCallCount;
   late int shareCallCount;
-  late Set<int> completedJobIndices;
-
-  Future<void> completeJob(int jobIndex) async {
-    if (!completedJobIndices.add(jobIndex)) return;
-    const codec = StandardMethodCodec();
-    final data = codec.encodeMethodCall(
-      MethodCall('onCompleted', {'job': jobIndex, 'completed': true}),
-    );
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(printingChannel.name, data, (_) {});
-  }
 
   setUp(() async {
-    printPdfCallCount = 0;
+    sharePdfCallCount = 0;
     shareCallCount = 0;
-    completedJobIndices = {};
 
     FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform({});
     keyManager = KeyManager();
@@ -71,13 +62,10 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       printingChannel,
       (call) async {
-        if (call.method == 'printPdf') {
-          printPdfCallCount++;
-          final jobIndex = call.arguments['job'] as int;
-          unawaited(
-            Future.delayed(const Duration(milliseconds: 30), () => completeJob(jobIndex)),
-          );
-          return jobIndex;
+        if (call.method == 'sharePdf') {
+          sharePdfCallCount++;
+          await Future.delayed(const Duration(milliseconds: 30));
+          return 1;
         }
         return null;
       },
@@ -294,11 +282,11 @@ void main() {
       consumeKnownListTileWarning(tester);
 
       expect(
-        printPdfCallCount,
+        sharePdfCallCount,
         1,
         reason: 'The _isPrinting guard should reject the second call outright, '
-            'so the native printing plugin should only ever be asked to start '
-            'one print job.',
+            'so the native printing plugin should only ever be asked to share '
+            'one PDF.',
       );
       // ignore: avoid_dynamic_calls
       expect((state as dynamic).isPrintingForTesting as bool, isFalse);

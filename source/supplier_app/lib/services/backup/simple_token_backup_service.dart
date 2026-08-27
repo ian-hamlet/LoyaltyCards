@@ -149,7 +149,11 @@ class SimpleTokenBackupService {
     return byteData!.buffer.asUint8List();
   }
 
-  /// Print Simple Mode stamp token QR
+  /// Print Simple Mode stamp token QR via the OS share sheet.
+  ///
+  /// Uses `Printing.sharePdf` rather than `Printing.layoutPdf` - see the
+  /// doc comment on `ConfigBackupService.printBackup` for why (CRASH-001's
+  /// native print-preview subsystem, which this deliberately avoids).
   static Future<BackupResult> printSimpleToken({
     required String qrData,
     required String businessName,
@@ -180,10 +184,8 @@ class SimpleTokenBackupService {
         extension: 'pdf',
       );
 
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => PdfValidation.generateValidatedPdfBytes(pdf),
-        name: fileName,
-      );
+      final bytes = await PdfValidation.generateValidatedPdfBytes(pdf);
+      await Printing.sharePdf(bytes: bytes, filename: fileName);
 
       AppLogger.debug('=== printSimpleToken END (success: true) ===', 'BackupService');
       return BackupResult.success();

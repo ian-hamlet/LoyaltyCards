@@ -74,14 +74,16 @@ class AuditTrailPdfService {
     return pdf;
   }
 
-  /// Opens the system print dialog with the audit trail table.
+  /// Opens the OS share sheet with the audit trail table PDF.
+  ///
+  /// Uses `Printing.sharePdf` rather than `Printing.layoutPdf` - see the
+  /// doc comment on `ConfigBackupService.printBackup` for why (CRASH-001's
+  /// native print-preview subsystem, which this deliberately avoids).
   static Future<BackupResult> printAuditTrail(Business business, List<AuditEntry> entries) async {
     try {
       final pdf = await _generatePdf(business, entries);
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => PdfValidation.generateValidatedPdfBytes(pdf),
-        name: _fileName(business),
-      );
+      final bytes = await PdfValidation.generateValidatedPdfBytes(pdf);
+      await Printing.sharePdf(bytes: bytes, filename: _fileName(business));
       return BackupResult.success();
     } catch (e) {
       final errorString = e.toString().toLowerCase();

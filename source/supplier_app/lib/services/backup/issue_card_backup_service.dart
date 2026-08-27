@@ -140,7 +140,11 @@ class IssueCardBackupService {
     return byteData!.buffer.asUint8List();
   }
 
-  /// Print Simple Mode issue card QR
+  /// Print Simple Mode issue card QR via the OS share sheet.
+  ///
+  /// Uses `Printing.sharePdf` rather than `Printing.layoutPdf` - see the
+  /// doc comment on `ConfigBackupService.printBackup` for why (CRASH-001's
+  /// native print-preview subsystem, which this deliberately avoids).
   static Future<BackupResult> printIssueCard({
     required QrCode qrCode,
     required String businessName,
@@ -168,10 +172,8 @@ class IssueCardBackupService {
         extension: 'pdf',
       );
 
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => PdfValidation.generateValidatedPdfBytes(pdf),
-        name: fileName,
-      );
+      final bytes = await PdfValidation.generateValidatedPdfBytes(pdf);
+      await Printing.sharePdf(bytes: bytes, filename: fileName);
 
       AppLogger.debug('=== printIssueCard END (success: true) ===', 'BackupService');
       return BackupResult.success();

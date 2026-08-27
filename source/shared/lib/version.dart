@@ -767,5 +767,14 @@
 ///   `PrintingPlugin` registers exactly once on both iOS and macOS with no
 ///   leftover CocoaPods references on either platform.
 
+/// Build 36 Changes:
+/// - Build-only bump, purely so a fresh on-device install is visibly
+///   distinguishable (Settings screen) from the +35 TestFlight upload
+///   during today's CRASH-001-style print-hang investigation on
+///   `feature/android-port` - both were reporting the same version number,
+///   making it impossible to tell from the UI alone whether a given test
+///   was against a freshly Xcode-installed build or the stale TestFlight
+///   copy. No code changes since +35.
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.1+35';
+const String appVersion = '2.2.1+36';

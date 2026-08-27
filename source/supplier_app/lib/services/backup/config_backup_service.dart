@@ -22,8 +22,25 @@ import 'pdf_validation.dart';
 /// services split out of the original monolithic `BackupStorageService` -
 /// see that file's now-thin facade for the full split.
 class ConfigBackupService {
-  /// 1. Generate and print PDF with backup QR code
-  /// Opens system print dialog on both iOS and Android
+  /// 1. Generate and share PDF with backup QR code via the OS share sheet
+  /// (AirPrint is available from there, alongside every other share target).
+  ///
+  /// Deliberately uses `Printing.sharePdf` rather than `Printing.layoutPdf`:
+  /// the latter drives iOS's native interactive Print Preview
+  /// (`UIPrintInteractionController`/`UIPrintPreviewViewController`), which
+  /// is the exact subsystem behind CRASH-001 (see
+  /// docs/archive/project-management/CRASH-001-stamp-print-race-condition.md)
+  /// - a native EXC_BAD_ACCESS crash in `CGPDFDocumentGetNumberOfPages` that
+  /// two guard layers were added for at the time (re-entrancy guard, PDF-byte
+  /// validation) but could not be fixed at the source, since the fault is
+  /// inside Apple/UIKit's and the plugin's native layer. That doc's own
+  /// Recommendation 3 - avoid the subsystem entirely - went unapplied until
+  /// a 2026-08-27 investigation found `layoutPdf` hanging (not crashing)
+  /// 100% of the time on a real-device TestFlight build, while the identical
+  /// source built directly via Xcode never hung - a deterministic
+  /// signing/distribution-pipeline difference, not a rare timing race.
+  /// `sharePdf` hands bytes straight to the share sheet, which never
+  /// exercises that native code path.
   static Future<BackupResult> printBackup(
     SupplierConfigBackup backup,
     Uint8List qrImageBytes,
@@ -35,14 +52,12 @@ class ConfigBackupService {
       AppLogger.debug('PDF generated successfully', 'BackupService');
 
       final fileName = _generateFileName(backup, 'pdf');
-      AppLogger.debug('Calling Printing.layoutPdf with name: $fileName', 'BackupService');
+      final bytes = await PdfValidation.generateValidatedPdfBytes(pdf);
+      AppLogger.debug('Calling Printing.sharePdf with name: $fileName', 'BackupService');
 
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => PdfValidation.generateValidatedPdfBytes(pdf),
-        name: fileName,
-      );
+      await Printing.sharePdf(bytes: bytes, filename: fileName);
 
-      AppLogger.debug('Print dialog opened successfully', 'BackupService');
+      AppLogger.debug('Share sheet opened successfully', 'BackupService');
       AppLogger.debug('=== printBackup END (success: true) ===', 'BackupService');
       return BackupResult.success();
     } catch (e, stackTrace) {

@@ -23,19 +23,26 @@ import 'package:supplier_app/services/supplier_database_helper.dart';
 /// most plausibly triggered by a double-tap on the Stamp Setup screen's
 /// unguarded "Print" button firing two concurrent `Printing.layoutPdf()`
 /// calls. See docs/project-management/CRASH-001-stamp-print-race-condition.md
-/// for the full crash report and root cause analysis.
+/// for the full crash report and root cause analysis. `_printToken()` since
+/// switched from `Printing.layoutPdf` to `Printing.sharePdf` (2026-08-27) -
+/// see `ConfigBackupService.printBackup`'s doc comment - since `layoutPdf`
+/// was separately found hanging 100% of the time on a real-device TestFlight
+/// build, a deterministic distribution-pipeline issue rather than the
+/// original rare on-device race. The guard tested here is independent of
+/// which `printing` API is used - it stops a second call from ever reaching
+/// native code, regardless.
 ///
 /// Reproducing the actual native race isn't feasible in `flutter_test` (it
 /// requires real UIKit/CoreGraphics on-device timing). Instead, this test
 /// proves the *mechanism* directly: it intercepts the `printing` plugin's
 /// method channel (`net.nfet.printing`) to count how many times the native
-/// side is asked to start a print job (`printPdf`), then calls the screen's
+/// side is asked to share a PDF (`sharePdf`), then calls the screen's
 /// print handler twice back-to-back without awaiting the first - exactly
 /// the shape of a fast double-tap, minus needing real frame/gesture timing
 /// to force it. Without the `_isPrinting` guard, both calls reach
-/// `Printing.layoutPdf()` and `printPdf` fires twice (the concurrent-print-job
-/// race that crashed on-device); with the guard, the second call is a no-op
-/// and `printPdf` fires exactly once.
+/// `Printing.sharePdf()` and `sharePdf` fires twice (the concurrent-job
+/// race that crashed on-device under the old `layoutPdf` API); with the
+/// guard, the second call is a no-op and `sharePdf` fires exactly once.
 ///
 /// Fake MobileScannerPlatform so the widget can mount under `flutter_test`
 /// without a real camera platform channel. Simple Mode (tested here) never
@@ -82,28 +89,12 @@ void main() {
 
   late KeyManager keyManager;
   late BusinessRepository businessRepo;
-  late int printPdfCallCount;
+  late int sharePdfCallCount;
   late int shareCallCount;
-  late Set<int> completedJobIndices;
-
-  /// Echoes back the `onCompleted` message the real `printing` plugin sends
-  /// natively once a print job finishes, so `Printing.layoutPdf()`'s Future
-  /// (and therefore `_printToken()`) actually resolves instead of hanging
-  /// forever - without this, the job's internal Completer never completes.
-  Future<void> completeJob(int jobIndex) async {
-    if (!completedJobIndices.add(jobIndex)) return;
-    const codec = StandardMethodCodec();
-    final data = codec.encodeMethodCall(
-      MethodCall('onCompleted', {'job': jobIndex, 'completed': true}),
-    );
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(printingChannel.name, data, (_) {});
-  }
 
   setUp(() async {
-    printPdfCallCount = 0;
+    sharePdfCallCount = 0;
     shareCallCount = 0;
-    completedJobIndices = {};
 
     FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform({});
     // supplier_stamp_card.dart's _loadRotationPreference() calls the legacy
@@ -117,18 +108,13 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       printingChannel,
       (call) async {
-        if (call.method == 'printPdf') {
-          printPdfCallCount++;
-          final jobIndex = call.arguments['job'] as int;
-          // Real device: native takes real, non-zero time to set up the
-          // print job/preview before signaling completion - that window is
-          // exactly what CRASH-001's race lives in. A short delay here
-          // (rather than completing inline) keeps both calls genuinely
-          // in flight at once when the guard is bypassed.
-          unawaited(
-            Future.delayed(const Duration(milliseconds: 30), () => completeJob(jobIndex)),
-          );
-          return jobIndex;
+        if (call.method == 'sharePdf') {
+          sharePdfCallCount++;
+          // Real device: native takes real, non-zero time to hand the PDF
+          // to the share sheet - that window is exactly where a concurrent
+          // second call would land if the guard were bypassed.
+          await Future.delayed(const Duration(milliseconds: 30));
+          return 1;
         }
         return null;
       },
@@ -246,11 +232,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        printPdfCallCount,
+        sharePdfCallCount,
         1,
         reason: 'The _isPrinting guard should reject the second call outright, '
-            'so the native printing plugin should only ever be asked to start '
-            'one print job - this is the exact concurrent-job race CRASH-001 '
+            'so the native printing plugin should only ever be asked to share '
+            'one PDF - this is the exact concurrent-job race CRASH-001 '
             'crashed on. If this is 2, the guard was bypassed or removed.',
       );
     },

@@ -20,8 +20,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.loyaltycards.customer_app"
+        // Matches the iOS bundle ID's naming (com.ianhamlet.loyaltycards.customerApp)
+        // as closely as Android package-name convention (lowercase) allows.
+        applicationId = "com.ianhamlet.loyaltycards.customer"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

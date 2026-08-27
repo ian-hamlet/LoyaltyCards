@@ -7,7 +7,10 @@ plugins {
 
 android {
     namespace = "com.loyaltycards.supplier_app"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_secure_storage 11.0.0 requires compiling against SDK 37, higher
+    // than Flutter's own default (flutter.compileSdkVersion) at this SDK
+    // version - see https://flutter.dev/to/review-gradle-config.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -20,8 +23,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.loyaltycards.supplier_app"
+        // Matches the iOS bundle ID's naming (com.ianhamlet.loyaltycards.supplierApp)
+        // as closely as Android package-name convention (lowercase) allows.
+        applicationId = "com.ianhamlet.loyaltycards.supplier"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

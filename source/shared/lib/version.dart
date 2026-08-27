@@ -768,13 +768,30 @@
 ///   leftover CocoaPods references on either platform.
 
 /// Build 36 Changes:
-/// - Build-only bump, purely so a fresh on-device install is visibly
-///   distinguishable (Settings screen) from the +35 TestFlight upload
-///   during today's CRASH-001-style print-hang investigation on
-///   `feature/android-port` - both were reporting the same version number,
-///   making it impossible to tell from the UI alone whether a given test
-///   was against a freshly Xcode-installed build or the stale TestFlight
-///   copy. No code changes since +35.
+/// - Correction (2026-08-27): this entry originally said "build-only bump,
+///   no code changes since +35" - written before the fix below existed.
+///   The version bump and the fix ended up in the same commit once both
+///   were ready, so this build is NOT code-identical to +35 as first
+///   documented here.
+/// - Supplier app: switched `printBackup`/`printIssueCard`/
+///   `printSimpleToken`/`printAuditTrail` from `Printing.layoutPdf` to
+///   `Printing.sharePdf` - user-visible change, since the Print flow now
+///   opens the OS share sheet (pick a printer/AirPrint from there) instead
+///   of the native interactive print-preview panel directly. Trade-off:
+///   the share sheet's built-in Print option has a simpler native
+///   print-options screen (no Scaling control) than the old panel did.
+///   Reason: `layoutPdf` drives `UIPrintInteractionController`/
+///   `CGPDFDocumentGetNumberOfPages` - the exact native subsystem behind
+///   CRASH-001's crash (see
+///   docs/archive/project-management/CRASH-001-stamp-print-race-condition.md).
+///   Confirmed via a controlled adjacent-version TestFlight update test on
+///   a real iPhone (+35 hangs on every print attempt, +36 does not) that
+///   this was the actual cause, not a rare timing race or an update-
+///   delivery-pipeline issue as first suspected.
+/// - Also bumped the on-device Settings version string so a fresh install
+///   was distinguishable from the +35 TestFlight upload during diagnosis
+///   (the original reason for this bump) - superseded in importance by the
+///   sharePdf fix above once that was ready.
 
 /// # source/shared/lib/version.dart:
 const String appVersion = '2.2.1+36';

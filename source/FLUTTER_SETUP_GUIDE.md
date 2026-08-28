@@ -1,5 +1,11 @@
 # Flutter Development Setup & Testing Guide
 
+> ⚠️ **STALE (2026-03-30).** Written for the original Windows/PowerShell prototype
+> (`loyalty_cards_prototype`), which no longer exists - the real project is
+> `source/{shared,customer_app,supplier_app}` on macOS. For current machine setup, use
+> `docs/technical/DEV_MACHINE_SETUP.md` (general) and
+> `docs/technical/ANDROID_DEV_ENVIRONMENT_SETUP.md` (Android toolchain) instead.
+
 ## Quick Start
 
 This guide will help you install Flutter, set up the development environment, and deploy the LoyaltyCards prototype to test devices.

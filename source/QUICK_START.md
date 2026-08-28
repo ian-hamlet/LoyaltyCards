@@ -1,5 +1,11 @@
 # Flutter Prototype - Quick Reference
 
+> ⚠️ **STALE (2026-03-30).** Written for the original Windows/PowerShell prototype
+> (`loyalty_cards_prototype`), which no longer exists - the real project is
+> `source/{shared,customer_app,supplier_app}` on macOS. For current machine setup, use
+> `docs/technical/DEV_MACHINE_SETUP.md` (general) and
+> `docs/technical/ANDROID_DEV_ENVIRONMENT_SETUP.md` (Android toolchain) instead.
+
 ## 🎯 What You Have Now
 
 A complete **Flutter prototype** ready for testing the P2P loyalty card interactions!

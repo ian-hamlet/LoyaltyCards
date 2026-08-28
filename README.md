@@ -140,7 +140,7 @@ This project uses AI-driven development with comprehensive documentation of the 
 ## Getting Started
 
 1. **Clone the repository**
-2. **Install Flutter** (see [source/FLUTTER_SETUP_GUIDE.md](source/FLUTTER_SETUP_GUIDE.md))
+2. **Install Flutter and set up your machine** (see [docs/technical/DEV_MACHINE_SETUP.md](docs/technical/DEV_MACHINE_SETUP.md))
 3. **Run the apps** (see Quick Start above)
 4. **Run tests** to verify everything works
-5. **Read the docs** in `07-Documentation/`
+5. **Read the docs** in `docs/`

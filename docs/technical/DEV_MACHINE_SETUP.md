@@ -5,10 +5,11 @@
 git. Companion to `docs/technical/ANDROID_DEV_ENVIRONMENT_SETUP.md`, which covers the Android
 SDK/emulator toolchain specifically - this doc covers everything else (Flutter, Xcode, git access).
 
-⚠️ `source/FLUTTER_SETUP_GUIDE.md` and `source/QUICK_START.md` are **stale** (dated 2026-03-30,
-Windows/PowerShell instructions for a `loyalty_cards_prototype` project structure that no longer
-exists - the real project is `source/{shared,customer_app,supplier_app}`). Don't follow them. Use
-this doc instead.
+(`source/FLUTTER_SETUP_GUIDE.md` and `source/QUICK_START.md` used to exist here - deleted
+2026-08-28. Both were dated 2026-03-30, Windows/PowerShell instructions for a
+`loyalty_cards_prototype` project structure that no longer existed even then - the real project is
+`source/{shared,customer_app,supplier_app}`. If either turns up again from an old branch/clone,
+it's stale; use this doc instead.)
 
 ---
 

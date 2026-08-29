@@ -36,19 +36,35 @@ Default install location: `/usr/local/share/android-commandlinetools`.
 Added to `~/.zshrc` (already present on this Mac; would need re-adding on a new one):
 
 ```bash
-export JAVA_HOME="/usr/local/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
 export ANDROID_HOME="/usr/local/share/android-commandlinetools"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
 ```
+
+`JAVA_HOME` above assumes Apple Silicon (`brew`'s arm64 prefix is `/opt/homebrew`). On an Intel Mac it would be
+`/usr/local/opt/openjdk@17/...` instead - check `arch` / `uname -m` and use whichever Homebrew prefix (`brew --prefix`)
+actually applies on that machine. `ANDROID_HOME` itself stays under `/usr/local/share` regardless of chip - that's
+just where the `android-commandlinetools` cask installs to, independent of the Homebrew prefix used to install it.
 
 ### 4. SDK components + licenses
 
 ```bash
 yes | sdkmanager --licenses
 sdkmanager "platform-tools" "platforms;android-36" "platforms;android-35" \
-  "build-tools;36.1.0" "emulator" "system-images;android-35;google_apis;x86_64"
+  "build-tools;36.1.0" "emulator" "system-images;android-35;google_apis;arm64-v8a"
 ```
+
+**Use `arm64-v8a`, not `x86_64`, on Apple Silicon.** The original 2026-08-27 setup on this Mac
+installed the `x86_64` image and emulator by mistake (Rosetta happened to be present at the time,
+so it didn't fail loudly - it just silently ran translated instead of native). Found and fixed
+2026-08-29: `sdkmanager` itself was actually broken by an unrelated Intel-Java problem at that
+point (see Java section above), and fixing that exposed the emulator/image mismatch too. Confirmed
+fix by re-downloading both (`sdkmanager --uninstall "emulator"` then reinstall pulls the
+`emulator-darwin_aarch64` package automatically once `sdkmanager` is running as a genuine arm64
+process) and cold-booting the AVD headless - boot completed in **10 seconds** (vs. minutes, or an
+outright failure with no Rosetta installed, for the x86_64 image). On an Intel Mac, use `x86_64`
+instead.
 
 `flutter_secure_storage` 11.0.0 (used by `supplier_app`) needs `platforms;android-37.0` too -
 Gradle auto-installs this itself on first build if missing (it did here), but you can add it
@@ -60,7 +76,10 @@ sdkmanager "platforms;android-37.0"
 
 Currently installed on this Mac (`sdkmanager --list_installed`): platform-tools 37.0.1,
 platforms 34/35/36/37.0, build-tools 35.0.0 and 36.1.0, NDK 28.2.13676358, CMake 3.22.1,
-emulator 37.1.11, system-images;android-35;google_apis;x86_64.
+emulator 37.1.11 (native arm64 build), system-images;android-35;google_apis;arm64-v8a (native).
+The original `x86_64` image was uninstalled 2026-08-29 once the `arm64-v8a` one was confirmed
+working (`sdkmanager --uninstall "system-images;android-35;google_apis;x86_64"`) - no reason to
+keep both on an Apple Silicon Mac.
 
 The NDK and CMake weren't requested explicitly - Gradle pulled them in automatically as part of
 the Flutter Gradle plugin's own build requirements. Expect the same to happen again on a fresh
@@ -69,7 +88,7 @@ machine; it's normal, not a sign of a missing step.
 ### 5. Emulator (AVD)
 
 ```bash
-avdmanager create avd -n Pixel7_API35 -k "system-images;android-35;google_apis;x86_64" -d pixel_7
+avdmanager create avd -n Pixel7_API35 -k "system-images;android-35;google_apis;arm64-v8a" -d pixel_7
 ```
 
 You may see `Error: Could not load devices from .../devices.xml` - this is a harmless

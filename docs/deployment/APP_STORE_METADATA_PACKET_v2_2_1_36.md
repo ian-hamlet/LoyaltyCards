@@ -1,8 +1,8 @@
 # App Store Metadata Packet (v2.2.1+36)
 
-**Status: 🔵 SUBMITTED — awaiting App Store review.** Built, uploaded to TestFlight, TestFlight-tested
-(both apps), metadata entered into App Store Connect from this packet, and **submitted for App
-Store review 2026-08-27** (both apps). `fix/ios-print-sharepdf-hang` merged to `develop`, `develop`
+**Status: 🟢 LIVE — approved by Apple and released to the App Store 2026-08-29 (both apps).** Built, uploaded to TestFlight, TestFlight-tested
+(both apps), metadata entered into App Store Connect from this packet, and submitted for App
+Store review 2026-08-27 (both apps). `fix/ios-print-sharepdf-hang` merged to `develop`, `develop`
 merged to `main`, and release branch `releases/v2.2.1-build36` cut, all 2026-08-27.
 
 **First 2.2.1 build actually submitted for review** - +33, +34, and +35 were TestFlight-only

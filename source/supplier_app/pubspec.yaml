@@ -57,6 +57,20 @@ dev_dependencies:
   build_runner: ^2.4.0
   test: ^1.24.0
   sqflite_common_ffi: ^2.3.0  # For desktop testing
+  local_auth_platform_interface: ^1.1.0  # For faking LocalAuthPlatform.instance in biometric_auth_service_test.dart
+  flutter_launcher_icons: ^0.14.4
+
+# Android app icon - the mipmap-*/ic_launcher.png files were still Flutter's
+# default placeholder logo (never generated for Android). Source is the same
+# branded icon already used for iOS/macOS. Generates both the legacy
+# ic_launcher.png set and an Android 8+ adaptive icon (mipmap-anydpi-v26).
+# Run: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "ios/Runner/Assets.xcassets/AppIcon.appiconset/1024.png"
+  adaptive_icon_background: "#F0532A"
+  adaptive_icon_foreground: "ios/Runner/Assets.xcassets/AppIcon.appiconset/1024.png"
 
 flutter:
   uses-material-design: true

@@ -1,13 +1,13 @@
 # Android Port Plan
 
-**Status:** Track 1 Phases 1-3 (toolchain, build config, functional verification) essentially
-complete as of 2026-08-30 - both apps build/run/test cleanly on a native arm64 emulator, and the
-core loyalty-card flows (issue/stamp/redeem, both Express and Secure Mode, biometric-gated backup/
-clone) are confirmed working, including two real bugs found and fixed along the way (one of which
-also affects the currently-live iOS app - see Phase 3 below and `2.2.2+37`'s changelog entry).
-Remaining Phase 3 items are secure-storage round-trip and the emulator's own camera (QR scanning
-into the app, not just out of it). Phase 4 (platform polish) and Phase 5 (release build) not
-started. Track 2 (Play Console) not started at all.
+**Status:** Track 1 Phases 1-4 (toolchain, build config, functional verification, platform
+polish) complete as of 2026-08-30 - both apps build/run/test cleanly on a native arm64 emulator,
+the core loyalty-card flows (issue/stamp/redeem, both Express and Secure Mode, biometric-gated
+backup/clone) are confirmed working, real app icons and display names now ship on Android
+(previously the literal Flutter placeholder and raw package names), and two real bugs were found
+and fixed along the way (one of which also affects the currently-live iOS app - see Phase 3 below
+and `2.2.2+37`'s changelog entry). Phase 5 (release build) is next. Track 2 (Play Console) not
+started at all.
 **Branch:** `feature/android-port`
 **Date:** 2026-08-29 (created); last updated 2026-08-30
 **Context:** Porting to Android is low-risk, mostly testing and store-listing work rather than a
@@ -64,36 +64,69 @@ Decisions / Risks" below for how that's handled.
          handler; `PlatformException` kept as a defensive fallback.
       With both fixed: no-credential-enrolled state shows the correct friendly message, and with
       a PIN actually set, both Create Recovery Backup and Clone to Another Device work
-      end-to-end.
+      end-to-end. `biometric_auth_service.dart` had zero test coverage before this - added
+      `test/services/biometric_auth_service_test.dart` (14 tests) covering the full
+      `LocalAuthExceptionCode` mapping, substituting `LocalAuthPlatform.instance` directly rather
+      than mocking the MethodChannel (confirmed the channel-mock approach used elsewhere in this
+      suite can't reach `LocalAuthException` at all under `flutter test` - it only ever throws
+      `PlatformException` via the unregistered-platform fallback).
 - [x] Recovery Backup file-output paths - share and print both bring up the correct native
       dialogs on the emulator - 2026-08-30. Low risk of surprising further on real hardware:
       unlike the biometric/enrollment issues found above, share/print dialogs are standard OS
       chrome (`share_plus`/`printing`), not something the app or emulator meaningfully diverges
       on. Full save-to-file/actual-print-output round trip still untested, but not considered a
       priority follow-up given this.
-- [ ] Secure storage round-trip (`flutter_secure_storage` → Android Keystore, vs. iOS Keychain)
-- [ ] QR camera scan - the emulator's own camera (webcam passthrough, configured 2026-08-30)
-      hasn't actually been exercised yet; the Express Mode test above only used the physical
-      iPhone's camera to scan the Android screen, not the reverse. Still open, see "Open
-      Decisions" below.
+- [x] Secure storage round-trip (`flutter_secure_storage` → Android Keystore) - implicitly
+      confirmed by the Secure Mode testing above: `key_manager.dart` writes/reads the ECDSA
+      private key via `FlutterSecureStorage` for every signing operation, so issue/stamp/redeem
+      all working in Secure Mode already proves the round-trip works. Not a separate untested
+      item.
+- [x] QR camera scan via the emulator's own camera (webcam passthrough) - 2026-08-30, confirmed:
+      the Secure Mode issue/stamp/redemption testing required the supplier app to actually scan
+      codes on the emulator (not just generate them), using the Mac's built-in camera passthrough
+      configured earlier.
 - [x] Full automated suite still green in this context (`shared` 216, `customer_app` 186,
       `supplier_app` 141) - reconfirmed repeatedly today, including after the toolchain rebuild
       and after both biometric-auth fixes - 2026-08-30
 
 ### Phase 4: Platform Polish
-- [ ] "Tell a Friend"/"Tell a Business" screen headline color differs from other screens on
-      Android (not an issue on iOS) - found 2026-08-30. Root cause candidate:
-      `source/shared/lib/widgets/app_referral_screen.dart:93`, the headline `Text`'s `TextStyle`
-      has no explicit `color`, so it inherits the ambient theme's default text color - plausibly
-      a light/dark mode difference between the Android emulator's and the test iPhone's system
-      theme setting, not yet confirmed. Needs a proper look, not guessed at further here.
-- [ ] Adaptive app icon for both apps (Play Store requirement - the iOS icon asset doesn't carry
-      over as-is)
-- [ ] `AndroidManifest.xml` permissions review (camera, biometric, storage) for both apps
-- [ ] Material Design pass - confirm the existing UI doesn't read as obviously iOS-styled (REQ-003's
-      acceptance criterion); likely low-effort since Flutter's Material widgets are already the
-      default look on Android
-- [ ] Decide and set minimum supported Android OS version (`minSdk`)
+- [x] "Tell a Friend"/"Tell a Business" screen headline color - fixed 2026-08-30
+      (`app_referral_screen.dart:93`). Ruled out the dark/light-mode theory first: checked the
+      emulator's actual system setting (`adb shell cmd uimode night` → "no", i.e. light mode,
+      same as the test iPhone), so it wasn't a theme mismatch. Root cause not fully pinned down,
+      but the code smell was real regardless - every other `Text` in this file sets an explicit
+      color, this headline was the one outlier left to inherit an ambient default. Gave it an
+      explicit `Colors.black87` to match its siblings, removing the platform-dependent ambiguity
+      either way.
+- [x] Adaptive app icon for both apps - fixed 2026-08-30. Both apps' Android `mipmap-*/ic_launcher.png`
+      were still Flutter's literal default placeholder logo (never generated for Android at all,
+      not just missing the adaptive variant - confirmed by viewing the actual PNG). Added
+      `flutter_launcher_icons` (dev dependency + config in each `pubspec.yaml`), generating both
+      the legacy icon set and a proper Android 8+ adaptive icon (`mipmap-anydpi-v26`, 16% inset
+      auto-applied for the safe zone) from the same branded 1024px source already used for
+      iOS/macOS. Rebuilt both APKs and confirmed visually in the emulator's actual app drawer -
+      both icons render correctly, cleanly circle-masked, no clipping.
+- [x] `AndroidManifest.xml` permissions review (camera, biometric, storage) for both apps -
+      2026-08-30, confirmed correct with no changes needed: checked the actual final *merged*
+      manifest from a release build output (not just the source manifest, since Flutter plugins
+      inject their own permissions via manifest merging) - `local_auth` and `mobile_scanner`
+      already correctly contribute `USE_BIOMETRIC`/`USE_FINGERPRINT`/`CAMERA` automatically. No
+      storage permission present or needed (scoped, app-private storage only). Found and fixed a
+      related real gap along the way: both apps' `android:label` were still the raw `flutter
+      create` defaults (`supplier_app`/`customer_app`) instead of proper display names - now
+      `LoyaltyCards Business`/`LoyaltyCards`, matching each app's iOS `CFBundleDisplayName`
+      exactly. Confirmed via the emulator's app drawer that these were showing as truncated raw
+      package names before the fix.
+- [x] Material Design pass - confirmed 2026-08-30: zero Cupertino widget usage anywhere in
+      `lib/` across all three packages (grepped for it), and both apps' theming is pure Material
+      3 (`ColorScheme.fromSeed`, light + dark). Matches everything observed live on the emulator
+      throughout today's testing - nothing read as iOS-styled.
+- [x] Decide and set minimum supported Android OS version (`minSdk`) - 2026-08-30, confirmed
+      already correct with no change needed: both apps use Flutter's own default
+      (`flutter.minSdkVersion`, not a custom override), which resolves to API 24 (Android 7.0,
+      released 2016 - confirmed via `aapt2 dump badging` on the actual built APK). Appropriately
+      conservative for 2026; raising it would only exclude users for no benefit, and lowering it
+      isn't possible below Flutter's own engine floor.
 
 ### Phase 5: Release Build
 - [ ] Generate an Android signing keystore (the Play Store equivalent of the Apple Distribution
@@ -122,11 +155,12 @@ Decisions / Risks" below for how that's handled.
 
 ## Open Decisions / Risks
 
-- **No Android hardware owned.** The QR camera-scan flow needs a real camera, which the emulator
-  doesn't have by default. Two options, neither started: (a) emulator webcam passthrough - point
-  the Mac's camera at a physical iPhone showing the QR code to scan it into the emulator, or (b)
-  rent a real device for an hour via Firebase Test Lab / BrowserStack for a final pre-Play-Store
-  check rather than buying hardware. Decide when Phase 3 gets there.
+- **No Android hardware owned.** Resolved for functional testing purposes: emulator webcam
+  passthrough (Mac's built-in camera, configured 2026-08-30) let the emulator genuinely scan real
+  codes, confirmed via full Secure Mode issue/stamp/redeem testing. Still worth a final real-device
+  pass (rented via Firebase Test Lab / BrowserStack) before Play Store submission, since an
+  emulator - even with a working camera - isn't a full substitute for real hardware/OEM variance,
+  but this is no longer a functional blocker for continued development.
 - **Keystore backup.** Once generated (Phase 5), the Android signing keystore is as sensitive and
   as easy to lose as the iOS Distribution certificate - worth a deliberate decision on where it's
   backed up before it's needed for a real release, not after.

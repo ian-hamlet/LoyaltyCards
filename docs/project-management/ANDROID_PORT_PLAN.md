@@ -1,11 +1,15 @@
 # Android Port Plan
 
-**Status:** Track 1 (technical setup) underway - toolchain installed and confirmed working on this
-Mac, one successful `flutter run` on an emulator already done (2026-08-27, pre-Apple-Silicon-fix).
-Functional verification, platform polish, and release-build steps below are not yet started.
-Track 2 (Play Console) not started at all.
+**Status:** Track 1 Phases 1-3 (toolchain, build config, functional verification) essentially
+complete as of 2026-08-30 - both apps build/run/test cleanly on a native arm64 emulator, and the
+core loyalty-card flows (issue/stamp/redeem, both Express and Secure Mode, biometric-gated backup/
+clone) are confirmed working, including two real bugs found and fixed along the way (one of which
+also affects the currently-live iOS app - see Phase 3 below and `2.2.2+37`'s changelog entry).
+Remaining Phase 3 items are secure-storage round-trip and the emulator's own camera (QR scanning
+into the app, not just out of it). Phase 4 (platform polish) and Phase 5 (release build) not
+started. Track 2 (Play Console) not started at all.
 **Branch:** `feature/android-port`
-**Date:** 2026-08-29
+**Date:** 2026-08-29 (created); last updated 2026-08-30
 **Context:** Porting to Android is low-risk, mostly testing and store-listing work rather than a
 rewrite - both apps already ship `android/` scaffolding, `Platform.isAndroid` branches already
 exist in `device_service.dart`/`backup_storage_service.dart`, and the ECDSA P-256/SHA-256 signing
@@ -68,10 +72,13 @@ Decisions / Risks" below for how that's handled.
       on. Full save-to-file/actual-print-output round trip still untested, but not considered a
       priority follow-up given this.
 - [ ] Secure storage round-trip (`flutter_secure_storage` → Android Keystore, vs. iOS Keychain)
-- [ ] QR camera scan - emulators have no real camera by default, see "Open Decisions" below
-- [ ] Full automated suite still green in this context (`shared` 216, `customer_app` 186,
-      `supplier_app` 141) - these are Dart-only and arch-independent, but worth reconfirming after
-      the toolchain rebuild
+- [ ] QR camera scan - the emulator's own camera (webcam passthrough, configured 2026-08-30)
+      hasn't actually been exercised yet; the Express Mode test above only used the physical
+      iPhone's camera to scan the Android screen, not the reverse. Still open, see "Open
+      Decisions" below.
+- [x] Full automated suite still green in this context (`shared` 216, `customer_app` 186,
+      `supplier_app` 141) - reconfirmed repeatedly today, including after the toolchain rebuild
+      and after both biometric-auth fixes - 2026-08-30
 
 ### Phase 4: Platform Polish
 - [ ] "Tell a Friend"/"Tell a Business" screen headline color differs from other screens on

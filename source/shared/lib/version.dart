@@ -793,5 +793,43 @@
 ///   (the original reason for this bump) - superseded in importance by the
 ///   sharePdf fix above once that was ready.
 
+/// Build 37 Changes:
+/// - **Patch version bump** (2.2.1 -> 2.2.2), not build-only - two real
+///   biometric-auth bugs fixed on top of the already-live v2.2.1+36, found
+///   while testing the Android port (see
+///   `docs/project-management/ANDROID_PORT_PLAN.md`):
+/// - Both apps: `MainActivity` extended plain `FlutterActivity`, but
+///   `local_auth`'s `BiometricPrompt` requires a `FragmentActivity` host -
+///   threw "The current activity must be a FragmentActivity" on every
+///   `authenticate()` call. This was the actual root blocker behind every
+///   biometric-gated flow failing on Android (Create Recovery Backup, Clone
+///   to Another Device, and `customer_app`'s app-lock-on-launch). Fixed in
+///   both apps' `MainActivity.kt` (→ `FlutterFragmentActivity`).
+/// - Supplier app: fixed `BiometricAuthService.authenticate()` catching the
+///   wrong exception type. The pinned `local_auth ^3.0.1`
+///   (`local_auth_android` 2.0.9) throws `LocalAuthException` for
+///   structured auth failures, not `PlatformException` - so the specific
+///   error-code handling (NotEnrolled, PermanentlyLockedOut, LockedOut,
+///   etc.) was dead code, and every real authentication failure fell
+///   through to the generic "Unexpected error during authentication"
+///   message instead. Found while testing the Android port: a fresh
+///   emulator AVD with no device credential enrolled reproduced this
+///   reliably ("Unexpected error" instead of a helpful "set up a
+///   passcode" message), and reading the actual installed package source
+///   confirmed the exception-type mismatch is real and platform-
+///   independent - not an emulator artifact. Added an `on LocalAuthException`
+///   handler mapping `LocalAuthExceptionCode` to the existing
+///   `BiometricAuthResult` constructors; the old `PlatformException`
+///   handler is kept as a defensive fallback. `customer_app`'s simpler
+///   biometric service (plain bool, no structured error codes) doesn't have
+///   this specific dead-code bug, but was still blocked by the
+///   `FragmentActivity` issue above until that fix.
+/// - With both fixed and confirmed on the Android emulator: no-credential-
+///   enrolled state shows the correct friendly message, and with a device
+///   PIN set, Create Recovery Backup and Clone to Another Device both work
+///   end-to-end. All three Dart test suites re-verified after the fix
+///   (shared 216, customer_app 186, supplier_app 141) - no new tests, since
+///   both fixes are Android-native/exception-type-only, not app logic.
+
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.1+36';
+const String appVersion = '2.2.2+37';

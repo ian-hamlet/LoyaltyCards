@@ -127,6 +127,13 @@ flutter doctor -v   # Android toolchain section should show green
 
 ## Known issues hit during this setup (for reference, not action items)
 
+- **Can't type into a text field on the emulator, even though mouse-driven controls (buttons,
+  color pickers, sliders) work fine.** The emulator's host-keyboard forwarding registers itself to
+  the guest as a "hardware keyboard," which makes Android suppress its own on-screen keyboard - so
+  neither the on-screen keyboard nor reliable host-key passthrough is available. Fix:
+  `adb shell settings put secure show_ime_with_hard_keyboard 1` forces the on-screen keyboard to
+  show regardless; from there either tap it with the mouse or type on the host keyboard once the
+  emulator window has focus. Needed again on a fresh AVD - not a one-time fix.
 - **`temurin` cask needs sudo** - use the `openjdk@17` formula instead (see above).
 - **Parallel `brew install` commands can collide** - Homebrew's own internal Ruby vendor install
   takes a lock; running two `brew install`/`brew install --cask` commands at the same time can

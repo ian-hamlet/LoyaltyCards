@@ -1,13 +1,13 @@
 # Android Port Plan
 
-**Status:** Track 1 Phases 1-4 (toolchain, build config, functional verification, platform
-polish) complete as of 2026-08-30 - both apps build/run/test cleanly on a native arm64 emulator,
-the core loyalty-card flows (issue/stamp/redeem, both Express and Secure Mode, biometric-gated
-backup/clone) are confirmed working, real app icons and display names now ship on Android
-(previously the literal Flutter placeholder and raw package names), and two real bugs were found
-and fixed along the way (one of which also affects the currently-live iOS app - see Phase 3 below
-and `2.2.2+37`'s changelog entry). Phase 5 (release build) is next. Track 2 (Play Console) not
-started at all.
+**Status:** Track 1 Phases 1-5 complete as of 2026-08-31 - both apps build/run/test cleanly on a
+native arm64 emulator, the core loyalty-card flows (issue/stamp/redeem, both Express and Secure
+Mode, biometric-gated backup/clone) are confirmed working, real app icons and display names now
+ship on Android (previously the literal Flutter placeholder and raw package names), and two real
+bugs were found and fixed along the way (one of which also affects the currently-live iOS app -
+see Phase 3 below and `2.2.2+37`'s changelog entry). Phase 5 (release build) is now done too: a
+real signing keystore exists, both apps' Gradle configs use it, and a verified-signed release AAB
+has been built for each. Track 2 (Play Console) is next and hasn't been started at all.
 **Branch:** `feature/android-port`
 **Date:** 2026-08-29 (created); last updated 2026-08-31
 **Context:** Porting to Android is low-risk, mostly testing and store-listing work rather than a
@@ -135,10 +135,27 @@ Decisions / Risks" below for how that's handled.
       exception. Fixed in `source/shared/lib/widgets/app_referral_screen.dart`.
 
 ### Phase 5: Release Build
-- [ ] Generate an Android signing keystore (the Play Store equivalent of the Apple Distribution
-      certificate step just done for iOS)
-- [ ] Configure Gradle signing config for both apps; keep the keystore itself out of git
-- [ ] Build a release AAB (`flutter build appbundle`) for both apps and verify it
+- [x] Generate an Android signing keystore - 2026-08-31. One shared keystore
+      (`~/.android-signing/loyaltycards-release.jks`, outside the repo, `chmod 600`) with two
+      RSA 2048 key aliases, `loyaltycards-supplier`/`loyaltycards-customer`, 10,000-day validity
+      (until 2054-01-16) - mirrors the iOS side, where one Apple Distribution certificate covers
+      both apps. Uses PKCS12 (`keytool`'s modern default), which requires the store password and
+      every key's password to match - both aliases share one password rather than having distinct
+      per-alias passwords, which isn't a PKCS12 option. Password shared with the developer to store
+      in his own secure vault; not retained in this repo or session.
+- [x] Configure Gradle signing config for both apps; keep the keystore itself out of git -
+      2026-08-31. Each app's `android/key.properties` (already gitignored by the Flutter-generated
+      `.gitignore`, confirmed via `git check-ignore`) points at the shared keystore file and its
+      app-specific alias. `android/app/build.gradle.kts` in both apps now loads `key.properties` at
+      config time and defines a real `release` `signingConfig`, falling back to debug signing only
+      when `key.properties` is absent (e.g. a fresh checkout without the keystore) so `flutter run`
+      and CI keep working without it.
+- [x] Build a release AAB (`flutter build appbundle`) for both apps and verify it - 2026-08-31.
+      `supplier_app` 71.1MB, `customer_app` 63.1MB. Verified both are actually signed with the new
+      keystore (not the debug fallback) via `jarsigner -verify -verbose -certs`: both report "jar
+      verified" (exit 0) and show the expected certificate
+      (`CN=Ian Hamlet, OU=LoyaltyCards, O=dotConnected`, correct per-app alias, expiring
+      2054-01-16).
 
 ---
 
@@ -167,9 +184,14 @@ Decisions / Risks" below for how that's handled.
   pass (rented via Firebase Test Lab / BrowserStack) before Play Store submission, since an
   emulator - even with a working camera - isn't a full substitute for real hardware/OEM variance,
   but this is no longer a functional blocker for continued development.
-- **Keystore backup.** Once generated (Phase 5), the Android signing keystore is as sensitive and
-  as easy to lose as the iOS Distribution certificate - worth a deliberate decision on where it's
-  backed up before it's needed for a real release, not after.
+- **Keystore backup.** Generated 2026-08-31 (Phase 5) at `~/.android-signing/loyaltycards-release.jks`,
+  machine-local only. As sensitive and as easy to lose as the iOS Distribution certificate - the
+  keystore file itself still needs a real backup (Time Machine/iCloud Drive/etc. - not yet
+  confirmed done), and the password was handed to the developer to store in his own secure vault
+  rather than kept in this repo or session. Play App Signing (the modern default for new apps)
+  softens the worst case - this local key becomes an "upload key," and Google can help recover a
+  lost one with proof of ownership - but that's still a real hassle, not instant, so losing it
+  isn't a non-event.
 
 ---
 

@@ -161,16 +161,25 @@ Decisions / Risks" below for how that's handled.
 
 ## Track 2: Google Play Developer Account & Store Listing
 
-- [ ] Register a Google Play Developer account ($25 one-time fee)
+- [ ] Register a Google Play Developer account ($25 one-time fee) - **requires the developer's own
+      action** (Google login + payment); nothing to do here until this exists
 - [ ] Create Play Console listings for both apps (one developer account, two listings - same
       pattern as the two App Store Connect listings under one Apple Developer account)
-- [ ] Store listing content - can start from the existing App Store metadata packets
-      (`docs/deployment/APP_STORE_METADATA_PACKET_v2_2_1_36.md`) as a draft, adapted to Play's
-      field set and character limits rather than written from scratch
-- [ ] Content rating questionnaire
-- [ ] Data safety form (Play's equivalent of the App Store's privacy nutrition label)
-- [ ] Privacy Policy / Support / Terms URLs - already hosted on Cloudflare Pages from the iOS
-      work, should be directly reusable
+- [x] Store listing content (text) drafted - 2026-08-31, see
+      `docs/deployment/PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`: app names, short/full
+      descriptions, category, and app-access/review notes for both apps, adapted from
+      `APP_STORE_METADATA_PACKET_v2_2_1_36.md` to Play's field set and refreshed to the current
+      build (2.2.2+37). Screenshots and the feature graphic still needed - see that packet's
+      "Graphic Assets" section.
+- [ ] Content rating questionnaire - expected answers drafted in the packet above (all "None" /
+      Everyone-3+, mirroring the App Store's Age Rating), but it's a self-service in-console
+      questionnaire, not something submittable in advance
+- [ ] Data safety form (Play's equivalent of the App Store's privacy nutrition label) - drafted in
+      the packet above, but flagged with one open judgment call (whether/how to disclose the
+      Secure Mode anti-fraud device signal) that needs a deliberate decision before submitting,
+      not just carrying the Privacy Policy's existing framing forward automatically
+- [x] Privacy Policy / Support / Terms URLs - already hosted on Cloudflare Pages from the iOS
+      work, directly reusable (same URLs carried into the Play packet)
 - [ ] Configure an Internal testing track (Play's TestFlight equivalent)
 - [ ] Upload and confirm a first internal test build for both apps
 

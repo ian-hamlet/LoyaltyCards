@@ -24,7 +24,7 @@ class _CustomerHomeState extends State<CustomerHome> {
   bool _isLoading = true;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
-  
+
   // Filter preference
   bool _hideRedeemed = true; // Default: hide redeemed cards
   static const String _hideRedeemedKey = 'hide_redeemed_cards';
@@ -46,10 +46,12 @@ class _CustomerHomeState extends State<CustomerHome> {
     try {
       final prefs = await SharedPreferences.getInstance();
       setState(() {
-        _hideRedeemed = prefs.getBool(_hideRedeemedKey) ?? true; // Default: hide redeemed
+        _hideRedeemed =
+            prefs.getBool(_hideRedeemedKey) ?? true; // Default: hide redeemed
       });
     } catch (e) {
-      AppLogger.error('Failed to load hide-redeemed preference', error: e, tag: 'Preferences');
+      AppLogger.error('Failed to load hide-redeemed preference',
+          error: e, tag: 'Preferences');
       // Use default but inform user
       if (mounted) {
         setState(() {
@@ -69,7 +71,8 @@ class _CustomerHomeState extends State<CustomerHome> {
       });
       AppLogger.debug('Hide redeemed cards: $value', 'Filter');
     } catch (e) {
-      AppLogger.error('Failed to save hide-redeemed preference', error: e, tag: 'Preferences');
+      AppLogger.error('Failed to save hide-redeemed preference',
+          error: e, tag: 'Preferences');
       // Revert UI state since save failed
       setState(() {
         _hideRedeemed = !value; // Revert
@@ -97,26 +100,29 @@ class _CustomerHomeState extends State<CustomerHome> {
       AppLogger.error('Failed to load cards', error: e, tag: 'CustomerHome');
       setState(() => _isLoading = false);
       if (mounted) {
-        AppFeedback.error(context, ErrorMessageMapper.forOperation(e, 'load cards'));
+        AppFeedback.error(
+            context, ErrorMessageMapper.forOperation(e, 'load cards'));
       }
     }
   }
 
   void _filterCards() {
     var filtered = _cards;
-    
+
     // Apply redeemed filter first
     if (_hideRedeemed) {
       filtered = filtered.where((card) => !card.isRedeemed).toList();
     }
-    
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((card) {
-        return card.businessName.toLowerCase().contains(_searchQuery.toLowerCase());
+        return card.businessName
+            .toLowerCase()
+            .contains(_searchQuery.toLowerCase());
       }).toList();
     }
-    
+
     _filteredCards = filtered;
   }
 
@@ -193,6 +199,7 @@ class _CustomerHomeState extends State<CustomerHome> {
           ),
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
             onPressed: () {
               Haptics.light();
               Navigator.push(
@@ -220,6 +227,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear),
+                          tooltip: 'Clear search',
                           onPressed: () {
                             Haptics.light();
                             _searchController.clear();
@@ -231,7 +239,8 @@ class _CustomerHomeState extends State<CustomerHome> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  fillColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm,
@@ -240,7 +249,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                 onChanged: _onSearchChanged,
               ),
             ),
-          
+
           // Filter chips
           if (_cards.isNotEmpty)
             Padding(
@@ -270,7 +279,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                 ],
               ),
             ),
-          
+
           // Content
           Expanded(
             child: _isLoading
@@ -296,11 +305,11 @@ class _CustomerHomeState extends State<CustomerHome> {
               ),
             ),
           );
-          
+
           if (result != null && mounted && context.mounted) {
             AppFeedback.success(context, result);
           }
-          
+
           _loadCards(); // Reload after returning
         },
         icon: const Icon(Icons.qr_code_scanner),
@@ -311,13 +320,11 @@ class _CustomerHomeState extends State<CustomerHome> {
 
   Widget _buildEmptyState(BuildContext context) {
     final isEmpty = _cards.isEmpty;
-    final message = isEmpty 
-        ? AppStrings.customerNoCards 
-        : 'No matching cards';
+    final message = isEmpty ? AppStrings.customerNoCards : 'No matching cards';
     final hint = isEmpty
         ? AppStrings.customerNoCardsHint
         : 'Try a different search term';
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -327,15 +334,18 @@ class _CustomerHomeState extends State<CustomerHome> {
             Icon(
               isEmpty ? Icons.card_membership_outlined : Icons.search_off,
               size: 100,
-              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondary
+                  .withValues(alpha: 0.3),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               message,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.grey[600],
-                fontSize: AppTypography.displaySmall,
-              ),
+                    color: Colors.grey[600],
+                    fontSize: AppTypography.displaySmall,
+                  ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
@@ -411,189 +421,221 @@ class _LoyaltyCardWidget extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Single combined description read by VoiceOver/TalkBack in one swipe,
+  /// instead of the visual tree's real structure - business name, mode icon,
+  /// status text, badge, and one _StampCircle per stamp (up to
+  /// stampsRequired, unlabeled) as separate stops. The stamp circles convey
+  /// nothing on their own that this text doesn't already say, so the whole
+  /// visual body is excluded from semantics below and replaced with this.
+  String get _semanticLabel {
+    final mode =
+        card.mode == OperationMode.simple ? 'Express Mode' : 'Secure Mode';
+    final status = card.isRedeemed
+        ? 'Reward claimed, you can delete this card'
+        : card.isComplete
+            ? AppStrings.stampReadyToRedeem
+            : '${card.stampsRequired - card.stampsCollected} more to go';
+    return '${card.businessName}, $mode, $status, '
+        '${card.stampsCollected} of ${card.stampsRequired} ${AppStrings.stampsCollected}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final brandColor = BrandColors.fromHex(card.brandColor);
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                brandColor.withValues(alpha: 0.1),
-                brandColor.withValues(alpha: 0.05),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
+
+    return Semantics(
+      label: _semanticLabel,
+      button: true,
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: ExcludeSemantics(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    brandColor.withValues(alpha: 0.1),
+                    brandColor.withValues(alpha: 0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundColor: brandColor,
-                    child: Icon(BusinessIcons.getIcon(card.logoIndex), color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  // Header
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: brandColor,
+                        child: Icon(BusinessIcons.getIcon(card.logoIndex),
+                            color: Colors.white),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Flexible(
-                              child: Text(
-                                card.businessName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                softWrap: false,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    card.businessName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 6),
+                                // Mode indicator icon
+                                Icon(
+                                  card.mode == OperationMode.simple
+                                      ? Icons.bolt
+                                      : Icons.enhanced_encryption,
+                                  size: 14,
+                                  color: card.mode == OperationMode.simple
+                                      ? Colors.blue[600]
+                                      : Colors.orange[700],
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 6),
-                            // Mode indicator icon
-                            Icon(
-                              card.mode == OperationMode.simple 
-                                ? Icons.bolt 
-                                : Icons.enhanced_encryption,
-                              size: 14,
-                              color: card.mode == OperationMode.simple 
-                                  ? Colors.blue[600] 
-                                  : Colors.orange[700],
+                            Text(
+                              card.isRedeemed
+                                  ? 'Reward claimed - you can delete this card'
+                                  : card.isComplete
+                                      ? AppStrings.stampReadyToRedeem
+                                      : '${card.stampsRequired - card.stampsCollected} more to go',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: false,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: card.isRedeemed
+                                    ? Colors.grey[600]
+                                    : card.isComplete
+                                        ? Colors.green
+                                        : Colors.grey[600],
+                                fontWeight: card.isComplete && !card.isRedeemed
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
                             ),
                           ],
                         ),
-                        Text(
-                          card.isRedeemed
-                              ? 'Reward claimed - you can delete this card'
-                              : card.isComplete
-                                  ? AppStrings.stampReadyToRedeem
-                                  : '${card.stampsRequired - card.stampsCollected} more to go',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: card.isRedeemed
-                                ? Colors.grey[600]
-                                : card.isComplete
-                                    ? Colors.green
-                                    : Colors.grey[600],
-                            fontWeight: card.isComplete && !card.isRedeemed ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                      if (card.isRedeemed)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          // Scale-capped: this badge previously grew
+                          // unboundedly with text scale and, since Row lays out
+                          // fixed-size children before handing the rest to the
+                          // Expanded name/status column, an oversized badge
+                          // left almost no width for that column - forcing
+                          // even short words to wrap letter-by-letter. The
+                          // status text next to it already says "REDEEMED",
+                          // so this badge is supplementary, not the only
+                          // source of that information.
+                          child: const ScaleCapped(
+                            child: Text(
+                              'REDEEMED',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (card.isComplete)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: BrandColors.success,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          // Scale-capped for the same reason as REDEEMED above.
+                          child: const ScaleCapped(
+                            child: Text(
+                              'COMPLETE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Progress (responsive: fit at least 8 stamps per row when possible)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      const baseStampSize = 28.0;
+                      const minStampSize = 20.0;
+                      const stampSpacing = 8.0;
+                      const targetMinStampsPerRow = 8;
+
+                      final targetPerRow =
+                          card.stampsRequired < targetMinStampsPerRow
+                              ? card.stampsRequired
+                              : targetMinStampsPerRow;
+
+                      final sizeToFitTarget = targetPerRow > 0
+                          ? (constraints.maxWidth -
+                                  ((targetPerRow - 1) * stampSpacing)) /
+                              targetPerRow
+                          : baseStampSize;
+
+                      final stampSize =
+                          sizeToFitTarget.clamp(minStampSize, baseStampSize);
+
+                      return Wrap(
+                        alignment: WrapAlignment.center,
+                        runAlignment: WrapAlignment.center,
+                        spacing: stampSpacing,
+                        runSpacing: stampSpacing,
+                        children: List.generate(card.stampsRequired, (index) {
+                          final isCollected = index < card.stampsCollected;
+                          return _StampCircle(
+                            isCollected: isCollected,
+                            color: brandColor,
+                            size: stampSize,
+                          );
+                        }),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Count
+                  Center(
+                    child: Text(
+                      '${card.stampsCollected} / ${card.stampsRequired} ${AppStrings.stampsCollected}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                  if (card.isRedeemed)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[700],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      // Scale-capped: this badge previously grew
-                      // unboundedly with text scale and, since Row lays out
-                      // fixed-size children before handing the rest to the
-                      // Expanded name/status column, an oversized badge
-                      // left almost no width for that column - forcing
-                      // even short words to wrap letter-by-letter. The
-                      // status text next to it already says "REDEEMED",
-                      // so this badge is supplementary, not the only
-                      // source of that information.
-                      child: const ScaleCapped(
-                        child: Text(
-                          'REDEEMED',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    )
-                  else if (card.isComplete)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: BrandColors.success,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      // Scale-capped for the same reason as REDEEMED above.
-                      child: const ScaleCapped(
-                        child: Text(
-                          'COMPLETE',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
-              const SizedBox(height: 20),
-              
-              // Progress (responsive: fit at least 8 stamps per row when possible)
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  const baseStampSize = 28.0;
-                  const minStampSize = 20.0;
-                  const stampSpacing = 8.0;
-                  const targetMinStampsPerRow = 8;
-
-                  final targetPerRow = card.stampsRequired < targetMinStampsPerRow
-                      ? card.stampsRequired
-                      : targetMinStampsPerRow;
-
-                  final sizeToFitTarget = targetPerRow > 0
-                      ? (constraints.maxWidth - ((targetPerRow - 1) * stampSpacing)) /
-                          targetPerRow
-                      : baseStampSize;
-
-                  final stampSize = sizeToFitTarget.clamp(minStampSize, baseStampSize);
-
-                  return Wrap(
-                    alignment: WrapAlignment.center,
-                    runAlignment: WrapAlignment.center,
-                    spacing: stampSpacing,
-                    runSpacing: stampSpacing,
-                    children: List.generate(card.stampsRequired, (index) {
-                      final isCollected = index < card.stampsCollected;
-                      return _StampCircle(
-                        isCollected: isCollected,
-                        color: brandColor,
-                        size: stampSize,
-                      );
-                    }),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              
-              // Count
-              Center(
-                child: Text(
-                  '${card.stampsCollected} / ${card.stampsRequired} ${AppStrings.stampsCollected}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

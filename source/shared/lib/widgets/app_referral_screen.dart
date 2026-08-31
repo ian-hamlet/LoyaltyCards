@@ -79,6 +79,7 @@ class _AppReferralScreenState extends State<AppReferralScreen> {
       appBar: AppBar(
         title: Text(widget.appBarTitle),
         backgroundColor: widget.appBarColor,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),

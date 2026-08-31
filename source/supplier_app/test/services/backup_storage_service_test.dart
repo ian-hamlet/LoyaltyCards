@@ -176,47 +176,51 @@ void main() {
   group('TEST-001: Backup Storage Methods (Documentation)', () {
     // These tests document expected behavior but require mocking to fully test
     
-    test('documentation: saveToPhotos should handle all failure scenarios', () {
-      // EXPECTED BEHAVIOR DOCUMENTED:
-      // 1. Success: Returns BackupResult.success()
-      // 2. Permission denied: Returns BackupResult.failure(permissionDenied, ...)
-      // 3. Disk full: Returns BackupResult.failure(diskFull, ...)
-      // 4. Timeout (>10s): Returns BackupResult.failure(timeout, ...)
-      // 5. Invalid result format: Returns BackupResult.failure(unknown, ...)
-      
-      // TODO: Implement with ImageGallerySaver mock
-      expect(true, true); // Placeholder
-    });
+    test(
+      'documentation: saveToPhotos should handle all failure scenarios',
+      () {
+        // EXPECTED BEHAVIOR DOCUMENTED:
+        // 1. Success: Returns BackupResult.success()
+        // 2. Permission denied: Returns BackupResult.failure(permissionDenied, ...)
+        // 3. Disk full: Returns BackupResult.failure(diskFull, ...)
+        // 4. Timeout (>10s): Returns BackupResult.failure(timeout, ...)
+        // 5. Invalid result format: Returns BackupResult.failure(unknown, ...)
+      },
+      skip: 'Needs an ImageGallerySaver mock',
+    );
 
-    test('documentation: printBackup should handle user cancellation', () {
-      // EXPECTED BEHAVIOR DOCUMENTED:
-      // 1. Success: Returns BackupResult.success()
-      // 2. User cancels: Returns BackupResult.failure(userCancelled, ...)
-      // 3. Printer error: Returns BackupResult.failure(unknown, ...)
-      
-      // TODO: Implement with Printing mock
-      expect(true, true); // Placeholder
-    });
+    test(
+      'documentation: printBackup should handle user cancellation',
+      () {
+        // EXPECTED BEHAVIOR DOCUMENTED:
+        // 1. Success: Returns BackupResult.success()
+        // 2. User cancels: Returns BackupResult.failure(userCancelled, ...)
+        // 3. Printer error: Returns BackupResult.failure(unknown, ...)
+      },
+      skip: 'Needs a Printing mock',
+    );
 
-    test('documentation: shareViaEmail should handle temp file errors', () {
-      // EXPECTED BEHAVIOR DOCUMENTED:
-      // 1. Success: Returns BackupResult.success()
-      // 2. Temp file creation fails: Returns BackupResult.failure(...)
-      // 3. Disk full: Returns BackupResult.failure(diskFull, ...)
-      
-      // TODO: Implement with Share mock
-      expect(true, true); // Placeholder
-    });
+    test(
+      'documentation: shareViaEmail should handle temp file errors',
+      () {
+        // EXPECTED BEHAVIOR DOCUMENTED:
+        // 1. Success: Returns BackupResult.success()
+        // 2. Temp file creation fails: Returns BackupResult.failure(...)
+        // 3. Disk full: Returns BackupResult.failure(diskFull, ...)
+      },
+      skip: 'Needs a Share mock',
+    );
 
-    test('documentation: saveToFiles should handle platform differences', () {
-      // EXPECTED BEHAVIOR DOCUMENTED:
-      // iOS: Saves to app documents, then shares
-      // Android: Saves to Downloads, fallback to external storage
-      // Unsupported platform: Returns BackupResult.failure(platformNotSupported, ...)
-
-      // TODO: Implement with Platform mock
-      expect(true, true); // Placeholder
-    });
+    test(
+      'documentation: saveToFiles should handle platform differences',
+      () {
+        // EXPECTED BEHAVIOR DOCUMENTED:
+        // iOS: Saves to app documents, then shares
+        // Android: Saves to Downloads, fallback to external storage
+        // Unsupported platform: Returns BackupResult.failure(platformNotSupported, ...)
+      },
+      skip: 'Needs a Platform mock',
+    );
   });
 
   group('CRASH-001 follow-up: isValidPdfBytesForTesting', () {

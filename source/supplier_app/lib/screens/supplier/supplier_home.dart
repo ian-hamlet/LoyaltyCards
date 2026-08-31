@@ -123,6 +123,7 @@ class _SupplierHomeState extends State<SupplierHome> {
           ),
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
             onPressed: () {
               Haptics.light();
               Navigator.push(

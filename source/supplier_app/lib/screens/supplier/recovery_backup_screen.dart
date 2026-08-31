@@ -390,6 +390,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
+                tooltip: 'Back',
               ),
       ),
       body: _isGenerating

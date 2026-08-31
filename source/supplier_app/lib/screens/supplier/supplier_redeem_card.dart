@@ -371,6 +371,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             child: IconButton(
               icon: const Icon(Icons.flash_on, color: Colors.white, size: 32),
               onPressed: () => cameraController.toggleTorch(),
+              tooltip: 'Toggle flashlight',
             ),
           ),
         ],

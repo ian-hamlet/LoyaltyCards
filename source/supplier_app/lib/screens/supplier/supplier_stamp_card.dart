@@ -489,6 +489,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                       }
                                     : null,
                                 icon: const Icon(Icons.remove_circle),
+                                tooltip: 'Decrease stamp count',
                               ),
                               Expanded(
                                 child: Text(
@@ -512,6 +513,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                       }
                                     : null,
                                 icon: const Icon(Icons.add_circle),
+                                tooltip: 'Increase stamp count',
                               ),
                             ],
                           ),
@@ -804,17 +806,20 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.red.shade200),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline, color: Colors.red.shade700),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade900, fontSize: 14),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red.shade700),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(color: Colors.red.shade900, fontSize: 14),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1018,23 +1023,26 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                   color: Colors.red.shade900.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                child: Semantics(
+                  liveRegion: true,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1046,6 +1054,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
             child: IconButton(
               icon: const Icon(Icons.flash_on, color: Colors.white, size: 32),
               onPressed: () => _cameraController.toggleTorch(),
+              tooltip: 'Toggle flashlight',
             ),
           ),
         ],
@@ -1130,6 +1139,7 @@ class _StampTokenScreenState extends State<_StampTokenScreen> {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back',
           onPressed: () {
             // Pop twice: close QR screen and camera scanner to return to home
             Navigator.pop(context);

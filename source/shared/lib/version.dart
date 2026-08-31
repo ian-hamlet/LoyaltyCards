@@ -52,8 +52,8 @@
 /// - Standardize error handling patterns across codebase (CR-014)
 /// - Added error_handling.dart utility with safeExecute helpers
 /// - Documented error handling conventions for each pattern:
-///   * Future<bool> for optional/graceful operations (backup, etc)
-///   * Future<void> + exceptions for critical operations (database)
+///   * `Future<bool>` for optional/graceful operations (backup, etc)
+///   * `Future<void>` + exceptions for critical operations (database)
 ///   * bool for synchronous validation (QR parsing, signatures)
 /// - Added comprehensive documentation to key service files
 /// - No breaking changes - documentation and utilities only
@@ -230,6 +230,7 @@
 /// - Files Modified: 12 files across shared/supplier/customer packages
 /// - Documentation: REQ-022_IMPLEMENTATION_SUMMARY.md created
 /// - Status: Code complete, ready for device testing
+library;
 
 /// IMPORTANT: Version Number Management
 /// =====================================

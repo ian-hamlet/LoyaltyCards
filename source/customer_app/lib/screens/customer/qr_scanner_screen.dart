@@ -228,7 +228,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 FloatingActionButton(
                   heroTag: 'flip_camera',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     _controller.switchCamera();
                   },
@@ -245,7 +245,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 FloatingActionButton(
                   heroTag: 'rotate90',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
@@ -266,7 +266,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 FloatingActionButton(
                   heroTag: 'rotate180',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
@@ -331,7 +331,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade900.withOpacity(0.9),
+                        color: Colors.red.shade900.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(

@@ -1,4 +1,5 @@
 /// Tests for Card model
+library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/shared.dart';
 import '../fixtures/test_fixtures.dart';
@@ -339,8 +340,8 @@ void main() {
           updatedAt: now,
         );
 
-        expect(card.createdAt.isBefore(DateTime.now().add(Duration(seconds: 1))), true);
-        expect(card.updatedAt.isAfter(card.createdAt.subtract(Duration(seconds: 1))), true);
+        expect(card.createdAt.isBefore(DateTime.now().add(const Duration(seconds: 1))), true);
+        expect(card.updatedAt.isAfter(card.createdAt.subtract(const Duration(seconds: 1))), true);
       });
     });
 

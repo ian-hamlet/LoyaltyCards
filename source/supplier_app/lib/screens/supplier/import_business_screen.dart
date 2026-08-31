@@ -18,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// - Recovery backup (no expiry) - for disaster recovery
 /// - Clone QR (24h expiry) - for setting up additional devices
 class ImportBusinessScreen extends StatefulWidget {
-  const ImportBusinessScreen({Key? key}) : super(key: key);
+  const ImportBusinessScreen({super.key});
 
   @override
   State<ImportBusinessScreen> createState() => _ImportBusinessScreenState();
@@ -262,6 +262,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
         } catch (e) {
           AppLogger.warning('Error stopping camera: $e', 'Import');
         }
+        if (!mounted) return;
 
         Haptics.success();
         AppFeedback.success(context, 'Business restored: ${business.name}');
@@ -375,7 +376,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Import Business'),
+        title: const Text('Import Business'),
         backgroundColor: const Color(0xFF2C3E50),
         foregroundColor: Colors.white,
       ),
@@ -388,8 +389,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final isLandscape = constraints.maxWidth > constraints.maxHeight;
-                  final padding = MediaQuery.of(context).padding;
-                  
+
                   // Apply rotation: base + manual offset
                   final baseQuarterTurns = isLandscape ? 3 : 0;
                   final quarterTurns = (baseQuarterTurns + _manualRotationOffset) % 4;
@@ -426,7 +426,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                   FloatingActionButton(
                     heroTag: 'flip_camera_import',
                     mini: true,
-                    backgroundColor: Colors.white.withOpacity(0.9),
+                    backgroundColor: Colors.white.withValues(alpha: 0.9),
                     onPressed: () {
                       AppLogger.debug('🔵 Flip camera button tapped', 'Camera');
                       _scannerController.switchCamera();
@@ -444,7 +444,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                   FloatingActionButton(
                     heroTag: 'rotate90_import',
                     mini: true,
-                    backgroundColor: Colors.white.withOpacity(0.9),
+                    backgroundColor: Colors.white.withValues(alpha: 0.9),
                     onPressed: () {
                       AppLogger.debug('🔄 Rotate 90° button tapped - current offset: $_manualRotationOffset', 'Camera');
                       final newRotation = (_manualRotationOffset + 1) % 4;
@@ -467,7 +467,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                   FloatingActionButton(
                     heroTag: 'rotate180_import',
                     mini: true,
-                    backgroundColor: Colors.white.withOpacity(0.9),
+                    backgroundColor: Colors.white.withValues(alpha: 0.9),
                     onPressed: () {
                       AppLogger.debug('🔁 Rotate 180° button tapped - current offset: $_manualRotationOffset', 'Camera');
                       final newRotation = (_manualRotationOffset + 2) % 4;
@@ -509,7 +509,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
           if (_isProcessing)
             Container(
               color: Colors.black87,
-              child: Center(
+              child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -545,10 +545,10 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
               right: 0,
               child: IgnorePointer(
                 child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16),
-                  padding: EdgeInsets.all(16),
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade900.withOpacity(0.85),
+                    color: Colors.blue.shade900.withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.blue.shade700, width: 2),
                   ),
@@ -559,7 +559,7 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                   // cover the scan target square above it. Capping keeps it
                   // a predictable size regardless of system text setting,
                   // same rationale as other supplementary/instructional text.
-                  child: Column(
+                  child: const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
@@ -612,9 +612,9 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
               left: 16,
               right: 16,
               child: Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade900.withOpacity(0.9),
+                  color: Colors.red.shade900.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.red, width: 2),
                 ),
@@ -624,12 +624,12 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.white, size: 28),
-                        SizedBox(width: 12),
+                        const Icon(Icons.error_outline, color: Colors.white, size: 28),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             _businessAlreadyExists ? 'Cannot Import' : 'Import Failed',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -638,26 +638,26 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       _errorMessage!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                       ),
                     ),
                     if (_businessAlreadyExists) ...[
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () => Navigator.pop(context),
-                          icon: Icon(Icons.arrow_back, size: 20),
-                          label: Text('Go Back'),
+                          icon: const Icon(Icons.arrow_back, size: 20),
+                          label: const Text('Go Back'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.red.shade900,
-                            padding: EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
                       ),
@@ -676,14 +676,14 @@ class _ImportBusinessScreenState extends State<ImportBusinessScreen> {
               child: Center(
                 child: TextButton.icon(
                   onPressed: () => Navigator.pop(context),
-                  icon: Icon(Icons.arrow_back, color: Colors.white),
-                  label: Text(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  label: const Text(
                     'Cancel',
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.black54,
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   ),
                 ),
               ),

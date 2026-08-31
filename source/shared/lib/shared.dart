@@ -1,4 +1,4 @@
-library shared;
+library;
 
 // Export models
 export 'models/card.dart';

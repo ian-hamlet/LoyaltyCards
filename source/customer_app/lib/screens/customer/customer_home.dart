@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:shared/models/card.dart' as models;
-import 'package:shared/models/transaction.dart' as models;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import '../../services/card_repository.dart';
-import '../../services/transaction_repository.dart';
 import '../../services/database_helper.dart';
 import '../../utils/error_message_mapper.dart';
 import 'customer_card_detail.dart';
@@ -22,7 +19,6 @@ class CustomerHome extends StatefulWidget {
 
 class _CustomerHomeState extends State<CustomerHome> {
   final CardRepository _cardRepo = CardRepository(DatabaseHelper());
-  final TransactionRepository _transactionRepo = TransactionRepository(DatabaseHelper());
   List<models.Card> _cards = [];
   List<models.Card> _filteredCards = [];
   bool _isLoading = true;
@@ -178,19 +174,6 @@ class _CustomerHomeState extends State<CustomerHome> {
     return confirmed == true;
   }
 
-  Future<void> _deleteCard(models.Card card) async {
-    final confirmed = await _confirmDelete(card);
-
-    if (confirmed) {
-      Haptics.medium();
-      await _cardRepo.deleteCard(card.id);
-      await _loadCards();
-      if (mounted) {
-        AppFeedback.success(context, '${card.businessName} deleted');
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -314,7 +297,7 @@ class _CustomerHomeState extends State<CustomerHome> {
             ),
           );
           
-          if (result != null && mounted) {
+          if (result != null && mounted && context.mounted) {
             AppFeedback.success(context, result);
           }
           
@@ -395,7 +378,7 @@ class _CustomerHomeState extends State<CustomerHome> {
               Haptics.medium();
               await _cardRepo.deleteCard(card.id);
               await _loadCards();
-              if (mounted) {
+              if (mounted && context.mounted) {
                 AppFeedback.success(context, '${card.businessName} deleted');
               }
             },

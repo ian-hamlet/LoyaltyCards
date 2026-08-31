@@ -26,8 +26,6 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
   String? _qrData;
   bool _isLoading = true;
   String? _error;
-  int _refreshKey = 0;
-  bool _instructionsExpanded = false; // Track if instructions are expanded
   int _qrGeneratedTime = 0; // Track when QR was generated
 
   @override
@@ -114,12 +112,6 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
     final title = widget.mode == QRDisplayMode.stampRequest
         ? 'Request Stamp'
         : 'Redeem Reward';
-
-    final instruction = widget.card.isRedeemed
-        ? 'Card has been redeemed'
-        : widget.mode == QRDisplayMode.stampRequest
-            ? 'Show this QR code to ${widget.card.businessName} to receive a stamp'
-            : 'Show this QR code to redeem your reward';
 
     return Scaffold(
       appBar: AppBar(
@@ -214,7 +206,7 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -301,25 +293,25 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.3),
+                                color: Colors.green.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(2, 0),
                               ),
                             ],
                           ),
-                          child: Center(
+                          child: const Center(
                             child: RotatedBox(
                               quarterTurns: 3, // Rotate 270° (counter-clockwise)
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.celebration,
                                     color: Colors.white,
                                     size: 18,
                                   ),
-                                  const SizedBox(width: 6),
-                                  const ScaleCapped(
+                                  SizedBox(width: 6),
+                                  ScaleCapped(
                                     child: Text(
                                       'COMPLETE',
                                       style: TextStyle(

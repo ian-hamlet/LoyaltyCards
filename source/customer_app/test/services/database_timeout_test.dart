@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -129,7 +128,7 @@ void main() {
       
       // Verify file exists
       final databasesPath = await databaseFactory.getDatabasesPath();
-      final dbPath = '${databasesPath}/test_corrupted.db';
+      final dbPath = '$databasesPath/test_corrupted.db';
       final file = File(dbPath);
       expect(await file.exists(), true);
       
@@ -179,7 +178,7 @@ void main() {
       // Delete database file (simulate corruption + recovery)
       await DatabaseHelper.resetForTesting(testDatabaseName: 'test_recreation.db');
       final databasesPath = await databaseFactory.getDatabasesPath();
-      final dbPath = '${databasesPath}/test_recreation.db';
+      final dbPath = '$databasesPath/test_recreation.db';
       final file = File(dbPath);
       if (await file.exists()) {
         await file.delete();

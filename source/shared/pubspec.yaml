@@ -16,6 +16,10 @@ dependencies:
   # Cryptography for signature verification
   pointycastle: ^4.0.0
 
+  # HMAC/SHA-256 key derivation in supplier_config_backup.dart - was only a
+  # transitive dependency (via pointycastle), made direct.
+  crypto: ^3.0.7
+
   # Structured logging
   logger: ^2.5.0
 

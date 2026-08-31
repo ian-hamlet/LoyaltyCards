@@ -63,7 +63,7 @@ class DeviceService {
     try {
       if (Platform.isIOS) {
         final iosInfo = await _deviceInfo.iosInfo;
-        return iosInfo.utsname.machine ?? 'iOS Device';
+        return iosInfo.utsname.machine;
       } else if (Platform.isAndroid) {
         final androidInfo = await _deviceInfo.androidInfo;
         return '${androidInfo.manufacturer} ${androidInfo.model}';

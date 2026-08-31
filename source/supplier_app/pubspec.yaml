@@ -58,6 +58,7 @@ dev_dependencies:
   test: ^1.24.0
   sqflite_common_ffi: ^2.3.0  # For desktop testing
   local_auth_platform_interface: ^1.1.0  # For faking LocalAuthPlatform.instance in biometric_auth_service_test.dart
+  flutter_secure_storage_platform_interface: ^2.0.2  # For TestFlutterSecureStoragePlatform in clone_device_screen_test.dart etc.
   flutter_launcher_icons: ^0.14.4
 
 # Android app icon - the mipmap-*/ic_launcher.png files were still Flutter's

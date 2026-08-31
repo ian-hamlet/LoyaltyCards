@@ -222,9 +222,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                         color: Colors.blue[400],
                       ),
                       const SizedBox(height: 16),
-                      Text(
+                      const Text(
                         'Express Mode',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -269,7 +269,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                                 ),
                               );
                               
-                              if (result != null && mounted) {
+                              if (result != null && mounted && context.mounted) {
                                 AppFeedback.info(context, result);
                                 _loadCardData();
                               }
@@ -300,7 +300,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(20),
                           ),
-                          border: Border.all(color: BrandColors.success.withOpacity(0.3), width: 2),
+                          border: Border.all(color: BrandColors.success.withValues(alpha: 0.3), width: 2),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -397,25 +397,25 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.4),
+                                color: Colors.grey.withValues(alpha: 0.4),
                                 blurRadius: 8,
                                 offset: const Offset(2, 0),
                               ),
                             ],
                           ),
-                          child: Center(
+                          child: const Center(
                             child: RotatedBox(
                               quarterTurns: 3,
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.check_circle,
                                     color: Colors.white,
                                     size: 16,
                                   ),
-                                  const SizedBox(width: 6),
-                                  const ScaleCapped(
+                                  SizedBox(width: 6),
+                                  ScaleCapped(
                                     child: Text(
                                       'REDEEMED',
                                       style: TextStyle(
@@ -457,7 +457,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                   decoration: BoxDecoration(
                     color: BrandColors.successContainer,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: BrandColors.success.withOpacity(0.3), width: 2),
+                    border: Border.all(color: BrandColors.success.withValues(alpha: 0.3), width: 2),
                   ),
                   child: Column(
                     children: [
@@ -535,17 +535,17 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
                   ),
-                  child: Column(
+                  child: const Column(
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.orange, size: 40),
-                      const SizedBox(height: 12),
-                      const Text(
+                      Icon(Icons.error_outline, color: Colors.orange, size: 40),
+                      SizedBox(height: 12),
+                      Text(
                         "This card's code is too large to display",
                         textAlign: TextAlign.center,
                         style: TextStyle(fontWeight: FontWeight.bold, color: BrandColors.textPrimary),
                       ),
-                      const SizedBox(height: 6),
-                      const Text(
+                      SizedBox(height: 6),
+                      Text(
                         'This can happen on an older card with a lot of stamps. Show the business your stamp history below, or ask them to redeem it manually.',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 13, color: BrandColors.textSecondary),
@@ -607,7 +607,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                               ),
                             );
                             
-                            if (result != null && mounted) {
+                            if (result != null && mounted && context.mounted) {
                               AppFeedback.info(context, result);
                               await _loadCardData(); // Reload card data
                             }
@@ -671,7 +671,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
                 ),
               );
               
-              if (result != null && mounted) {
+              if (result != null && mounted && context.mounted) {
                 AppFeedback.info(context, result);
                 await _loadCardData();
               }
@@ -689,7 +689,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -783,9 +783,9 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
       margin: const EdgeInsets.only(bottom: 8),
       color: BrandColors.infoContainer,
       child: ListTile(
-        leading: CircleAvatar(
+        leading: const CircleAvatar(
           backgroundColor: BrandColors.info,
-          child: const Icon(Icons.add_card, color: Colors.white, size: 20),
+          child: Icon(Icons.add_card, color: Colors.white, size: 20),
         ),
         title: const Text(
           'Card Created',
@@ -799,7 +799,7 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
           children: [
             Text(
               _formatDate(_card!.createdAt),
-              style: TextStyle(fontSize: 12, color: BrandColors.textSecondary),
+              style: const TextStyle(fontSize: 12, color: BrandColors.textSecondary),
             ),
             if (displayStampCount > 0) ...[
               const SizedBox(height: 4),

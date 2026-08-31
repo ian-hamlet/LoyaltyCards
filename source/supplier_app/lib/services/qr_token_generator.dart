@@ -20,7 +20,7 @@ class QRTokenGenerator {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     
     // Generate card ID that will be used by both supplier and customer
-    final cardId = '${business.id}_${timestamp}';
+    final cardId = '${business.id}_$timestamp';
     
     // Generate initial stamps if requested
     final List<InitialStamp> initialStamps = [];

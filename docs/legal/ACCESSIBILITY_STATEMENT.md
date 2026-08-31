@@ -5,7 +5,7 @@
 **Last Updated:** August 31, 2026  
 **Compliance Target:** WCAG 2.1 Level AA
 
-**Note:** The known dark-mode text-legibility risk has been checked and ruled out (see "Dark Mode" section below, verified 2026-07-20). A first round of VoiceOver/semantic-labeling and live-region work landed 2026-08-31 for the Customer app - see "Screen Reader Support" and Roadmap below. Not yet applied to the Supplier app's own screens (the shared `AppFeedback` live-region fix benefits both apps, since it's one shared component, but Supplier-specific screens haven't had their own audit pass).
+**Note:** The known dark-mode text-legibility risk has been checked and ruled out (see "Dark Mode" section below, verified 2026-07-20). A first round of VoiceOver/semantic-labeling and live-region work landed 2026-08-31 for the Customer app, followed the same day by an icon-tooltip and live-region pass for the Supplier app - see "Screen Reader Support" and Roadmap below. The Supplier app's pass was narrower than the Customer app's: it added tooltips and live-region error announcements, but didn't need the combined-semantic-label/`ExcludeSemantics` work the Customer app's loyalty card list required, since the Supplier app's equivalent UI (the stamp-count selector) already used real visible labels.
 
 ---
 
@@ -99,17 +99,19 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 - ✅ Previously-unlabeled icon-only buttons (scanner flashlight toggle, home screen settings, search-clear) now have `tooltip`/semantic labels
 - ✅ The QR code image itself now has a contextual semantic label ("QR code to receive a stamp at [Business]" / "...to redeem your reward at [Business]") instead of the generic default
 - ⚠️ Custom widgets elsewhere in the app may still lack semantic labels - this was a targeted pass on the highest-value screens (wallet home, card detail, QR scanner, QR display), not an exhaustive audit
-- ⚠️ Not yet applied to the Supplier app's own screens (only the shared feedback-message fix below benefits it)
+- ✅ Supplier app (2026-08-31): previously-unlabeled icon-only buttons (back navigation, settings, two flashlight toggles, stamp-count +/- on the token screen) now have `tooltip`s, and inline error banners (import screen, and both error panels on the stamp/scan screen) now announce via the same live-region pattern as the Customer app
+- ⚠️ Supplier app did not need the Customer app's combined-label/`ExcludeSemantics` work - its stamp-count selector already exposes real visible labels (`ChoiceChip`s), so there was no redundant-unlabeled-element problem to fix there
 
 **Current Experience:**
 - VoiceOver reads button labels
 - VoiceOver announces navigation changes
 - VoiceOver describes text fields
 - VoiceOver now announces QR scan outcomes (see Live Regions below) and reads loyalty cards as one clear sentence each
+- VoiceOver now announces Supplier app error banners (import failures, scan/stamp errors) the same way
 
 **Gaps:**
-- Card visual details not fully described everywhere (only the two highest-traffic screens covered so far)
-- Supplier app not yet covered by this pass
+- Card visual details not fully described everywhere (only the two highest-traffic Customer app screens covered so far)
+- Supplier app has icon tooltips and live-region error announcements, but hasn't had a full audit pass of every screen
 
 #### Dynamic Type
 
@@ -145,12 +147,14 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 
 **13. Semantic Labels**
 - ✅ Semantic grouping implemented for loyalty card list items and card detail stamp grids (Customer app) - see item 10 above
-- ⚠️ Still missing on custom widgets outside the screens covered in this pass
+- ✅ Icon-only buttons in the Supplier app (back navigation, settings, flashlight toggles, stamp-count +/-) now have `tooltip`s (2026-08-31)
+- ⚠️ Still missing on custom widgets outside the screens covered in these two passes
 - ✅ QR scanner: rejection reasons now announced (see Live Regions below); the "processing" state (spinner shown while a scan is being validated) does not yet have its own announcement
 
 **14. Live Regions**
 - ✅ **Success/error/info/warning messages are now announced automatically.** `AppFeedback` (`source/shared/lib/widgets/feedback.dart`) - the single component both apps use for every SnackBar-based message, including QR scan outcomes - wraps its content in `Semantics(liveRegion: true, ...)`, since Flutter's `SnackBar` doesn't reliably announce itself to VoiceOver/TalkBack on its own. This fixes every call site at once, in both apps.
 - ✅ The Customer app's QR scanner screen also wraps its own in-panel rejection message (a separate UI element from the SnackBar) in the same `liveRegion: true` pattern, so a failed scan is announced even though the screen itself doesn't navigate away.
+- ✅ The Supplier app's inline error banners get the same treatment (2026-08-31): the business-import failure screen and both error panels on the stamp/scan screen (issuing a stamp token, and scanning a customer's card).
 - ⚠️ Loading states (e.g. the QR scanner's "processing" spinner) still not explicitly announced - only the terminal outcomes (success/error) are covered so far.
 
 ### ❌ Not Implemented (Future Enhancements)
@@ -221,12 +225,12 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 
 ### Barrier 3: Limited Screen Reader Optimization
 
-**Issue:** VoiceOver support relies mostly on iOS defaults, with targeted custom work on the Customer app's highest-traffic screens as of 2026-08-31 (see items 10/13/14 above) - not yet a comprehensive pass across either app
+**Issue:** VoiceOver support relies mostly on iOS defaults, with targeted custom work on the Customer app's highest-traffic screens and a lighter icon-tooltip/live-region pass on the Supplier app, both as of 2026-08-31 (see items 10/13/14 above) - not yet a comprehensive pass across either app
 
 **Impact:**
 - Screen reader users may experience verbose or unclear announcements on screens not yet covered
 - Some interactive elements outside the covered screens remain poorly described
-- Supplier app not yet covered at all (beyond the shared feedback-message fix)
+- Supplier app has icon tooltips and live-region error announcements, but not the deeper combined-label work the Customer app's card list got (not needed there - see item 10)
 
 **Current Mitigation:**
 - All buttons have text labels
@@ -234,9 +238,10 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 - Standard iOS components provide baseline accessibility
 - Success/error/info/warning messages now announce automatically app-wide (both apps, via the shared `AppFeedback` component)
 - The Customer app's wallet home screen and card detail screen now describe each loyalty card as one clear sentence instead of many unlabeled visual elements
+- The Supplier app's icon-only buttons now have tooltips, and its inline error banners now announce automatically, same as the Customer app
 
 **Future Enhancement:**
-- Extend the same semantic-labeling pass to the remaining Customer app screens and to the Supplier app
+- Extend the Customer app's semantic-labeling pass to its remaining screens, and do a full audit pass of the Supplier app (beyond the icon tooltips and live regions already added)
 - Announce loading/processing states, not just terminal success/error outcomes
 - Custom semantic labels for all remaining interactive elements
 - Optimized navigation for screen readers
@@ -304,11 +309,12 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 
 **High Priority:**
 - [x] Verify the known dark-mode text-legibility risk (`BrandColors.textPrimary`/`textSecondary` on dynamic surfaces) — checked 2026-07-20, confirmed not present; see "Dark Mode Support" above
-- [x] Add Semantics widgets to interactive elements — done 2026-08-31 for the Customer app's wallet home, card detail, QR scanner, and QR display screens; Supplier app and remaining Customer screens still open
+- [x] Add Semantics widgets to interactive elements — done 2026-08-31 for the Customer app's wallet home, card detail, QR scanner, and QR display screens; remaining Customer screens still open
 - [x] Add live-region announcements for success/error/info/warning messages — done 2026-08-31, shared `AppFeedback` component, both apps
 - [x] Add semantic labels for card details — done 2026-08-31 for the Customer app's loyalty card list and detail stamp grid
+- [x] Add icon-button tooltips and inline error live-regions to the Supplier app — done 2026-08-31 (back navigation, settings, flashlight toggles, stamp-count +/-; import-failure and stamp/scan error banners)
 - [ ] Improve QR scanner accessibility further (voice guidance beyond the outcome announcement already added)
-- [ ] Extend this pass to the Supplier app and the remaining Customer app screens
+- [ ] Full audit pass of the remaining Customer app screens and the rest of the Supplier app (beyond the tooltips/live-regions already added)
 - [ ] Test with real VoiceOver users
 
 **Medium Priority (may defer post-v1.0):**
@@ -415,7 +421,7 @@ If you encounter accessibility barriers while using LoyaltyCards, please contact
 **Level AA:** ⚠️ Partially Conformant  
 **Level AAA:** ❌ Not Conformant
 
-**Last Evaluation:** April 18, 2026 (general self-assessment); dark-mode legibility risk specifically re-checked July 20, 2026; first round of Customer app semantic-labeling/live-region work landed August 31, 2026 (see Document History)  
+**Last Evaluation:** April 18, 2026 (general self-assessment); dark-mode legibility risk specifically re-checked July 20, 2026; first round of Customer app semantic-labeling/live-region work landed August 31, 2026, extended to the Supplier app's icon tooltips and live-region error announcements the same day (see Document History)  
 **Evaluation Method:** Self-assessment (manual testing + targeted code review)  
 **Next Evaluation:** Before the final pre-submission build, covering the remaining open roadmap items (VoiceOver/semantics work)
 
@@ -450,6 +456,7 @@ We are actively working toward full compliance with WCAG 2.1 Level AA and releva
 | 1.1 | July 20, 2026 | Corrected Dark Mode claims to match actual (system-following, unaudited) implementation; removed unplanned NFC commitment; filled in contact email; updated version/dates |
 | 1.2 | July 20, 2026 | Verified the specific dark-mode legibility risk (BrandColors.textPrimary/textSecondary on dynamic surfaces) across both apps and confirmed it does not occur — all instances pair fixed text with fixed backgrounds. Reframed as a visual style item (fixed-color badges in dark mode), not a contrast/legibility bug. Updated roadmap accordingly. |
 | 1.3 | August 31, 2026 | First round of VoiceOver/semantic-labeling and live-region work, Customer app: live-region announcements for all AppFeedback success/error/info/warning messages (shared component, both apps benefit) and the QR scanner's inline rejection message; combined semantic labels replacing per-element announcements for loyalty card list items and the card detail stamp grid (previously up to `stampsRequired` individual unlabeled circles per card); semantic labels added to previously-unlabeled icon buttons (flashlight, settings, search-clear) and the QR code image itself. Covered the wallet home, card detail, QR scanner, and QR display screens - not an exhaustive pass, and not yet applied to the Supplier app's own screens. Added automated widget-test coverage asserting on the actual semantics tree, not just visible text. Updated roadmap and per-item status accordingly. |
+| 1.4 | August 31, 2026 | Extended the same day's work to the Supplier app: `tooltip`s added to previously-unlabeled icon-only buttons (back navigation, settings, two flashlight toggles, stamp-count +/- on the simple-mode token screen), and inline error banners (business import failure screen; both error panels on the stamp/scan screen) wrapped in `Semantics(liveRegion: true, ...)`, matching the Customer app's QR scanner fix. Confirmed the Customer app's combined-label/`ExcludeSemantics` work wasn't needed here - the Supplier app's stamp-count selector already uses real visible `ChoiceChip` labels. Narrower in scope than the Customer app pass (no new automated semantics-tree test); updated roadmap and per-item status accordingly. |
 
 ---
 

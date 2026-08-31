@@ -9,7 +9,7 @@ and fixed along the way (one of which also affects the currently-live iOS app - 
 and `2.2.2+37`'s changelog entry). Phase 5 (release build) is next. Track 2 (Play Console) not
 started at all.
 **Branch:** `feature/android-port`
-**Date:** 2026-08-29 (created); last updated 2026-08-30
+**Date:** 2026-08-29 (created); last updated 2026-08-31
 **Context:** Porting to Android is low-risk, mostly testing and store-listing work rather than a
 rewrite - both apps already ship `android/` scaffolding, `Platform.isAndroid` branches already
 exist in `device_service.dart`/`backup_storage_service.dart`, and the ECDSA P-256/SHA-256 signing
@@ -127,6 +127,12 @@ Decisions / Risks" below for how that's handled.
       released 2016 - confirmed via `aapt2 dump badging` on the actual built APK). Appropriately
       conservative for 2026; raising it would only exclude users for no benefit, and lowering it
       isn't possible below Flutter's own engine floor.
+- [x] Follow-up found during later emulator testing (2026-08-31): the "Tell a Friend"/"Tell a
+      Business" `AppBar` itself (not the headline text fixed above) wasn't setting
+      `foregroundColor`, so Material 3 defaulted the title to a dark `onSurface` color regardless
+      of the custom navy `backgroundColor` - every other `AppBar` in both apps sets
+      `foregroundColor: Colors.white` explicitly, this shared `AppReferralScreen` was the one
+      exception. Fixed in `source/shared/lib/widgets/app_referral_screen.dart`.
 
 ### Phase 5: Release Build
 - [ ] Generate an Android signing keystore (the Play Store equivalent of the Apple Distribution

@@ -162,15 +162,24 @@ Decisions / Risks" below for how that's handled.
 ## Track 2: Google Play Developer Account & Store Listing
 
 - [ ] Register a Google Play Developer account ($25 one-time fee) - **requires the developer's own
-      action** (Google login + payment); nothing to do here until this exists
+      action** (Google login + payment); nothing to do here until this exists. In progress as of
+      2026-09-02: registration is asking for proof of an Android device tied to the account (part
+      of Google's account/device verification anti-fraud step for new developer accounts) - the
+      developer is sourcing a physical Android device for this, since the emulator used for
+      screenshot capture doesn't satisfy it. This is the actual current blocker on Track 2, not
+      the $25 fee itself.
 - [ ] Create Play Console listings for both apps (one developer account, two listings - same
       pattern as the two App Store Connect listings under one Apple Developer account)
 - [x] Store listing content (text) drafted - 2026-08-31, see
       `docs/deployment/PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`: app names, short/full
       descriptions, category, and app-access/review notes for both apps, adapted from
       `APP_STORE_METADATA_PACKET_v2_2_1_36.md` to Play's field set and refreshed to the current
-      build (2.2.2+37). Screenshots and the feature graphic still needed - see that packet's
-      "Graphic Assets" section.
+      build (2.2.2+37).
+- [x] Phone screenshots captured 2026-09-02 - 26 total (13 per app), real live captures covering
+      both Express and Secure Mode end-to-end against the developer's iPhone, committed to the
+      repo (`screenshots/customer_app/android/`, `screenshots/supplier_app/android/`) so they're
+      available for tomorrow's registration. Feature graphic (1024x500) and the 512x512 app icon
+      export still needed - see the metadata packet's "Graphic Assets" section.
 - [ ] Content rating questionnaire - expected answers drafted in the packet above (all "None" /
       Everyone-3+, mirroring the App Store's Age Rating), but it's a self-service in-console
       questionnaire, not something submittable in advance

@@ -179,7 +179,9 @@ Decisions / Risks" below for how that's handled.
       both Express and Secure Mode end-to-end against the developer's iPhone, committed to the
       repo (`screenshots/customer_app/android/`, `screenshots/supplier_app/android/`) so they're
       available for tomorrow's registration. Feature graphic (1024x500) and the 512x512 app icon
-      export still needed - see the metadata packet's "Graphic Assets" section.
+      export drafted 2026-09-02 and approved by the developer the same day, in
+      `store_graphics/customer_app/` and `store_graphics/supplier_app/` - see the metadata
+      packet's "Graphic Assets" section. Ready to upload once the Play Console listings exist.
 - [ ] Content rating questionnaire - expected answers drafted in the packet above (all "None" /
       Everyone-3+, mirroring the App Store's Age Rating), but it's a self-service in-console
       questionnaire, not something submittable in advance

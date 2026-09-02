@@ -169,10 +169,16 @@ one.
 
 Play Console requires image assets the App Store submission didn't need in the same form:
 
-- [ ] **App icon** (512×512 PNG) - can be exported directly from the same 1024px branded source
-      already used for `flutter_launcher_icons` (Phase 4 of the Android port)
-- [ ] **Feature graphic** (1024×500 PNG/JPG) - a promotional banner, no direct App Store
-      equivalent; needs actual design work, not just a resize
+- [x] **App icon** (512×512 PNG) - exported 2026-09-02 directly from the same 1024px branded
+      source already used for `flutter_launcher_icons` (Phase 4 of the Android port), via `sips`.
+      `store_graphics/customer_app/app_icon_512.png` and `store_graphics/supplier_app/app_icon_512.png`
+- [x] **Feature graphic** (1024×500 PNG) - drafted 2026-09-02 as a first pass: branded gradient
+      (matching each app's `adaptive_icon_background`) with the existing app icon art, wordmark,
+      and short tagline pulled from the descriptions above. Built as HTML/CSS rendered via headless
+      Chrome (source in this session's scratchpad, not committed - only the rendered PNGs are).
+      `store_graphics/customer_app/feature_graphic.png` and
+      `store_graphics/supplier_app/feature_graphic.png` - approved by the developer 2026-09-02,
+      ready to upload as-is
 - [x] **Phone screenshots** - captured 2026-09-02, real device screenshots off the Android
       emulator (`adb exec-out screencap`), not mockups. 13 for the Customer app, 13 for the
       Supplier app, in `screenshots/customer_app/android/` and `screenshots/supplier_app/android/`
@@ -267,7 +273,7 @@ obviously-correct answer from the app's code alone.
 - [ ] Register the Google Play Developer account ($25 one-time, developer's own action)
 - [ ] Decide the Data Safety anti-fraud-signal disclosure question above
 - [x] Phone screenshots captured 2026-09-02 (see "Graphic Assets" above)
-- [ ] Produce the 512×512 app icon export and the 1024×500 feature graphic (see "Graphic Assets" above)
+- [x] Produce the 512×512 app icon export and the 1024×500 feature graphic (see "Graphic Assets" above) - draft, 2026-09-02
 - [ ] Confirm Play's current Category/Tag list still matches what's assumed here (Play's taxonomy
       changes occasionally - verify Lifestyle/Business are still the right top-level categories
       when the listing is actually being created)

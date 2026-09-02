@@ -189,6 +189,13 @@ Decisions / Risks" below for how that's handled.
       the packet above, but flagged with one open judgment call (whether/how to disclose the
       Secure Mode anti-fraud device signal) that needs a deliberate decision before submitting,
       not just carrying the Privacy Policy's existing framing forward automatically
+      - [x] Real bug found and fixed while digging into this, 2026-09-02: the Android anti-fraud
+            device signal was a hash of `Build.ID` (an OS-build tag shared by every device on
+            identical firmware, not per-device), silently breaking the V-005 mismatch check for
+            Android devices sharing an OS image. Fixed with an app-generated random UUID
+            persisted locally instead. Version bumped 2.2.2+37 → 2.2.3+38 - see `version.dart`
+            Build 38. Not yet re-verified on the Android emulator/hardware. The disclosure
+            judgment call above should be decided against this fixed behavior, not the old one.
 - [x] Privacy Policy / Support / Terms URLs - already hosted on Cloudflare Pages from the iOS
       work, directly reusable (same URLs carried into the Play packet)
 - [ ] Configure an Internal testing track (Play's TestFlight equivalent)
@@ -220,3 +227,5 @@ Decisions / Risks" below for how that's handled.
   known issues, needed again on any new machine
 - `docs/project-management/Requirements/REQ-003_Mobile_Platform_Support.md` - originating
   requirement and acceptance criteria
+- `docs/deployment/ANDROID_APP_SUBMISSION_CHECKLIST.md` - the copy-paste/tick-through Play
+  Console checklist for Track 2, mirroring `APP_STORE_SUBMISSION_CHECKLIST.md` on the iOS side

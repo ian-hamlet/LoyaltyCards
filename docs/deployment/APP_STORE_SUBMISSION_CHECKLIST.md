@@ -47,7 +47,7 @@
 - [x] **Version number confirmed** — v2.0.3+23 (version 2.0.3 unchanged from +22, build bumped only)
 - [x] **All code merged to `main` branch** — `main`/`develop`/`releases/v2.0.3-build23` all equalized
 - [x] **Release branch created** `releases/v2.0.3-build23`
-- [x] **Archive builds completed** for v2.0.3+23 — built via `source/build_both_apps.sh`, both IPAs verified (valid zip, correct 2.0.3/23 embedded in Info.plist)
+- [x] **Archive builds completed** for v2.0.3+23 — built via `source/build_both_apps.sh` (renamed to `build_both_apps_ios.sh` during the Android port), both IPAs verified (valid zip, correct 2.0.3/23 embedded in Info.plist)
 - [x] **IPA files uploaded to App Store Connect** via Transporter
 - [x] **Build processing complete** in App Store Connect
 - [x] **TestFlight testing completed** — Sharing feature and both bug fixes confirmed working on-device

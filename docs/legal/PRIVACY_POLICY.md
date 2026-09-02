@@ -1,6 +1,6 @@
 # Privacy Policy for LoyaltyCards
 
-**Last Updated:** July 25, 2026  
+**Last Updated:** September 3, 2026  
 **Effective Date:** April 13, 2026
 
 ---
@@ -34,10 +34,10 @@ We do not collect, store, transmit, or process any of the following:
 
 ### Local Storage Only
 
-All data is stored **exclusively on your device** using iOS local storage:
+All data is stored **exclusively on your device** using local storage:
 
-- **Customer App:** Your loyalty cards and stamp history are stored in your device's local database (SQLite)
-- **Supplier App:** Your business configuration and transaction history are stored in your device's local database (SQLite)
+- **Customer App:** Your loyalty cards and stamp history are stored in your device's local database
+- **Supplier App:** Your business configuration and transaction history are stored in your device's local database
 
 **Your data never reaches us.** We have no servers, no cloud storage, and no data backends — the only place your data ever goes is directly to another device during a QR exchange, described below.
 
@@ -52,12 +52,11 @@ LoyaltyCards uses a peer-to-peer (P2P) architecture:
 
 ### Anti-Fraud Device Signal (Secure Mode Redemption Only)
 
-One narrow exception to "we don't collect device identifiers": when you redeem a Secure Mode loyalty card, the redemption QR code includes a one-way-hashed identifier derived from your device. This lets the business detect if the same card is being redeemed from an unusually large number of different devices — a fraud-prevention signal, similar to a cashier checking a physical stamp card for signs of it being passed around or copied.
+One narrow exception to "we don't collect device identifiers": when you redeem a Secure Mode loyalty card, the redemption QR code includes a random, one-way identifier generated for your specific installation of the app. This lets the business detect if the same card is being redeemed from an unusually large number of different devices — a fraud-prevention signal, similar to a cashier checking a physical stamp card for signs of it being passed around or copied.
 
 - This value is generated on your device and cannot be reversed to identify your device or you personally
-- It travels only within that single QR exchange, directly to the business's device processing that redemption
-- It is never transmitted to us, to any server, or to any third party
-- It is not used for tracking, advertising, or any purpose beyond this one fraud check
+- It is sent directly to the business's device as part of that one redemption. It is never sent to us, to any server, or to anyone beyond that single transaction — it is not collected, aggregated, sold, or used for any purpose beyond that one fraud check
+- It is not used for tracking or advertising
 - It is not used in Express Mode, which has no per-stamp or redemption verification at all
 
 ---

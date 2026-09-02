@@ -832,5 +832,42 @@ library;
 ///   (shared 216, customer_app 186, supplier_app 141) - no new tests, since
 ///   both fixes are Android-native/exception-type-only, not app logic.
 
+/// Build 38 Changes:
+/// - **Patch version bump** (2.2.2 -> 2.2.3), not build-only - a real
+///   Android-only bug fix found while digging into the Play Store Data
+///   Safety disclosure question for the anti-fraud device signal (see
+///   `docs/deployment/PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`).
+/// - `customer_app/lib/services/device_service.dart`'s `getDeviceId()`
+///   (backing the V-005 multi-device redemption-mismatch check) hashed
+///   `AndroidDeviceInfo.id` on Android, believing it to be a per-device
+///   identifier (the old comment said so). It's actually `Build.ID` - a
+///   per-OS-build tag shared by every device on the same firmware image,
+///   not per-device - so the mismatch check silently produced false
+///   negatives (no warning shown) for any two Android devices running
+///   identical firmware, e.g. two phones of the same model/carrier on the
+///   same security patch. iOS's equivalent (`identifierForVendor`) is
+///   genuinely per-install, so this was Android-only. Also: the pinned
+///   `device_info_plus` (13.2.0) doesn't expose real `ANDROID_ID` at all any
+///   more - Google restricted it for privacy reasons - so there was no
+///   drop-in per-device OS identifier to switch to instead.
+/// - Fixed by generating a random UUID on first run and persisting it
+///   locally (`SharedPreferences`) as the Android device identifier, rather
+///   than reading anything from `device_info_plus`. Matches iOS's
+///   per-install semantics closely enough for this fraud-detection purpose,
+///   needs no special permissions, and is easier to defend in the Play Data
+///   Safety form than a hardware/OS-derived value would have been (still an
+///   open decision - see the metadata packet).
+/// - New `DeviceService.getOrCreateAndroidInstallId()` (`@visibleForTesting`,
+///   deliberately not gated on `Platform.isAndroid` itself so it can be unit
+///   tested under `flutter test`, which always runs as the host platform and
+///   can't fake `Platform.isAndroid` being true) plus
+///   `test/services/device_service_test.dart` (4 new tests) - `getDeviceId()`
+///   itself had zero prior test coverage.
+/// - Not yet re-verified on the Android emulator/hardware - functionally
+///   equivalent to the old code from every other caller's perspective (same
+///   hash/truncate wrapper, same return shape), but the Android install-ID
+///   path specifically should get a real-device pass before shipping,
+///   consistent with how Build 37's biometric fixes were verified.
+///
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.2+37';
+const String appVersion = '2.2.3+38';

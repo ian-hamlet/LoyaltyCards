@@ -230,29 +230,58 @@ file, get a second look at this section specifically before submitting, since Pl
 disclosure requirements are stricter/differently-scoped than what the Privacy Policy was written
 for. Source of truth for what the app actually does: `docs/legal/PRIVACY_POLICY.md`.
 
-**Does your app collect or share any of the required user data types?** Expected answer: **No**,
-for both apps, on the basis that:
-- No data is transmitted to the developer or to any server (there is no server)
-- No data is shared with third parties
-- All storage is local to the device (SQLite, iOS Keychain / Android Keystore)
+**Decided 2026-09-02** (superseding the "judgment call" framing this section carried until now -
+see the reasoning below): the two apps get **different answers**, because Play's own
+collected/shared distinction splits cleanly along which side of the QR exchange each app is on.
 
-**⚠️ One judgment call worth a deliberate decision, not just carrying the Privacy Policy's
-existing framing forward as-is:** Secure Mode's anti-fraud device signal (a one-way-hashed
-device identifier, sent device-to-device inside a redemption QR code - see "Anti-Fraud Device
-Signal" in the Privacy Policy) *does* leave the user's device, even though it never reaches the
-developer or a server. Play's Data Safety form asks about data collected/shared in a broader
-sense than "sent to us" - its own guidance covers data shared with *other users* of the app too,
-which is closer to what this signal actually does. Worth explicitly deciding whether to:
-  (a) disclose it as a "Device or other IDs" data type shared with "other users" (accurate,
-      cautious, but adds friction to an otherwise clean "no data collected" listing), or
-  (b) treat it as out of scope on the basis that it's a one-way, non-reversible, ephemeral value
-      that never identifies a specific device or person and isn't retained by anyone
-This isn't a call to make automatically - it affects a legal disclosure and there isn't a single
-obviously-correct answer from the app's code alone.
+**Does your app collect or share any of the required user data types?**
 
-**Security practices section** (if data collection is disclosed at all, even minimally):
-- Data encrypted in transit: N/A (no network transmission)
-- Users can request data deletion: Yes (delete the app / Settings → Reset Business Configuration)
+- **Supplier App: No.** It only ever *receives* the customer's device signal inbound (scanned
+  from a QR code) and stores it locally to power its own V-005 mismatch check - it never
+  retransmits that value to any other party, the developer, or a server. Nothing leaves the
+  supplier's device. This answer was never actually in question and is unaffected by everything
+  below.
+- **Customer App: Yes** - one data type, **Device or other IDs**, answered as follows:
+  - **Collected: No** - still true, nothing is transmitted to the developer or any server (there
+    is no server)
+  - **Shared: Yes** - the app *generates* this identifier and *transmits* it outward, inside the
+    redemption QR code, to the supplier's device. The supplier is a different party than the
+    developer, which is what triggers "shared" under Play's own definition - this was already
+    true before the Android fix below, just of a less honest-looking value
+  - **Purpose:** Fraud prevention, security, and compliance
+  - **Is this data processed ephemerally?** No - the identifier itself persists across app
+    sessions on the customer's device (that's what makes the fraud check work at all); only the
+    *single QR transmission* of it is one-shot, not the value itself
+  - **Required or optional:** Required - generated and included automatically as part of using
+    Secure Mode redemption, not a user-facing toggle
+  - **Used for tracking** (Play's definition - correlating with data from other apps/sites/ad
+    networks): No
+  - **Data not sold to third parties:** Confirmed
+  - **Users can request deletion:** Yes - deleting the app clears it; a reinstall generates an
+    unrelated new random value with no way to correlate it to the old one
+
+**Reasoning for this being the final answer, not another draft:** Play's Data Safety guidance
+defines "shared" around transmission to a party other than the developer - it doesn't turn on
+whether the value is hardware-derived or app-generated. Trying to argue this out of scope on the
+basis that it's "just a random value, not a real device ID" mattered less than it seemed to
+before - the sharing already happens regardless of the value's nature. What the nature of the
+value *does* change is how comfortable this disclosure is to make: describing it as "an
+app-generated identifier, not derived from your device's hardware or OS" (accurate as of the
+Android fix in `version.dart` Build 38 - see below) is a materially better sentence to put in
+front of a user than "a hash of your device's hardware ID" would have been, even though the Play
+Console checkbox answer is the same either way.
+
+**Background - why this was flagged as open in the first place, and what changed:** digging into
+what this signal actually is on Android surfaced a real bug, now fixed: the Android identifier
+was a hash of `Build.ID` (an OS-build tag shared by every device on the same firmware image, not
+a per-device value) - not a genuine device identifier at all, and not functioning as the
+fraud-detection feature intended. It's now a random UUID generated on first run and persisted
+locally (`SharedPreferences`), which both fixes the fraud check itself and is the more accurate,
+more disclosure-friendly value this section's answer above is written against.
+
+**Security practices section** (customer app, since it's the one with a disclosed data type):
+- Data encrypted in transit: N/A (no network transmission - this travels inside a QR code image, not a network protocol)
+- Users can request data deletion: Yes (delete the app)
 - Data is not sold to third parties: Confirmed
 
 ---
@@ -271,7 +300,8 @@ obviously-correct answer from the app's code alone.
 ## Decisions Needed Before Submission (not yet made)
 
 - [ ] Register the Google Play Developer account ($25 one-time, developer's own action)
-- [ ] Decide the Data Safety anti-fraud-signal disclosure question above
+- [x] Decide the Data Safety anti-fraud-signal disclosure question above - decided 2026-09-02: Yes
+      (Device or other IDs, shared) for the Customer app; No, unaffected, for the Supplier app
 - [x] Phone screenshots captured 2026-09-02 (see "Graphic Assets" above)
 - [x] Produce the 512×512 app icon export and the 1024×500 feature graphic (see "Graphic Assets" above) - draft, 2026-09-02
 - [ ] Confirm Play's current Category/Tag list still matches what's assumed here (Play's taxonomy

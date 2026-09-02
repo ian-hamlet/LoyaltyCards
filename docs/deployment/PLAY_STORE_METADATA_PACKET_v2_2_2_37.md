@@ -165,7 +165,7 @@ one.
 
 ---
 
-## Graphic Assets (not yet produced)
+## Graphic Assets
 
 Play Console requires image assets the App Store submission didn't need in the same form:
 
@@ -173,11 +173,23 @@ Play Console requires image assets the App Store submission didn't need in the s
       already used for `flutter_launcher_icons` (Phase 4 of the Android port)
 - [ ] **Feature graphic** (1024×500 PNG/JPG) - a promotional banner, no direct App Store
       equivalent; needs actual design work, not just a resize
-- [ ] **Phone screenshots** (min 2, max 8 per app, 16:9 or 9:16) - these can be captured for real
-      from the emulator (`adb shell screencap` or Android Studio's screenshot tool) once there's a
-      concrete list of which screens to capture; a good candidate list per app: wallet home (a
-      couple of cards, one near-complete), card detail, QR scan/display, and (Supplier) the
-      issue-card and stamp screens
+- [x] **Phone screenshots** - captured 2026-09-02, real device screenshots off the Android
+      emulator (`adb exec-out screencap`), not mockups. 13 for the Customer app, 13 for the
+      Supplier app, in `screenshots/customer_app/android/` and `screenshots/supplier_app/android/`
+      (local-only, gitignored - same convention as the existing iOS screenshot set). Covers two
+      full real end-to-end cycles driven live against the developer's iPhone:
+      - **Express Mode:** issue → new card added → stamp scans → card complete → redeem
+        confirmation dialog → "Reward Redeemed!"
+      - **Secure Mode:** issue (5-minute-expiry QR) → supplier scans customer's stamp request →
+        "How many stamps?" → signed "Adding Stamps" QR (2-minute expiry) scanned back by customer
+        → repeated to completion → supplier scans customer's redemption QR → "Reward Redeemed!"
+        with a final confirmation QR scanned back by the customer, confirmed via the Issued/
+        Stamped/Redeemed counters on the supplier home screen incrementing for real
+      Plus wallet home, card detail, QR scanner, Settings, Tell a Friend/Business, Business Setup,
+      and "How It Works". Far more than Play's 2-minimum requirement - pick the strongest 4-8 per
+      app for the actual listing rather than uploading all of them. Found and fixed two real
+      dark-mode legibility bugs on the referral screen along the way (AppBar title color, headline
+      text color - see git log on `feature/android-port`).
 - [ ] **Tablet screenshots** - optional, only needed if either app is listed as tablet-optimized
 
 ---
@@ -254,7 +266,8 @@ obviously-correct answer from the app's code alone.
 
 - [ ] Register the Google Play Developer account ($25 one-time, developer's own action)
 - [ ] Decide the Data Safety anti-fraud-signal disclosure question above
-- [ ] Produce the feature graphic and phone screenshots (see "Graphic Assets" above)
+- [x] Phone screenshots captured 2026-09-02 (see "Graphic Assets" above)
+- [ ] Produce the 512×512 app icon export and the 1024×500 feature graphic (see "Graphic Assets" above)
 - [ ] Confirm Play's current Category/Tag list still matches what's assumed here (Play's taxonomy
       changes occasionally - verify Lifestyle/Business are still the right top-level categories
       when the listing is actually being created)

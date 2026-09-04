@@ -1,21 +1,19 @@
 # Android (Google Play) Submission Checklist
 
-**LoyaltyCards v2.2.3+38**
+**LoyaltyCards v2.2.4+40**
 **Customer App:** LoyaltyCards Customer Wallet (`com.ianhamlet.loyaltycards.customer`)
 **Supplier App:** LoyaltyCards Business (`com.ianhamlet.loyaltycards.supplier`)
-**Target Release:** 🔴 Not yet submitted - Track 2 (Play Console) work in progress, blocked on
-Google Play Developer account registration (device-verification step - see below). Nothing in
-this checklist has been entered into Play Console yet; it's a copy-paste/tick-through companion
-to `PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`, mirroring the pattern of
-`APP_STORE_SUBMISSION_CHECKLIST.md` on the iOS side.
-**Last Updated:** September 2, 2026
+**Target Release:** 🟢 Both apps live on Google Play **Internal testing**, real-device tested
+successfully on two Samsung Galaxy devices (A14/A12) - see `ANDROID_PORT_PLAN.md` Track 2.
+**Everything remaining is a single Play Console page: Policy and programs → App content** (Content
+rating, App content declarations, Data Safety) - all three sections' answers are already decided
+below, nothing left to draft. Once that page is green for both apps, promote to Production.
+**Last Updated:** September 4, 2026
 
-**Status note:** iOS is live (`APP_STORE_SUBMISSION_CHECKLIST.md`, currently v2.2.1+36 approved
-and released). Android is a separate, later submission under the same version line - see
-`docs/project-management/ANDROID_PORT_PLAN.md` for the full port history (Track 1: technical
-port, complete; Track 2: this checklist, in progress). The two platforms are **not** kept on
-identical version numbers by policy - each ships independently as its own review/approval cycle
-completes, the same way the two iOS apps under one Apple account already do.
+**Status note:** iOS is at the same version line (v2.2.4+40, submitted for App Store review
+2026-09-04, TestFlight testing in parallel - see `APP_STORE_SUBMISSION_CHECKLIST.md`). The two
+platforms are **not** kept in lockstep by policy - each ships independently as its own
+review/approval cycle completes.
 
 Play Console's field set differs from App Store Connect's in ways that matter throughout this
 checklist: **one description field (no separate Subtitle/Promotional Text/Keywords)**, **a single
@@ -30,64 +28,56 @@ testers), and an **.aab** (Android App Bundle) upload instead of an **.ipa**.
 
 ### Code & Build Preparation
 
-- [x] **Final version incremented** across all three `pubspec.yaml` files + `source/shared/lib/version.dart` - `2.2.3+38`, confirmed in sync (customer_app, supplier_app, shared)
-- [x] **Version number confirmed** - v2.2.3+38 (patch bump, not build-only - see version.dart Build 38: a real Android-only bug fix in the anti-fraud device signal, found while working this checklist's Data Safety section)
-- [ ] **All code merged to `main` branch** - still on `feature/android-port`, not yet merged to `develop`/`main`
-- [ ] **Release branch created** - not yet, follows the same convention as iOS releases once this branch is ready
-- [ ] **Release AABs built** via `source/build_both_apps_android.sh` (added alongside this checklist - mirrors `build_both_apps_ios.sh`, outputs `<app>/build/app/outputs/bundle/release/app-release.aab` for both apps). Needs each app's `android/key.properties` present (machine-local, gitignored, points at the shared release keystore - see `ANDROID_PORT_PLAN.md` Phase 5) or the script warns and falls back to a debug-signed build Play Console will reject.
-- [x] **Release AABs verified signed** - done once already during Phase 5 (2026-08-31, before this checklist existed): both apps' AABs confirmed signed with the real keystore (not the debug fallback) via `jarsigner -verify -verbose -certs`. Re-verify after the next real build, since the device-signal fix above hasn't been built into an AAB yet.
-- [x] **All automated tests passing** - shared 216, customer_app 184 (+8 skipped), supplier_app 151 (+4 skipped) - re-confirmed 2026-09-02 after the device-signal fix
-- [x] **`flutter analyze` clean** on all three packages - re-confirmed 2026-09-02
-- [ ] **Critical bugs resolved** - the Android device-signal bug (see below) is fixed in code but **not yet re-verified on the Android emulator/real hardware** - do this before building the AAB for submission, not just relying on the unit tests
+- [x] **Final version incremented** across all three `pubspec.yaml` files + `source/shared/lib/version.dart` - `2.2.4+40`, confirmed in sync
+- [x] **All code merged** - `feature/android-port` → `develop` (`767f641`), release branch `releases/v2.2.4-build40` cut from `develop`. Not yet merged to `main` - held until both platforms clear their respective store reviews, per this project's standard convention.
+- [x] **Release AABs built** via `source/build_both_apps_android.sh` for both apps, confirmed release-signed via `jarsigner -verify` (not the debug-signing fallback)
+- [x] **All automated tests passing** - shared 216, customer_app 184 (+8 skipped), supplier_app 151 (+4 skipped)
+- [x] **`flutter analyze` clean** on all three packages
+- [x] **Critical bugs resolved** - the Android device-signal bug (Build 38) and a duplicate redemption button (Build 39/40) both fixed and shipped in v2.2.4+40. The device-signal fix's real-device confirmation is necessarily partial: there's no practical way to manually stage a genuine device-mismatch scenario through the app's own UI (see the discussion in `ANDROID_PORT_PLAN.md`), so it's verified by unit tests plus confirming the app functions correctly end-to-end on two distinct real devices - not by reproducing the original bug's exact failure mode.
 
 ---
 
 ## Google Play Developer Account
 
-- [ ] **Register the account** ($25 one-time fee, not recurring - contrast with Apple's $99/year) - **the developer's own action** (Google login + payment)
-- [ ] **Device-verification step** - 🔴 **current blocker**, in progress as of 2026-09-02. Google's
-      anti-fraud check for new developer accounts wants proof of an actual physical Android device
-      tied to the account; the emulator used for all functional/screenshot work doesn't satisfy
-      it. See the chat log / `ANDROID_PORT_PLAN.md` "Open Decisions / Risks" for the device
-      sourcing discussion (recommendation: a used Google Pixel 4a/5a/6a-range phone - Play
-      certified, has a fingerprint sensor and autofocus camera, cheap secondhand).
-- [ ] Once registered: **create the two Play Console app listings** (one account, two listings -
-      same pattern as the two App Store Connect listings under one Apple Developer account)
+- [x] **Account registered** - completed 2026-09-04
+- [x] **Device-verification step** - resolved 2026-09-04: developer sourced and reset two real Android devices (Samsung Galaxy A14/A12)
+- [x] **Both Play Console app listings created** - `com.ianhamlet.loyaltycards.customer` and `com.ianhamlet.loyaltycards.supplier`, 2026-09-04
 
 ---
 
 ## App Setup - Basic Info
 
+Both confirmed correct via successful Internal testing uploads under these exact identifiers:
+
 #### Customer App: LoyaltyCards Customer Wallet
-- [ ] **App name** (30 chars max): `LoyaltyCards Customer Wallet` (28 chars)
-- [ ] **Package name:** `com.ianhamlet.loyaltycards.customer` - fixed at first upload, cannot be
-      changed later, double-check before the first AAB upload
-- [ ] **Category:** Lifestyle (Play allows one category only - App Store's secondary "Shopping"
-      has no Play slot; consider as an optional Tag once Play Console's current tag list is
-      visible)
-- [ ] **Default language:** English (United Kingdom)
+- [x] **App name:** `LoyaltyCards Customer Wallet`
+- [x] **Package name:** `com.ianhamlet.loyaltycards.customer`
+- [ ] **Category:** Lifestyle - not yet confirmed set in Play Console (not required for Internal testing; part of the Main store listing page, see below)
+- [x] **Default language:** English (United Kingdom)
 
 #### Supplier App: LoyaltyCards Business
-- [ ] **App name** (30 chars max): `LoyaltyCards Business` (21 chars)
-- [ ] **Package name:** `com.ianhamlet.loyaltycards.supplier` - fixed at first upload
-- [ ] **Category:** Business (App Store's secondary "Productivity" has no Play slot; consider as
-      an optional Tag)
-- [ ] **Default language:** English (United Kingdom)
+- [x] **App name:** `LoyaltyCards Business`
+- [x] **Package name:** `com.ianhamlet.loyaltycards.supplier`
+- [ ] **Category:** Business - not yet confirmed set in Play Console, same as above
+- [x] **Default language:** English (United Kingdom)
 
 ---
 
 ## Store Listing Content
 
 Full copy-paste text lives in
-[`PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`](PLAY_STORE_METADATA_PACKET_v2_2_2_37.md) - drafted
-2026-08-31, still accurate (no user-facing copy changed by the device-signal fix). This section is
-just the entry checklist against Play Console's actual fields:
+[`PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`](PLAY_STORE_METADATA_PACKET_v2_2_2_37.md) - still
+accurate, no user-facing store copy has changed since. **Not yet entered into Play Console** -
+Internal testing doesn't require the Main store listing page to be filled in, only App setup +
+an uploaded release, which is why this is still outstanding despite testing already being
+underway:
 
-- [ ] **Short description** (80 chars max, both apps) - entered
-- [ ] **Full description** (4000 chars max, both apps) - entered
+- [ ] **Short description** (80 chars max, both apps)
+- [ ] **Full description** (4000 chars max, both apps)
 - [ ] **App icon** (512×512 PNG) - see "Graphic Assets" below
 - [ ] **Feature graphic** (1024×500 PNG) - see "Graphic Assets" below
 - [ ] **Phone screenshots** - see "Graphic Assets" below
+- [ ] **Category** (Lifestyle / Business - see above)
 - [ ] **Privacy Policy URL:** https://loyaltycards-site.pages.dev/legal/privacy-policy.html (both apps)
 
 Play has no separate Subtitle/Promotional Text/Keywords fields the way App Store Connect does -
@@ -97,28 +87,26 @@ everything beyond the short/full description above is out of scope here.
 
 ## Graphic Assets
 
-- [x] **App icon** (512×512 PNG) - exported 2026-09-02 directly from the same 1024px branded
-      source already used for `flutter_launcher_icons`, via `sips`. Approved by the developer
-      2026-09-02.
-      `store_graphics/customer_app/app_icon_512.png`, `store_graphics/supplier_app/app_icon_512.png`
-- [x] **Feature graphic** (1024×500 PNG) - drafted and approved 2026-09-02: branded gradient
-      (matching each app's `adaptive_icon_background`), the existing app icon art, wordmark, and a
-      short tagline pulled from the descriptions above.
-      `store_graphics/customer_app/feature_graphic.png`, `store_graphics/supplier_app/feature_graphic.png`
-- [x] **Phone screenshots** - captured 2026-09-02, real device screenshots off the Android
-      emulator (`adb exec-out screencap`), not mockups. 13 per app in
-      `screenshots/customer_app/android/` and `screenshots/supplier_app/android/`. Play's
-      minimum is 2 per app - pick the strongest 4-8 per app for the actual listing rather than
-      uploading all of them (same guidance as the metadata packet).
-- [ ] **Upload all of the above into Play Console** - not yet done, account doesn't exist yet
-- [ ] **Tablet screenshots** - optional, only needed if either app is listed as tablet-optimized (not currently planned - skip unless that changes)
+- [x] **App icon** (512×512 PNG) - `store_graphics/customer_app/app_icon_512.png`, `store_graphics/supplier_app/app_icon_512.png`, approved 2026-09-02
+- [x] **Feature graphic** (1024×500 PNG) - `store_graphics/customer_app/feature_graphic.png`, `store_graphics/supplier_app/feature_graphic.png`, approved 2026-09-02
+- [x] **Phone screenshots** - 13 per app, real captures, in `screenshots/customer_app/android/` and `screenshots/supplier_app/android/` - pick the strongest 4-8 per app for the actual listing rather than uploading all of them
+- [ ] **Upload all of the above into Play Console's Main store listing page** - not yet done
+- [ ] **Tablet screenshots** - optional, not currently planned
 
 ---
 
-## Content Rating (IARC Questionnaire)
+## App Content (start here - one Play Console page covers all three sections below)
 
-Expected answers (mirrors the App Store's "all None"/4+ outcome - full detail and reasoning in
-the metadata packet's "Content Rating" section):
+**Navigate to: Play Console → select an app → left sidebar → Policy and programs → App content.**
+This single hub page lists Content rating, Target audience/Ads/Government app/COVID-19
+app/Financial features, and Data safety, each as its own row with a "Start"/"Manage" button.
+None of it was required for Internal testing, which is why it's the one thing still outstanding
+despite both apps already being installed and tested on real hardware. Recommended order: content
+rating first (quickest), then the small declarations, then Data Safety last (the one with actual
+nuance). Do this for the Customer app first, then repeat for the Supplier app (its Data Safety
+answer is simpler - "No" throughout).
+
+### 1. Content Rating (IARC Questionnaire)
 
 - [ ] Violence: None
 - [ ] Sexual content: None
@@ -128,25 +116,34 @@ the metadata packet's "Content Rating" section):
 - [ ] User-generated content: None
 - [ ] Shares location: No
 - [ ] Allows user interaction/communication: No
-- [ ] **Entered into Play Console's actual questionnaire** (both apps) - self-service, in-console
-      only, nothing submittable in advance
+- [ ] **Entered into Play Console's questionnaire** (both apps)
 
 **Expected Rating:** Everyone / 3+ (Play's closest equivalent to Apple's 4+)
 
----
+### 2. App Content Declarations
 
-## Data Safety Form
+- [ ] **Target audience & content:** not primarily child-directed (general/business utility tool)
+- [ ] **Government app:** No
+- [ ] **COVID-19 app:** No (not a contact-tracing/status app)
+- [ ] **Financial features:** No real-money transactions, payments, or financial services -
+      loyalty stamps have no cash value
+- [ ] **Ads declaration:** No ads in either app
+- [ ] **Permissions declaration** - Play may ask for justification of sensitive runtime
+      permissions at review time. Camera (`CAMERA`) is the only sensitive one either app
+      requests (contributed automatically by `mobile_scanner`, confirmed via the actual merged
+      manifest). Justification if asked: "scan QR codes to issue/collect/redeem loyalty stamps."
 
-**Decided 2026-09-02** - the two apps get different answers; full reasoning in the metadata
-packet's "Data Safety Form" section. Summary for entering into Play Console:
+### 3. Data Safety Form
 
-#### Supplier App: No
-- [ ] **Does the app collect/share required user data types?** **No.** It only ever *receives* the
-      customer's device signal inbound (scanned from a QR code) and stores it locally for its own
-      fraud check - never retransmits it anywhere. Never in question, unaffected by the device-
-      signal fix.
+**Decided 2026-09-02**, updated 2026-09-04 to reflect the final v2.2.4+40 device-signal behavior -
+full reasoning in the metadata packet's "Data Safety Form" section.
 
-#### Customer App: Yes - one data type
+**Supplier App: No**
+- [ ] **Does the app collect/share required user data types?** **No.** It only ever *receives*
+      the customer's device signal inbound (scanned from a QR code) and stores it locally for
+      its own fraud check - never retransmits it anywhere.
+
+**Customer App: Yes - one data type**
 - [ ] **Does the app collect/share required user data types?** **Yes**
 - [ ] **Data type:** Device or other IDs
 - [ ] **Collected:** No (nothing reaches the developer or any server)
@@ -159,84 +156,53 @@ packet's "Data Safety Form" section. Summary for entering into Play Console:
 - [ ] **Required or optional:** Required (automatic as part of Secure Mode redemption, not a
       user-facing toggle)
 - [ ] **Used for tracking:** No
-- [ ] **Security practices:** data encrypted in transit - N/A (no network transmission, travels
-      inside a QR code image); users can request deletion - Yes (delete the app); data not sold to
-      third parties - confirmed
+- [ ] **Security practices:** data encrypted in transit - N/A (travels inside a QR code image,
+      not a network protocol); users can request deletion - Yes (delete the app); data not sold
+      to third parties - confirmed
 - [ ] **Entered into Play Console** (both apps)
 
-Note: this is a **more disclosure-friendly answer** than it would have been pre-fix, not because
-the Play Console checkbox changed (it doesn't - "shared" was already true either way), but because
-the value itself is now honestly describable as "an app-generated identifier, not derived from
-your device's hardware or OS" rather than a hash of one.
-- [ ] **Entered into Play Console** (both apps) - blocked on the decision above
+Note: this reads as a more disclosure-friendly answer than it would have pre-fix, not because the
+checkbox changed (it doesn't - "shared" was already true either way), but because the value
+itself is now honestly describable as "an app-generated identifier, not derived from your
+device's hardware or OS" rather than a hash of one.
 
 ---
 
-## App Content Declarations
+## Internal Testing Track - ✅ Complete for both apps
 
-Play's "App content" section covers several standalone declarations that have no App Store
-Connect equivalent in this shape:
-
-- [ ] **Target audience & content:** not primarily child-directed (general/business utility tool)
-- [ ] **Government app:** No
-- [ ] **COVID-19 app:** No (not a contact-tracing/status app)
-- [ ] **Financial features:** No real-money transactions, payments, or financial services -
-      loyalty stamps have no cash value
-- [ ] **Ads declaration:** No ads in either app
-- [ ] **Permissions declaration form** - Play may ask for justification of sensitive runtime
-      permissions during review. Camera (`CAMERA`) is the only sensitive one either app
-      requests - contributed automatically by `mobile_scanner`, confirmed via the actual merged
-      manifest during Android Phase 4 (see `ANDROID_PORT_PLAN.md`). Justification: "scan QR codes
-      to issue/collect/redeem loyalty stamps" - matches the Play Store listing description
-      already.
-
----
-
-## Internal Testing Track
-
-Play's equivalent of TestFlight - **no review gate at all** for internal testers, a meaningful
-speed advantage over Apple's Beta App Review step:
-
-- [ ] **Configure the Internal testing track** for both apps
-- [ ] **Add internal testers** by email (the developer's own account/device at minimum)
-- [ ] **Upload the first internal test AAB** for both apps - the Phase 5 release AABs exist
-      already but need rebuilding first to pick up the Build 38 device-signal fix
-- [ ] **Confirm install via the Play Console opt-in link** on the verification device once it
-      exists
-- [ ] **Internal test pass on real hardware** - covers what the emulator already confirmed
-      functionally (issue/stamp/redeem, both modes, biometric-gated backup/clone, QR camera scan)
-      plus specifically re-verifying the Build 38 device-signal fix, which has no emulator/unit
-      coverage of its own yet
+- [x] **Configured** for both apps, 2026-09-04
+- [x] **Testers added**, opt-in confirmed on both Samsung devices
+- [x] **First internal test AAB uploaded** - v2.2.4+40 for both apps (v2.2.4+39 was consumed by
+      an abandoned draft release and could never be reused - Play permanently reserves a version
+      code once uploaded to any track)
+- [x] **Install confirmed** via the Play Store's tester opt-in flow on both real devices
+- [x] **Functional test pass on real hardware, completed 2026-09-04**: full Express and Secure
+      Mode issue/stamp/redeem cycles, biometric-gated Recovery Backup and Clone to Another Device
+      with a real fingerprint/PIN, and the Secure Mode redemption screen confirmed showing only
+      the single "Scan Redemption" button post-fix. One real bug (the duplicate button above) was
+      found and fixed during this pass.
 
 ---
 
 ## Production Release
 
-- [ ] **Promote from Internal testing to Production** once the above is verified
-- [ ] **Release type:** Manual (not staged rollout to start) - matches the iOS convention of
-      holding both apps' releases until both are ready, though Play's two listings under one
-      account don't have the exact same cross-app timing risk App Store Connect's manual-release
-      workaround was solving (each Play listing releases independently by default regardless)
+- [ ] **Complete "App content"** above for both apps (the actual remaining blocker)
+- [ ] **Complete the Main store listing** (descriptions, category, graphics) for both apps
+- [ ] **Promote from Internal testing to Production** once the above is done
+- [ ] **Release type:** Manual (not staged rollout to start), matching the iOS convention of
+      holding until ready rather than defaulting to automatic
 - [ ] **Pricing:** Free (both apps, no in-app purchases) - matches iOS
+- [ ] **Submit for Play review** - largely automated, typically hours rather than Apple's days
 
 ---
 
 ## Technical Requirements
 
-- [x] **minSdk:** 24 (Android 7.0, released 2016) - Flutter's own default
-      (`flutter.minSdkVersion`), not a custom override; confirmed appropriate for 2026, see
-      `ANDROID_PORT_PLAN.md` Phase 4
-- [x] **compileSdk:** 37 (bumped from 36 for `supplier_app` - `flutter_secure_storage` 11.0.0
-      requires it)
-- [x] **Adaptive icon + display names** - real branded icons and `LoyaltyCards`/`LoyaltyCards
-      Business` display names ship on Android (previously Flutter's literal placeholder icon and
-      raw package-name labels) - see `ANDROID_PORT_PLAN.md` Phase 4
-- [x] **Permissions reviewed** - `CAMERA` (`mobile_scanner`), `USE_BIOMETRIC`/`USE_FINGERPRINT`
-      (`local_auth`), both contributed automatically via manifest merging, confirmed against the
-      actual merged manifest, not just the source one - no storage permission needed (scoped,
-      app-private storage only)
-- [x] **Signing** - real release keystore + Gradle signing config for both apps, verified-signed
-      release AAB built for each (Phase 5, 2026-08-31) - needs rebuilding to pick up Build 38
+- [x] **minSdk:** 24 (Android 7.0) - Flutter's own default, confirmed appropriate
+- [x] **compileSdk:** 37 (bumped from 36 for `supplier_app` - `flutter_secure_storage` 11.0.0 requires it)
+- [x] **Adaptive icon + display names** - real branded icons and `LoyaltyCards`/`LoyaltyCards Business` display names ship on Android
+- [x] **Permissions reviewed** - `CAMERA` (`mobile_scanner`), `USE_BIOMETRIC`/`USE_FINGERPRINT` (`local_auth`), both contributed automatically via manifest merging - no storage permission needed
+- [x] **Signing** - real release keystore + Gradle signing config for both apps, verified-signed release AAB built for each at v2.2.4+40
 
 ---
 
@@ -248,7 +214,7 @@ the iOS checklist:
 
 - **Data Safety accuracy vs. actual behavior** - Play has been known to enforce this more
   literally than Apple's App Privacy label; this is the reason the anti-fraud device signal
-  question above needs a real decision rather than a reflexive "no data collected" answer.
+  question above got a real decision rather than a reflexive "no data collected" answer.
 - **Permissions justification** - Play can request an explanation for any sensitive permission at
   review time even without a dedicated pre-submission form for it; the Camera justification above
   covers this if asked.
@@ -275,12 +241,13 @@ Same URLs as the iOS checklist - already hosted on Cloudflare Pages, directly re
 
 ---
 
-**Document Status:** 🔴 Draft, nothing yet entered into Play Console - blocked on Google Play
-Developer account registration (device-verification step). Store listing text, graphics,
-screenshots, and now the Data Safety answers (decided 2026-09-02) are all ready to paste in the
-moment the account exists.
+**Document Status:** 🟢 Both apps live on Internal testing, real-device tested successfully.
+Everything remaining is the "App content" page (Content rating → App content declarations → Data
+Safety, in that order) plus the Main store listing (descriptions/graphics/category), both purely
+data-entry at this point - every answer needed is already decided above. Then promote to
+Production and submit for Play review.
 **Maintained by:** Development Team
-**Last Updated:** September 2, 2026
+**Last Updated:** September 4, 2026
 
 ---
 

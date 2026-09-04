@@ -154,9 +154,7 @@ sqflite_common_ffi: ^2.3.0   # Desktop testing
 - [P2P Architecture Decision](01-Design/Architecture/DECISION_P2P_Architecture.md)
 
 ### Implementation
-- [Flutter Setup Guide](source/FLUTTER_SETUP_GUIDE.md)
-- [Quick Start Guide](source/QUICK_START.md)
-- [Prototype README](source/loyalty_cards_prototype/README.md)
+- [Dev Machine Setup Guide](docs/technical/DEV_MACHINE_SETUP.md)
 
 ---
 

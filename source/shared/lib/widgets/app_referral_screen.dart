@@ -79,6 +79,7 @@ class _AppReferralScreenState extends State<AppReferralScreen> {
       appBar: AppBar(
         title: Text(widget.appBarTitle),
         backgroundColor: widget.appBarColor,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -90,7 +91,11 @@ class _AppReferralScreenState extends State<AppReferralScreen> {
             Text(
               widget.headline,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -106,7 +111,7 @@ class _AppReferralScreenState extends State<AppReferralScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),

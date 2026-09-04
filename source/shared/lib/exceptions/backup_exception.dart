@@ -3,7 +3,7 @@
 /// Provides specific failure reasons to help users understand what went wrong
 /// and guide them toward alternative backup methods.
 /// 
-/// HP-1: Replaced Future<bool> pattern with specific exceptions
+/// HP-1: Replaced `Future<bool>` pattern with specific exceptions
 /// This allows callers to provide better user guidance based on failure type.
 class BackupException implements Exception {
   final String message;

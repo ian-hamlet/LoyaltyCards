@@ -155,7 +155,7 @@ void main() {
       await controller.loadBusiness();
 
       final expiredTimestamp = DateTime.now()
-          .subtract(Duration(milliseconds: AppConstants.stampRequestExpiryMs + 5000))
+          .subtract(const Duration(milliseconds: AppConstants.stampRequestExpiryMs + 5000))
           .millisecondsSinceEpoch;
       final token = buildToken(timestamp: expiredTimestamp);
       final result = await controller.parseStampRequest(token.toQRString());

@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/qr_token_generator.dart';
 import '../../services/key_manager.dart';
 import '../../services/business_repository.dart';
-import '../../services/supplier_database_helper.dart';
 import '../../services/backup_storage_service.dart';
 import '../../widgets/stamps_required_fix.dart';
 
@@ -358,7 +356,7 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                       decoration: BoxDecoration(
                                         color: BrandColors.infoContainer,
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                                        border: Border.all(color: BrandColors.info.withValues(alpha: 0.3)),
                                       ),
                                       child: Row(
                                         children: [
@@ -438,17 +436,17 @@ class _SupplierIssueCardState extends State<SupplierIssueCard> {
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
                                   ),
-                                  child: Column(
+                                  child: const Column(
                                     children: [
-                                      const Icon(Icons.error_outline, color: Colors.orange, size: 40),
-                                      const SizedBox(height: 12),
-                                      const Text(
+                                      Icon(Icons.error_outline, color: Colors.orange, size: 40),
+                                      SizedBox(height: 12),
+                                      Text(
                                         "This card's code is too large to display",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
-                                      const SizedBox(height: 6),
-                                      const Text(
+                                      SizedBox(height: 6),
+                                      Text(
                                         'Try reducing the number of pre-applied stamps for this card.',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontSize: 13, color: Colors.black54),

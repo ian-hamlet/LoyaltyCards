@@ -1,9 +1,5 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shared/models/business.dart';
-import 'package:shared/models/supplier_config_backup.dart';
-import 'package:shared/widgets/feedback.dart';
 import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/backup_storage_service.dart';
@@ -38,10 +34,10 @@ class RecoveryBackupScreen extends StatefulWidget {
   final bool isFirstTime; // True if called during initial setup
 
   const RecoveryBackupScreen({
-    Key? key,
+    super.key,
     required this.business,
     this.isFirstTime = false,
-  }) : super(key: key);
+  });
 
   @override
   State<RecoveryBackupScreen> createState() => _RecoveryBackupScreenState();
@@ -57,7 +53,6 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   // _backup existed, instead of showing the loading state that's already
   // genuinely in flight.
   bool _isGenerating = true;
-  bool _authenticationRequired = true;
   // CRASH-001: guards each distribution method against a fast double-tap
   // firing a second concurrent native call (Printing.layoutPdf /
   // Share.shareXFiles) before the first one completes.
@@ -95,9 +90,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
   /// This protects the private key from unauthorized access
   Future<void> _authenticateAndGenerate() async {
     AppLogger.debug('🔐 Requesting authentication for backup QR generation...', 'Backup');
-    
-    final authMethodName = await _biometricAuth.getAuthMethodName();
-    
+
     final result = await _biometricAuth.authenticate(
       reason: 'Authenticate to view recovery backup QR code containing your private key',
     );
@@ -106,7 +99,6 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
       AppLogger.warning('Authentication failed: ${result.status}', 'Backup');
       if (mounted) {
         setState(() {
-          _authenticationRequired = true;
           _isGenerating = false;
         });
         
@@ -127,10 +119,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     }
 
     AppLogger.debug('✅ Authentication successful - generating backup', 'Backup');
-    setState(() {
-      _authenticationRequired = false;
-    });
-    
+
     await _generateBackup();
   }
 
@@ -359,14 +348,14 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
             Icon(Icons.warning, color: Colors.orange),
             SizedBox(width: 8),
             Expanded(child: Text('No Backup Created')),
           ],
         ),
-        content: Text(
+        content: const Text(
           'Without a backup, if you lose this device, all your customer loyalty cards will become invalid.\n\n'
           'You would need to re-issue new cards to every customer.\n\n'
           'Are you sure you want to skip creating a backup?',
@@ -374,7 +363,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Go Back'),
+            child: const Text('Go Back'),
           ),
           TextButton(
             onPressed: () {
@@ -382,7 +371,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
               Navigator.pop(context, false); // Close screen
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('Skip Anyway'),
+            child: const Text('Skip Anyway'),
           ),
         ],
       ),
@@ -395,24 +384,25 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recovery Backup'),
+        title: const Text('Recovery Backup'),
         leading: widget.isFirstTime
             ? null
             : IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
+                tooltip: 'Back',
               ),
       ),
       body: _isGenerating
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Warning banner
                   Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: colorScheme.errorContainer,
                       border: Border.all(color: colorScheme.error, width: 2),
@@ -423,7 +413,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                         Row(
                           children: [
                             Icon(Icons.security, color: colorScheme.onErrorContainer, size: 32),
-                            SizedBox(width: 12),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,7 +426,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                                       color: colorScheme.onErrorContainer,
                                     ),
                                   ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Text(
                                     'Anyone with this QR can impersonate your business',
                                     style: TextStyle(
@@ -453,12 +443,12 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // QR Code display
                   if (_backup != null)
                     Container(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.grey.shade300),
@@ -471,7 +461,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                             style: Theme.of(context).textTheme.titleLarge,
                             textAlign: TextAlign.center,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             'Recovery Backup - No Expiry',
                             style: TextStyle(
@@ -479,13 +469,13 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                               fontSize: 12,
                             ),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           QrImageView(
                             data: _backup!.toQRString(),
                             version: QrVersions.auto,
                             size: 250,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             'Created: ${DateFormat('MMM d, yyyy').format(_backup!.timestamp)}',
                             style: TextStyle(
@@ -497,7 +487,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                       ),
                     ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Redemption tracking notice - restoring onto a
                   // replacement device does not carry over which rewards
@@ -506,7 +496,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                   // SECURITY_MODEL.md's "Redemption Tracking Across Cloned
                   // Devices" section for the full rationale).
                   Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.amber.shade50,
                       borderRadius: BorderRadius.circular(8),
@@ -515,7 +505,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     child: Row(
                       children: [
                         Icon(Icons.receipt_long_outlined, color: Colors.amber.shade900),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -528,7 +518,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                                   color: Colors.amber.shade900,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
                                 'A device restored from this backup won\'t know which rewards were already redeemed before the backup was made - verify manually if a card looks like it should already be redeemed.',
                                 style: TextStyle(
@@ -543,20 +533,20 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Instructions
                   Text(
                     'Save This Backup:',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'We recommend using all methods for maximum safety',
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
 
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Print option (highlighted)
                   _buildStorageOption(
@@ -569,7 +559,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     isBusy: _isPrinting,
                   ),
 
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
                   // Email option
                   _buildStorageOption(
@@ -581,7 +571,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     isBusy: _isSharingEmail,
                   ),
 
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
                   // Files option
                   _buildStorageOption(
@@ -593,11 +583,11 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     isBusy: _isSavingToFiles,
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Completion indicator
                   Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: _completedMethods.length >= 2
                           ? colorScheme.tertiaryContainer
@@ -614,7 +604,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                               ? colorScheme.onTertiaryContainer
                               : colorScheme.onSurfaceVariant,
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,21 +633,21 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Done button
                   ElevatedButton(
                     onPressed: _onDone,
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: Text(
                       _completedMethods.isEmpty ? 'Skip (Not Recommended)' : 'Done',
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ),
 
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -711,7 +701,7 @@ class _RecoveryBackupScreenState extends State<RecoveryBackupScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : (completed
-                ? Icon(Icons.check_circle, color: Colors.green)
+                ? const Icon(Icons.check_circle, color: Colors.green)
                 : Icon(Icons.chevron_right, color: Colors.grey[600])),
         // CRASH-001: null onTap while busy - prevents a fast double-tap from
         // firing a second concurrent native call before the first resolves.

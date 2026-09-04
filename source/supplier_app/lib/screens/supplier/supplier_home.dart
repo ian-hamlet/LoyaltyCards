@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../services/business_repository.dart';
-import '../../services/supplier_database_helper.dart';
 import 'supplier_onboarding.dart';
 import 'supplier_issue_card.dart';
 import 'supplier_stamp_card.dart';
@@ -105,9 +104,9 @@ class _SupplierHomeState extends State<SupplierHome> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AppReferralScreen(
+                  builder: (context) => const AppReferralScreen(
                     appBarTitle: 'Tell a Friend',
-                    appBarColor: const Color(0xFF2C3E50),
+                    appBarColor: Color(0xFF2C3E50),
                     icon: Icons.people_outline,
                     headline: 'New customer without the app?',
                     bodyText: 'Show them this code, or share the link, to get '
@@ -124,6 +123,7 @@ class _SupplierHomeState extends State<SupplierHome> {
           ),
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
             onPressed: () {
               Haptics.light();
               Navigator.push(
@@ -394,7 +394,7 @@ class _SupplierHomeState extends State<SupplierHome> {
           Container(
             width: 28,
             height: 28,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: BrandColors.primary,
               shape: BoxShape.circle,
             ),

@@ -307,41 +307,43 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                RadioListTile<OperationMode>(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(OperationMode.simple.displayName),
-                  subtitle: Text(
-                    OperationMode.simple.recommendedFor,
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  value: OperationMode.simple,
+                RadioGroup<OperationMode>(
                   groupValue: _selectedMode,
                   onChanged: (value) {
                     Haptics.selection();
                     setState(() => _selectedMode = value!);
                   },
-                ),
-                RadioListTile<OperationMode>(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(OperationMode.secure.displayName),
-                  subtitle: Text(
-                    OperationMode.secure.recommendedFor,
-                    style: const TextStyle(fontSize: 13),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RadioListTile<OperationMode>(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(OperationMode.simple.displayName),
+                        subtitle: Text(
+                          OperationMode.simple.recommendedFor,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        value: OperationMode.simple,
+                      ),
+                      RadioListTile<OperationMode>(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(OperationMode.secure.displayName),
+                        subtitle: Text(
+                          OperationMode.secure.recommendedFor,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        value: OperationMode.secure,
+                      ),
+                    ],
                   ),
-                  value: OperationMode.secure,
-                  groupValue: _selectedMode,
-                  onChanged: (value) {
-                    Haptics.selection();
-                    setState(() => _selectedMode = value!);
-                  },
                 ),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.15),
+                    color: Colors.amber.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                    border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -646,11 +648,11 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ),
                     );
                   },
-                  icon: Icon(Icons.restore, size: 24),
-                  label: Text('Recover from Backup', textAlign: TextAlign.center),
+                  icon: const Icon(Icons.restore, size: 24),
+                  label: const Text('Recover from Backup', textAlign: TextAlign.center),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.all(16),
-                    side: BorderSide(color: Colors.blue, width: 2),
+                    padding: const EdgeInsets.all(16),
+                    side: const BorderSide(color: Colors.blue, width: 2),
                     foregroundColor: Colors.blue,
                   ),
                 ),
@@ -679,11 +681,11 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                       ),
                     );
                   },
-                  icon: Icon(Icons.device_hub, size: 24),
-                  label: Text('Clone from Another Device', textAlign: TextAlign.center),
+                  icon: const Icon(Icons.device_hub, size: 24),
+                  label: const Text('Clone from Another Device', textAlign: TextAlign.center),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.all(16),
-                    side: BorderSide(color: Colors.green, width: 2),
+                    padding: const EdgeInsets.all(16),
+                    side: const BorderSide(color: Colors.green, width: 2),
                     foregroundColor: Colors.green,
                   ),
                 ),
@@ -715,10 +717,10 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
               backgroundColor: BrandColors.fromHex(_selectedColor),
             ),
             child: _isCreating
-                ? Row(
+                ? const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
@@ -726,14 +728,14 @@ class _SupplierOnboardingState extends State<SupplierOnboarding> {
                           color: Colors.white,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
+                      SizedBox(width: AppSpacing.sm),
                       Text(
                         'Creating...',
                         style: TextStyle(fontSize: AppTypography.bodyLarge),
                       ),
                     ],
                   )
-                : Text(
+                : const Text(
                     'Create Business Profile',
                     style: TextStyle(fontSize: AppTypography.bodyLarge),
                   ),

@@ -26,20 +26,21 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
   String? _qrData;
   bool _isLoading = true;
   String? _error;
-  int _refreshKey = 0;
-  bool _instructionsExpanded = false; // Track if instructions are expanded
   int _qrGeneratedTime = 0; // Track when QR was generated
 
   @override
   void initState() {
     super.initState();
-    AppLogger.qr('QR Display Screen initialized - Card: ${widget.card.id.substring(0, 8)}, Stamps: ${widget.card.stampsCollected}, Mode: ${widget.mode}');
+    AppLogger.qr(
+        'QR Display Screen initialized - Card: ${widget.card.id.substring(0, 8)}, Stamps: ${widget.card.stampsCollected}, Mode: ${widget.mode}');
     _generateQRData();
   }
 
   Future<void> _generateQRData() async {
     AppLogger.debug('Generating QR data', 'QR');
-    AppLogger.debug('Card: ${widget.card.id}, Stamps: ${widget.card.stampsCollected}', 'QR');
+    AppLogger.debug(
+        'Card: ${widget.card.id}, Stamps: ${widget.card.stampsCollected}',
+        'QR');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -95,7 +96,8 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
           break;
       }
     } catch (e, stackTrace) {
-      AppLogger.error('QR Display ERROR', error: e, stackTrace: stackTrace, tag: 'QR');
+      AppLogger.error('QR Display ERROR',
+          error: e, stackTrace: stackTrace, tag: 'QR');
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -114,12 +116,6 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
     final title = widget.mode == QRDisplayMode.stampRequest
         ? 'Request Stamp'
         : 'Redeem Reward';
-
-    final instruction = widget.card.isRedeemed
-        ? 'Card has been redeemed'
-        : widget.mode == QRDisplayMode.stampRequest
-            ? 'Show this QR code to ${widget.card.businessName} to receive a stamp'
-            : 'Show this QR code to redeem your reward';
 
     return Scaffold(
       appBar: AppBar(
@@ -175,7 +171,9 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                     // Main content
                     SingleChildScrollView(
                       padding: EdgeInsets.fromLTRB(
-                        widget.mode == QRDisplayMode.redemption ? 48 : 24, // Extra left padding for vertical bar
+                        widget.mode == QRDisplayMode.redemption
+                            ? 48
+                            : 24, // Extra left padding for vertical bar
                         24,
                         24,
                         24,
@@ -186,7 +184,10 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                           // Business name
                           Text(
                             widget.card.businessName,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                             textAlign: TextAlign.center,
@@ -198,7 +199,10 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                           if (widget.mode == QRDisplayMode.stampRequest)
                             Text(
                               'Current stamps: ${widget.card.stampsCollected} / ${widget.card.stampsRequired}',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
                                     color: Colors.grey[600],
                                   ),
                             ),
@@ -206,82 +210,94 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
 
                           const SizedBox(height: 24),
 
-                      // QR Code
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: QrImageView(
-                          data: _qrData!,
-                          version: QrVersions.auto,
-                          size: QRCodeSize.calculate(context),
-                          backgroundColor: Colors.white,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Compact info badges
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey[300]!),
-                        ),
-                        child: Column(
-                          children: [
-                            if (widget.mode == QRDisplayMode.stampRequest)
-                              Row(
-                                children: [
-                                  Icon(Icons.info_outline, size: 14, color: Colors.orange[700]),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      'Refresh QR (tap ⟳ above) after each stamp',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.orange[900],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (widget.mode == QRDisplayMode.stampRequest)
-                              const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                Icon(Icons.timer_outlined, size: 14, color: Colors.orange[700]),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    widget.mode == QRDisplayMode.stampRequest
-                                        ? 'Valid ${_formatValidityMinutes(AppConstants.stampRequestExpiryMs)} (expires ${_getExpiryTime(AppConstants.stampRequestExpiryMs)})'
-                                        : 'Valid ${_formatValidityMinutes(AppConstants.stampExpiryMs)} (expires ${_getExpiryTime(AppConstants.stampExpiryMs)})',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.orange[900],
-                                    ),
-                                  ),
+                          // QR Code
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                            child: QrImageView(
+                              data: _qrData!,
+                              version: QrVersions.auto,
+                              size: QRCodeSize.calculate(context),
+                              backgroundColor: Colors.white,
+                              // Default is the generic "qr code" - a screen
+                              // reader user can't read the code itself either
+                              // way, but this at least confirms what it's for
+                              // and which business, matching the visual
+                              // business-name heading above.
+                              semanticsLabel: widget.mode ==
+                                      QRDisplayMode.stampRequest
+                                  ? 'QR code to receive a stamp at ${widget.card.businessName}'
+                                  : 'QR code to redeem your reward at ${widget.card.businessName}',
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Compact info badges
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: Column(
+                              children: [
+                                if (widget.mode == QRDisplayMode.stampRequest)
+                                  Row(
+                                    children: [
+                                      Icon(Icons.info_outline,
+                                          size: 14, color: Colors.orange[700]),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          'Refresh QR (tap ⟳ above) after each stamp',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.orange[900],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                if (widget.mode == QRDisplayMode.stampRequest)
+                                  const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Icon(Icons.timer_outlined,
+                                        size: 14, color: Colors.orange[700]),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        widget.mode ==
+                                                QRDisplayMode.stampRequest
+                                            ? 'Valid ${_formatValidityMinutes(AppConstants.stampRequestExpiryMs)} (expires ${_getExpiryTime(AppConstants.stampRequestExpiryMs)})'
+                                            : 'Valid ${_formatValidityMinutes(AppConstants.stampExpiryMs)} (expires ${_getExpiryTime(AppConstants.stampExpiryMs)})',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.orange[900],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                    
+                    ),
+
                     // Vertical status bar for redemption mode
                     if (widget.mode == QRDisplayMode.redemption)
                       Positioned(
@@ -301,25 +317,26 @@ class _QRDisplayScreenState extends State<QRDisplayScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.3),
+                                color: Colors.green.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(2, 0),
                               ),
                             ],
                           ),
-                          child: Center(
+                          child: const Center(
                             child: RotatedBox(
-                              quarterTurns: 3, // Rotate 270° (counter-clockwise)
+                              quarterTurns:
+                                  3, // Rotate 270° (counter-clockwise)
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.celebration,
                                     color: Colors.white,
                                     size: 18,
                                   ),
-                                  const SizedBox(width: 6),
-                                  const ScaleCapped(
+                                  SizedBox(width: 6),
+                                  ScaleCapped(
                                     child: Text(
                                       'COMPLETE',
                                       style: TextStyle(

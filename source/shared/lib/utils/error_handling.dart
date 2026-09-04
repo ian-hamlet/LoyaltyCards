@@ -5,13 +5,13 @@
 /// 
 /// CONVENTIONS:
 /// 
-/// 1. Future<bool> - Optional/graceful operations
+/// 1. `Future<bool>` - Optional/graceful operations
 ///    - Used for: Backup operations, optional features, non-critical actions
 ///    - Returns true on success, false on failure
 ///    - Always logs failures via AppLogger.error()
 ///    - Example: BackupStorageService.saveToPhotos()
 /// 
-/// 2. Future<void> - Critical operations that must succeed
+/// 2. `Future<void>` - Critical operations that must succeed
 ///    - Used for: Database writes, essential state changes
 ///    - Throws exceptions on failure
 ///    - Caller must catch and handle
@@ -30,11 +30,12 @@
 /// 
 /// GUIDELINES:
 /// 
-/// - Choose Future<bool> when failure is acceptable and expected
-/// - Choose Future<void> + exceptions when failure indicates a serious problem
+/// - Choose `Future<bool>` when failure is acceptable and expected
+/// - Choose `Future<void>` + exceptions when failure indicates a serious problem
 /// - Choose bool for pure validation functions
 /// - Always provide context in error messages ("Backup to photos failed" not "Operation failed")
 /// - Log all exceptions with stack traces for debugging
+library;
 
 import 'package:shared/shared.dart';
 

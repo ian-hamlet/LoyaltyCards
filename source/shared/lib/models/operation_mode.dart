@@ -4,6 +4,7 @@
 /// 
 /// - Express: Fast, trust-based stamping with time limits
 /// - Secure: Full cryptographic validation (current implementation)
+library;
 
 enum OperationMode {
   /// Express mode: Trust-based stamping with time limits

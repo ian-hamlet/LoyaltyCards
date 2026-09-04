@@ -13,16 +13,13 @@ void main() {
 
   group('Database Migration Safety Tests', () {
     late DatabaseHelper dbHelper;
-    late String testDbPath;
 
     setUp(() async {
       // Use unique database name for this test file to prevent locking
       await DatabaseHelper.resetForTesting(testDatabaseName: 'test_database_migration.db');
-      
+
       dbHelper = DatabaseHelper();
-      final databasesPath = await getDatabasesPath();
-      testDbPath = join(databasesPath, 'test_database_migration.db');
-      
+
       // Clean up any existing test database
       try {
         await dbHelper.deleteDatabase();

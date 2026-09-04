@@ -52,8 +52,8 @@
 /// - Standardize error handling patterns across codebase (CR-014)
 /// - Added error_handling.dart utility with safeExecute helpers
 /// - Documented error handling conventions for each pattern:
-///   * Future<bool> for optional/graceful operations (backup, etc)
-///   * Future<void> + exceptions for critical operations (database)
+///   * `Future<bool>` for optional/graceful operations (backup, etc)
+///   * `Future<void>` + exceptions for critical operations (database)
 ///   * bool for synchronous validation (QR parsing, signatures)
 /// - Added comprehensive documentation to key service files
 /// - No breaking changes - documentation and utilities only
@@ -230,6 +230,7 @@
 /// - Files Modified: 12 files across shared/supplier/customer packages
 /// - Documentation: REQ-022_IMPLEMENTATION_SUMMARY.md created
 /// - Status: Code complete, ready for device testing
+library;
 
 /// IMPORTANT: Version Number Management
 /// =====================================
@@ -793,5 +794,128 @@
 ///   (the original reason for this bump) - superseded in importance by the
 ///   sharePdf fix above once that was ready.
 
+/// Build 37 Changes:
+/// - **Patch version bump** (2.2.1 -> 2.2.2), not build-only - two real
+///   biometric-auth bugs fixed on top of the already-live v2.2.1+36, found
+///   while testing the Android port (see
+///   `docs/project-management/ANDROID_PORT_PLAN.md`):
+/// - Both apps: `MainActivity` extended plain `FlutterActivity`, but
+///   `local_auth`'s `BiometricPrompt` requires a `FragmentActivity` host -
+///   threw "The current activity must be a FragmentActivity" on every
+///   `authenticate()` call. This was the actual root blocker behind every
+///   biometric-gated flow failing on Android (Create Recovery Backup, Clone
+///   to Another Device, and `customer_app`'s app-lock-on-launch). Fixed in
+///   both apps' `MainActivity.kt` (→ `FlutterFragmentActivity`).
+/// - Supplier app: fixed `BiometricAuthService.authenticate()` catching the
+///   wrong exception type. The pinned `local_auth ^3.0.1`
+///   (`local_auth_android` 2.0.9) throws `LocalAuthException` for
+///   structured auth failures, not `PlatformException` - so the specific
+///   error-code handling (NotEnrolled, PermanentlyLockedOut, LockedOut,
+///   etc.) was dead code, and every real authentication failure fell
+///   through to the generic "Unexpected error during authentication"
+///   message instead. Found while testing the Android port: a fresh
+///   emulator AVD with no device credential enrolled reproduced this
+///   reliably ("Unexpected error" instead of a helpful "set up a
+///   passcode" message), and reading the actual installed package source
+///   confirmed the exception-type mismatch is real and platform-
+///   independent - not an emulator artifact. Added an `on LocalAuthException`
+///   handler mapping `LocalAuthExceptionCode` to the existing
+///   `BiometricAuthResult` constructors; the old `PlatformException`
+///   handler is kept as a defensive fallback. `customer_app`'s simpler
+///   biometric service (plain bool, no structured error codes) doesn't have
+///   this specific dead-code bug, but was still blocked by the
+///   `FragmentActivity` issue above until that fix.
+/// - With both fixed and confirmed on the Android emulator: no-credential-
+///   enrolled state shows the correct friendly message, and with a device
+///   PIN set, Create Recovery Backup and Clone to Another Device both work
+///   end-to-end. All three Dart test suites re-verified after the fix
+///   (shared 216, customer_app 186, supplier_app 141) - no new tests, since
+///   both fixes are Android-native/exception-type-only, not app logic.
+
+/// Build 38 Changes:
+/// - **Patch version bump** (2.2.2 -> 2.2.3), not build-only - a real
+///   Android-only bug fix found while digging into the Play Store Data
+///   Safety disclosure question for the anti-fraud device signal (see
+///   `docs/deployment/PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`).
+/// - `customer_app/lib/services/device_service.dart`'s `getDeviceId()`
+///   (backing the V-005 multi-device redemption-mismatch check) hashed
+///   `AndroidDeviceInfo.id` on Android, believing it to be a per-device
+///   identifier (the old comment said so). It's actually `Build.ID` - a
+///   per-OS-build tag shared by every device on the same firmware image,
+///   not per-device - so the mismatch check silently produced false
+///   negatives (no warning shown) for any two Android devices running
+///   identical firmware, e.g. two phones of the same model/carrier on the
+///   same security patch. iOS's equivalent (`identifierForVendor`) is
+///   genuinely per-install, so this was Android-only. Also: the pinned
+///   `device_info_plus` (13.2.0) doesn't expose real `ANDROID_ID` at all any
+///   more - Google restricted it for privacy reasons - so there was no
+///   drop-in per-device OS identifier to switch to instead.
+/// - Fixed by generating a random UUID on first run and persisting it
+///   locally (`SharedPreferences`) as the Android device identifier, rather
+///   than reading anything from `device_info_plus`. Matches iOS's
+///   per-install semantics closely enough for this fraud-detection purpose,
+///   needs no special permissions, and is easier to defend in the Play Data
+///   Safety form than a hardware/OS-derived value would have been (still an
+///   open decision - see the metadata packet).
+/// - New `DeviceService.getOrCreateAndroidInstallId()` (`@visibleForTesting`,
+///   deliberately not gated on `Platform.isAndroid` itself so it can be unit
+///   tested under `flutter test`, which always runs as the host platform and
+///   can't fake `Platform.isAndroid` being true) plus
+///   `test/services/device_service_test.dart` (4 new tests) - `getDeviceId()`
+///   itself had zero prior test coverage.
+/// - Not yet re-verified on the Android emulator/hardware - functionally
+///   equivalent to the old code from every other caller's perspective (same
+///   hash/truncate wrapper, same return shape), but the Android install-ID
+///   path specifically should get a real-device pass before shipping,
+///   consistent with how Build 37's biometric fixes were verified.
+///
+/// Build 39 Changes:
+/// - **Patch version bump** (2.2.3 -> 2.2.4), not build-only - a real UI bug
+///   found during the first real-device Internal testing pass on the two
+///   Samsung Galaxy devices (A14/A12).
+/// - `customer_app/lib/screens/customer/customer_card_detail.dart`: a Secure
+///   Mode card that's complete but not yet redeemed showed two buttons doing
+///   the exact same thing - the pre-existing inline "Scan Redemption" button
+///   below the QR code, and a floating "Scan Confirmation" button added later
+///   (TEST-010, Build 20) as extra insurance against needing to scroll to
+///   reach the inline button on longer cards. Both navigated to the identical
+///   `QRScannerScreen(mode: QRScanMode.receiveStamp)` with identical result
+///   handling - not two steps, one action exposed twice under two different
+///   labels, which read as confusing rather than helpful. TEST-010's other
+///   two changes (compact QR layout, smart-collapsed stamp display for
+///   complete/redeemed cards) already keep the inline button reachable
+///   without scrolling on their own, making the FAB redundant rather than
+///   necessary - removed it, keeping only the inline button, which also
+///   matches the pattern used for every other primary action across both
+///   apps (supplier_home.dart, supplier_stamp_card.dart,
+///   supplier_redeem_card.dart, import_business_screen.dart are all inline;
+///   the only other FAB-as-primary-action, customer_home.dart's "Scan QR
+///   Code," has no inline duplicate to begin with).
+/// - No test coverage existed for either button's label/presence, so nothing
+///   to update; `flutter analyze` clean, all three suites re-verified
+///   (shared 216, customer_app 184, supplier_app 151).
+///
+/// Build 40 Changes:
+/// - Build-only bump, same 2.2.4 line - no code changes since Build 39.
+///   Build 39's version code got consumed on the Play Console Internal
+///   testing release for the Customer app (Play permanently reserves a
+///   version code once uploaded to any track, even for an abandoned/
+///   incomplete release), so it can never be reused - this build exists
+///   purely to supply a fresh version code for a clean re-upload.
+/// - Confirmed 2026-09-04: rolled out to Play Console Internal testing for
+///   **both** apps (the Customer app's first successful Android release,
+///   and the Supplier app's first Android release of any kind), installed
+///   and updating correctly on two real Android devices (Samsung Galaxy
+///   A14/A12) via the Play Store's tester opt-in flow. This confirms the
+///   build/signing/upload pipeline end-to-end on real hardware.
+/// - Confirmed 2026-09-04 (same day, following test pass): full Express and
+///   Secure Mode issue/stamp/redeem cycles both work correctly across the
+///   two real devices, the biometric challenge correctly appears on Create
+///   Recovery Backup and Clone to Another Device with a real fingerprint/PIN
+///   (not the emulator's simulated prompt), and the Secure Mode redemption
+///   screen shows only the single "Scan Redemption" button post-fix.
+///   Android real-device testing is now considered complete for this
+///   release - see `ANDROID_PORT_PLAN.md` Track 2.
+///
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.1+36';
+const String appVersion = '2.2.4+40';

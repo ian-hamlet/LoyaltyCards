@@ -2,7 +2,7 @@ import 'package:shared/shared.dart';
 
 /// Result of a backup operation
 /// 
-/// HP-1: Replaced Future<bool> pattern with detailed result object
+/// HP-1: Replaced `Future<bool>` pattern with detailed result object
 /// This provides specific error context instead of silently losing information.
 /// 
 /// Pattern matches VerificationResult (praised in code review as exemplary)

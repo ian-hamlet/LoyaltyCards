@@ -1,13 +1,9 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared/shared.dart' hide Card;
 import '../../controllers/supplier_stamp_card_controller.dart';
-import '../../services/supplier_database_helper.dart';
-import '../../services/device_orientation_service.dart';
 import '../../services/backup_storage_service.dart'; // REQ-022
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,8 +33,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   String? _errorMessage;
   int _manualRotationOffset = 1; // 0, 1, 2, or 3 quarter turns (1 = 90° to fix mobile_scanner 7.2.0)
   Timer? _countdownTimer;
-  Duration? _remainingTime;
-  
+
   // REQ-022: Enhanced Simple Mode token configuration
   int _stampCount = 1; // Number of stamps (1 to stampsRequired)
   DateTime? _expiryDate; // Optional expiry date
@@ -245,9 +240,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
   }
 
   void _showStampTokenQR(StampToken token, int currentStamps, int stampCount) {
-    final newStampCount = currentStamps + stampCount;
-    final stampText = stampCount > 1 ? '$stampCount Stamps' : 'Stamp ${token.stampNumber}';
-    
     // Navigate to non-modal QR display screen
     Navigator.push(
       context,
@@ -260,16 +252,6 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
         ),
       ),
     );
-  }
-
-  String _getExpiryTime(StampToken token) {
-    final expiryTime = DateTime.fromMillisecondsSinceEpoch(token.timestamp)
-        .add(const Duration(milliseconds: AppConstants.stampExpiryMs));
-    
-    final hour = expiryTime.hour.toString().padLeft(2, '0');
-    final minute = expiryTime.minute.toString().padLeft(2, '0');
-    
-    return '$hour:$minute';
   }
 
   void _showError(String message) {
@@ -507,6 +489,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                       }
                                     : null,
                                 icon: const Icon(Icons.remove_circle),
+                                tooltip: 'Decrease stamp count',
                               ),
                               Expanded(
                                 child: Text(
@@ -530,6 +513,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                                       }
                                     : null,
                                 icon: const Icon(Icons.add_circle),
+                                tooltip: 'Increase stamp count',
                               ),
                             ],
                           ),
@@ -568,7 +552,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                           ),
                           const SizedBox(height: 12),
                           DropdownButtonFormField<String>(
-                            value: _expiryOption,
+                            initialValue: _expiryOption,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -822,17 +806,20 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.red.shade200),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline, color: Colors.red.shade700),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade900, fontSize: 14),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red.shade700),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(color: Colors.red.shade900, fontSize: 14),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -940,7 +927,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 FloatingActionButton(
                   heroTag: 'flip_camera_stamp',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     _cameraController.switchCamera();
                   },
@@ -957,7 +944,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 FloatingActionButton(
                   heroTag: 'rotate90',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
@@ -978,7 +965,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
                 FloatingActionButton(
                   heroTag: 'rotate180',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
@@ -1016,7 +1003,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
           // Processing indicator
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -1033,26 +1020,29 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade900.withOpacity(0.95),
+                  color: Colors.red.shade900.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                child: Semantics(
+                  liveRegion: true,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1064,6 +1054,7 @@ class _SupplierStampCardState extends State<SupplierStampCard> {
             child: IconButton(
               icon: const Icon(Icons.flash_on, color: Colors.white, size: 32),
               onPressed: () => _cameraController.toggleTorch(),
+              tooltip: 'Toggle flashlight',
             ),
           ),
         ],
@@ -1148,6 +1139,7 @@ class _StampTokenScreenState extends State<_StampTokenScreen> {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back',
           onPressed: () {
             // Pop twice: close QR screen and camera scanner to return to home
             Navigator.pop(context);
@@ -1195,7 +1187,7 @@ class _StampTokenScreenState extends State<_StampTokenScreen> {
                 decoration: BoxDecoration(
                   color: BrandColors.infoContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: BrandColors.info.withOpacity(0.3)),
+                  border: Border.all(color: BrandColors.info.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [

@@ -2,6 +2,7 @@
 /// 
 /// These models define the data structures exchanged between supplier
 /// and customer devices via QR codes.
+library;
 
 import 'dart:convert';
 import 'operation_mode.dart';
@@ -131,9 +132,9 @@ class CardIssueToken extends QRToken {
     this.mode = OperationMode.secure,
     required this.signature,
     this.cardId,
-    required int timestamp,
+    required super.timestamp,
     this.initialStamps = const [],
-  }) : super(type: 'card_issue', timestamp: timestamp);
+  }) : super(type: 'card_issue');
 
   factory CardIssueToken.fromJson(Map<String, dynamic> json) {
     final initialStampsJson = json['initialStamps'] as List<dynamic>? ?? [];
@@ -262,8 +263,8 @@ class CardStampRequestToken extends QRToken {
     required this.currentStamps,
     required this.publicKey,
     required this.lastStampHash,
-    required int timestamp,
-  }) : super(type: 'card_stamp_request', timestamp: timestamp);
+    required super.timestamp,
+  }) : super(type: 'card_stamp_request');
 
   factory CardStampRequestToken.fromJson(Map<String, dynamic> json) {
     return CardStampRequestToken(
@@ -366,7 +367,7 @@ class StampToken extends QRToken {
     required this.stampNumber,
     required this.previousHash,
     required this.signature,
-    required int timestamp,
+    required super.timestamp,
     this.additionalStamps = const [],
     this.stampCount = 1, // Default: 1 stamp (backward compatible)
     this.expiryDate, // Optional expiry
@@ -375,7 +376,7 @@ class StampToken extends QRToken {
     this.brandColor,
     this.logoIndex,
     this.stampsRequired,
-  }) : super(type: 'stamp_token', timestamp: timestamp);
+  }) : super(type: 'stamp_token');
 
   factory StampToken.fromJson(Map<String, dynamic> json) {
     final additionalStampsJson = json['additionalStamps'] as List<dynamic>? ?? [];
@@ -545,10 +546,10 @@ class RedemptionRequestToken extends QRToken {
     required this.businessId,
     required this.stampsCollected,
     required this.stampProofs,
-    required int timestamp,
+    required super.timestamp,
     this.cardDeviceId,
     this.currentDeviceId,
-  }) : super(type: 'redemption_request', timestamp: timestamp);
+  }) : super(type: 'redemption_request');
 
   factory RedemptionRequestToken.fromJson(Map<String, dynamic> json) {
     // V-012: accept legacy 'stampSignatures' (bare strings, no timestamp)
@@ -632,10 +633,10 @@ class RedemptionToken extends QRToken {
     required this.businessId,
     required this.stampsRedeemed,
     required this.signature,
-    required int timestamp,
+    required super.timestamp,
     this.cardDeviceId,
     this.currentDeviceId,
-  }) : super(type: 'redemption_token', timestamp: timestamp);
+  }) : super(type: 'redemption_token');
 
   factory RedemptionToken.fromJson(Map<String, dynamic> json) {
     return RedemptionToken(

@@ -12,9 +12,11 @@ account is registered, both Play Console listings exist, Internal testing is con
 apps, and v2.2.4+40 is installed on two real Android devices (Samsung Galaxy A14/A12) - the first
 real-hardware testing this project has had on Android, surfacing and fixing one more real bug
 along the way (a duplicate action button, unrelated to the port itself - see Track 2 below and
-`version.dart` Builds 39/40). The functional Express/Secure Mode test pass on real hardware is
-still in progress; the full store listing (content rating, data safety submission) is not yet
-entered into Play Console.
+`version.dart` Builds 39/40). The full functional Express/Secure Mode test pass across both real
+devices completed successfully 2026-09-04, including biometric-gated backup/clone with a real
+fingerprint/PIN - Android real-device testing is now considered done for this release. Remaining
+before Play Store submission: the full store listing (content rating questionnaire, data safety
+submission) is not yet entered into Play Console.
 **Branch:** `feature/android-port`
 **Date:** 2026-08-29 (created); last updated 2026-09-04
 **Context:** Porting to Android is low-risk, mostly testing and store-listing work rather than a
@@ -218,9 +220,15 @@ real-device testing - see "Open Decisions / Risks" below, updated accordingly.
       -verify` before upload. Installed and updating correctly on two real Android devices
       (Samsung Galaxy A14/A12) via the Play Store's tester opt-in flow - first real-hardware
       confirmation of the build/signing/upload pipeline end-to-end.
-- [ ] Confirm the first internal test build - functional Express/Secure Mode test pass across the
-      two real devices, in progress. Found and fixed one real bug already during this pass (see
-      below), unrelated to the Android port itself.
+- [x] Confirm the first internal test build - functional Express/Secure Mode test pass completed
+      2026-09-04 across both real devices (Customer app on one Samsung Galaxy, Supplier app on the
+      other, both v2.2.4+40): full issue/stamp/redeem cycle confirmed working in both Express and
+      Secure Mode, biometric challenge confirmed appearing correctly on Create Recovery Backup and
+      Clone to Another Device (real fingerprint/PIN, not the emulator's simulated prompt), and the
+      Secure Mode redemption screen confirmed showing only the single "Scan Redemption" button
+      post-fix. One real bug found and fixed during this pass (see below), unrelated to the
+      Android port itself. Android real-device testing is now considered complete for this
+      release; Track 1's "final real-device pass" open item is resolved by this.
 - [x] Real bug found and fixed during this real-device pass, 2026-09-04: a Secure Mode card that's
       complete but not yet redeemed showed two buttons doing the exact same thing ("Scan
       Redemption" inline, "Scan Confirmation" floating) - not an Android-specific bug, just never
@@ -238,7 +246,8 @@ real-device testing - see "Open Decisions / Risks" below, updated accordingly.
   requirement and now running v2.2.4+40 via Internal testing. Before this, functional testing
   relied on emulator webcam passthrough (Mac's built-in camera, configured 2026-08-30), which
   worked but was always going to need a real-device pass before submission given OEM variance -
-  that pass is now underway on real hardware rather than rented (Firebase Test Lab/BrowserStack
+  that pass completed successfully 2026-09-04 on real hardware rather than rented (Firebase Test
+  Lab/BrowserStack
   is no longer needed).
 - **Keystore backup.** Generated 2026-08-31 (Phase 5) at `~/.android-signing/loyaltycards-release.jks`,
   machine-local only. As sensitive and as easy to lose as the iOS Distribution certificate - the

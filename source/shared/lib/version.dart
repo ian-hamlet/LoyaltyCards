@@ -907,10 +907,15 @@ library;
 ///   and the Supplier app's first Android release of any kind), installed
 ///   and updating correctly on two real Android devices (Samsung Galaxy
 ///   A14/A12) via the Play Store's tester opt-in flow. This confirms the
-///   build/signing/upload pipeline end-to-end on real hardware; the actual
-///   Express/Secure Mode functional test pass across the two devices is
-///   still in progress as of this entry - see `ANDROID_PORT_PLAN.md` Track 2
-///   for current status.
+///   build/signing/upload pipeline end-to-end on real hardware.
+/// - Confirmed 2026-09-04 (same day, following test pass): full Express and
+///   Secure Mode issue/stamp/redeem cycles both work correctly across the
+///   two real devices, the biometric challenge correctly appears on Create
+///   Recovery Backup and Clone to Another Device with a real fingerprint/PIN
+///   (not the emulator's simulated prompt), and the Secure Mode redemption
+///   screen shows only the single "Scan Redemption" button post-fix.
+///   Android real-device testing is now considered complete for this
+///   release - see `ANDROID_PORT_PLAN.md` Track 2.
 ///
 /// # source/shared/lib/version.dart:
 const String appVersion = '2.2.4+40';

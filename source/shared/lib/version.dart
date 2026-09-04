@@ -869,5 +869,48 @@ library;
 ///   path specifically should get a real-device pass before shipping,
 ///   consistent with how Build 37's biometric fixes were verified.
 ///
+/// Build 39 Changes:
+/// - **Patch version bump** (2.2.3 -> 2.2.4), not build-only - a real UI bug
+///   found during the first real-device Internal testing pass on the two
+///   Samsung Galaxy devices (A14/A12).
+/// - `customer_app/lib/screens/customer/customer_card_detail.dart`: a Secure
+///   Mode card that's complete but not yet redeemed showed two buttons doing
+///   the exact same thing - the pre-existing inline "Scan Redemption" button
+///   below the QR code, and a floating "Scan Confirmation" button added later
+///   (TEST-010, Build 20) as extra insurance against needing to scroll to
+///   reach the inline button on longer cards. Both navigated to the identical
+///   `QRScannerScreen(mode: QRScanMode.receiveStamp)` with identical result
+///   handling - not two steps, one action exposed twice under two different
+///   labels, which read as confusing rather than helpful. TEST-010's other
+///   two changes (compact QR layout, smart-collapsed stamp display for
+///   complete/redeemed cards) already keep the inline button reachable
+///   without scrolling on their own, making the FAB redundant rather than
+///   necessary - removed it, keeping only the inline button, which also
+///   matches the pattern used for every other primary action across both
+///   apps (supplier_home.dart, supplier_stamp_card.dart,
+///   supplier_redeem_card.dart, import_business_screen.dart are all inline;
+///   the only other FAB-as-primary-action, customer_home.dart's "Scan QR
+///   Code," has no inline duplicate to begin with).
+/// - No test coverage existed for either button's label/presence, so nothing
+///   to update; `flutter analyze` clean, all three suites re-verified
+///   (shared 216, customer_app 184, supplier_app 151).
+///
+/// Build 40 Changes:
+/// - Build-only bump, same 2.2.4 line - no code changes since Build 39.
+///   Build 39's version code got consumed on the Play Console Internal
+///   testing release for the Customer app (Play permanently reserves a
+///   version code once uploaded to any track, even for an abandoned/
+///   incomplete release), so it can never be reused - this build exists
+///   purely to supply a fresh version code for a clean re-upload.
+/// - Confirmed 2026-09-04: rolled out to Play Console Internal testing for
+///   **both** apps (the Customer app's first successful Android release,
+///   and the Supplier app's first Android release of any kind), installed
+///   and updating correctly on two real Android devices (Samsung Galaxy
+///   A14/A12) via the Play Store's tester opt-in flow. This confirms the
+///   build/signing/upload pipeline end-to-end on real hardware; the actual
+///   Express/Secure Mode functional test pass across the two devices is
+///   still in progress as of this entry - see `ANDROID_PORT_PLAN.md` Track 2
+///   for current status.
+///
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.3+38';
+const String appVersion = '2.2.4+40';

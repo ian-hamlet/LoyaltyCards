@@ -822,7 +822,7 @@ packages:
       path: "../shared"
       relative: true
     source: path
-    version: "2.2.3+38"
+    version: "2.2.4+40"
   shared_preferences:
     dependency: "direct main"
     description:

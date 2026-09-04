@@ -7,17 +7,25 @@ ship on Android (previously the literal Flutter placeholder and raw package name
 bugs were found and fixed along the way (one of which also affects the currently-live iOS app -
 see Phase 3 below and `2.2.2+37`'s changelog entry). Phase 5 (release build) is now done too: a
 real signing keystore exists, both apps' Gradle configs use it, and a verified-signed release AAB
-has been built for each. Track 2 (Play Console) is next and hasn't been started at all.
+has been built for each. Track 2 (Play Console) is well underway as of 2026-09-04: the developer
+account is registered, both Play Console listings exist, Internal testing is configured for both
+apps, and v2.2.4+40 is installed on two real Android devices (Samsung Galaxy A14/A12) - the first
+real-hardware testing this project has had on Android, surfacing and fixing one more real bug
+along the way (a duplicate action button, unrelated to the port itself - see Track 2 below and
+`version.dart` Builds 39/40). The functional Express/Secure Mode test pass on real hardware is
+still in progress; the full store listing (content rating, data safety submission) is not yet
+entered into Play Console.
 **Branch:** `feature/android-port`
-**Date:** 2026-08-29 (created); last updated 2026-08-31
+**Date:** 2026-08-29 (created); last updated 2026-09-04
 **Context:** Porting to Android is low-risk, mostly testing and store-listing work rather than a
 rewrite - both apps already ship `android/` scaffolding, `Platform.isAndroid` branches already
 exist in `device_service.dart`/`backup_storage_service.dart`, and the ECDSA P-256/SHA-256 signing
 (`pointycastle`, pure Dart) has zero OS dependency, so a signature produced on Android verifies
 identically on iOS and vice versa. Originating requirement: `Requirements/REQ-003_Mobile_Platform_Support.md`
 (its Android acceptance criteria are still unchecked there - this plan is where they actually get
-executed; check them off in both places as items land). No Android hardware is owned - see "Open
-Decisions / Risks" below for how that's handled.
+executed; check them off in both places as items land). Android hardware (two Samsung Galaxy
+devices) was sourced 2026-09-04 to satisfy Play's device-verification requirement and for
+real-device testing - see "Open Decisions / Risks" below, updated accordingly.
 
 ---
 
@@ -161,14 +169,12 @@ Decisions / Risks" below for how that's handled.
 
 ## Track 2: Google Play Developer Account & Store Listing
 
-- [ ] Register a Google Play Developer account ($25 one-time fee) - **requires the developer's own
-      action** (Google login + payment); nothing to do here until this exists. In progress as of
-      2026-09-02: registration is asking for proof of an Android device tied to the account (part
-      of Google's account/device verification anti-fraud step for new developer accounts) - the
-      developer is sourcing a physical Android device for this, since the emulator used for
-      screenshot capture doesn't satisfy it. This is the actual current blocker on Track 2, not
-      the $25 fee itself.
-- [ ] Create Play Console listings for both apps (one developer account, two listings - same
+- [x] Register a Google Play Developer account ($25 one-time fee) - **the developer's own action**
+      (Google login + payment). Completed 2026-09-04: the device-verification blocker (see below)
+      is resolved - the developer sourced and reset two real Android devices (Samsung Galaxy
+      A14/A12), and registration completed.
+- [x] Create Play Console listings for both apps - both created 2026-09-04
+      (`com.ianhamlet.loyaltycards.customer` / `com.ianhamlet.loyaltycards.supplier`, same
       pattern as the two App Store Connect listings under one Apple Developer account)
 - [x] Store listing content (text) drafted - 2026-08-31, see
       `docs/deployment/PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`: app names, short/full
@@ -194,23 +200,46 @@ Decisions / Risks" below for how that's handled.
             identical firmware, not per-device), silently breaking the V-005 mismatch check for
             Android devices sharing an OS image. Fixed with an app-generated random UUID
             persisted locally instead. Version bumped 2.2.2+37 → 2.2.3+38 - see `version.dart`
-            Build 38. Not yet re-verified on the Android emulator/hardware. The disclosure
-            judgment call above should be decided against this fixed behavior, not the old one.
+            Build 38.
+      - [x] Data Safety disclosure decided 2026-09-02 against the fixed behavior above - see
+            `PLAY_STORE_METADATA_PACKET_v2_2_2_37.md`. Not yet entered into Play Console (that
+            happens once the store listing itself is filled in, not required for Internal
+            testing).
 - [x] Privacy Policy / Support / Terms URLs - already hosted on Cloudflare Pages from the iOS
       work, directly reusable (same URLs carried into the Play packet)
-- [ ] Configure an Internal testing track (Play's TestFlight equivalent)
-- [ ] Upload and confirm a first internal test build for both apps
+- [x] Configure an Internal testing track (Play's TestFlight equivalent) - done for both apps,
+      2026-09-04
+- [x] Upload a first internal test build for both apps - done 2026-09-04: v2.2.4+40 (customer_app's
+      first successful Android release; supplier_app's first Android release of any kind).
+      v2.2.4+39 was built and uploaded first but its version code got consumed by an abandoned
+      draft release (Play permanently reserves a version code once uploaded to any track, even
+      for a deleted draft) - +40 is a build-only bump carrying no code changes beyond +39, purely
+      to get a fresh, usable version code. Both AABs confirmed release-signed via `jarsigner
+      -verify` before upload. Installed and updating correctly on two real Android devices
+      (Samsung Galaxy A14/A12) via the Play Store's tester opt-in flow - first real-hardware
+      confirmation of the build/signing/upload pipeline end-to-end.
+- [ ] Confirm the first internal test build - functional Express/Secure Mode test pass across the
+      two real devices, in progress. Found and fixed one real bug already during this pass (see
+      below), unrelated to the Android port itself.
+- [x] Real bug found and fixed during this real-device pass, 2026-09-04: a Secure Mode card that's
+      complete but not yet redeemed showed two buttons doing the exact same thing ("Scan
+      Redemption" inline, "Scan Confirmation" floating) - not an Android-specific bug, just never
+      visible on iOS/TestFlight screens captured previously. Removed the redundant floating button,
+      keeping the inline one, which also matches the primary-action pattern used everywhere else in
+      both apps. Version bumped 2.2.3+38 → 2.2.4+39 (then +40, see above) - see `version.dart`
+      Builds 39/40.
 
 ---
 
 ## Open Decisions / Risks
 
-- **No Android hardware owned.** Resolved for functional testing purposes: emulator webcam
-  passthrough (Mac's built-in camera, configured 2026-08-30) let the emulator genuinely scan real
-  codes, confirmed via full Secure Mode issue/stamp/redeem testing. Still worth a final real-device
-  pass (rented via Firebase Test Lab / BrowserStack) before Play Store submission, since an
-  emulator - even with a working camera - isn't a full substitute for real hardware/OEM variance,
-  but this is no longer a functional blocker for continued development.
+- **No Android hardware owned.** Fully resolved 2026-09-04 - the developer sourced and reset two
+  real Android devices (Samsung Galaxy A14/A12), both satisfying Play's device-verification
+  requirement and now running v2.2.4+40 via Internal testing. Before this, functional testing
+  relied on emulator webcam passthrough (Mac's built-in camera, configured 2026-08-30), which
+  worked but was always going to need a real-device pass before submission given OEM variance -
+  that pass is now underway on real hardware rather than rented (Firebase Test Lab/BrowserStack
+  is no longer needed).
 - **Keystore backup.** Generated 2026-08-31 (Phase 5) at `~/.android-signing/loyaltycards-release.jks`,
   machine-local only. As sensitive and as easy to lose as the iOS Distribution certificate - the
   keystore file itself still needs a real backup (Time Machine/iCloud Drive/etc. - not yet

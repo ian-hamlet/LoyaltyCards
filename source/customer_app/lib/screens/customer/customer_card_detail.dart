@@ -711,31 +711,6 @@ class _CustomerCardDetailState extends State<CustomerCardDetail> {
           ],
         ),
       ),
-      // Floating Action Button - Always visible "Scan Confirmation" for redemption (TEST-010)
-      floatingActionButton: (_card!.mode == OperationMode.secure &&
-              _card!.isComplete &&
-              !_card!.isRedeemed)
-          ? FloatingActionButton.extended(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const QRScannerScreen(
-                      mode: QRScanMode.receiveStamp,
-                    ),
-                  ),
-                );
-
-                if (result != null && mounted && context.mounted) {
-                  AppFeedback.info(context, result);
-                  await _loadCardData();
-                }
-              },
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const ScaleCapped(child: Text('Scan Confirmation')),
-              backgroundColor: Colors.green[600],
-            )
-          : null,
     );
   }
 

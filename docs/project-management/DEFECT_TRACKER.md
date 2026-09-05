@@ -2171,6 +2171,22 @@ This document tracks defects from two sources:
 
 ---
 
+### DECISION-024: Add a Sort Control to the Customer Wallet Home Screen
+
+- **Type:** Feature addition, not yet built - analysis only, logged at the user's request
+- **Status:** 📋 BACKLOG
+- **Priority:** LOW (UX enhancement, no correctness issue - current behavior is consistent, just invisible)
+- **Screen/Feature:** `source/customer_app/lib/screens/customer/customer_home.dart`
+- **Context:** User asked what order the wallet displays cards in (having possibly been confused by this before). Traced the full history: the card list has never had a genuine "sort" feature - the very first prototype (`da06ef1`, "phase 0") had three hardcoded mock cards that happened to be typed in alphabetical order, purely coincidental (new cards were just appended to a static list). Since `bba07a4` ("phase 1 and 2 completion", 2026-04-03), the real `CardRepository.getAllCards()` implementation has always queried `orderBy: 'created_at DESC'` (newest-created card first) - unchanged ever since, confirmed via full `--follow -p` history search on both `card_repository.dart` and `customer_home.dart`. There is no sort UI at all today; the order is a fixed, invisible default.
+- **Assessment (complexity is low):** every field needed for realistic sort options already exists on the `Card` model (`businessName`, `createdAt`, `updatedAt`, `stampsCollected`/`stampsRequired`, `isRedeemed`) - no schema change, no new query, no new package. `_filteredCards[index]` is used only for rendering (confirmed via grep - nothing downstream keys off list position), so reordering is safe with zero effect on any other logic. The shape of the change mirrors the existing `_hideRedeemed` pattern already in this exact file (a persisted `SharedPreferences` bool + applied in `_filterCards()`) - a sort option is the same pattern with an enum instead of a bool. Estimated a few hours including a test, not a redesign.
+- **Suggested options (keep short):** Newest First (current behavior - would be the default, so no change for existing users until they touch it), Oldest First, Name (A-Z), Name (Z-A). A progress-based option (closest to complete) is possible later without disturbing the rest, since `stampsCollected`/`stampsRequired` are already available - not recommended for a first pass, less obvious as a "sort" mental model.
+- **UI placement options considered:**
+  1. **(Recommended)** A third AppBar icon (`Icons.sort`) next to the existing Help/Settings icons, opening a `PopupMenuButton` checklist. Standard Material pattern, no extra vertical space, avoids the existing filter-chip `Wrap` row - which already needed `ScaleCapped` fixes for overflow at large accessibility text sizes, so adding a second chip there raises that risk again.
+  2. A second chip (`ActionChip`/dropdown) next to the existing "Show Redeemed" `FilterChip`, keeping it visually grouped with the other display-affecting control - riskier on small screens/large text given that row's overflow history.
+- **Target Build:** Unscheduled - no code written yet, this is the recorded analysis for whenever it's picked up.
+
+---
+
 ## 📊 Defect Summary Statistics
 
 ### By Priority

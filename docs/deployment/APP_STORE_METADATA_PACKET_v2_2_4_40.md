@@ -1,10 +1,12 @@
 # App Store Metadata Packet (v2.2.4+40)
 
-**Status: 🟢 Submitted for App Store review 2026-09-04 (both apps), after Transporter upload and
-in-parallel TestFlight testing.** Built via `build_both_apps_ios.sh`, both IPAs verified (valid
-zip, correct 2.2.4/40 in `Info.plist`, correct bundle IDs). Branch: merged `feature/android-port`
-→ `develop` (`767f641`), release branch `releases/v2.2.4-build40` cut from `develop`. Not yet
-merged to `main` - held until both apps clear review, per this project's standard convention.
+**Status: 🟢 LIVE ON THE APP STORE — approved by Apple and released 2026-09-06 (both apps), no
+review questions raised.** Submitted 2026-09-04 after Transporter upload; TestFlight real-device
+testing completed in parallel with the review, behavior confirmed consistent with prior versions,
+no regressions found. Built via `build_both_apps_ios.sh`, both IPAs verified (valid zip, correct
+2.2.4/40 in `Info.plist`, correct bundle IDs). Branch: merged `feature/android-port` → `develop`
+(`767f641`), release branch `releases/v2.2.4-build40` cut from `develop`. Not yet merged to `main`
+- held until Android also clears Play Store review, per this project's standard convention.
 
 **First iOS build since v2.2.1+36** - builds 37, 38, and 39 were never built for iOS at all
 (version-bumped in source only, for Android-only fixes built and tested exclusively via Play

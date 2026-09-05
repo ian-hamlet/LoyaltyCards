@@ -2150,6 +2150,27 @@ This document tracks defects from two sources:
 
 ---
 
+### TEST-023: Business Icon Silently Resets to the Default Store Icon on Clone/Recovery Restore
+
+- **Source:** Real-device testing, found by the user cloning a Supplier business from an Android device to an iOS device during Android-port real-hardware testing (v2.2.4+40)
+- **Status:** 📋 BACKLOG - deferred to after the current release cycle (v2.2.4+40) completes, by user decision
+- **Priority:** MEDIUM (cosmetic - no data loss, no security impact, no functional breakage of stamping/redemption - but a real, 100%-reproducible defect on a supplier-facing feature)
+- **Screen/Feature:** Both apps share the fault - `shared/lib/models/supplier_config_backup.dart` (`SupplierConfigBackup`), consumed by Supplier App's `import_business_screen.dart` (both "Clone to Another Device" and "Create Recovery Backup" restore flows)
+- **Description:** `SupplierConfigBackup` - the single model backing both Clone and Recovery Backup - has no `logoIndex` field anywhere in it: not in the class/constructor, not in `toJson()`/`fromJson()`, not in the signed payload (`_calculateSignature()`), and not in `toBusiness()` (which reconstructs the `Business` object on import). Every other business-identifying field (`businessName`, `brandColor`, `stampsRequired`, `operationMode`, `privateKey`/`publicKey`) is present and round-trips correctly - `logoIndex` was simply never added to this model at all.
+- **Reproduction Steps:**
+  1. Configure a Supplier business with any non-default icon (i.e. anything other than index 0/Store)
+  2. Generate a Clone QR (Settings → Clone to Another Device) or a Recovery Backup
+  3. Scan/restore it on another device (or the same device after a reset) via "Recover Existing Business"
+  4. Restored business shows the generic Store icon, regardless of what icon the original business had
+- **Expected Behavior:** The restored/cloned business should show the same icon as the source business
+- **Actual Behavior:** Icon always resets to index 0 (Store) - `Business`'s constructor default - because `toBusiness()` never sets `logoIndex` at all
+- **Root Cause:** Field omission in `SupplierConfigBackup`, not a range/bounds bug. Confirmed NOT limited to the 8 icons added in DECISION-018 (index 20-27) - **any** non-zero `logoIndex` (1-27) is lost, including icons from the original set of 20. Confirmed both "Clone to Another Device" and "Create Recovery Backup" restore share the exact same defect, since `import_business_screen.dart:149` (`final business = backup.toBusiness();`) is the single reconstruction path for both - they're only distinguished afterward by `backup.type` for audit-trail logging. Not platform-specific either (not Android→iOS specific - would reproduce on any platform pairing, including same-platform).
+- **Fix Required (not yet applied):** Add `logoIndex` to `SupplierConfigBackup`, but **exclude it from the signed payload** (`_calculateSignature`'s `dataToSign` string), decoding as `json['logoIndex'] as int? ?? 0` for backward compatibility. This mirrors the existing precedent in this codebase: `StampToken` already carries `logoIndex`/`brandColor`/`businessName`/`stampsRequired` as deliberately unsigned snapshot fields, "kept outside `getSignatureData()` so stamp-chain integrity is unaffected, decoded as nullable for backward compatibility" (see `version.dart` Build 31/DECISION-021). Doing the same here means any Recovery Backup QR/PDF already printed and stored away keeps verifying correctly under old or new app code - only the icon-carrying behavior changes going forward, nothing about already-generated backups needs regenerating. Also update `test_fixtures.dart`'s `testSupplierConfigBackup` alongside the model change.
+- **Impact:** Any supplier who picked a non-default icon and then clones to a second device or restores from a Recovery Backup gets their icon silently reset - a real papercut for a self-service feature the app markets ("Back up your configuration with one QR scan and clone it to additional devices"), though with no data loss or security consequence - `brandColor` and everything else survives correctly, and the icon is trivially re-settable in Settings afterward.
+- **Target Build:** Unscheduled - deferred until after v2.2.4+40 clears both stores' review, per user decision 2026-09-05/06.
+
+---
+
 ## 📊 Defect Summary Statistics
 
 ### By Priority

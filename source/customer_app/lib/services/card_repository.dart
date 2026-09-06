@@ -6,13 +6,13 @@ import 'database_helper.dart';
 /// Repository for managing loyalty cards in the database
 /// 
 /// ERROR HANDLING PATTERN:
-/// All mutation methods (insert, update, delete) return Future<void>:
+/// All mutation methods (insert, update, delete) return `Future<void>`:
 /// - Throws CardValidationException on invalid input (works in ALL builds)
 /// - Throws DatabaseConstraintException on database constraint violations
 /// - Caller must catch and handle exceptions at UI boundary
 /// - Database operations are critical - failures indicate serious problems
-/// 
-/// Query methods return Future<List<T>> or Future<T?>:
+///
+/// Query methods return `Future<List<T>>` or `Future<T?>`:
 /// - Empty list for no results (not an error)
 /// - null for not found (not an error)
 /// - Throws exceptions for database errors only

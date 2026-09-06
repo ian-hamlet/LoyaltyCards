@@ -270,7 +270,7 @@ These documents contain proven prompt templates for triggering comprehensive cod
 - User: 2 files (guides)
 - Meta: 7 files (metadata, template guides)
 - Meta: 5 files (project metadata, documentation tracking)
-- Source: 3 files (source/README.md, QUICK_START.md, FLUTTER_SETUP_GUIDE.md - not tracked in this index)
+- Source: 1 file (source/README.md - not tracked in this index)
 
 **Critical Documents:** 4 AI prompt templates marked ⭐  
 **Requirements:** 24 requirement documents (REQ-001 to REQ-022 + README + discovery + template)  

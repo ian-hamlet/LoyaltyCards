@@ -77,7 +77,8 @@ class SimpleTokenBackupService {
     final qrSize = size - (margin * 2);
     final qrPainter = QrPainter.withQr(
       qr: qrCode,
-      color: const Color(0xFF000000),
+      eyeStyle: const QrEyeStyle(color: Color(0xFF000000)),
+      dataModuleStyle: const QrDataModuleStyle(color: Color(0xFF000000)),
       gapless: true,
       embeddedImageStyle: null,
       embeddedImage: null,
@@ -264,11 +265,13 @@ For best results:
 4. Show to customers after purchase
 ''';
 
-      final result = await Share.shareXFiles(
-        [XFile(filePath)],
-        subject: subject,
-        text: body,
-        sharePositionOrigin: sharePositionOrigin,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(filePath)],
+          subject: subject,
+          text: body,
+          sharePositionOrigin: sharePositionOrigin,
+        ),
       );
 
       AppLogger.debug('=== shareSimpleTokenViaEmail END (success: true) ===', 'BackupService');
@@ -318,11 +321,13 @@ For best results:
 
       if (Platform.isIOS) {
         final stampText = stampCount == 1 ? '1 Stamp' : '$stampCount Stamps';
-        final result = await Share.shareXFiles(
-          [XFile(filePath)],
-          subject: 'LoyaltyCards Stamp Token - $stampText',
-          text: 'Save this stamp token to a secure location',
-          sharePositionOrigin: sharePositionOrigin,
+        final result = await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(filePath)],
+            subject: 'LoyaltyCards Stamp Token - $stampText',
+            text: 'Save this stamp token to a secure location',
+            sharePositionOrigin: sharePositionOrigin,
+          ),
         );
         AppLogger.debug('Share result: ${result.status}', 'BackupService');
       }
@@ -381,7 +386,7 @@ For best results:
                 // Title
                 pw.Text(
                   businessName,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 28,
                     fontWeight: pw.FontWeight.bold,
                   ),
@@ -412,7 +417,7 @@ For best results:
                     children: [
                       pw.Text(
                         'Stamp Token: $stampText',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 18,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.blue900,
@@ -426,7 +431,7 @@ For best results:
                       pw.SizedBox(height: 10),
                       pw.Text(
                         'Instructions:',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 14,
                           fontWeight: pw.FontWeight.bold,
                         ),

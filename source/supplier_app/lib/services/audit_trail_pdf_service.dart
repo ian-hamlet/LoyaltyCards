@@ -39,7 +39,7 @@ class AuditTrailPdfService {
         build: (context) => [
           pw.Header(
             level: 0,
-            child: pw.Text('LoyaltyCards Audit Trail', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+            child: pw.Text('LoyaltyCards Audit Trail', style: const pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
           ),
           pw.Text('Business: ${business.name}'),
           pw.Text('Business ID: ${business.id}'),
@@ -48,7 +48,7 @@ class AuditTrailPdfService {
           if (entries.isEmpty)
             pw.Text('No audit trail entries yet.')
           else
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               headers: const ['Date/Time', 'Property', 'New Value', 'App Version'],
               data: entries
                   .map((e) => [
@@ -58,7 +58,7 @@ class AuditTrailPdfService {
                         e.appVersion,
                       ])
                   .toList(),
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              headerStyle: const pw.TextStyle(fontWeight: pw.FontWeight.bold),
               cellAlignment: pw.Alignment.centerLeft,
               columnWidths: const {
                 0: pw.FlexColumnWidth(2.2),
@@ -106,11 +106,13 @@ class AuditTrailPdfService {
       final file = File(filePath);
       await file.writeAsBytes(bytes);
 
-      final result = await Share.shareXFiles(
-        [XFile(filePath)],
-        subject: 'LoyaltyCards Audit Trail - ${business.name}',
-        text: 'Audit trail for ${business.name}, generated ${DateFormat('MMMM d, yyyy').format(DateTime.now())}.',
-        sharePositionOrigin: sharePositionOrigin,
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(filePath)],
+          subject: 'LoyaltyCards Audit Trail - ${business.name}',
+          text: 'Audit trail for ${business.name}, generated ${DateFormat('MMMM d, yyyy').format(DateTime.now())}.',
+          sharePositionOrigin: sharePositionOrigin,
+        ),
       );
 
       AppLogger.debug('Audit trail share result: ${result.status}', 'AuditTrail');

@@ -1,12 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared/shared.dart' hide Card;
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../controllers/controller_results.dart';
 import '../../controllers/supplier_redeem_card_controller.dart';
-import '../../services/device_orientation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SupplierRedeemCard extends StatefulWidget {
@@ -114,20 +111,20 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Info Card
-              Card(
+              const Card(
                 elevation: 1,
                 color: BrandColors.successContainer,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: BrandColors.success, size: 24),
-                      const SizedBox(width: 12),
+                      Icon(Icons.info_outline, color: BrandColors.success, size: 24),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Express Mode - Manual Redemption',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -135,8 +132,8 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                                 fontSize: 14,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            const Text(
+                            SizedBox(height: 4),
+                            Text(
                               'Honor-based system - verify customer has completed card',
                               style: TextStyle(
                                 color: BrandColors.textSecondary,
@@ -283,7 +280,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                 FloatingActionButton(
                   heroTag: 'flip_camera_redeem',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     cameraController.switchCamera();
                   },
@@ -300,7 +297,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                 FloatingActionButton(
                   heroTag: 'rotate90',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
@@ -321,7 +318,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
                 FloatingActionButton(
                   heroTag: 'rotate180',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
@@ -359,7 +356,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
           // Processing indicator
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -374,6 +371,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
             child: IconButton(
               icon: const Icon(Icons.flash_on, color: Colors.white, size: 32),
               onPressed: () => cameraController.toggleTorch(),
+              tooltip: 'Toggle flashlight',
             ),
           ),
         ],
@@ -381,6 +379,11 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     );
   }
 
+  // Q-013 (docs/archive/quality/FUNCTIONAL_REVIEW_2026-07-26.md): deliberately
+  // unreachable - Express Mode redemption is self-service by design, no
+  // confirmation button is wired to this. Kept as a reserved code path in
+  // case that decision changes; not dead code to delete.
+  // ignore: unused_element
   Widget _buildStep(String text) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,6 +400,9 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     );
   }
 
+  // Q-013: see the ignore comment on _buildStep above - same deliberate
+  // reserved-but-unreachable status, not dead code to delete.
+  // ignore: unused_element
   Future<void> _showRedemptionConfirmation() async {
     if (_business == null) return;
 
@@ -601,7 +607,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     RedemptionRequestToken? token,
   }) async {
     final result = await _controller.confirmRedemption(cardId, stamps, token: token);
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
 
     if (!result.isSuccess) {
       _showError(result.errorMessage!);
@@ -620,7 +626,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
     );
 
     // Return to previous screen after showing token
-    if (mounted) {
+    if (mounted && context.mounted) {
       Navigator.pop(context, true);
     }
 
@@ -658,22 +664,22 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
               Expanded(child: Text('Device Mismatch')),
             ],
           ),
-          content: Column(
+          content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'This card is being redeemed on a different device than where it was created.',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
-              const Text('Possible reasons:'),
-              const SizedBox(height: 8),
-              const Text('• Customer got a new phone'),
-              const Text('• Customer restored from backup'),
-              const Text('• Card was cloned/duplicated (fraud)'),
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: 16),
+              Text('Possible reasons:'),
+              SizedBox(height: 8),
+              Text('• Customer got a new phone'),
+              Text('• Customer restored from backup'),
+              Text('• Card was cloned/duplicated (fraud)'),
+              SizedBox(height: 16),
+              Text(
                 'Verify the customer\'s identity and check stamp history before proceeding.',
                 style: TextStyle(fontSize: 13, color: Colors.grey),
               ),
@@ -696,7 +702,7 @@ class _SupplierRedeemCardState extends State<SupplierRedeemCard> {
       },
     );
 
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
 
     if (result == true) {
       // User chose to proceed despite mismatch
@@ -770,7 +776,7 @@ class _RedemptionTokenScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: BrandColors.successContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: BrandColors.success.withOpacity(0.3)),
+                  border: Border.all(color: BrandColors.success.withValues(alpha: 0.3)),
                 ),
                 child: const Row(
                   children: [
@@ -800,7 +806,7 @@ class _RedemptionTokenScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),

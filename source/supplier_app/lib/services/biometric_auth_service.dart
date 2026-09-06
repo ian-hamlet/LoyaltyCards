@@ -67,9 +67,33 @@ class BiometricAuthService {
         AppLogger.debug('❌ Authentication failed or cancelled', 'BiometricAuth');
         return const BiometricAuthResult.cancelled();
       }
+    } on LocalAuthException catch (e) {
+      AppLogger.error('LocalAuthException during authentication: ${e.code}', error: e, tag: 'BiometricAuth');
+
+      // local_auth_android 2.x / local_auth_darwin throw LocalAuthException,
+      // not PlatformException - this is the exception type actually thrown
+      // by the pinned local_auth ^3.0.1. The PlatformException handler below
+      // is kept as a defensive fallback but is not expected to trigger.
+      switch (e.code) {
+        case LocalAuthExceptionCode.noBiometricHardware:
+        case LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable:
+          return const BiometricAuthResult.notAvailable('Biometric authentication is not available');
+        case LocalAuthExceptionCode.noCredentialsSet:
+        case LocalAuthExceptionCode.noBiometricsEnrolled:
+          return const BiometricAuthResult.notEnrolled();
+        case LocalAuthExceptionCode.biometricLockout:
+          return BiometricAuthResult.platformError(e, 'Too many failed attempts. Please try again later.');
+        case LocalAuthExceptionCode.temporaryLockout:
+          return BiometricAuthResult.platformError(e, 'Temporarily locked. Please try again later.');
+        case LocalAuthExceptionCode.userCanceled:
+        case LocalAuthExceptionCode.systemCanceled:
+          return const BiometricAuthResult.cancelled();
+        default:
+          return BiometricAuthResult.platformError(e, 'Authentication error: ${e.description ?? e.code.name}');
+      }
     } on PlatformException catch (e) {
       AppLogger.error('Platform exception during authentication: ${e.code}', error: e, tag: 'BiometricAuth');
-      
+
       // Parse specific error codes from local_auth package
       // Note: local_auth 3.0+ removed error_codes, using string matching instead
       switch (e.code) {

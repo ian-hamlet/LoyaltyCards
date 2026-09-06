@@ -34,7 +34,7 @@
 <div class="wrap">
   <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
   <h1>Privacy Policy for LoyaltyCards</h1>
-  <p class="meta">Last Updated: July 25, 2026 &nbsp;·&nbsp; Effective Date: April 13, 2026</p>
+  <p class="meta">Last Updated: September 3, 2026 &nbsp;·&nbsp; Effective Date: April 13, 2026</p>
 
   <div class="callout"><strong>The short version: we collect NO personal data. Everything stays on your device.</strong></div>
 
@@ -56,10 +56,10 @@
   </ul>
 
   <h2>How LoyaltyCards Works</h2>
-  <p><strong>Local Storage Only.</strong> All data is stored exclusively on your device using iOS local storage:</p>
+  <p><strong>Local Storage Only.</strong> All data is stored exclusively on your device using local storage:</p>
   <ul>
-    <li><strong>Customer App:</strong> Your loyalty cards and stamp history are stored in your device's local database (SQLite)</li>
-    <li><strong>Supplier App:</strong> Your business configuration and transaction history are stored in your device's local database (SQLite)</li>
+    <li><strong>Customer App:</strong> Your loyalty cards and stamp history are stored in your device's local database</li>
+    <li><strong>Supplier App:</strong> Your business configuration and transaction history are stored in your device's local database</li>
   </ul>
   <p>Your data never reaches us. We have no servers, no cloud storage, and no data backends — the only place your data ever goes is directly to another device during a QR exchange, described below.</p>
 
@@ -71,12 +71,11 @@
     <li>QR codes contain only the minimal data needed for the transaction (business ID, card ID, stamp count, and — for Secure Mode redemptions only — a one-way-hashed device signal, see below)</li>
   </ul>
 
-  <p><strong>Anti-Fraud Device Signal (Secure Mode Redemption Only).</strong> One narrow exception to "we don't collect device identifiers": when you redeem a Secure Mode loyalty card, the redemption QR code includes a one-way-hashed identifier derived from your device. This lets the business detect if the same card is being redeemed from an unusually large number of different devices — a fraud-prevention signal, similar to a cashier checking a physical stamp card for signs of it being passed around or copied.</p>
+  <p><strong>Anti-Fraud Device Signal (Secure Mode Redemption Only).</strong> One narrow exception to "we don't collect device identifiers": when you redeem a Secure Mode loyalty card, the redemption QR code includes a random, one-way identifier generated for your specific installation of the app. This lets the business detect if the same card is being redeemed from an unusually large number of different devices — a fraud-prevention signal, similar to a cashier checking a physical stamp card for signs of it being passed around or copied.</p>
   <ul>
     <li>This value is generated on your device and cannot be reversed to identify your device or you personally</li>
-    <li>It travels only within that single QR exchange, directly to the business's device processing that redemption</li>
-    <li>It is never transmitted to us, to any server, or to any third party</li>
-    <li>It is not used for tracking, advertising, or any purpose beyond this one fraud check</li>
+    <li>It is sent directly to the business's device as part of that one redemption. It is never sent to us, to any server, or to anyone beyond that single transaction — it is not collected, aggregated, sold, or used for any purpose beyond that one fraud check</li>
+    <li>It is not used for tracking or advertising</li>
     <li>It is not used in Express Mode, which has no per-stamp or redemption verification at all</li>
   </ul>
 

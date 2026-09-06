@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
-# Builds release IPAs for both apps, one after the other.
+# Builds release IPAs for both apps, one after the other (iOS/Apple App Store).
+# For the Android/Google Play equivalent, see build_both_apps_android.sh.
 #
 # Usage: from anywhere, run:
-#   ./build_both_apps.sh
+#   ./build_both_apps_ios.sh
 # or:
-#   bash source/build_both_apps.sh
+#   bash source/build_both_apps_ios.sh
 #
 # Run this alone - don't start a second build of either app while this is
 # running. Two concurrent `flutter clean`/`flutter build` runs against the

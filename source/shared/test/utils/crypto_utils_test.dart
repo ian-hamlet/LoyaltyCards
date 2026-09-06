@@ -257,7 +257,7 @@ void main() {
     /// the V-010 fix: stampCount=1, expiryDate=null, scanInterval=null are
     /// baked into every real Secure Mode stamp (see supplier_stamp_card.dart
     /// - it never sets these REQ-022/Simple-Mode-only fields).
-    String _signChainStamp({
+    String signChainStamp({
       required String cardId,
       required int stampNumber,
       required int timestamp,
@@ -267,12 +267,12 @@ void main() {
       return _sign(data, keyPair.privateKey as ECPrivateKey);
     }
 
-    List<RedemptionStampProof> _genuineChain(String cardId, int count) {
+    List<RedemptionStampProof> genuineChain(String cardId, int count) {
       final proofs = <RedemptionStampProof>[];
       String previousHash = '';
       for (int i = 1; i <= count; i++) {
         final timestamp = 1749600000000 + i;
-        final signature = _signChainStamp(
+        final signature = signChainStamp(
           cardId: cardId,
           stampNumber: i,
           timestamp: timestamp,
@@ -285,7 +285,7 @@ void main() {
     }
 
     test('accepts a genuine, fully-signed stamp chain', () {
-      final proofs = _genuineChain('card-001', 5);
+      final proofs = genuineChain('card-001', 5);
 
       final result = CryptoUtils.verifyRedemptionStampChain(
         cardId: 'card-001',
@@ -314,7 +314,7 @@ void main() {
     });
 
     test('rejects when a genuine stamp is appended with a fabricated one', () {
-      final proofs = _genuineChain('card-001', 2)
+      final proofs = genuineChain('card-001', 2)
         ..add(RedemptionStampProof(signature: 'fabricated-extra-stamp', timestamp: 999));
 
       final result = CryptoUtils.verifyRedemptionStampChain(
@@ -328,7 +328,7 @@ void main() {
     });
 
     test('rejects a genuine chain verified against a different cardId', () {
-      final proofs = _genuineChain('card-001', 3);
+      final proofs = genuineChain('card-001', 3);
 
       final result = CryptoUtils.verifyRedemptionStampChain(
         cardId: 'card-999', // customer claims a different card
@@ -340,7 +340,7 @@ void main() {
     });
 
     test('rejects a genuine chain verified against the wrong business public key', () {
-      final proofs = _genuineChain('card-001', 3);
+      final proofs = genuineChain('card-001', 3);
       final otherKeyPair = _generateKeyPair();
       final wrongPublicKey = _encodePublicKey(otherKeyPair.publicKey as ECPublicKey);
 
@@ -354,7 +354,7 @@ void main() {
     });
 
     test('rejects reordered stamps (breaks the hash chain)', () {
-      final proofs = _genuineChain('card-001', 3);
+      final proofs = genuineChain('card-001', 3);
       final reordered = [proofs[1], proofs[0], proofs[2]];
 
       final result = CryptoUtils.verifyRedemptionStampChain(
@@ -384,13 +384,13 @@ void main() {
       // signature only verifies against the original data, not its new
       // position - originalCardId/originalStampNumber/originalPreviousHash
       // is exactly what lets that still verify correctly.
-      final sourcePreviousHash = _signChainStamp(
+      final sourcePreviousHash = signChainStamp(
         cardId: 'card-source',
         stampNumber: 5,
         timestamp: 1749600000005,
         previousHash: '',
       );
-      final movedSignature = _signChainStamp(
+      final movedSignature = signChainStamp(
         cardId: 'card-source',
         stampNumber: 6,
         timestamp: 1749600000006,
@@ -420,7 +420,7 @@ void main() {
       // Genuinely signed as card-source stamp #6, but the redemption
       // request claims it was originally stamp #7 - the signature won't
       // match that fabricated claim.
-      final movedSignature = _signChainStamp(
+      final movedSignature = signChainStamp(
         cardId: 'card-source',
         stampNumber: 6,
         timestamp: 1749600000006,
@@ -453,7 +453,7 @@ void main() {
       // directly earned there, positionally, rather than moved. Since its
       // signature covers card-source (not card-dest), positional
       // verification against card-dest must fail.
-      final signature = _signChainStamp(
+      final signature = signChainStamp(
         cardId: 'card-source',
         stampNumber: 1,
         timestamp: 1749600000001,
@@ -479,13 +479,13 @@ void main() {
       // its previousHash is genuinely the moved stamp's signature - the
       // chain walk must keep using proof.signature between iterations
       // regardless of whether the preceding stamp was itself moved.
-      final movedSignature = _signChainStamp(
+      final movedSignature = signChainStamp(
         cardId: 'card-source',
         stampNumber: 3,
         timestamp: 1749600000003,
         previousHash: '',
       );
-      final normalSignature = _signChainStamp(
+      final normalSignature = signChainStamp(
         cardId: 'card-dest',
         stampNumber: 2,
         timestamp: 1749600000010,
@@ -517,7 +517,7 @@ void main() {
       // genuinely earns ONE real stamp, then submits it multiple times
       // (each independently a perfectly valid signature) to claim a card
       // is complete when only one stamp was ever actually issued.
-      final genuineSignature = _signChainStamp(
+      final genuineSignature = signChainStamp(
         cardId: 'card-001',
         stampNumber: 1,
         timestamp: 1749600000001,
@@ -546,7 +546,7 @@ void main() {
       // The signature itself is still the same real artifact being reused,
       // so this must still be rejected regardless of what original context
       // each copy claims.
-      final genuineSignature = _signChainStamp(
+      final genuineSignature = signChainStamp(
         cardId: 'card-source',
         stampNumber: 1,
         timestamp: 1749600000001,

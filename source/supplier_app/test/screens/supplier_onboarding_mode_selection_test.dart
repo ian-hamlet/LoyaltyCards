@@ -27,10 +27,8 @@ void main() {
     testWidgets('defaults to Express Mode (OperationMode.simple)', (tester) async {
       await pumpOnboarding(tester);
 
-      final simpleRadio = tester.widget<RadioListTile<OperationMode>>(
-        find.widgetWithText(RadioListTile<OperationMode>, OperationMode.simple.displayName),
-      );
-      expect(simpleRadio.groupValue, OperationMode.simple);
+      final radioGroup = tester.widget<RadioGroup<OperationMode>>(find.byType(RadioGroup<OperationMode>));
+      expect(radioGroup.groupValue, OperationMode.simple);
 
       // The scan-cooldown section is Simple-Mode-only - visible by default.
       expect(find.text('Customer Scan Cooldown'), findsOneWidget);
@@ -52,10 +50,8 @@ void main() {
 
       await tapModeOption(tester, find.text(OperationMode.secure.displayName));
 
-      final secureRadio = tester.widget<RadioListTile<OperationMode>>(
-        find.widgetWithText(RadioListTile<OperationMode>, OperationMode.secure.displayName),
-      );
-      expect(secureRadio.groupValue, OperationMode.secure);
+      final radioGroup = tester.widget<RadioGroup<OperationMode>>(find.byType(RadioGroup<OperationMode>));
+      expect(radioGroup.groupValue, OperationMode.secure);
       expect(find.text('Customer Scan Cooldown'), findsNothing);
     });
 

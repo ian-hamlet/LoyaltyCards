@@ -193,7 +193,7 @@ class BrandColors {
   
   /// Convert Color to hex string
   static String toHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+    return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
   }
 }
 

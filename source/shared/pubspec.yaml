@@ -2,7 +2,7 @@ name: shared
 description: "A new Flutter package project."
 # always keep the 3 pubspec.yaml files and the version .dart file in sync with the same version number
 # source/shared/lib/version.dart: 
-version: 2.2.1+36
+version: 2.2.4+40
 homepage:
 
 environment:
@@ -15,6 +15,10 @@ dependencies:
   
   # Cryptography for signature verification
   pointycastle: ^4.0.0
+
+  # HMAC/SHA-256 key derivation in supplier_config_backup.dart - was only a
+  # transitive dependency (via pointycastle), made direct.
+  crypto: ^3.0.7
 
   # Structured logging
   logger: ^2.5.0

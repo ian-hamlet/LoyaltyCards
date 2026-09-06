@@ -4,6 +4,8 @@ This guide captures the repeatable process for seeding screenshot-ready customer
 
 **Need this on a physical device instead?** Use `scripts/seed_customer_device_db.sh` (added 2026-07-20) — same seed data, but pulls/pushes the database via `xcrun devicectl device copy` (app-data-container file access) instead of `simctl get_app_container`, since simulator tooling has no equivalent on real hardware. Usage: `./scripts/seed_customer_device_db.sh "Ians iPhone"` (device name or UDID — see `xcrun devicectl list devices`). Same one-time-setup requirement: the app must have been installed and launched at least once so its database exists. **Warning:** this overwrites whatever is currently in the app on that device; the script keeps a local timestamped backup of the pre-seed database (not written back to the device) but there's no on-device undo.
 
+**Need this on Android instead?** Use `scripts/seed_customer_android_db.sh` (added 2026-08-31) — same seed data again, via `adb run-as` app-data access on a device/emulator. Usage: `./scripts/seed_customer_android_db.sh emulator-5554` (or a real device serial — see `adb devices`; omit the argument to use whatever `adb` picks by default). Requires a **debug** build of the customer app (`flutter run`, not `flutter build ... --release`) already installed and launched at least once, since release builds aren't `run-as`-accessible. Same overwrite warning as the physical-device script above; used to capture the Play Store screenshot set on 2026-08-31.
+
 ## Purpose
 
 Use this when you need realistic Wallet screenshots quickly without manually creating cards and stamps.
@@ -16,10 +18,11 @@ Use this when you need realistic Wallet screenshots quickly without manually cre
 
 ## Script Location
 
-- `scripts/seed_customer_simulator_db.sh` (simulator)
-- `scripts/seed_customer_device_db.sh` (physical device)
+- `scripts/seed_customer_simulator_db.sh` (iOS simulator)
+- `scripts/seed_customer_device_db.sh` (physical iOS device)
+- `scripts/seed_customer_android_db.sh` (Android device/emulator)
 
-Both scripts are intentionally kept in-repo for reuse in future screenshot cycles.
+All three scripts are intentionally kept in-repo for reuse in future screenshot cycles.
 
 ---
 

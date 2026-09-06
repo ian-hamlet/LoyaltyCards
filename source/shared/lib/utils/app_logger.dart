@@ -18,7 +18,7 @@ class AppLogger {
       lineLength: 80,
       colors: true,
       printEmojis: true,
-      printTime: false,
+      dateTimeFormat: DateTimeFormat.none,
     ),
     level: kDebugMode ? Level.debug : Level.warning,
   );

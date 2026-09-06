@@ -2,6 +2,7 @@
 /// 
 /// These exceptions are thrown by repository layers when data validation
 /// or database operations fail. They work in ALL build modes (debug/release).
+library;
 
 /// Base exception for repository errors
 class RepositoryException implements Exception {
@@ -16,7 +17,7 @@ class RepositoryException implements Exception {
 
 /// Exception thrown when card data validation fails
 class CardValidationException extends RepositoryException {
-  CardValidationException(String message) : super(message);
+  CardValidationException(super.message);
   
   @override
   String toString() => 'CardValidationException: $message';
@@ -24,7 +25,7 @@ class CardValidationException extends RepositoryException {
 
 /// Exception thrown when stamp data validation fails
 class StampValidationException extends RepositoryException {
-  StampValidationException(String message) : super(message);
+  StampValidationException(super.message);
   
   @override
   String toString() => 'StampValidationException: $message';
@@ -32,7 +33,7 @@ class StampValidationException extends RepositoryException {
 
 /// Exception thrown when transaction data validation fails
 class TransactionValidationException extends RepositoryException {
-  TransactionValidationException(String message) : super(message);
+  TransactionValidationException(super.message);
   
   @override
   String toString() => 'TransactionValidationException: $message';
@@ -40,7 +41,7 @@ class TransactionValidationException extends RepositoryException {
 
 /// Exception thrown when business data validation fails
 class BusinessValidationException extends RepositoryException {
-  BusinessValidationException(String message) : super(message);
+  BusinessValidationException(super.message);
   
   @override
   String toString() => 'BusinessValidationException: $message';
@@ -48,8 +49,7 @@ class BusinessValidationException extends RepositoryException {
 
 /// Exception thrown when database constraint is violated
 class DatabaseConstraintException extends RepositoryException {
-  DatabaseConstraintException(String message, {dynamic cause}) 
-    : super(message, cause: cause);
+  DatabaseConstraintException(super.message, {super.cause});
   
   @override
   String toString() => 'DatabaseConstraintException: $message${cause != null ? ' (caused by: $cause)' : ''}';

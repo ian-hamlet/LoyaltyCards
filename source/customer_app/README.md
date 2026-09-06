@@ -58,5 +58,5 @@ When you use LoyaltyCards, you'll encounter one of two experiences depending on 
 
 This is a Flutter application. For development setup and contribution guidelines, see the main project README.
 
-- [Flutter Setup Guide](../FLUTTER_SETUP_GUIDE.md)
+- [Dev Machine Setup Guide](../../docs/technical/DEV_MACHINE_SETUP.md)
 - [Project README](../../README.md)

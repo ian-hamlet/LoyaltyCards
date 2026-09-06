@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:shared/models/business.dart';
-import 'package:shared/models/supplier_config_backup.dart';
-import 'package:shared/widgets/feedback.dart';
 import 'package:shared/shared.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/key_manager.dart';
@@ -17,9 +14,9 @@ class CloneDeviceScreen extends StatefulWidget {
   final Business business;
 
   const CloneDeviceScreen({
-    Key? key,
+    super.key,
     required this.business,
-  }) : super(key: key);
+  });
 
   @override
   State<CloneDeviceScreen> createState() => _CloneDeviceScreenState();
@@ -35,7 +32,6 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
   // an actual failure, just the state not having caught up to what's
   // already in flight.
   bool _isGenerating = true;
-  bool _authenticationRequired = true;
   Timer? _countdownTimer;
   Duration? _remainingTime;
   final KeyManager _keyManager = KeyManager();
@@ -57,9 +53,7 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
   /// This protects the private key from unauthorized access
   Future<void> _authenticateAndGenerate() async {
     AppLogger.debug('🔐 Requesting authentication for clone QR generation...', 'Clone');
-    
-    final authMethodName = await _biometricAuth.getAuthMethodName();
-    
+
     final result = await _biometricAuth.authenticate(
       reason: 'Authenticate to generate device clone QR code containing your private key',
     );
@@ -68,7 +62,6 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
       AppLogger.warning('Authentication failed: ${result.status}', 'Clone');
       if (mounted) {
         setState(() {
-          _authenticationRequired = true;
           _isGenerating = false;
         });
         
@@ -89,10 +82,7 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
     }
 
     AppLogger.debug('✅ Authentication successful - generating clone QR', 'Clone');
-    setState(() {
-      _authenticationRequired = false;
-    });
-    
+
     await _generateCloneQR();
   }
 
@@ -252,7 +242,7 @@ class _CloneDeviceScreenState extends State<CloneDeviceScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
                             ),

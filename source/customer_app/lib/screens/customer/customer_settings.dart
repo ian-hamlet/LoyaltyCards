@@ -205,6 +205,7 @@ class _CustomerSettingsState extends State<CustomerSettings> {
 
           // Refresh stats
           await _loadStats();
+          if (!mounted) return;
 
           // Pop settings screen to return to (now empty) home
           Navigator.pop(context);
@@ -317,9 +318,9 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AppReferralScreen(
+                        builder: (context) => const AppReferralScreen(
                           appBarTitle: 'Tell a Business',
-                          appBarColor: const Color(0xFF673AB7),
+                          appBarColor: Color(0xFF673AB7),
                           icon: Icons.storefront,
                           headline: 'Know a shop that would like this?',
                           bodyText: 'Show them this code, or share the link, to get '
@@ -343,9 +344,9 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AppReferralScreen(
+                        builder: (context) => const AppReferralScreen(
                           appBarTitle: 'Tell a Friend',
-                          appBarColor: const Color(0xFF673AB7),
+                          appBarColor: Color(0xFF673AB7),
                           icon: Icons.people_outline,
                           headline: "Know someone who'd like this?",
                           bodyText: 'Show them this code, or share the link, to get '
@@ -411,9 +412,9 @@ class _CustomerSettingsState extends State<CustomerSettings> {
                     ),
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('Version'),
+                const ListTile(
+                  leading: Icon(Icons.info_outline),
+                  title: Text('Version'),
                   subtitle: Text(appVersion),
                 ),
 

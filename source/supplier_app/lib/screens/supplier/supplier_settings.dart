@@ -255,7 +255,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
           ),
         );
 
-        AppLogger.info('${'=' * 60}');
+        AppLogger.info('=' * 60);
         AppLogger.info('SUPPLIER APP: RESETTING BUSINESS - ${DateTime.now().toIso8601String()}');
         AppLogger.info('Business: ${widget.business.name} (ID: ${widget.business.id})');
         
@@ -266,7 +266,7 @@ class _SupplierSettingsState extends State<SupplierSettings> {
         await _keyManager.deleteKeys(widget.business.id);
         
         AppLogger.info('BUSINESS RESET COMPLETE');
-        AppLogger.info('${'=' * 60}');
+        AppLogger.info('=' * 60);
 
         if (mounted) {
           // Pop loading dialog
@@ -465,9 +465,9 @@ class _SupplierSettingsState extends State<SupplierSettings> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AppReferralScreen(
+                  builder: (context) => const AppReferralScreen(
                     appBarTitle: 'Tell a Business',
-                    appBarColor: const Color(0xFF2C3E50),
+                    appBarColor: Color(0xFF2C3E50),
                     icon: Icons.storefront,
                     headline: 'Know another business that would like this?',
                     bodyText: 'Show them this code, or share the link, to get '
@@ -495,9 +495,9 @@ class _SupplierSettingsState extends State<SupplierSettings> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AppReferralScreen(
+                  builder: (context) => const AppReferralScreen(
                     appBarTitle: 'Tell a Friend',
-                    appBarColor: const Color(0xFF2C3E50),
+                    appBarColor: Color(0xFF2C3E50),
                     icon: Icons.people_outline,
                     headline: 'New customer without the app?',
                     bodyText: 'Show them this code, or share the link, to get '
@@ -563,9 +563,9 @@ class _SupplierSettingsState extends State<SupplierSettings> {
               ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('Version'),
+          const ListTile(
+            leading: Icon(Icons.info_outline),
+            title: Text('Version'),
             subtitle: Text(appVersion),
           ),
           const Divider(height: 32),

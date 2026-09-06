@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -36,30 +35,30 @@ void main() {
       await DatabaseHelper.resetForTesting();
     });
 
-    test('should timeout if initialization exceeds 10 seconds', () async {
-      // Note: This test documents expected behavior but is difficult to implement
-      // without a way to artificially delay database initialization.
-      // In production, timeout protects against:
-      // - Corrupted database files
-      // - Database locked by another process
-      // - File system issues
-      
-      // EXPECTED BEHAVIOR:
-      // - If _initDatabase() takes > 10 seconds, TimeoutException is thrown
-      // - Error is logged: "Database initialization timeout"
-      // - Recovery is attempted via _attemptDatabaseRecovery()
-      
-      // TODO: Implement using database file corruption simulation
-    });
+    test(
+      'should timeout if initialization exceeds 10 seconds',
+      () async {
+        // In production, timeout protects against:
+        // - Corrupted database files
+        // - Database locked by another process
+        // - File system issues
+        //
+        // EXPECTED BEHAVIOR:
+        // - If _initDatabase() takes > 10 seconds, TimeoutException is thrown
+        // - Error is logged: "Database initialization timeout"
+        // - Recovery is attempted via _attemptDatabaseRecovery()
+      },
+      skip: 'Needs a way to artificially delay database initialization (database file corruption simulation)',
+    );
 
-    test('should log timeout error with helpful message', () async {
-      // Verify error logging includes context for debugging
-      
-      // EXPECTED LOG OUTPUT:
-      // AppLogger.error('Database initialization timeout - database may be locked or corrupted')
-      
-      // TODO: Implement with log capture mechanism
-    });
+    test(
+      'should log timeout error with helpful message',
+      () async {
+        // EXPECTED LOG OUTPUT:
+        // AppLogger.error('Database initialization timeout - database may be locked or corrupted')
+      },
+      skip: 'Needs a log capture mechanism',
+    );
   });
 
   group('TEST-002: Database Recovery Mechanism', () {
@@ -129,7 +128,7 @@ void main() {
       
       // Verify file exists
       final databasesPath = await databaseFactory.getDatabasesPath();
-      final dbPath = '${databasesPath}/test_corrupted.db';
+      final dbPath = '$databasesPath/test_corrupted.db';
       final file = File(dbPath);
       expect(await file.exists(), true);
       
@@ -141,13 +140,15 @@ void main() {
       await DatabaseHelper.resetForTesting();
     });
 
-    test('should log recovery attempt', () async {
-      // EXPECTED LOG OUTPUT when recovery triggered:
-      // AppLogger.error('Attempting database recovery after timeout')
-      // AppLogger.warning('Deleted corrupted database file: /path/to/db')
-      
-      // TODO: Implement with log capture mechanism
-    });
+    test(
+      'should log recovery attempt',
+      () async {
+        // EXPECTED LOG OUTPUT when recovery triggered:
+        // AppLogger.error('Attempting database recovery after timeout')
+        // AppLogger.warning('Deleted corrupted database file: /path/to/db')
+      },
+      skip: 'Needs a log capture mechanism',
+    );
 
     test('should reset database instance after recovery', () async {
       await DatabaseHelper.resetForTesting(testDatabaseName: 'test_recovery_reset.db');
@@ -179,7 +180,7 @@ void main() {
       // Delete database file (simulate corruption + recovery)
       await DatabaseHelper.resetForTesting(testDatabaseName: 'test_recreation.db');
       final databasesPath = await databaseFactory.getDatabasesPath();
-      final dbPath = '${databasesPath}/test_recreation.db';
+      final dbPath = '$databasesPath/test_recreation.db';
       final file = File(dbPath);
       if (await file.exists()) {
         await file.delete();
@@ -193,16 +194,18 @@ void main() {
       await DatabaseHelper.resetForTesting();
     });
 
-    test('should handle recovery failure gracefully', () async {
-      // If recovery fails, error should be logged but not crash app
-      
-      // EXPECTED BEHAVIOR:
-      // - If file deletion fails during recovery, log error
-      // - Error: "Database recovery failed: [error]"
-      // - TimeoutException still rethrown to caller
-      
-      // TODO: Implement with file permission simulation
-    });
+    test(
+      'should handle recovery failure gracefully',
+      () async {
+        // If recovery fails, error should be logged but not crash app
+        //
+        // EXPECTED BEHAVIOR:
+        // - If file deletion fails during recovery, log error
+        // - Error: "Database recovery failed: [error]"
+        // - TimeoutException still rethrown to caller
+      },
+      skip: 'Needs a file permission simulation',
+    );
   });
 
   group('TEST-002: Database Timeout - Individual Operations', () {
@@ -244,54 +247,62 @@ void main() {
       await DatabaseHelper.resetForTesting();
     });
 
-    test('should handle database locked scenario', () async {
-      // SQLite default timeout is 30 seconds for locked database
-      // Our 10-second initialization timeout provides earlier feedback
-      
-      // EXPECTED BEHAVIOR:
-      // - If database is locked by another process
-      // - Initialization timeout triggers after 10 seconds
-      // - User gets feedback faster than default 30s SQLite timeout
-      
-      // TODO: Implement with multi-process database access simulation
-    });
+    test(
+      'should handle database locked scenario',
+      () async {
+        // SQLite default timeout is 30 seconds for locked database
+        // Our 10-second initialization timeout provides earlier feedback
+        //
+        // EXPECTED BEHAVIOR:
+        // - If database is locked by another process
+        // - Initialization timeout triggers after 10 seconds
+        // - User gets feedback faster than default 30s SQLite timeout
+      },
+      skip: 'Needs a multi-process database access simulation',
+    );
   });
 
   group('TEST-002: Database Error Handling', () {
-    test('should rethrow TimeoutException after recovery attempt', () async {
-      // When timeout occurs, recovery is attempted but exception is still thrown
-      // This allows caller to handle the error appropriately
-      
-      // EXPECTED BEHAVIOR:
-      // try {
-      //   await dbHelper.database; // Timeout occurs
-      // } on TimeoutException {
-      //   // Recovery was attempted
-      //   // Exception rethrown so caller knows initialization failed
-      // }
-      
-      // TODO: Implement with timeout simulation
-    });
+    test(
+      'should rethrow TimeoutException after recovery attempt',
+      () async {
+        // When timeout occurs, recovery is attempted but exception is still thrown
+        // This allows caller to handle the error appropriately
+        //
+        // EXPECTED BEHAVIOR:
+        // try {
+        //   await dbHelper.database; // Timeout occurs
+        // } on TimeoutException {
+        //   // Recovery was attempted
+        //   // Exception rethrown so caller knows initialization failed
+        // }
+      },
+      skip: 'Needs a timeout simulation',
+    );
 
-    test('should catch and log all database errors during init', () async {
-      // Any exception during init should be logged with context
-      
-      // EXPECTED LOG OUTPUT:
-      // AppLogger.error('Database initialization error: [error]', error, stackTrace)
-      
-      // TODO: Implement with log capture mechanism
-    });
+    test(
+      'should catch and log all database errors during init',
+      () async {
+        // Any exception during init should be logged with context
+        //
+        // EXPECTED LOG OUTPUT:
+        // AppLogger.error('Database initialization error: [error]', error, stackTrace)
+      },
+      skip: 'Needs a log capture mechanism',
+    );
 
-    test('should handle non-timeout initialization errors', () async {
-      // Errors other than timeout should also be logged and rethrown
-      
-      // Examples:
-      // - Disk full
-      // - Permission denied
-      // - Invalid database format
-      
-      // TODO: Implement with error injection
-    });
+    test(
+      'should handle non-timeout initialization errors',
+      () async {
+        // Errors other than timeout should also be logged and rethrown
+        //
+        // Examples:
+        // - Disk full
+        // - Permission denied
+        // - Invalid database format
+      },
+      skip: 'Needs error injection',
+    );
   });
 
   group('TEST-002: Cross-Platform Database Behavior', () {

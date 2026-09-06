@@ -228,7 +228,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 FloatingActionButton(
                   heroTag: 'flip_camera',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     _controller.switchCamera();
                   },
@@ -245,7 +245,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 FloatingActionButton(
                   heroTag: 'rotate90',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 1) % 4;
                     setState(() {
@@ -266,7 +266,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 FloatingActionButton(
                   heroTag: 'rotate180',
                   mini: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
                   onPressed: () {
                     final newRotation = (_manualRotationOffset + 2) % 4;
                     setState(() {
@@ -328,19 +328,25 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   ],
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade900.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                    // liveRegion: true so VoiceOver/TalkBack announce the
+                    // rejection reason when it appears - a failed scan has
+                    // no other non-visual signal on this screen.
+                    Semantics(
+                      liveRegion: true,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade900.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        textAlign: TextAlign.center,
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ],
@@ -355,6 +361,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             right: 16,
             child: IconButton(
               icon: const Icon(Icons.flash_on, color: Colors.white, size: 32),
+              tooltip: 'Toggle flashlight',
               onPressed: () => _controller.toggleTorch(),
             ),
           ),

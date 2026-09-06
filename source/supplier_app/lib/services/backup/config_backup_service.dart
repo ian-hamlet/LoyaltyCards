@@ -128,14 +128,16 @@ The QR code image is attached to this email.
 ''';
 
       AppLogger.debug('Email subject: $subject', 'BackupService');
-      AppLogger.debug('Calling Share.shareXFiles...', 'BackupService');
+      AppLogger.debug('Calling SharePlus.instance.share...', 'BackupService');
 
       // Share with email as preferred method
-      final result = await Share.shareXFiles(
-        [XFile(filePath)],
-        subject: subject,
-        text: body,
-        sharePositionOrigin: sharePositionOrigin,
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(filePath)],
+          subject: subject,
+          text: body,
+          sharePositionOrigin: sharePositionOrigin,
+        ),
       );
 
       AppLogger.debug('Share result: ${result.status}', 'BackupService');
@@ -194,11 +196,13 @@ The QR code image is attached to this email.
       // On iOS, also offer to share so user can move to iCloud Drive
       if (Platform.isIOS) {
         AppLogger.debug('iOS: Opening share sheet for file...', 'BackupService');
-        final result = await Share.shareXFiles(
-          [XFile(filePath)],
-          subject: 'LoyaltyCards Backup - ${backup.businessName}',
-          text: 'Save this backup to a secure location',
-          sharePositionOrigin: sharePositionOrigin,
+        final result = await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(filePath)],
+            subject: 'LoyaltyCards Backup - ${backup.businessName}',
+            text: 'Save this backup to a secure location',
+            sharePositionOrigin: sharePositionOrigin,
+          ),
         );
         AppLogger.debug('Share result: ${result.status}', 'BackupService');
       }
@@ -250,7 +254,8 @@ The QR code image is attached to this email.
       final qrCode = qrValidationResult.qrCode!;
       final painter = QrPainter.withQr(
         qr: qrCode,
-        color: const Color(0xFF000000),
+        eyeStyle: const QrEyeStyle(color: Color(0xFF000000)),
+        dataModuleStyle: const QrDataModuleStyle(color: Color(0xFF000000)),
         gapless: true,
         embeddedImageStyle: null,
         embeddedImage: null,
@@ -297,7 +302,7 @@ The QR code image is attached to this email.
                     children: [
                       pw.Text(
                         'LOYALTYCARDS RECOVERY BACKUP',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 24,
                           fontWeight: pw.FontWeight.bold,
                         ),
@@ -305,7 +310,7 @@ The QR code image is attached to this email.
                       pw.SizedBox(height: 10),
                       pw.Text(
                         backup.businessName,
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 20,
                           fontWeight: pw.FontWeight.bold,
                         ),
@@ -350,7 +355,7 @@ The QR code image is attached to this email.
                     children: [
                       pw.Text(
                         'WARNING: KEEP THIS SECURE',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.red,
@@ -379,7 +384,7 @@ The QR code image is attached to this email.
                     children: [
                       pw.Text(
                         'Storage Recommendations:',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 14,
                           fontWeight: pw.FontWeight.bold,
                         ),
@@ -394,7 +399,7 @@ The QR code image is attached to this email.
                       pw.SizedBox(height: 10),
                       pw.Text(
                         'Recovery Instructions:',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 14,
                           fontWeight: pw.FontWeight.bold,
                         ),

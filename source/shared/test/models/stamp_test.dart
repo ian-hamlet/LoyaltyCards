@@ -1,4 +1,5 @@
 /// Tests for Stamp model
+library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/shared.dart';
 import '../fixtures/test_fixtures.dart';

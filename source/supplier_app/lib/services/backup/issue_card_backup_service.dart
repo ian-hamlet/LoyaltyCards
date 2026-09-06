@@ -69,7 +69,8 @@ class IssueCardBackupService {
     final qrSize = size - (margin * 2);
     final qrPainter = QrPainter.withQr(
       qr: qrCode,
-      color: const Color(0xFF000000),
+      eyeStyle: const QrEyeStyle(color: Color(0xFF000000)),
+      dataModuleStyle: const QrDataModuleStyle(color: Color(0xFF000000)),
       gapless: true,
       embeddedImageStyle: null,
       embeddedImage: null,
@@ -227,7 +228,7 @@ class IssueCardBackupService {
                 // Title
                 pw.Text(
                   businessName,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 28,
                     fontWeight: pw.FontWeight.bold,
                   ),
@@ -260,7 +261,7 @@ class IssueCardBackupService {
                     children: [
                       pw.Text(
                         'Loyalty Card Issue QR',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
                         ),
@@ -273,7 +274,7 @@ class IssueCardBackupService {
                       pw.SizedBox(height: 10),
                       pw.Text(
                         'Instructions:',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           fontSize: 14,
                           fontWeight: pw.FontWeight.bold,
                         ),
@@ -345,11 +346,13 @@ For best results:
 3. Keep accessible for new customers
 ''';
 
-      final result = await Share.shareXFiles(
-        [XFile(filePath)],
-        subject: subject,
-        text: body,
-        sharePositionOrigin: sharePositionOrigin,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(filePath)],
+          subject: subject,
+          text: body,
+          sharePositionOrigin: sharePositionOrigin,
+        ),
       );
 
       AppLogger.debug('=== shareIssueCard END (success: true) ===', 'BackupService');

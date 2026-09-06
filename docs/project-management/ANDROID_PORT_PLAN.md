@@ -14,11 +14,28 @@ real-hardware testing this project has had on Android, surfacing and fixing one 
 along the way (a duplicate action button, unrelated to the port itself - see Track 2 below and
 `version.dart` Builds 39/40). The full functional Express/Secure Mode test pass across both real
 devices completed successfully 2026-09-04, including biometric-gated backup/clone with a real
-fingerprint/PIN - Android real-device testing is now considered done for this release. Remaining
-before Play Store submission: the full store listing (content rating questionnaire, data safety
-submission) is not yet entered into Play Console.
-**Branch:** `feature/android-port`
-**Date:** 2026-08-29 (created); last updated 2026-09-04
+fingerprint/PIN - Android real-device testing is now considered done for this release.
+
+**🟡 Track 2 is now PAUSED as of 2026-09-06**, not close to submission as previously tracked. While
+working through the Customer app's Play Console setup live, discovered a hard requirement neither
+this plan nor `ANDROID_APP_SUBMISSION_CHECKLIST.md` had accounted for: personal Google Play
+developer accounts created after 13 November 2023 (this one, registered 2026-09-04, qualifies)
+must run a **Closed testing** track - a separate track from Internal testing, which does not count
+toward this - with **at least 12 testers opted in continuously for 14 days** before Production
+access is even available. Confirmed directly from Google's own Help Centre article ("App testing
+requirements for new personal developer accounts"), not an assumption. This corrects an earlier,
+wrong claim in `ANDROID_APP_SUBMISSION_CHECKLIST.md` that Play's review is "largely automated,
+often hours" - even the production-access application review itself is "seven days or less, but
+can occasionally take longer" per Google's own wording, before the 14-day testing window is even
+factored in. Realistic floor from here: roughly 3 weeks once a closed test actually has 12 people
+opted in - not something to complete "tomorrow." **Do not attempt to shortcut the 12-tester count
+with fake accounts or a bulk-tester service** - that risks the whole developer account being
+suspended. Current decision: paused pending a plan for recruiting 12 genuine testers - see
+`ANDROID_APP_SUBMISSION_CHECKLIST.md`'s dedicated section for full detail, and Track 2 below for
+exactly where the Customer app's Play Console setup was left mid-flight. iOS (same v2.2.4+40) is
+unaffected by any of this and is already live on the App Store.
+**Branch:** `feature/android-port` (merged to `develop`; release branch `releases/v2.2.4-build40`)
+**Date:** 2026-08-29 (created); last updated 2026-09-06
 **Context:** Porting to Android is low-risk, mostly testing and store-listing work rather than a
 rewrite - both apps already ship `android/` scaffolding, `Platform.isAndroid` branches already
 exist in `device_service.dart`/`backup_storage_service.dart`, and the ECDSA P-256/SHA-256 signing
@@ -236,6 +253,25 @@ real-device testing - see "Open Decisions / Risks" below, updated accordingly.
       keeping the inline one, which also matches the primary-action pattern used everywhere else in
       both apps. Version bumped 2.2.3+38 → 2.2.4+39 (then +40, see above) - see `version.dart`
       Builds 39/40.
+- [ ] **⚠️ Closed testing requirement discovered 2026-09-06 - Track 2 paused here.** Worked through
+      the Customer app's Play Console "App content" checklist live: Content Rating completed
+      (Everyone/3+, as expected), Ads confirmed No, Target audience and Data Safety mid-wizard,
+      Health apps declaration and Privacy Policy URL not yet entered - full state preserved in
+      `ANDROID_APP_SUBMISSION_CHECKLIST.md` so nothing needs re-deriving. Discovered along the way
+      that Production access requires a Closed testing track (12 testers, 14 continuous days) that
+      Internal testing does not satisfy - see the Status note at the top of this document and the
+      dedicated section in the submission checklist for full detail. Also built and deployed
+      `site/legal/data-deletion.html` (merged directly to `main` and back into `develop`/the
+      release branch, since Play's Data Safety form needed a live URL for its "Delete data URL"
+      field before the form could be submitted).
+- [ ] Recruit 12 genuine testers and run a 14-day Closed testing window (not started)
+- [ ] Complete the Customer app's remaining App content items and Main store listing (can continue
+      in parallel with tester recruitment - not blocked by the 12/14 requirement itself)
+- [ ] Repeat "App content" and Main store listing for the Supplier app - answers already decided,
+      see `ANDROID_APP_SUBMISSION_CHECKLIST.md`'s "Supplier App - Ready-to-Paste Answers" section
+- [ ] Apply for production access once the Closed testing requirement is met, for both apps
+- [ ] Merge `releases/v2.2.4-build40` → `main` for the Android side once it clears review (iOS
+      side already merged 2026-09-06 - see `RELEASES.md`)
 
 ---
 

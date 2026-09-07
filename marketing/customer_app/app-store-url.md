@@ -8,7 +8,7 @@ Bundle ID: com.ianhamlet.loyaltycards.customerApp
 Use this URL with Apple's marketing tools (tools.applemediaservices.com) to generate the official "Download on the App Store" badge and QR code.
 
 
-This is teh short url for the app store page: https://apple.co/4bYdQ0T
+This is the short url for the app store page: https://apple.co/4bYdQ0T
 
 ## Finding this app by search
 

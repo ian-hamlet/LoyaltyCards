@@ -22,6 +22,7 @@
 - `docs/legal/` - Privacy policy, terms of service, accessibility
 - `docs/quality/` - Code reviews, testing, vulnerabilities, lessons learned
 - `docs/user/` - User guides and end-user documentation
+- `docs/marketing/` - Marketing strategy, positioning, and the printable/online asset inventory
 - `docs/meta/` - Project metadata and documentation about documentation
 
 ---
@@ -218,15 +219,33 @@ These documents contain proven prompt templates for triggering comprehensive cod
 
 ---
 
-## 👥 User Documentation (2 files)
+## 👥 User Documentation (3 files)
 
 **Location:** `docs/user/`
 
 ### [docs/user/USER_GUIDE.md](docs/user/USER_GUIDE.md)
 **Purpose:** End-user documentation explaining how to use both customer and supplier apps with instructions and guidance.
 
+### [docs/user/SUPPLIER_SETUP_GUIDE.md](docs/user/SUPPLIER_SETUP_GUIDE.md)
+**Purpose:** Full-depth guide for a business owner choosing Express vs. Secure mode and completing initial setup. The Tier-3 destination every marketing asset in `docs/marketing/MARKETING_ASSETS_INDEX.md` eventually points to.
+
 ### [docs/user/ABOUT_LOYALTYCARDS.md](docs/user/ABOUT_LOYALTYCARDS.md)
 **Purpose:** Marketing-style overview of LoyaltyCards features, benefits, and unique value proposition for App Store description and promotional materials.
+
+---
+
+## 📣 Marketing (3 files + asset library)
+
+**Location:** `docs/marketing/`
+
+### ⭐ [docs/marketing/MARKETING_ASSETS_INDEX.md](docs/marketing/MARKETING_ASSETS_INDEX.md)
+**Purpose:** Complete inventory of every printable, online, and social marketing asset (`marketing/`, `site/marketing/`, `screenshots/`, `store_graphics/`) — start here to find what already exists before making something new. Organizes everything by pathway tier: quick in-person hook, skimmable decision aid, full setup guide.
+
+### [docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md](docs/marketing/COMPETITIVE_ASSESSMENT_2026-08-21.md)
+**Purpose:** App Store competitive landscape review — source of the core positioning claim ("no server exists," not just "we don't look at your data") used throughout the marketing assets.
+
+### [docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md](docs/marketing/POSITIONING_UPDATE_PLAN_2026-08-21.md)
+**Purpose:** Applied plan for pushing App Store metadata toward the architecture claim over the convenience claim.
 
 ---
 

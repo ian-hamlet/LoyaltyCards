@@ -35,13 +35,13 @@ Originally there was Tier 1 and Tier 3 with nothing in between — a shop owner 
 **Tier:** 1 (hook). **Purpose:** Poster-style single card, one large QR code, GDPR/no-fees facts. Meant to be displayed (pinned at a counter) rather than handed over — use once a business has already said yes and wants something on the wall, or as the online landing card.
 
 ### [is-it-right-for-your-shop.html](../../marketing/supplier_app/is-it-right-for-your-shop.html)
-**Tier:** 2 (decide). **Purpose:** One-page, skimmable comparison table — Paper Cards vs. Paid Loyalty App vs. LoyaltyCards — across cost, setup effort, customer data, lock-in, hardware, and fraud protection, plus the honest iPhone-only caveat. Built to answer "should I bother?" in under a minute. Its own CTA now points to `how-it-works-business.html` rather than the deep setup guide.
+**Tier:** 2 (decide). **Purpose:** One-page, skimmable comparison table — Paper Cards vs. Paid Loyalty App vs. LoyaltyCards — across cost, setup effort, customer data, lock-in, hardware, and fraud protection, plus the honest iPhone-only caveat. Opens by naming why a loyalty scheme is worth running at all (rewards frequent purchases, turns casual buyers into regulars) before comparing three ways to run one. Built to answer "should I bother?" in under a minute. Its CTA carries a distilled trust line ("built to give away, not sell") and points to `how-it-works-business.html` rather than the deep setup guide.
 
 ### [how-it-works-business.html](../../marketing/supplier_app/how-it-works-business.html)
 **Tier:** 2.5 (understand). **Purpose:** Four-step overview of running the business day to day — choose Express or Secure mode, set up the business, stamp customers, redeem rewards — with the mode decision itself deferred to the full setup guide rather than re-explained here. Sits between "should I bother" and "walk me through every option," linked from both `is-it-right-for-your-shop.html` and the handout's small QR.
 
 ### [get-the-app-business-personal-note-a5.html](../../marketing/supplier_app/get-the-app-business-personal-note-a5.html)
-**Tier:** 1↔2 (hook with real depth). **Purpose:** One full page, first-person note explaining why the app exists, what it needs from the owner, and the iPhone-only caveat up front. Use when you've got a minute to actually talk to the owner, not just leave something behind.
+**Tier:** 1↔2 (hook with real depth). **Purpose:** One full page, first-person note explaining why the app exists, what it needs from the owner, and the iPhone-only caveat up front. Use when you've got a minute to actually talk to the owner, not just leave something behind. A different channel from the rest of the pathway — meant for direct personal delivery rather than being carried in blank or browsed online — but its own "how it works" link points to `how-it-works-business.html` like everything else, not the deep guide.
 
 ### [get-the-app-business-personal-note-email.html](../../marketing/supplier_app/get-the-app-business-personal-note-email.html)
 **Purpose:** Same note as the A5 version, formatted to print/save as a PDF for emailing rather than handing over physically.

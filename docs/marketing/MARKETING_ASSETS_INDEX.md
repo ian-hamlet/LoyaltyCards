@@ -3,6 +3,7 @@
 **Last Updated:** September 7, 2026 (added the Tier 2.5 "how it works" bridge for both audiences)
 **Purpose:** Complete inventory of every marketing asset in the repo — printable, online, and social — organized by where it sits in the pathway from "never heard of this" to "using it day to day."
 **Companion to:** [DOCUMENTATION_INDEX.md](../../DOCUMENTATION_INDEX.md) (this file is the marketing-specific equivalent, one level down).
+**Printable companion:** [MARKETING_ASSETS_INDEX.html](MARKETING_ASSETS_INDEX.html) &mdash; a one-page "what to grab, and when" cheat sheet. Internal working reference only, not published to the site.
 
 ---
 
@@ -80,7 +81,7 @@ Originally there was Tier 1 and Tier 3 with nothing in between — a shop owner 
 **Purpose:** Home page of the site — links to legal/support/guides plus every printable asset under "Marketing Materials." Update this whenever a new printable asset is added or removed.
 
 ### [site/marketing/](../../site/marketing/)
-**Purpose:** Browser-viewable/printable mirror of everything in `marketing/supplier_app/` and `marketing/customer_app/` (HTML and `.txt` only — the social graphics below aren't published here). Each file is generated from its `marketing/` source with two changes: the relative link back to `site/user/` is shortened, and any "Source: ... in the LoyaltyCards repo" footer credit is dropped since it's redundant on the live site. Keep both copies in sync by hand when editing.
+**Purpose:** Browser-viewable/printable mirror of everything in `marketing/supplier_app/` and `marketing/customer_app/`. The printable HTML and `.txt` files sit flat at `site/marketing/` root — deliberately, since their URLs are already baked into printed QR codes (the handout's small QR, the App Store QR badges) and can't move. Each is generated from its `marketing/` source with two changes: the relative link back to `site/user/` is shortened, and any "Source: ... in the LoyaltyCards repo" footer credit is dropped. The images, App Store badge SVGs, and `app-store-url.md` reference docs are mirrored into `site/marketing/supplier_app/` and `site/marketing/customer_app/` subfolders instead, matching their layout in `marketing/` — nothing currently links to these directly, they're just published so the whole `marketing/` tree is reachable on the live site. Keep all copies in sync by hand when editing; everything under `marketing/` is now published somewhere under `site/marketing/`. What's deliberately *not* published: the strategy docs below (`docs/marketing/*.md`, a separate folder from `marketing/`), and the App Store screenshots and store graphics (App-Store-submission assets, not public site content).
 
 ### [site/user/about.html](../../site/user/about.html), [site/user/user-guide.html](../../site/user/user-guide.html), [site/user/supplier-setup-guide.html](../../site/user/supplier-setup-guide.html)
 **Tier:** 3 (do it). **Purpose:** The full-depth docs every Tier-1/2 asset eventually points to. Published from `docs/user/ABOUT_LOYALTYCARDS.md`, `docs/user/USER_GUIDE.md`, and `docs/user/SUPPLIER_SETUP_GUIDE.md` respectively.

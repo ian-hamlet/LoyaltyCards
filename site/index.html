@@ -42,6 +42,17 @@
   p.lede { color: var(--muted); margin-top: 0; }
   .intro { color: var(--muted); font-size: 1rem; margin: 0 0 8px; }
   .grid { display: grid; gap: 14px; margin-top: 20px; }
+  ol.pathway { list-style: none; margin: 16px 0 28px; padding: 0; counter-reset: step; }
+  ol.pathway li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--border); }
+  ol.pathway li:first-child { border-top: none; }
+  ol.pathway .num {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  ol.pathway span.txt { font-size: 0.92rem; color: var(--fg); }
+  ol.pathway span.txt strong { display: block; margin-bottom: 1px; }
+  ol.pathway span.sub { color: var(--muted); font-size: 0.85rem; }
   a.card {
     display: block; padding: 18px 20px; border-radius: 12px;
     background: var(--card); border: 1px solid var(--border);
@@ -101,7 +112,26 @@
     </div>
 
     <h2 class="section">Marketing Materials</h2>
-    <p class="intro">Printable flyers and handouts &mdash; open in a browser, then print or save as PDF.</p>
+    <p class="intro">Printable flyers and handouts &mdash; open in a browser, then print or save as PDF. Not sure where to start? Here's the order most people go through:</p>
+
+    <ol class="pathway">
+      <li>
+        <span class="num">1</span>
+        <span class="txt"><strong>Get the app</strong><span class="sub">A quick QR code &mdash; in person or online.</span></span>
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="txt"><strong>Weigh it up</strong><span class="sub">A business owner compares options; a customer previews what they'll get before installing.</span></span>
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="txt"><strong>See how it works day to day</strong><span class="sub">The short version, before the full setup guide.</span></span>
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span class="txt"><strong>Set it up properly</strong><span class="sub">The full setup guide for businesses, or just use the app for customers.</span></span>
+      </li>
+    </ol>
 
     <div class="grid">
       <a class="card" href="marketing/get-the-app-customer-flyer.html">

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoyaltyCards Marketing Materials — Quick Reference</title>
+<meta name="description" content="Printable one-page cheat sheet: what to grab and when, across the whole LoyaltyCards marketing pathway.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .toolbar {
+    max-width: 950px; margin: 0 auto; padding: 20px 20px 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .toolbar button {
+    font: inherit; font-size: 0.9rem; padding: 8px 16px; border-radius: 8px;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    cursor: pointer;
+  }
+  .intro { max-width: 950px; margin: 16px auto 0; padding: 0 20px; color: var(--muted); font-size: 0.9rem; }
+
+  .sheet {
+    max-width: 210mm; margin: 24px auto 60px; padding: 10mm 12mm;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  }
+  .page { background: #fff; color: #1a1a1a; border: 1px solid var(--border); border-radius: 12px; padding: 12mm 14mm; }
+  h1 { font-size: 1.3rem; margin: 0 0 2mm; color: #1a1a1a; }
+  p.lede { font-size: 0.85rem; color: #555; margin: 0 0 5mm; }
+  h2.section { font-size: 0.95rem; margin: 6mm 0 2mm; color: #1a1a1a; }
+
+  table.tiers { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin-bottom: 4mm; }
+  table.tiers th, table.tiers td { border: 1px solid #dde2e8; padding: 2.2mm 2.6mm; text-align: left; vertical-align: top; }
+  table.tiers th { background: #f4f6f9; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.02em; color: #444; }
+  table.tiers col.tier { width: 18%; }
+  table.tiers code { font-size: 0.68rem; }
+
+  .carry {
+    background: #eaf1ff; border: 1px solid #cfe0ff; border-radius: 8px;
+    padding: 3mm 4mm; font-size: 0.72rem; color: #1a1a1a; line-height: 1.4; margin-bottom: 5mm;
+  }
+  .carry strong { color: #14306b; }
+
+  .cols { display: flex; gap: 6mm; }
+  .col { flex: 1 1 0; min-width: 0; }
+  ul.doclist { list-style: none; margin: 0; padding: 0; }
+  ul.doclist li { padding: 1.6mm 0; border-top: 1px solid #eef0f3; font-size: 0.7rem; line-height: 1.35; }
+  ul.doclist li:first-child { border-top: none; }
+  ul.doclist code { display: block; font-size: 0.68rem; color: #14306b; margin-bottom: 0.5mm; }
+  ul.doclist span.tag { display: inline-block; font-size: 0.6rem; font-weight: 700; color: #fff; background: var(--accent); border-radius: 4px; padding: 0.5px 4px; margin-right: 4px; vertical-align: middle; }
+  ul.doclist span.desc { color: #444; }
+
+  footer.note { max-width: 950px; margin: 0 auto; padding: 0 20px 40px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+
+  @media print {
+    .toolbar, .intro { display: none; }
+    body { background: #fff; color: #000; }
+    .sheet { border: none; background: #fff; margin: 0 auto; padding: 8mm 10mm; max-width: 100%; }
+    .page { border: none; padding: 0; }
+    footer.note { display: none; }
+    @page { size: A4 portrait; margin: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span></span>
+    <button onclick="window.print()">Print this sheet</button>
+  </div>
+  <p class="intro">Internal working reference &mdash; not published to the public site. Full detail lives in docs/marketing/MARKETING_ASSETS_INDEX.md.</p>
+
+  <div class="sheet">
+    <div class="page">
+      <h1>LoyaltyCards Marketing Materials &mdash; Quick Reference</h1>
+      <p class="lede">What to grab, and when, across the whole pathway.</p>
+
+      <table class="tiers">
+        <colgroup><col class="tier"><col><col></colgroup>
+        <thead><tr><th>Tier</th><th>Shop owner</th><th>Their customer</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Hook</strong><br>a few seconds</td>
+            <td><code>get-the-app-business-flyer.html</code><br><code>get-the-app-business-handout-a5.html</code></td>
+            <td><code>get-the-app-customer-flyer.html</code></td>
+          </tr>
+          <tr>
+            <td><strong>1.5. Preview</strong><br>before installing, online</td>
+            <td>&mdash;</td>
+            <td><code>see-what-you-get.html</code></td>
+          </tr>
+          <tr>
+            <td><strong>2. Decide</strong><br>a minute, skimmable</td>
+            <td><code>is-it-right-for-your-shop.html</code></td>
+            <td>&mdash;</td>
+          </tr>
+          <tr>
+            <td><strong>2.5. Understand</strong><br>the mechanics</td>
+            <td><code>how-it-works-business.html</code></td>
+            <td><code>get-the-app-customer-how-it-works.html</code></td>
+          </tr>
+          <tr>
+            <td><strong>3. Do it</strong><br>full depth</td>
+            <td>site/user/supplier-setup-guide.html</td>
+            <td>(in-app "How It Works" screen)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="carry">
+        <strong>What to carry in person:</strong> a stack of <code>get-the-app-business-handout-a5.html</code> cut-outs. Talking it through instead? <code>is-it-right-for-your-shop.html</code> is the one-page pitch. Once they say yes, <code>get-the-app-customer-how-it-works.html</code> goes on their counter. <code>see-what-you-get.html</code> isn't something to print &mdash; it's the online link from the customer flyer.
+      </div>
+
+      <div class="cols">
+        <div class="col">
+          <h2 class="section">Supplier &mdash; marketing/supplier_app/</h2>
+          <ul class="doclist">
+            <li><span class="tag">1</span><code>get-the-app-business-handout-a5.html</code><span class="desc">4-up cutouts to hand out shop after shop.</span></li>
+            <li><span class="tag">1</span><code>get-the-app-business-flyer.html</code><span class="desc">Poster-style, for display once they've said yes.</span></li>
+            <li><span class="tag">2</span><code>is-it-right-for-your-shop.html</code><span class="desc">Comparison table: paper vs. paid vs. us.</span></li>
+            <li><span class="tag">2.5</span><code>how-it-works-business.html</code><span class="desc">4-step day-to-day overview before the deep guide.</span></li>
+            <li><span class="tag">1&harr;2</span><code>get-the-app-business-personal-note-a5.html</code><span class="desc">First-person note, print or hand over &mdash; use when you've got a minute to talk.</span></li>
+            <li><code>get-the-app-business-personal-note-email.html</code><span class="desc">Same note, paste into an email.</span></li>
+            <li><code>get-the-app-business-personal-note-message.txt</code><span class="desc">Same note, paste into WhatsApp/SMS.</span></li>
+            <li><code>app-store-url.md</code><span class="desc">Reference: App Store URL/IDs for the Business app.</span></li>
+          </ul>
+        </div>
+        <div class="col">
+          <h2 class="section">Customer &mdash; marketing/customer_app/</h2>
+          <ul class="doclist">
+            <li><span class="tag">1</span><code>get-the-app-customer-flyer.html</code><span class="desc">Generic checkout QR card, any business.</span></li>
+            <li><span class="tag">1.5</span><code>see-what-you-get.html</code><span class="desc">Online preview before installing &mdash; not for print.</span></li>
+            <li><span class="tag">2.5</span><code>get-the-app-customer-how-it-works.html</code><span class="desc">Counter card, 4 steps, for the till.</span></li>
+            <li><code>app-store-url.md</code><span class="desc">Reference: App Store URL/IDs for the Customer app.</span></li>
+          </ul>
+          <h2 class="section">Not printed / not for a shop</h2>
+          <ul class="doclist">
+            <li><span class="desc">Social graphics (Square Post, Banner Ads, Link Card Preview) and store-listing assets &mdash; see MARKETING_ASSETS_INDEX.md for the full inventory.</span></li>
+            <li><span class="desc">Strategy docs (docs/marketing/*.md) are internal only &mdash; never published to the site.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="note">
+    Print-friendly companion to <code>docs/marketing/MARKETING_ASSETS_INDEX.md</code> &mdash; keep both in sync by hand when the pathway changes.
+  </footer>
+</body>
+</html>

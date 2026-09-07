@@ -1,6 +1,6 @@
 # Marketing Assets Index
 
-**Last Updated:** September 7, 2026
+**Last Updated:** September 7, 2026 (added the Tier 2.5 "how it works" bridge for both audiences)
 **Purpose:** Complete inventory of every marketing asset in the repo — printable, online, and social — organized by where it sits in the pathway from "never heard of this" to "using it day to day."
 **Companion to:** [DOCUMENTATION_INDEX.md](../../DOCUMENTATION_INDEX.md) (this file is the marketing-specific equivalent, one level down).
 
@@ -8,32 +8,37 @@
 
 ## The pathway
 
-Everything below exists to move a specific person through a specific gap. There are two audiences (a shop owner deciding whether to run this, and their customer deciding whether to scan a code) and three tiers of material for each:
+Everything below exists to move a specific person through a specific gap. There are two audiences (a shop owner deciding whether to run this, and their customer deciding whether to scan a code) and four tiers of material for each:
 
 | Tier | For the shop owner | For their customer |
 |---|---|---|
-| **1. Hook** — a few seconds, in person | `get-the-app-business-flyer.html`, `get-the-app-business-handout-a5.html` | `get-the-app-customer-flyer.html` |
-| **2. Decide** — a minute, skimmable | `is-it-right-for-your-shop.html` | `get-the-app-customer-how-it-works.html` |
+| **1. Hook** — a few seconds | `get-the-app-business-flyer.html`, `get-the-app-business-handout-a5.html` (in person) | `get-the-app-customer-flyer.html` (in person) |
+| **1.5. Preview** — before installing, online | &mdash; | `see-what-you-get.html` &mdash; "just scan and collect," linked from the flyer |
+| **2. Decide** — a minute, skimmable | `is-it-right-for-your-shop.html` | &mdash; |
+| **2.5. Understand** — the mechanics, before the deep guide | `how-it-works-business.html` | `get-the-app-customer-how-it-works.html` (in person, counter card) |
 | **3. Do it** — full depth, only once they've said yes | `site/user/supplier-setup-guide.html`, `docs/user/USER_GUIDE.md` | (in-app "How It Works" screen) |
 
-Before this file existed, there was Tier 1 and Tier 3 but nothing in between — a shop owner had to go from a QR code straight to a full setup guide with no easy way to weigh it up first, and a customer being migrated off a paper card had no printed explanation at all. `is-it-right-for-your-shop.html` and `get-the-app-customer-how-it-works.html` fill that gap. See below for what to actually carry into a shop.
+Originally there was Tier 1 and Tier 3 with nothing in between — a shop owner went from a QR code straight to a full setup guide with no way to weigh it up first, and a customer being migrated off a paper card had no explanation at all, printed or online. The gap closed in two passes: `is-it-right-for-your-shop.html` and `get-the-app-customer-how-it-works.html` first (Tier 2), then `how-it-works-business.html` and `see-what-you-get.html` (Tiers 2.5 and 1.5) once it was clear "decide" and "do it" were still one big jump apart, and customers browsing online before ever visiting a shop had no hook at all. See below for what to actually carry into a shop.
 
-**What to carry in person:** a stack of `get-the-app-business-handout-a5.html` cut-outs (Tier 1) is the thing to hand over. If the owner wants to talk it through, `is-it-right-for-your-shop.html` (Tier 2) is the one-page version of the pitch. Once they say yes, `get-the-app-customer-how-it-works.html` is what goes on their counter for customers.
+**What to carry in person:** a stack of `get-the-app-business-handout-a5.html` cut-outs (Tier 1) is the thing to hand over — its small second QR now points to `how-it-works-business.html` (Tier 2.5) rather than straight at the deep guide. If the owner wants to talk it through instead, `is-it-right-for-your-shop.html` (Tier 2) is the one-page version of the pitch, and its own CTA links onward to `how-it-works-business.html` too. Once they say yes, `get-the-app-customer-how-it-works.html` is what goes on their counter for customers. `see-what-you-get.html` isn't something to print or carry — it's the link from `get-the-app-customer-flyer.html` for someone deciding whether to install before they've ever been handed anything.
 
 ---
 
-## 🖨️ Printable — Supplier-Facing (7 files)
+## 🖨️ Printable — Supplier-Facing (8 files)
 
 **Location:** `marketing/supplier_app/` (source) — mirrored to `site/marketing/` for online viewing/printing, listed on the site's `Marketing Materials` section.
 
 ### [get-the-app-business-handout-a5.html](../../marketing/supplier_app/get-the-app-business-handout-a5.html)
-**Tier:** 1 (hook). **Purpose:** Four wallet-card-sized cutouts per A4 sheet — QR to download, App Store badge, one-line pitch, a "what happens next" line, and a small second QR straight to the setup guide. This is the one to carry in person and hand out shop after shop.
+**Tier:** 1 (hook). **Purpose:** Four wallet-card-sized cutouts per A4 sheet — QR to download, App Store badge, one-line pitch, a "what happens next" line, and a small second QR straight to `how-it-works-business.html`. This is the one to carry in person and hand out shop after shop.
 
 ### [get-the-app-business-flyer.html](../../marketing/supplier_app/get-the-app-business-flyer.html)
 **Tier:** 1 (hook). **Purpose:** Poster-style single card, one large QR code, GDPR/no-fees facts. Meant to be displayed (pinned at a counter) rather than handed over — use once a business has already said yes and wants something on the wall, or as the online landing card.
 
 ### [is-it-right-for-your-shop.html](../../marketing/supplier_app/is-it-right-for-your-shop.html)
-**Tier:** 2 (decide). **Purpose:** One-page, skimmable comparison table — Paper Cards vs. Paid Loyalty App vs. LoyaltyCards — across cost, setup effort, customer data, lock-in, hardware, and fraud protection, plus the honest iPhone-only caveat. Built to answer "should I bother?" in under a minute, without sending anyone to a full guide first.
+**Tier:** 2 (decide). **Purpose:** One-page, skimmable comparison table — Paper Cards vs. Paid Loyalty App vs. LoyaltyCards — across cost, setup effort, customer data, lock-in, hardware, and fraud protection, plus the honest iPhone-only caveat. Built to answer "should I bother?" in under a minute. Its own CTA now points to `how-it-works-business.html` rather than the deep setup guide.
+
+### [how-it-works-business.html](../../marketing/supplier_app/how-it-works-business.html)
+**Tier:** 2.5 (understand). **Purpose:** Four-step overview of running the business day to day — choose Express or Secure mode, set up the business, stamp customers, redeem rewards — with the mode decision itself deferred to the full setup guide rather than re-explained here. Sits between "should I bother" and "walk me through every option," linked from both `is-it-right-for-your-shop.html` and the handout's small QR.
 
 ### [get-the-app-business-personal-note-a5.html](../../marketing/supplier_app/get-the-app-business-personal-note-a5.html)
 **Tier:** 1↔2 (hook with real depth). **Purpose:** One full page, first-person note explaining why the app exists, what it needs from the owner, and the iPhone-only caveat up front. Use when you've got a minute to actually talk to the owner, not just leave something behind.
@@ -49,15 +54,18 @@ Before this file existed, there was Tier 1 and Tier 3 but nothing in between —
 
 ---
 
-## 🖨️ Printable — Customer-Facing (3 files)
+## 🖨️ Printable — Customer-Facing (4 files)
 
 **Location:** `marketing/customer_app/` (source) — mirrored to `site/marketing/`.
 
+### [see-what-you-get.html](../../marketing/customer_app/see-what-you-get.html)
+**Tier:** 1.5 (preview). **Purpose:** Online-first hook for someone deciding whether to install, not something to print or hand over — benefit-led ("Just Scan and Collect": all your cards on one phone, scan to collect, free rewards automatically tracked) rather than instructional. Linked directly from `get-the-app-customer-flyer.html`'s toolbar, and listed on the site.
+
 ### [get-the-app-customer-how-it-works.html](../../marketing/customer_app/get-the-app-customer-how-it-works.html)
-**Tier:** 2 (decide/explain). **Purpose:** Printable counter card, four numbered steps (Add a Card → Show It Each Visit → Watch It Fill Up → Redeem Your Reward) mirroring the app's own in-app "How It Works" screen, plus a QR to download. Built specifically for the moment a regular customer asks "how does this work?" while a shop is moving off paper cards — reassures them nothing about the reward itself changes.
+**Tier:** 2.5 (understand). **Purpose:** Printable counter card, four numbered steps (Add a Card → Show It Each Visit → Watch It Fill Up → Redeem Your Reward) mirroring the app's own in-app "How It Works" screen, plus a QR to download. Built specifically for the moment a regular customer asks "how does this work?" while a shop is moving off paper cards — reassures them nothing about the reward itself changes. Different job from `see-what-you-get.html`: this one is for someone already standing at the till, not someone deciding online.
 
 ### [get-the-app-customer-flyer.html](../../marketing/customer_app/get-the-app-customer-flyer.html)
-**Tier:** 1 (hook). **Purpose:** Generic checkout-display card — QR only, no "how it works" content. Works for any business already using LoyaltyCards, print and leave at the till.
+**Tier:** 1 (hook). **Purpose:** Generic checkout-display card — QR only, no "how it works" content. Works for any business already using LoyaltyCards, print and leave at the till. Toolbar links onward to `see-what-you-get.html`.
 
 ### [app-store-url.md](../../marketing/customer_app/app-store-url.md)
 **Purpose:** Same reference doc as the supplier version, for the Customer Wallet app (`apple.co/4bYdQ0T`).

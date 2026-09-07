@@ -11,4 +11,4 @@ The one honest catch right now: it's iPhone only for the moment. If most of your
 No pressure at all — have a play with it, and if it's not for you or doesn't fit how you run things, no problem, I'd just genuinely like to know why. If it does click, even better.
 
 Get the app: https://apple.co/4hFWKsh
-Full setup guide: https://loyaltycards-site.pages.dev/user/supplier-setup-guide.html
+How it works: https://loyaltycards-site.pages.dev/marketing/how-it-works-business.html

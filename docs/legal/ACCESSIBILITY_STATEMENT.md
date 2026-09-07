@@ -1,11 +1,11 @@
 # Accessibility Statement
 
-**LoyaltyCards v1.0.2+8**  
+**LoyaltyCards v2.2.4+40**  
 **Commitment:** Making digital loyalty cards accessible to everyone  
-**Last Updated:** August 31, 2026  
+**Last Updated:** September 7, 2026  
 **Compliance Target:** WCAG 2.1 Level AA
 
-**Note:** The known dark-mode text-legibility risk has been checked and ruled out (see "Dark Mode" section below, verified 2026-07-20). A first round of VoiceOver/semantic-labeling and live-region work landed 2026-08-31 for the Customer app, followed the same day by an icon-tooltip and live-region pass for the Supplier app - see "Screen Reader Support" and Roadmap below. The Supplier app's pass was narrower than the Customer app's: it added tooltips and live-region error announcements, but didn't need the combined-semantic-label/`ExcludeSemantics` work the Customer app's loyalty card list required, since the Supplier app's equivalent UI (the stamp-count selector) already used real visible labels.
+**Note:** The known dark-mode text-legibility risk has been checked and ruled out (see "Dark Mode" section below, verified 2026-07-20) - though two unrelated, genuinely invisible dark-mode text bugs were subsequently found and fixed on the `AppReferralScreen` shared by both apps (2026-08-30 and 2026-08-31, during Android emulator testing); see "Dark Mode Support" below for what that means for the original check's scope. A first round of VoiceOver/semantic-labeling and live-region work landed 2026-08-31 for the Customer app, followed the same day by an icon-tooltip and live-region pass for the Supplier app - see "Screen Reader Support" and Roadmap below. The Supplier app's pass was narrower than the Customer app's: it added tooltips and live-region error announcements, but didn't need the combined-semantic-label/`ExcludeSemantics` work the Customer app's loyalty card list required, since the Supplier app's equivalent UI (the stamp-count selector) already used real visible labels.
 
 ---
 
@@ -17,7 +17,7 @@ LoyaltyCards is committed to ensuring digital accessibility for all users, inclu
 
 ## Current Accessibility Status
 
-**Status:** 🟡 **Partial Compliance** (v1.0.2+8)
+**Status:** 🟡 **Partial Compliance** (v2.2.4+40)
 
 LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conformant" means that some parts of the application do not fully conform to the accessibility standard.
 
@@ -136,8 +136,9 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 - ✅ **Verified (2026-07-20):** Checked every `BrandColors.textPrimary`/`BrandColors.textSecondary` text-color usage across both apps (21 instances total — 10 in the Supplier app, 11 in the Customer app) against their enclosing background. All of them sit on a fixed `BrandColors.*Container` background (or an explicit `Colors.white`/`Colors.grey[50]`), never on the theme's dynamic surface color — so none of them go illegible in dark mode. This is a deliberate, pre-existing pattern (one instance — the "Card Created" badge — was fixed this exact way in a past release per `CHANGELOG.md` v0.3.0+1), not an oversight.
 - ⚠️ What this means in practice: branded info/success/warning callout badges keep a fixed light background + dark text regardless of the app's theme, so in dark mode they render as a light-colored badge on an otherwise-dark screen. That's a **visual style inconsistency**, not a contrast/legibility failure — text stays fully readable either way.
 - ⚠️ This check covered the specific symbols most likely to cause invisible text (`BrandColors.textPrimary`/`textSecondary`); it was not an exhaustive pixel-by-pixel audit of every screen and widget, and no automated/manual VoiceOver or Dynamic Type dark-mode testing has been performed.
+- ❌ **Confirmed by subsequent testing:** that scope limitation wasn't theoretical. Two genuinely invisible-text dark-mode bugs were found and fixed in `source/shared/lib/widgets/app_referral_screen.dart` (the "Tell a Friend"/"Tell a Business" screen shared by both apps) shortly after the 2026-07-20 check, neither using the `BrandColors.textPrimary`/`textSecondary` symbols that check covered: (1) 2026-08-30, the headline text was hardcoded to `Colors.black87`, effectively invisible on the screen's near-black dark background; (2) 2026-08-31, found while capturing Play Store screenshots on the Android emulator in dark mode - the screen's `AppBar` wasn't setting `foregroundColor`, so Material 3 defaulted its title to a dark color against the custom navy bar. Both are fixed (the headline now uses `Theme.of(context).colorScheme.onSurface`; the AppBar sets `foregroundColor: Colors.white` like every other app bar in both apps), but their existence means the 2026-07-20 audit's clean result should be read as "no illegible instances of the specific pattern checked," not "no dark-mode legibility bugs anywhere."
 
-**Status:** The specific legibility risk this section previously flagged has been checked and ruled out. Making the branded badges themselves theme-aware (so they blend into dark mode instead of staying fixed-light) remains an optional future polish item, not a release blocker.
+**Status:** The specific legibility risk this section originally flagged (`BrandColors.textPrimary`/`textSecondary` on dynamic surfaces) has been checked and ruled out. Two unrelated invisible-text bugs found by later testing, on a different shared screen, are now also fixed. Making the branded badges themselves theme-aware (so they blend into dark mode instead of staying fixed-light) remains an optional future polish item, not a release blocker.
 
 ---
 
@@ -287,6 +288,9 @@ LoyaltyCards is **partially conformant** with WCAG 2.1 Level AA. "Partially conf
 - ⚠️ Not yet tested with users who have disabilities
 - ⚠️ No formal accessibility audit performed
 
+**What Actually Caught the Dark Mode Bugs:**
+- Neither of the two invisible-text dark-mode bugs described under "Dark Mode Support" was caught by the targeted `BrandColors` code review - both were found through ordinary manual use (day-to-day dark-mode use for the first, capturing Play Store screenshots on an emulator for the second), not a dedicated accessibility pass. Worth keeping in mind when reading "verified" claims elsewhere in this document: a targeted code-symbol check rules out the specific pattern it looked for, not every way a screen can render illegibly.
+
 ---
 
 ### Accessibility Testing Tools
@@ -421,7 +425,7 @@ If you encounter accessibility barriers while using LoyaltyCards, please contact
 **Level AA:** ⚠️ Partially Conformant  
 **Level AAA:** ❌ Not Conformant
 
-**Last Evaluation:** April 18, 2026 (general self-assessment); dark-mode legibility risk specifically re-checked July 20, 2026; first round of Customer app semantic-labeling/live-region work landed August 31, 2026, extended to the Supplier app's icon tooltips and live-region error announcements the same day (see Document History)  
+**Last Evaluation:** April 18, 2026 (general self-assessment); dark-mode legibility risk specifically re-checked July 20, 2026; first round of Customer app semantic-labeling/live-region work landed August 31, 2026, extended to the Supplier app's icon tooltips and live-region error announcements the same day; document corrected September 7, 2026 to log two invisible-text dark-mode bugs found and fixed on `AppReferralScreen` after the July 20 check (see Document History)  
 **Evaluation Method:** Self-assessment (manual testing + targeted code review)  
 **Next Evaluation:** Before the final pre-submission build, covering the remaining open roadmap items (VoiceOver/semantics work)
 
@@ -457,6 +461,7 @@ We are actively working toward full compliance with WCAG 2.1 Level AA and releva
 | 1.2 | July 20, 2026 | Verified the specific dark-mode legibility risk (BrandColors.textPrimary/textSecondary on dynamic surfaces) across both apps and confirmed it does not occur — all instances pair fixed text with fixed backgrounds. Reframed as a visual style item (fixed-color badges in dark mode), not a contrast/legibility bug. Updated roadmap accordingly. |
 | 1.3 | August 31, 2026 | First round of VoiceOver/semantic-labeling and live-region work, Customer app: live-region announcements for all AppFeedback success/error/info/warning messages (shared component, both apps benefit) and the QR scanner's inline rejection message; combined semantic labels replacing per-element announcements for loyalty card list items and the card detail stamp grid (previously up to `stampsRequired` individual unlabeled circles per card); semantic labels added to previously-unlabeled icon buttons (flashlight, settings, search-clear) and the QR code image itself. Covered the wallet home, card detail, QR scanner, and QR display screens - not an exhaustive pass, and not yet applied to the Supplier app's own screens. Added automated widget-test coverage asserting on the actual semantics tree, not just visible text. Updated roadmap and per-item status accordingly. |
 | 1.4 | August 31, 2026 | Extended the same day's work to the Supplier app: `tooltip`s added to previously-unlabeled icon-only buttons (back navigation, settings, two flashlight toggles, stamp-count +/- on the simple-mode token screen), and inline error banners (business import failure screen; both error panels on the stamp/scan screen) wrapped in `Semantics(liveRegion: true, ...)`, matching the Customer app's QR scanner fix. Confirmed the Customer app's combined-label/`ExcludeSemantics` work wasn't needed here - the Supplier app's stamp-count selector already uses real visible `ChoiceChip` labels. Narrower in scope than the Customer app pass (no new automated semantics-tree test); updated roadmap and per-item status accordingly. |
+| 1.5 | September 7, 2026 | Corrected the version number in the header/status (was stuck at v1.0.2+8; app is v2.2.4+40). Logged two invisible-text dark-mode bugs found and fixed on `AppReferralScreen` (shared "Tell a Friend"/"Tell a Business" screen) after the July 20 dark-mode check: a hardcoded `Colors.black87` headline (found 2026-08-30) and a missing `AppBar.foregroundColor` (found 2026-08-31, during Android emulator screenshot capture) - both fixed, neither caught by the targeted `BrandColors` symbol check, so the "Dark Mode Support" and Testing Methodology sections now say so explicitly. No Android-specific accessibility claims added - Android's release is undecided, and TalkBack/Android-specific material will be added if and when that's committed to. |
 
 ---
 
@@ -475,7 +480,7 @@ We are actively working toward full compliance with WCAG 2.1 Level AA and releva
 ---
 
 **Maintained by:** Development Team  
-**Last Updated:** August 31, 2026  
+**Last Updated:** September 7, 2026  
 **Next Review:** Before the final pre-submission build for v1.0 App Store release
 
 ---

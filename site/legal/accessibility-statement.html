@@ -36,9 +36,9 @@
 <div class="wrap">
   <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
   <h1>Accessibility Statement</h1>
-  <p class="meta">LoyaltyCards v1.0.2+8 &nbsp;·&nbsp; Last Updated: July 20, 2026 &nbsp;·&nbsp; Compliance Target: WCAG 2.1 Level AA</p>
+  <p class="meta">LoyaltyCards v2.2.4+40 &nbsp;·&nbsp; Last Updated: September 7, 2026 &nbsp;·&nbsp; Compliance Target: WCAG 2.1 Level AA</p>
 
-  <div class="note">The known dark-mode text-legibility risk has been checked and ruled out (see "Dark Mode" below, verified July 20, 2026). Broader VoiceOver/semantic-labeling work remains open — see Roadmap.</div>
+  <div class="note">The known dark-mode text-legibility risk was checked and ruled out on July 20, 2026 (see "Dark Mode" below) — though two unrelated, genuinely invisible dark-mode text bugs were later found and fixed on a shared screen, which narrows what that check actually proved. A first round of VoiceOver semantic-labeling and live-region work landed August 31, 2026 for both apps — see "Screen Reader Support" and Roadmap below.</div>
 
   <p>LoyaltyCards is committed to ensuring digital accessibility for all users, including those with disabilities. We strive to continually improve the user experience for everyone and apply relevant accessibility standards.</p>
 
@@ -58,16 +58,16 @@
 
   <h2>Partial Implementation</h2>
   <h3>Screen Reader Support (VoiceOver)</h3>
-  <p>Basic support via iOS defaults — button labels, navigation changes, and text fields are read. Gaps: custom widgets may lack semantic labels, QR scanner status isn't clearly announced, stamp counts may be read as separate numbers, and business logos may be described as "image" rather than by business name.</p>
+  <p>Basic support via iOS defaults, supplemented August 31, 2026 with targeted work on the highest-traffic screens of both apps. Customer app: loyalty card list items and the card detail stamp grid now expose one combined, accurate description instead of many unlabeled elements; previously-unlabeled icon buttons (flashlight, settings, search-clear) got semantic labels; the QR code image itself now describes what scanning it will do. Supplier app: previously-unlabeled icon-only buttons (back navigation, settings, flashlight toggles, stamp-count +/-) got tooltips. This was a targeted pass on specific screens, not an exhaustive audit — custom widgets elsewhere in either app may still lack semantic labels.</p>
   <h3>Dynamic Type</h3>
   <p>Body text scales with system settings; some headings use fixed sizes; QR code size doesn't scale (functional limitation); card layout may break at extreme text sizes (200%+).</p>
   <h3>Dark Mode</h3>
-  <p>The app follows the device's system light/dark appearance (both apps' main.dart wire up real, distinct light/dark ColorScheme objects, defaulting to system mode), but there is no in-app toggle to choose Light/Dark/System independent of the device setting. <strong>Verified July 20, 2026:</strong> every text-color usage most likely to cause an illegible-text bug in dark mode (21 instances across both apps) was checked against its background — all of them pair fixed text with a fixed background (branded info/success/warning badges), so none go illegible in dark mode. This is a deliberate, pre-existing pattern, not an oversight. The visible effect is that these badges keep a fixed light background regardless of theme, so in dark mode they can look like a light-colored card on an otherwise dark screen — a style inconsistency, not a legibility problem.</p>
+  <p>The app follows the device's system light/dark appearance (both apps' main.dart wire up real, distinct light/dark ColorScheme objects, defaulting to system mode), but there is no in-app toggle to choose Light/Dark/System independent of the device setting. <strong>Verified July 20, 2026:</strong> every text-color usage most likely to cause an illegible-text bug in dark mode (21 instances across both apps, all using the app's branded `BrandColors.textPrimary`/`textSecondary` symbols) was checked against its background — all of them pair fixed text with a fixed background (branded info/success/warning badges), so none go illegible in dark mode. This is a deliberate, pre-existing pattern, not an oversight. The visible effect is that these badges keep a fixed light background regardless of theme, so in dark mode they can look like a light-colored card on an otherwise dark screen — a style inconsistency, not a legibility problem. <strong>That check's scope had a real limit, though:</strong> two separate, genuinely invisible-text bugs were later found and fixed on the "Tell a Friend"/"Tell a Business" screen shared by both apps — neither used the symbols the check covered. One (found August 30) was a hardcoded dark headline color invisible on the dark background; the other (found August 31, while capturing Play Store screenshots) was a missing app-bar text color that defaulted to dark-on-dark. Both are fixed now, but their existence means "verified" above should be read as "no issues found in the specific pattern checked," not "no dark-mode legibility bugs anywhere."</p>
 
   <h2>Not Yet Implemented</h2>
   <ul>
-    <li>Comprehensive semantic labels/grouping on custom widgets; better QR scanner state announcements</li>
-    <li>Automatic announcements for success/error states and loading states (live regions)</li>
+    <li>Comprehensive semantic labels/grouping on custom widgets outside the screens covered August 31, 2026 (see "Screen Reader Support" above)</li>
+    <li>Live-region announcements for loading/processing states — success/error/info/warning messages are now announced automatically app-wide as of August 31, 2026, but in-progress states (e.g. the QR scanner's "processing" spinner) are not yet</li>
     <li>Color customization, high-contrast override, or option to disable brand colors</li>
     <li>Zoom/scaling of fixed card layouts; simplified UI mode</li>
     <li>Audio cues or haptic alternatives to visual indicators (standard iOS haptics on button presses are supported)</li>
@@ -79,18 +79,19 @@
   <h3>Card Visual Design</h3>
   <p>Cards use color and layout to convey information, which can be harder for color-blind or screen-reader users. Business name and stamp count are always present as text, mitigating this partially.</p>
   <h3>Limited Screen Reader Optimization</h3>
-  <p>VoiceOver support relies on iOS defaults rather than custom optimization; navigation flow may not be fully optimal for screen reader users. All buttons have text labels and navigation is linear and predictable as a baseline mitigation.</p>
+  <p>VoiceOver support relies mostly on iOS defaults, with targeted custom work (August 31, 2026) on each app's highest-traffic screens — not yet a comprehensive pass across either app. Mitigations: all buttons have text labels, navigation is linear and predictable, and success/error/info/warning messages now announce automatically app-wide via the apps' shared feedback component.</p>
   <h3>Fixed-Color Badges Don't Adapt to Dark Mode</h3>
   <p>See "Dark Mode" above — branded callout badges keep a fixed light background regardless of theme (verified as a style issue, not a legibility one), and users cannot force a light/dark mode independent of their device setting.</p>
 
   <h2>Testing Performed</h2>
-  <p>Manual testing has covered basic VoiceOver navigation, Dynamic Type at system sizes, Reduce Motion, manual WCAG contrast checks, and touch target measurement. No automated accessibility testing or CI/CD checks are in place yet, and no formal audit or testing with users who have disabilities has been performed yet.</p>
+  <p>Manual testing has covered basic VoiceOver navigation, Dynamic Type at system sizes, Reduce Motion, manual WCAG contrast checks, and touch target measurement. Not yet run as part of CI/CD, but the August 31, 2026 semantic-labeling work has one dedicated automated widget test asserting on the actual semantics tree (not just visible text) for the Customer app's wallet home screen — no broader automated accessibility testing exists yet, and no formal audit or testing with users who have disabilities has been performed. Notably, neither invisible-text dark-mode bug described under "Dark Mode" above was caught by a dedicated accessibility pass — both were found through ordinary manual use.</p>
 
   <h2>Roadmap</h2>
   <h3>Before the final pre-submission build</h3>
   <ul>
-    <li><s>Verify the dark-mode text-legibility risk</s> — done July 20, 2026, confirmed not present</li>
-    <li>Add Semantics widgets to all interactive elements; optimize VoiceOver announcements and card-detail labels</li>
+    <li><s>Verify the dark-mode text-legibility risk</s> — done July 20, 2026; two unrelated invisible-text bugs found by later testing are also now fixed (see "Dark Mode" above)</li>
+    <li><s>Add Semantics widgets and live-region announcements to the highest-traffic screens</s> — done August 31, 2026 for both apps (see "Screen Reader Support" above)</li>
+    <li>Full audit pass of the remaining screens in both apps; announce loading/processing states, not just terminal outcomes</li>
     <li>Improve QR scanner accessibility (voice guidance); test with real VoiceOver users</li>
   </ul>
   <h3>Medium priority (may defer post-v1.0)</h3>
@@ -111,7 +112,7 @@
     <tr><td>AA</td><td>Partially Conformant</td></tr>
     <tr><td>AAA</td><td>Not Conformant</td></tr>
   </table>
-  <p>Evaluation Method: self-assessment (manual testing + targeted code review). Last Evaluation: April 18, 2026 (general); dark-mode legibility risk specifically re-checked July 20, 2026. Next Evaluation: before the final pre-submission build, covering the remaining open roadmap items.</p>
+  <p>Evaluation Method: self-assessment (manual testing + targeted code review). Last Evaluation: April 18, 2026 (general); dark-mode legibility risk specifically re-checked July 20, 2026; VoiceOver semantic-labeling and live-region work landed August 31, 2026; this page corrected September 7, 2026 to log two invisible-text dark-mode bugs found and fixed after the July check. Next Evaluation: before the final pre-submission build, covering the remaining open roadmap items.</p>
 
   <h2>Legal Compliance Context</h2>
   <p>Relevant standards we track: Americans with Disabilities Act (ADA) Title III and Section 508 in the US; WCAG 2.1 and EN 301 549 internationally; Apple's iOS Human Interface Guidelines and App Store Review Guideline 2.5.18 (Accessibility). We are actively working toward full WCAG 2.1 Level AA compliance.</p>

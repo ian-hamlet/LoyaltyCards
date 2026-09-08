@@ -2178,8 +2178,9 @@ This document tracks defects from two sources:
 
 ### DECISION-024: Add a Sort Control to the Customer Wallet Home Screen
 
-- **Type:** Feature addition, not yet built - analysis only, logged at the user's request
-- **Status:** 📋 BACKLOG
+- **Type:** Feature addition
+- **Status:** 🔨 FIRST STAB BUILT (2026-09-08), unreviewed - see below
+- **Implementation (2026-09-08):** Built on `feature/customer-wallet-card-sorting` (v2.3.0+41), deliberately **not** merged into `develop` or `main` pending review/decision. Followed this entry's own recommendation exactly: a `CardSortOrder` enum (`newestFirst`/`oldestFirst`/`nameAZ`/`nameZA`, `newestFirst` matching the pre-existing default), persisted via `SharedPreferences` mirroring the existing `_hideRedeemed` pattern, applied client-side in `_filterCards()` with no DB query/schema change, and a third AppBar icon (`Icons.sort`) opening a `PopupMenuButton` checklist - option 1 from "UI placement options" below, not the filter-chip-row alternative. New `customer_home_sort_test.dart` (5 tests). All three suites and `flutter analyze` clean; full detail in `CHANGELOG.md` v2.3.0+41 and the Build 41 note in `version.dart`.
 - **Priority:** LOW (UX enhancement, no correctness issue - current behavior is consistent, just invisible)
 - **Screen/Feature:** `source/customer_app/lib/screens/customer/customer_home.dart`
 - **Context:** User asked what order the wallet displays cards in (having possibly been confused by this before). Traced the full history: the card list has never had a genuine "sort" feature - the very first prototype (`da06ef1`, "phase 0") had three hardcoded mock cards that happened to be typed in alphabetical order, purely coincidental (new cards were just appended to a static list). Since `bba07a4` ("phase 1 and 2 completion", 2026-04-03), the real `CardRepository.getAllCards()` implementation has always queried `orderBy: 'created_at DESC'` (newest-created card first) - unchanged ever since, confirmed via full `--follow -p` history search on both `card_repository.dart` and `customer_home.dart`. There is no sort UI at all today; the order is a fixed, invisible default.
@@ -2188,7 +2189,7 @@ This document tracks defects from two sources:
 - **UI placement options considered:**
   1. **(Recommended)** A third AppBar icon (`Icons.sort`) next to the existing Help/Settings icons, opening a `PopupMenuButton` checklist. Standard Material pattern, no extra vertical space, avoids the existing filter-chip `Wrap` row - which already needed `ScaleCapped` fixes for overflow at large accessibility text sizes, so adding a second chip there raises that risk again.
   2. A second chip (`ActionChip`/dropdown) next to the existing "Show Redeemed" `FilterChip`, keeping it visually grouped with the other display-affecting control - riskier on small screens/large text given that row's overflow history.
-- **Target Build:** Unscheduled - no code written yet, this is the recorded analysis for whenever it's picked up.
+- **Target Build:** Unscheduled for `develop`/`main` - built and tested on `feature/customer-wallet-card-sorting` (v2.3.0+41, see Implementation above), awaiting a decision on whether/when to merge.
 
 ---
 

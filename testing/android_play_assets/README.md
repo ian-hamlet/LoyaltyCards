@@ -1,0 +1,122 @@
+# Android Play-Testing Asset Pack
+
+Generates a printable PDF of QR codes for Google Play closed-testing testers
+of the **Customer Wallet** app, covering **Express Mode only**. Each business
+gets one A4 sheet with everything a tester needs to add a card and fill it
+up quickly, without a live Supplier device in the room.
+
+## What gets generated
+
+For each business in `seed_businesses.json`:
+
+- **1× Add Card QR** — genuinely ECDSA-signed (`CardIssueToken`), exactly as
+  a real Supplier app would produce. The customer app verifies this
+  signature in every mode, so it has to be real, not a placeholder.
+- **3× Add Stamp QR** — denominations of +1 / +2 / +3 stamps
+  (`StampToken.stampCount`), to fill a card in fewer scans. Express Mode
+  never checks the stamp signature (only expiry and stamp count), so these
+  carry a placeholder signature by design — that's real app behaviour, not
+  a shortcut taken here.
+- **1× Business Backup QR** — a non-expiring `SupplierConfigBackup`
+  (`type: "recovery"`), so the same test business can be restored through
+  the Supplier app later if needed.
+
+All three are cryptographically/structurally correct per the app's own
+verification code — see "Verifying correctness" below, not just asserted.
+
+## Running it
+
+```bash
+cd testing/android_play_assets
+python3 -m pip install cryptography qrcode   # one-time
+python3 generate_test_assets.py
+```
+
+Output lands in `output/`:
+- `express_test_pack.pdf` — the printable pack, one page per business
+- `express_test_pack.html` — the same content, for previewing/editing the template
+- `generated_tokens.json` — the raw JSON inside every QR, for inspection or re-verification
+
+## Adding or changing businesses
+
+Edit `seed_businesses.json` and re-run the script. Each business's `keys`
+block is filled in **automatically** the first time it's generated, then
+reused on every future run — matching a real business's key pair never
+changing. This means:
+
+- Adding a 7th business is safe: existing businesses keep their keys/IDs,
+  so their already-printed QR codes stay valid.
+- To force a *new* key pair for one business (e.g. you suspect a tester's
+  device already has stale data for it), delete just that business's
+  `"keys": { ... }` block back to `"keys": null` and re-run.
+- Never hand-edit the values inside an existing `keys` block.
+
+`cooldownSeconds` (top-level, default 10) controls the rate limit
+(`scanInterval`) baked into all three stamp QR codes for every business.
+
+## Why these business names
+
+`Test Coffee`, `Green Grocer`, `Sunny Bakery`, and `City Books` are reused
+from the existing `scripts/seed_customer_*_db.sh` fixtures (all Express
+Mode there too). `Riverside Deli` and `Willow Spa` are new names —
+the seed scripts' `Metro Deli` and `Zen Spa` are Secure Mode there, and
+reusing those names for Express Mode test businesses here would confuse a
+tester whose device already has old seed data under the same name but
+different behaviour.
+
+## Known limitation (pre-existing app gap, not something this script can fix)
+
+Restoring a business from the Backup QR resets its icon to the default
+Store icon and its scan cooldown to the app's default. `SupplierConfigBackup`
+doesn't carry `logoIndex` or `scanInterval` at all — a real, already-tracked
+gap (`docs/project-management/DEFECT_TRACKER.md`), not specific to test
+data. Everything else (name, keys, stamps required, brand color) restores
+correctly.
+
+## Verifying correctness
+
+`source/shared/test/verify_android_play_test_assets_test.dart` loads
+`output/generated_tokens.json` and runs every payload through the app's
+*real* verification code (`CryptoUtils.verifySignature`,
+`SupplierConfigBackup.verifySignature`, `StampToken`/`CardIssueToken`
+structural checks) — not a re-implementation, the actual production code
+both apps ship. Run it after regenerating:
+
+```bash
+cd source/shared
+flutter test test/verify_android_play_test_assets_test.dart
+```
+
+If this ever fails after an unrelated change elsewhere in `shared`, it
+means that change would also invalidate every QR code already printed and
+handed to testers — re-run `generate_test_assets.py` for a fresh,
+compatible pack rather than treating the test as wrong.
+
+## Technical notes (for anyone extending this)
+
+The generator reimplements, in Python, the exact encoding
+`source/supplier_app/lib/services/key_manager.dart` and
+`source/shared/lib/models/supplier_config_backup.dart` use — not a
+approximation:
+
+- Public keys / signatures: `[4-byte big-endian length][bytes]` pairs,
+  base64-encoded, using **minimal-length** big-endian integers (not fixed
+  32-byte width) — see `bigint_to_bytes()` in the script.
+- `CardIssueToken` signature covers
+  `businessId:businessName:publicKey:stampsRequired:brandColor:cardId:timestamp:mode`,
+  with `mode` as the *current* `"express"` string
+  (`OperationModeExtension.toStorageString()`), not the older `"simple"`
+  value some pre-existing seed scripts still use.
+- The stamp QRs' `cardId` must be the exact literal
+  `"express-mode-stamp"` — this is the Smart Routing sentinel
+  `QrScannerController` checks for to route a stamp by `businessId` instead
+  of an exact card ID, since a static Express Mode QR can't know in advance
+  which customer's card ID it will ever be scanned against.
+- The Backup QR's HMAC key is derived from the business's own private key
+  via the exact HKDF construction in
+  `SupplierConfigBackup._deriveHMACKey` — no shared secret, fully
+  reproducible from a private key this script generates itself.
+- The Backup QR's `timestamp` is formatted to round-trip exactly through
+  Dart's `DateTime.parse(...).toIso8601String()`, since the HMAC is
+  computed over the *parsed-then-reformatted* value, not the raw JSON
+  string.

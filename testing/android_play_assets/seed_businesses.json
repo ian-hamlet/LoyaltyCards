@@ -1,0 +1,72 @@
+{
+  "_comment": "Seed/config file for generate_test_assets.py. Edit the business list to add/change test businesses, then re-run the generator. Each business's 'keys' block is filled in automatically the first time it's generated and then reused on every future run (matching a real business's key pair never changing) - delete a business's 'keys' block entirely to force a fresh key pair for that one business only. Do not hand-edit 'keys' values.",
+  "cooldownSeconds": 10,
+  "businesses": [
+    {
+      "name": "Test Coffee",
+      "brandColor": "#8B4513",
+      "logoIndex": 1,
+      "stampsRequired": 5,
+      "keys": {
+        "businessId": "098812b8-3900-4e19-af55-34ffbeb845a9",
+        "privateKey": "2II3vWJQ5sAmd7mDwtnxz/IEFf3UPhGgJX1L9K9M4us=",
+        "publicKey": "AAAAIOOy4j3dXyQPfioOQk0jJgBdZLdX5s+AXKRDACHTm9caAAAAIGDytRU6Ogp+/ie3bhHQvH6H4edokEva7Rk6sizv3Ymq"
+      }
+    },
+    {
+      "name": "Green Grocer",
+      "brandColor": "#2E7D32",
+      "logoIndex": 10,
+      "stampsRequired": 5,
+      "keys": {
+        "businessId": "1c011a5f-6426-47ad-babe-912004920f0d",
+        "privateKey": "soo1rdGXnJ5HK215PtIXDUb/eI3PPl2aHbp+0ItNTBs=",
+        "publicKey": "AAAAINLX6dvNBD6cWo3/+Fi1fAqocf93kDhitFcgi+l9r9yyAAAAIHTcSHlxXV8kwDFvLSiPS0R8DHerjzhSrFsG9thfOgr0"
+      }
+    },
+    {
+      "name": "Riverside Deli",
+      "brandColor": "#1565C0",
+      "logoIndex": 2,
+      "stampsRequired": 7,
+      "keys": {
+        "businessId": "0cabbd9c-df93-4e6f-85a8-8f53c0c22493",
+        "privateKey": "T2m0LGc/8Ieq/C/+X9AqUvCbusuUtaFHqf2cFNZYk/s=",
+        "publicKey": "AAAAIBqbZxD9zVo9zFXwaQcFfONIK7qw6GLKwcetwqKc3RshAAAAILpoRb7NqN1eIuZDnM7SpmoJ6mCBzvEi/lyxH7htwjtj"
+      }
+    },
+    {
+      "name": "Sunny Bakery",
+      "brandColor": "#EF6C00",
+      "logoIndex": 5,
+      "stampsRequired": 7,
+      "keys": {
+        "businessId": "488cbb35-3abe-4268-ae0d-5ef69cef3198",
+        "privateKey": "M/1ogZFgQRThsOVAooGS7W4DM0IOWZD2KMYDHmcuFk8=",
+        "publicKey": "AAAAINo8vJq3wBcKE+oKfMFLAoDEbYLrQPeJIwr9Cinu0wY8AAAAIEBsbu+nTeJHdRhG3UxeGXgmgYk7Vccbe9nfSvFQnPe8"
+      }
+    },
+    {
+      "name": "Willow Spa",
+      "brandColor": "#6A1B9A",
+      "logoIndex": 13,
+      "stampsRequired": 8,
+      "keys": {
+        "businessId": "e1103000-a9d7-4634-8d29-18425a818956",
+        "privateKey": "0Lafx6Pt4NGZ8fg1bX/SB0EzQrzeMJmTcVJYQlB3mHI=",
+        "publicKey": "AAAAIPHhbNdDO8Wz6oomd7HEvVcnXc3450kQ7yvDfia90/oTAAAAIOc9z4AfanowFJ5NjxRDxtaQBIg7Af64KZd0+CIy92Qv"
+      }
+    },
+    {
+      "name": "City Books",
+      "brandColor": "#455A64",
+      "logoIndex": 23,
+      "stampsRequired": 6,
+      "keys": {
+        "businessId": "384b99d5-48d2-4c03-b2fa-8bf9991ca8c7",
+        "privateKey": "LOiawPv4bsLMCtQFO/bBYmAXT3zazQ9+pTt7LOqh50A=",
+        "publicKey": "AAAAIBE+9DhXMUKdWISpbwORZj9U2X+BxHCfo0wPBLwNha64AAAAIFr3Bsv6kSmF9Z+MMyQ5Dxk4x93NlDaYlNw4qgM4eAcI"
+      }
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # Android Play-Testing Asset Pack
 
+**Tester-facing instructions:** [`CLOSED_TESTING_INSTRUCTIONS.md`](CLOSED_TESTING_INSTRUCTIONS.md) (also built as `output/CLOSED_TESTING_INSTRUCTIONS.pdf`) — the daily routine testers actually follow for the 14-day Google Play closed test, referencing the QR pack below. This README is about the *generator*, not the test routine itself.
+
 Generates a printable PDF of QR codes for Google Play closed-testing testers
 of the **Customer Wallet** app, covering **Express Mode only**. Each business
 gets one A4 sheet with everything a tester needs to add a card and fill it

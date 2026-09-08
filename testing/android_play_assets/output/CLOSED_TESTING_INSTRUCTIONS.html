@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LoyaltyCards Android Closed Testing Instructions</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec; --warn: #8a5a00; --warnbg: #fff6e5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 190mm; margin: 0 auto; padding: 14mm 16mm 20mm; }
+  h1 { font-size: 20pt; margin: 0 0 4mm; }
+  h2 { font-size: 13pt; margin-top: 9mm; border-top: 1px solid var(--border); padding-top: 6mm; }
+  .meta { color: var(--muted); font-size: 10pt; margin-bottom: 6mm; }
+  .meta strong { color: var(--fg); }
+  p { margin: 0 0 3mm; }
+  ol, ul { padding-left: 5mm; margin: 0 0 3mm; }
+  li { margin: 0 0 2mm; }
+  .callout { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 5mm 6mm; margin: 4mm 0; }
+  .note { background: var(--warnbg); color: var(--warn); border: 1px solid #f0d998; border-radius: 8px; padding: 4mm 6mm; margin: 3mm 0; font-size: 10.5pt; }
+  table { border-collapse: collapse; width: 100%; margin: 3mm 0; font-size: 10.5pt; }
+  th, td { border: 1px solid var(--border); padding: 3mm 3.5mm; text-align: left; }
+  th { background: var(--card); }
+  .checkbox-table td:not(:first-child), .checkbox-table th:not(:first-child) { text-align: center; }
+  footer { text-align: center; color: var(--muted); font-size: 9pt; margin-top: 10mm; }
+  a { color: var(--accent); }
+  @media print { @page { size: A4 portrait; margin: 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>LoyaltyCards Customer Wallet &mdash; Android Closed Testing Instructions</h1>
+  <p class="meta">
+    <strong>For:</strong> Google Play Closed Testing participants &nbsp;&middot;&nbsp;
+    <strong>App:</strong> LoyaltyCards (Customer Wallet) &nbsp;&middot;&nbsp;
+    <strong>Testing window:</strong> 14 continuous days &mdash; [start date] to [end date] &nbsp;&middot;&nbsp;
+    <strong>Daily time needed:</strong> roughly 5&ndash;10 minutes
+  </p>
+
+  <h2>Why this test exists</h2>
+  <p>Google requires at least <strong>12 testers opted in continuously for 14 days</strong> before a personal developer account can apply for full Play Store release. That's a fixed rule, not a judgement about how much there is to find in the app &mdash; LoyaltyCards is deliberately simple (collect stamps, redeem a reward), so this test is mostly about <strong>accruing the required testing time with real daily use</strong>, not hunting for edge cases. You'll be repeating the same routine every day for two weeks. That's expected &mdash; thank you for bearing with the repetition.</p>
+  <p>If anything ever does look wrong, though, we absolutely want to hear about it &mdash; see &ldquo;Reporting Issues&rdquo; below.</p>
+
+  <h2>How this fits together in real life</h2>
+  <p>LoyaltyCards is two apps, not one:</p>
+  <ul>
+    <li><strong>LoyaltyCards Business</strong> (the &ldquo;Supplier&rdquo; app) &mdash; installed by a shop. The shop owner sets up a stamp card (how many stamps, reward, branding), and the app produces QR codes: one for customers to add the shop's card to their wallet, and one for adding a stamp at each visit.</li>
+    <li><strong>LoyaltyCards</strong> (the &ldquo;Customer Wallet&rdquo; app &mdash; <strong>what you're testing</strong>) &mdash; installed by a shopper. They scan a shop's QR codes to add cards and collect stamps, and redeem a reward once a card is full.</li>
+  </ul>
+  <p>Normally, testing the Customer Wallet properly would mean also running the Business app on a second device to produce QR codes to scan. <strong>This test pack skips that step</strong>: the QR codes in the provided PDF are pre-generated exactly as the Business app would produce them, for six fictional test shops. You only need the Customer Wallet app installed &mdash; scan the provided codes as if a real shop had shown them to you at the till.</p>
+  <p>The one exception is <strong>redeeming a reward</strong>, which needs no QR code at all in this mode &mdash; you just tap a button in the app once your card is full, the same as a real shop visit.</p>
+
+  <h2>Before You Start (once, on day one)</h2>
+  <ol>
+    <li>Install <strong>LoyaltyCards</strong> from the Play Store closed-testing link: <strong>[insert Play Console opt-in / install link here]</strong></li>
+    <li>Open the app once. No account, signup, or personal details are ever needed &mdash; that's by design, not something missing.</li>
+    <li>Have the <strong>QR code test pack</strong> (<code>express_test_pack.pdf</code>) open on a second screen, or printed. All six sheets are used every day.</li>
+  </ol>
+
+  <h2>Daily Routine &mdash; repeat once per day, all 14 days</h2>
+  <p>Every business is <strong>Express Mode</strong>, so every stamp scan works the same way: no waiting on anyone else, just your phone and the printed/on-screen QR code.</p>
+  <p>For <strong>each of the six businesses</strong> in the pack (Test Coffee, Green Grocer, Riverside Deli, Sunny Bakery, Willow Spa, City Books):</p>
+  <ol>
+    <li><strong>Add the card.</strong> Open the scanner (camera icon) and scan that business's <strong>Add Card</strong> QR code. It appears in your wallet immediately.
+      <div class="note">If you already have a card for this business from a previous day, scan it again anyway &mdash; a second card for the same business is expected with this daily routine and isn't a bug worth reporting.</div>
+    </li>
+    <li><strong>Collect stamps until the card overflows.</strong> Scan the three <strong>Add Stamp</strong> QR codes in order &mdash; <strong>+1</strong>, then <strong>+2</strong>, then <strong>+3</strong> &mdash; waiting about <strong>10 seconds</strong> between each scan (the app enforces a short delay between stamps by design; scanning again too soon is expected to be briefly refused). Check the card after each scan.
+      <ul>
+        <li>Once the card shows as <strong>complete</strong>, scan <strong>one more</strong> Add Stamp code (any of the three). This pushes it past capacity &mdash; you should see a message that a new card was created for the extra stamp(s). That overflow behaviour is exactly what we're testing here.</li>
+        <li>If the card <em>isn't</em> complete yet after going through +1, +2, +3 once, just repeat the same three scans again from +1 until it is, then do the one extra scan to overflow it.</li>
+      </ul>
+    </li>
+    <li><strong>Redeem.</strong> On the completed card (the one from <em>before</em> the overflow scan &mdash; not the freshly-created overflow one), tap <strong>Redeem</strong>. No QR code needed for this step. Confirm the card resets and a new card appears for next time.</li>
+  </ol>
+  <p>Move to the next business and repeat. Six businesses, same three steps each &mdash; that's the whole daily session.</p>
+
+  <h2>A Note on the Sort Feature (Build 41)</h2>
+  <p>At some point during the 14-day window, you may receive a Play Store update to a newer build that adds a <strong>sort control</strong> to the wallet's card list &mdash; a small icon near the top of the screen (next to Help and Settings) that lets you reorder your cards (Newest First, Oldest First, Name A-Z, Name Z-A).</p>
+  <p>If you get that update:</p>
+  <ul>
+    <li>Install it as you normally would, then carry on with the same daily routine above &mdash; nothing else changes.</li>
+    <li>Optionally, give the sort icon a try once after updating: tap it, pick a different order, and confirm the card list reorders as expected. This isn't part of the required daily routine, just worth a look if you have a moment.</li>
+  </ul>
+
+  <h2>Reporting Issues</h2>
+  <p>If anything crashes, looks wrong, or doesn't match these instructions, email <a href="mailto:ian.hamlet@dotconnected.com">ian.hamlet@dotconnected.com</a> with:</p>
+  <ul>
+    <li>Which business/step you were on</li>
+    <li>What you expected vs. what happened</li>
+    <li>A screenshot if possible</li>
+  </ul>
+  <p>We aim to respond within 48 hours.</p>
+
+  <h2>Quick Daily Checklist</h2>
+  <p>Print or screenshot this page for a fast reference each day.</p>
+  <table class="checkbox-table">
+    <tr><th>Business</th><th>Add Card</th><th>+1&rarr;+2&rarr;+3 (repeat until overflow)</th><th>Redeem</th></tr>
+    <tr><td>Test Coffee</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>Green Grocer</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>Riverside Deli</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>Sunny Bakery</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>Willow Spa</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>City Books</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+  </table>
+
+  <footer>LoyaltyCards Android Closed Testing &mdash; thank you for helping us reach general availability.</footer>
+</div>
+</body>
+</html>

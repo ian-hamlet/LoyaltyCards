@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0+41] - 2026-09-08
+
+**Status:** 🔵 First stab at DECISION-024, built on `feature/customer-wallet-card-sorting` - deliberately **not** merged into `develop` or `main`. **Minor version bump** (2.2.4 -> 2.3.0) since this is a real feature, not a fix. All automated tests passing (shared 216/216, customer_app 189/189 - 8 pre-existing/unrelated skips, supplier_app 151/151 - 4 pre-existing/unrelated skips), `flutter analyze` clean on all three packages.
+
+### Added
+- **A sort control for the Customer app's wallet home screen** (`DEFECT_TRACKER.md` DECISION-024). The card list has never had a genuine sort - `CardRepository.getAllCards()` has always queried newest-created-first with no UI to change it. Adds Newest First (the pre-existing default - unchanged for anyone who doesn't touch the control), Oldest First, Name (A-Z), and Name (Z-A), via a third AppBar icon (`Icons.sort`) next to Help/Settings, as recommended in the decision record. Preference persists via `SharedPreferences`, applied client-side after the existing redeemed/search filters - no database schema or query change. Customer app only; the Supplier app has no equivalent card wallet. New `customer_home_sort_test.dart` (5 tests).
+
+---
+
 ## [2.2.1+33] - 2026-08-25
 
 **Status:** 🔵 In development on `feature/code-quality-refactor`/`develop` - not yet built or uploaded, preparing for a TestFlight validation round. `main` deliberately left untouched pending explicit instruction. **Patch version bump** (2.2.0 -> 2.2.1) on top of v2.2.0+32 - not build-only, since this closes a real bug present in the currently-live 2.2.0+32 backup print paths (see Fixed below), found during this work rather than introduced by it; everything else here is internal refactor/docs/marketing with no App-Store-facing capability change. All automated tests passing (shared 216/216, customer_app 186/186, supplier_app 141/141), `flutter analyze` clean of errors on all three packages.

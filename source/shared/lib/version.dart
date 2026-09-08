@@ -917,5 +917,34 @@ library;
 ///   Android real-device testing is now considered complete for this
 ///   release - see `ANDROID_PORT_PLAN.md` Track 2.
 ///
+/// Build 41 Changes:
+/// - **Minor version bump** (2.2.4 -> 2.3.0) for a real feature, not a fix:
+///   DECISION-024 (`DEFECT_TRACKER.md`), a sort control for the Customer
+///   app's wallet home screen. The card list has never had a genuine sort -
+///   `CardRepository.getAllCards()` has always queried newest-created-first
+///   with no UI to change it, unchanged since the very first real
+///   implementation. Adds a `CardSortOrder` enum (Newest First - the
+///   pre-existing default, so nothing changes for anyone who doesn't touch
+///   the control - Oldest First, Name A-Z, Name Z-A), persisted via
+///   `SharedPreferences` using the same pattern as the existing
+///   `_hideRedeemed` filter in the same file, applied client-side in
+///   `_filterCards()` after the existing redeemed/search filters (no DB
+///   query change, per the decision's own complexity assessment). UI is a
+///   third AppBar icon (`Icons.sort`) opening a `PopupMenuButton` checklist
+///   (`CheckedPopupMenuItem`), next to the existing Help/Settings icons, as
+///   recommended in the decision record over crowding the filter-chip row.
+/// - `customer_app/lib/screens/customer/customer_home.dart` only - no
+///   Supplier app change (it has no equivalent card wallet), no schema
+///   change, no new package.
+/// - New `customer_home_sort_test.dart` (5 tests): default order, each of
+///   the three explicit options, and that the choice persists across a
+///   screen reload. All three suites re-verified (shared 216/216,
+///   customer_app 189/189 - 8 skipped, pre-existing and unrelated -
+///   supplier_app 151/151, 4 skipped, pre-existing and unrelated),
+///   `flutter analyze` clean on all three packages.
+/// - Built on `feature/customer-wallet-card-sorting`, deliberately not
+///   merged into `develop` - a first stab at the feature per DECISION-024,
+///   not yet reviewed/decided as ready to ship.
+///
 /// # source/shared/lib/version.dart:
-const String appVersion = '2.2.4+40';
+const String appVersion = '2.3.0+41';

@@ -10,6 +10,28 @@ import 'customer_settings.dart';
 import 'qr_scanner_screen.dart';
 import 'how_it_works.dart';
 
+/// DECISION-024: the wallet's card order has always been a fixed, invisible
+/// default (newest-created first, straight from the DB query) with no way
+/// for the customer to change it. This enum is the sort option a customer
+/// can pick; `newestFirst` matches that pre-existing default so nothing
+/// changes for anyone who never touches the control.
+enum CardSortOrder { newestFirst, oldestFirst, nameAZ, nameZA }
+
+extension CardSortOrderLabel on CardSortOrder {
+  String get label {
+    switch (this) {
+      case CardSortOrder.newestFirst:
+        return 'Newest First';
+      case CardSortOrder.oldestFirst:
+        return 'Oldest First';
+      case CardSortOrder.nameAZ:
+        return 'Name (A-Z)';
+      case CardSortOrder.nameZA:
+        return 'Name (Z-A)';
+    }
+  }
+}
+
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
 
@@ -29,10 +51,15 @@ class _CustomerHomeState extends State<CustomerHome> {
   bool _hideRedeemed = true; // Default: hide redeemed cards
   static const String _hideRedeemedKey = 'hide_redeemed_cards';
 
+  // Sort preference (DECISION-024)
+  CardSortOrder _sortOrder = CardSortOrder.newestFirst;
+  static const String _sortOrderKey = 'card_sort_order';
+
   @override
   void initState() {
     super.initState();
     _loadFilterPreference();
+    _loadSortPreference();
     _loadCards();
   }
 
@@ -87,6 +114,54 @@ class _CustomerHomeState extends State<CustomerHome> {
     }
   }
 
+  Future<void> _loadSortPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString(_sortOrderKey);
+      setState(() {
+        _sortOrder = CardSortOrder.values.firstWhere(
+          (order) => order.name == stored,
+          orElse: () => CardSortOrder.newestFirst,
+        );
+      });
+    } catch (e) {
+      AppLogger.error('Failed to load sort preference',
+          error: e, tag: 'Preferences');
+      // Use default but don't block card loading on this failing
+      if (mounted) {
+        setState(() {
+          _sortOrder = CardSortOrder.newestFirst;
+        });
+      }
+    }
+  }
+
+  Future<void> _setSortOrder(CardSortOrder value) async {
+    final previous = _sortOrder;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sortOrderKey, value.name);
+      setState(() {
+        _sortOrder = value;
+        _filterCards();
+      });
+      AppLogger.debug('Card sort order: ${value.name}', 'Filter');
+    } catch (e) {
+      AppLogger.error('Failed to save sort preference',
+          error: e, tag: 'Preferences');
+      setState(() {
+        _sortOrder = previous; // Revert
+        _filterCards();
+      });
+      if (mounted) {
+        AppFeedback.warning(
+          context,
+          'Could not save sort preference. Your setting was not saved.',
+        );
+      }
+    }
+  }
+
   Future<void> _loadCards() async {
     setState(() => _isLoading = true);
     try {
@@ -123,7 +198,32 @@ class _CustomerHomeState extends State<CustomerHome> {
       }).toList();
     }
 
-    _filteredCards = filtered;
+    // Apply sort order (DECISION-024). getAllCards() already returns
+    // newest-first from the DB, but sorting explicitly here - rather than
+    // relying on that query order - means every option (including the
+    // default) behaves the same way regardless of where the list came from,
+    // and survives the .where() filters above being applied first.
+    final sorted = List<models.Card>.from(filtered);
+    switch (_sortOrder) {
+      case CardSortOrder.newestFirst:
+        sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case CardSortOrder.oldestFirst:
+        sorted.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case CardSortOrder.nameAZ:
+        sorted.sort((a, b) => a.businessName
+            .toLowerCase()
+            .compareTo(b.businessName.toLowerCase()));
+        break;
+      case CardSortOrder.nameZA:
+        sorted.sort((a, b) => b.businessName
+            .toLowerCase()
+            .compareTo(a.businessName.toLowerCase()));
+        break;
+    }
+
+    _filteredCards = sorted;
   }
 
   void _onSearchChanged(String query) {
@@ -186,6 +286,22 @@ class _CustomerHomeState extends State<CustomerHome> {
       appBar: AppBar(
         title: const Text('My Loyalty Cards'),
         actions: [
+          PopupMenuButton<CardSortOrder>(
+            icon: const Icon(Icons.sort),
+            tooltip: 'Sort',
+            initialValue: _sortOrder,
+            onSelected: (value) {
+              Haptics.light();
+              _setSortOrder(value);
+            },
+            itemBuilder: (context) => CardSortOrder.values
+                .map((order) => CheckedPopupMenuItem<CardSortOrder>(
+                      value: order,
+                      checked: order == _sortOrder,
+                      child: Text(order.label),
+                    ))
+                .toList(),
+          ),
           IconButton(
             icon: const Icon(Icons.help_outline),
             tooltip: 'How It Works',

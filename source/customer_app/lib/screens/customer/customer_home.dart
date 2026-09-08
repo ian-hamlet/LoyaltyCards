@@ -288,7 +288,13 @@ class _CustomerHomeState extends State<CustomerHome> {
         actions: [
           PopupMenuButton<CardSortOrder>(
             icon: const Icon(Icons.sort),
-            tooltip: 'Sort',
+            // Dynamic rather than a static "Sort" - a sighted user has no
+            // way to see the current order without opening the menu either,
+            // but a VoiceOver/TalkBack user has no visual fallback (no
+            // equivalent of glancing at the list) to work it out another
+            // way, so the trigger itself should say what a sighted user
+            // would have to remember.
+            tooltip: 'Sort (currently ${_sortOrder.label})',
             initialValue: _sortOrder,
             onSelected: (value) {
               Haptics.light();

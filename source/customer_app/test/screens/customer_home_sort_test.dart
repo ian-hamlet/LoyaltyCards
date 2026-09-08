@@ -201,4 +201,24 @@ void main() {
     expect(renderedNamesInOrder(tester),
         ['Alpha Cafe', 'Beta Bakery', 'Charlie Diner']);
   });
+
+  testWidgets(
+      "sort button's accessible label states the current order, not just its own name",
+      (tester) async {
+    // A sighted user has no visual indicator of the current sort order
+    // either without opening the menu - but they at least have the option
+    // to remember or re-check by eye. A VoiceOver/TalkBack user has no such
+    // fallback, so the trigger's own label needs to state it outright
+    // rather than just announcing a static "Sort".
+    await resetDb(tester);
+    await seedThreeCards(tester);
+    await settleAfterMount(tester);
+
+    expect(find.byTooltip('Sort (currently Newest First)'), findsOneWidget);
+
+    await selectSortOption(tester, 'Name (A-Z)');
+
+    expect(find.byTooltip('Sort (currently Name (A-Z))'), findsOneWidget);
+    expect(find.byTooltip('Sort (currently Newest First)'), findsNothing);
+  });
 }

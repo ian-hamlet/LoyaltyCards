@@ -71,7 +71,7 @@ LoyaltyCards provides optional app-level security for privacy-conscious users.
 
 **Home Screen:**
 - Shows all your loyalty cards
-- Sort by: Recent, Alphabetical, Progress
+- Sort by: Newest First (default), Oldest First, Name (A-Z), Name (Z-A) - tap the sort icon in the top bar
 - Search: Find specific business
 - Tap any card to see details
 
@@ -638,6 +638,7 @@ When a card is completed, a new card is automatically created for the same busin
 |--------|----------|--------|
 | Add Card | Camera icon → Scan | New card in wallet |
 | View Cards | Home screen | All your cards |
+| Sort Cards | Sort icon (top bar) | Reorder your wallet |
 | Card Details | Tap any card | Full card info |
 | Add Stamp | Scan business QR | Stamp added |
 | Redeem | Scan redeem QR or show card | Card resets |

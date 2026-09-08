@@ -427,7 +427,12 @@ DOCUMENT_TEMPLATE = """<!doctype html>
   .stamp-row {{ display: flex; justify-content: center; gap: 14mm; }}
   .backup-group {{ margin-top: auto; display: flex; justify-content: center; border-top: 1px dashed #ccc; padding-top: 8mm; }}
 
-  .qr-block {{ text-align: center; }}
+  /* flex column + align-items:center, not text-align:center - text-align
+     only centers inline content, and it silently fails to center these
+     fixed-width *block* images once their shrink-wrapped container ends up
+     wider than the image itself (e.g. the backup QR's wrapping label text),
+     leaving the QR looking left-shifted relative to the label under it. */
+  .qr-block {{ display: flex; flex-direction: column; align-items: center; }}
   .qr-block img {{ display: block; background: #fff; padding: 3mm; border: 1px solid #ddd; border-radius: 3mm; }}
   .qr-block.large img {{ width: 65mm; height: 65mm; }}
   .qr-block:not(.large):not(.small) img {{ width: 42mm; height: 42mm; }}

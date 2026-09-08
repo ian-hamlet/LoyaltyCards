@@ -9,6 +9,13 @@
 
 ## Why this test exists
 
+The goal is to make the Customer Wallet available across a wide variety of
+platforms. It's already fully tested and released on iOS (iPhone and Mac)
+&mdash; this Android closed test is the next step, bringing that same,
+already-proven experience to Android users too. The **Business** (Supplier)
+app for Android will be tested and released separately, in the near
+future; this particular test is about the Customer Wallet only.
+
 Google requires at least **12 testers opted in continuously for 14 days**
 before a personal developer account can apply for full Play Store release.
 That's a fixed rule, not a judgement about how much there is to find in the

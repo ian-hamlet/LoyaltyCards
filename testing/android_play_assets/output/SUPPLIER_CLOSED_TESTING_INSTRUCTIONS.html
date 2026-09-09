@@ -48,22 +48,34 @@
   <p>The Customer Wallet was tested first deliberately: it's the simpler app to test (one device, a pre-made QR pack) and has the wider appeal, since every shopper is a potential Customer Wallet user, while LoyaltyCards Business is only relevant to the smaller number of businesses running a loyalty scheme. This test is about the Business side specifically.</p>
   <p>As before, LoyaltyCards Business is deliberately simple, so this is mostly about <strong>accruing the required testing time with real daily use</strong> &mdash; you'll be repeating the same routine most days. That's expected. If anything looks genuinely wrong, though, see &ldquo;Reporting Issues&rdquo; below.</p>
 
-  <h2>Why this one needs two devices and two business profiles</h2>
+  <h2>Why this one needs two devices and two test businesses</h2>
   <p>Unlike the Customer Wallet test, there's no way to substitute a pre-generated QR pack here &mdash; <strong>generating QR codes live is the thing being tested.</strong> You'll play both roles yourself: the shop (this app, on the device under test) and a shopper (your own second device, running the ordinary Customer Wallet app).</p>
-  <p>You'll also set up <strong>two separate test businesses</strong> &mdash; one Express Mode, one Secure Mode. The operation mode is chosen once per business and <strong>locked permanently</strong> (changing it later requires a full reset that deletes that business's data), so covering both modes means two businesses, not one switched back and forth.</p>
+  <p>You'll also set up <strong>two separate test businesses</strong> &mdash; one Express Mode, one Secure Mode. The operation mode is chosen once per business and <strong>locked permanently</strong> (there's no in-app way to convert one mode to the other), so covering both modes means two businesses, not one switched back and forth.</p>
+  <p><strong>The two businesses are tested in two back-to-back phases, not alternated day by day</strong> &mdash; see &ldquo;Two Phases, Not Alternating Days&rdquo; below for why.</p>
 
-  <h2>Switching businesses: uninstall, reinstall, restore</h2>
-  <p>LoyaltyCards Business holds <strong>one business at a time</strong> &mdash; there's no multi-business switcher in this app. Normally a business could reset itself in-app (&ldquo;Delete All Data&rdquo;) to start over, but that option is <strong>only available in debug builds</strong> &mdash; the closed-testing build you're using is a release build, so it's not there. That means the only way to move from &ldquo;Express Test Shop&rdquo; to &ldquo;Secure Test Shop&rdquo; (or back) is:</p>
-  <ol>
-    <li><strong>Uninstall</strong> LoyaltyCards Business from your device.</li>
-    <li><strong>Reinstall</strong> it from the Play Store closed-testing link.</li>
-    <li>On first launch, choose <strong>&ldquo;Recover Existing Business&rdquo;</strong> (never &ldquo;Create New Business&rdquo; once a business already has a saved backup) and scan/import that business's saved Recovery Backup.</li>
-  </ol>
-  <p>This is genuinely useful, not just a workaround: it means the <strong>Recovery Backup / Restore</strong> feature &mdash; the app's actual disaster-recovery safety net &mdash; gets exercised for real, repeatedly, across the whole 14 days, rather than sitting untested. By the end of the test you'll have restored a business from backup more times than most real businesses ever will. That's a good outcome for this closed test, not a consolation prize for a limitation.</p>
-  <p><strong>Uninstalling doesn't affect your closed-test status.</strong> Being &ldquo;opted in&rdquo; to this closed test is tracked by Google against your account, separately from whether the app happens to be installed on your device at any given moment &mdash; uninstalling and reinstalling as instructed below doesn't reset or interrupt your participation.</p>
+  <h2>Two Phases, Not Alternating Days</h2>
+  <ul>
+    <li><strong>Phase 1 &mdash; Express (Days 1&ndash;7):</strong> Express Test Shop, set up once on Day 1 and left running for the whole week.</li>
+    <li><strong>Phase 2 &mdash; Secure (Days 8&ndash;14):</strong> Secure Test Shop, set up once at the start of Day 8 and left running for the rest of the test.</li>
+  </ul>
+  <p>LoyaltyCards Business holds <strong>one business at a time</strong> &mdash; there's no multi-business switcher in this app. Normally a business could reset itself in-app (&ldquo;Delete All Data&rdquo;) to start over, but that option is <strong>only available in debug builds</strong>; the closed-testing build you're using is a release build, so it isn't there. That means moving from Express to Secure requires <strong>uninstalling and reinstalling</strong> the app.</p>
+  <p>Doing this as two phases &mdash; instead of alternating Express/Secure on successive days &mdash; means that uninstall/reinstall happens <strong>exactly once</strong> across the whole 14-day test, at the Phase 1 &rarr; Phase 2 boundary, instead of thirteen times. Fewer uninstalls is a better test in its own right (closer to how a real business actually uses the app &mdash; install once, keep using it), and avoids a pattern of repeated uninstall/reinstall cycles that could otherwise look unusual in Google's review of the test.</p>
+  <p><strong>Uninstalling doesn't affect your closed-test status.</strong> Being &ldquo;opted in&rdquo; to this closed test is tracked by Google against your account, separately from whether the app happens to be installed on your device at any given moment &mdash; the one uninstall/reinstall this test needs doesn't reset or interrupt your participation.</p>
 
-  <h2>Day 1: One-Time Setup</h2>
-  <p>Do this once, on your first day, before the daily routine begins.</p>
+  <h2>Backup and Clone &mdash; tested once, early, on the lower-stakes business</h2>
+  <p>LoyaltyCards Business has two related recovery features, both worth exercising for real during this test:</p>
+  <ul>
+    <li><strong>Create Recovery Backup</strong> (Settings) &mdash; a backup with no expiry, intended as a business's long-term disaster-recovery safety net.</li>
+    <li><strong>Clone to Another Device</strong> (Settings) &mdash; a backup that expires after <strong>5 minutes</strong>, intended for setting up a second device while the original keeps working.</li>
+  </ul>
+  <p>Both produce a QR code that the app's <strong>Import Business</strong> screen (choose <strong>&ldquo;Recover Existing Business&rdquo;</strong> on first launch) reads back in exactly the same way &mdash; the only difference is that a Clone QR is checked against its 5-minute expiry and a Recovery Backup isn't. Restoring from either one also restores the same underlying business (name, keys, stamps required, brand color) &mdash; see the note below on what doesn't come back.</p>
+  <p>Rather than adding extra uninstall cycles to exercise both separately, <strong>Day 1's one-time setup tests Clone directly</strong> (since it needs an uninstall/reinstall to prove the restore actually works, not just that the QR was generated) <strong>on Express Test Shop</strong> &mdash; the simpler, lower-stakes business. Because both restore paths go through the same import code, successfully restoring via Clone is good evidence the Recovery Backup would work the same way if it were ever needed for real. The Recovery Backup is still created and saved on Day 1, exactly as a real business would keep one, but doesn't need a second restore cycle to prove itself during this test.</p>
+  <div class="note">
+    <p style="margin:0">Restoring a business (either way) resets its <strong>icon</strong> to the default and its <strong>stamp scan cooldown</strong> to the app's default &mdash; the backup format doesn't carry those two fields. Everything else restores correctly. This is a known, already-tracked gap, not something to report as a new issue.</p>
+  </div>
+
+  <h2>Phase 1, Day 1: One-Time Setup</h2>
+  <p>Do this once, at the very start of the test.</p>
 
   <h3>1. Install both apps</h3>
   <ul>
@@ -71,63 +83,85 @@
     <li>On your second device, install the ordinary <strong>LoyaltyCards</strong> (Customer Wallet) app from whichever store applies to that device (App Store or Play Store) &mdash; if you already have it from the earlier Customer Wallet test, that's fine, keep using it.</li>
   </ul>
 
-  <h3>2. Create, back up, and card up each test business in turn</h3>
-  <p>You'll create both businesses one at a time, since only one can exist on the device at once. Use these exact values for both (the specific numbers don't matter technically, but using the same ones keeps everyone's test consistent and easier to support):</p>
+  <h3>2. Create Express Test Shop</h3>
+  <p>On first launch, choose <strong>Create New Business</strong> and set it up with:</p>
   <table>
-    <tr><th>Setting</th><th>Express Test Shop</th><th>Secure Test Shop</th></tr>
-    <tr><td>Business Name</td><td><code>Express Test Shop</code></td><td><code>Secure Test Shop</code></td></tr>
-    <tr><td>Operation Mode</td><td><strong>Express</strong></td><td><strong>Secure</strong></td></tr>
-    <tr><td>Stamps Required</td><td><code>5</code></td><td><code>3</code> (the minimum allowed &mdash; keeps Secure Mode's live round-trips short)</td></tr>
-    <tr><td>Icon / Brand Color</td><td>any</td><td>any</td></tr>
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>Business Name</td><td><code>Express Test Shop</code></td></tr>
+    <tr><td>Operation Mode</td><td><strong>Express</strong></td></tr>
+    <tr><td>Stamps Required</td><td><code>5</code></td></tr>
+    <tr><td>Icon / Brand Color</td><td>any</td></tr>
   </table>
-  <p>For <strong>each</strong> business in turn (Express first, then Secure), while it's the one currently active on the device:</p>
+
+  <h3>3. Try editing the business once</h3>
+  <p>Open <strong>Settings</strong> and change the business's <strong>icon</strong> and <strong>brand color</strong> once (Business Name and Stamps Required are also editable). Only <strong>Operation Mode</strong> is permanently locked &mdash; that's expected, not a bug if you can't change it.</p>
+
+  <h3>4. Add the card to your Customer Wallet device</h3>
+  <p>Home &rarr; <strong>Issue Card</strong>, scan the QR with your Customer Wallet device, so Express Test Shop's card is in your wallet ready for the daily routine.</p>
+
+  <h3>5. Test Clone to Another Device, and prove the restore works</h3>
   <ol>
-    <li><strong>Create New Business</strong> and set it up with the values above.</li>
-    <li>Try the one-time edit check (see step 3 below) &mdash; a natural point to do it while you're already in the business's Settings.</li>
-    <li>Scan its Add Card QR (Home &rarr; <strong>Issue Card</strong>) with your Customer Wallet device, so that business's card is in your wallet ready for the daily routine.</li>
-    <li><strong>Settings &rarr; Create Recovery Backup</strong> (needs Face ID/Touch ID/fingerprint or your device passcode). Save the result somewhere durable &mdash; email it to yourself, save to Photos, or a cloud drive &mdash; named clearly (<code>express-test-backup</code>, <code>secure-test-backup</code>).</li>
-    <li><strong>Uninstall</strong> LoyaltyCards Business, then <strong>reinstall</strong> it from the Play Store link, ready for the next business (or, after Secure, ready for the final restore below).</li>
+    <li><strong>Settings &rarr; Clone to Another Device.</strong> This shows a QR code valid for 5 minutes &mdash; leave this screen open (or keep the app in the foreground) until step 3 below.</li>
+    <li><strong>Uninstall</strong> LoyaltyCards Business, then <strong>reinstall</strong> it from the Play Store link.</li>
+    <li>On first launch, choose <strong>Recover Existing Business</strong> and scan the Clone QR from step 1 (you have 5 minutes from when it was generated &mdash; if it's expired, uninstall/reinstall once more and generate a fresh one). Confirm the restore screen shows <strong>Express Test Shop</strong> with the correct name and stamp count before confirming <strong>Restore This Business</strong>.</li>
   </ol>
-  <p>After both businesses have been through steps 1&ndash;5, do one more restore to land on the business Day 1 actually needs:</p>
-  <ol start="6">
-    <li>On first launch after the last reinstall, choose <strong>Recover Existing Business</strong> and import <code>express-test-backup</code> &mdash; Day 1 is an odd day (Express), per the alternation below.</li>
-  </ol>
-  <p>You should now have two backup files saved somewhere safe, one card from each business already in your Customer Wallet, and Express Test Shop active on the device, ready for Day 1's routine.</p>
+  <p>You should now be back on Express Test Shop, restored via Clone, with the same card still valid on your Customer Wallet device (same keys &mdash; that's the point of the test).</p>
 
-  <h3>3. Try editing a business once</h3>
-  <p>Confirm the editable settings work: open <strong>Settings</strong> and change the business's <strong>icon</strong> and <strong>brand color</strong> once (Business Name and Stamps Required are also editable). Only <strong>Operation Mode</strong> is permanently locked &mdash; that's expected, not a bug if you can't change it.</p>
+  <h3>6. Create the Recovery Backup</h3>
+  <p><strong>Settings &rarr; Create Recovery Backup</strong> (needs Face ID/Touch ID/fingerprint or your device passcode). Save the result somewhere durable &mdash; email it to yourself, save to Photos, or a cloud drive &mdash; named clearly (<code>express-test-backup</code>). You won't need to restore from this during the test (step 5 already proved the restore mechanism works), but keep it saved as you would for a real business.</p>
   <div class="note">
-    <strong>Always choose &ldquo;Recover Existing Business&rdquo; when restoring, never &ldquo;Create New Business,&rdquo; once a business already has a saved backup.</strong>
-    <p style="margin-top:2mm">Your Customer Wallet device's test cards are cryptographically tied to the specific key pair each business was created with. If you accidentally create a <strong>brand-new</strong> business with the same name instead of restoring the real one, it will have different keys &mdash; the old cards on your Customer Wallet device will stop validating against it, and you'll need to delete those cards and start that business's test over. Always double-check the restored business shows the correct name and stamp count before continuing.</p>
+    <strong>Always choose &ldquo;Recover Existing Business&rdquo; when restoring, never &ldquo;Create New Business,&rdquo; if a business already has a saved backup.</strong>
+    <p style="margin-top:2mm">Your Customer Wallet device's test card is cryptographically tied to the specific key pair Express Test Shop was created with. Accidentally creating a <strong>brand-new</strong> business with the same name instead of restoring the real one gives it different keys &mdash; the card on your Customer Wallet device will stop validating against it, and you'd need to delete that card and start over.</p>
   </div>
+  <p>That's the end of one-time setup. From here through the end of Day 7, no further uninstalls are needed &mdash; just the daily routine below.</p>
 
-  <h2>Daily Routine &mdash; alternate modes on successive days</h2>
-  <p>Test <strong>one business per day</strong>, alternating:</p>
-  <ul>
-    <li><strong>Odd days</strong> (1, 3, 5, 7, 9, 11, 13) &rarr; <strong>Express Test Shop</strong></li>
-    <li><strong>Even days</strong> (2, 4, 6, 8, 10, 12, 14) &rarr; <strong>Secure Test Shop</strong></li>
-  </ul>
-  <p>That's 7 full cycles of each mode across the 14 days.</p>
-  <p><strong>Start of every day except Day 1:</strong> the business you need today isn't the one currently on the device (you switched at the end of yesterday's session, or the device already ended Day 1's setup on Express) &mdash; restore it first: <strong>uninstall LoyaltyCards Business, reinstall it, then Recover Existing Business</strong> using today's saved backup (<code>express-test-backup</code> on odd days, <code>secure-test-backup</code> on even days). Confirm the restored business's name and stamp count match before continuing.</p>
-
-  <h3>On an Express day</h3>
+  <h2>Phase 1 (Days 1&ndash;7): Express Test Shop daily routine</h2>
   <p>Express Mode needs no live back-and-forth for stamping &mdash; you generate a QR, your Customer Wallet device scans it, done.</p>
   <ol>
-    <li>In LoyaltyCards Business (<strong>Express Test Shop</strong> restored/selected), go to <strong>Generate QR</strong> and create a new stamp QR with the count set to <strong>6</strong> (one more than the 5 required &mdash; this fills <em>and</em> overflows the card in a single scan).</li>
+    <li>In LoyaltyCards Business, go to <strong>Generate QR</strong> and create a new stamp QR with the count set to <strong>6</strong> (one more than the 5 required &mdash; this fills <em>and</em> overflows the card in a single scan).</li>
     <li>On your Customer Wallet device, scan that QR. Confirm the card shows as complete, and that a new (near-empty) card was created for the overflow.</li>
-    <li>Back on the completed card in Customer Wallet, tap <strong>Redeem</strong>. In LoyaltyCards Business, confirm the redemption when prompted &mdash; this is the &ldquo;customer shows you a completed card, you confirm&rdquo; handshake, no QR involved for redemption in Express Mode.</li>
+    <li>On the completed card in Customer Wallet, tap <strong>Redeem Reward</strong>, then confirm <strong>Yes, Redeem</strong>. This is Express Mode's redemption &mdash; a self-serve confirmation entirely on the Customer Wallet side, with <strong>no QR code and nothing to do in LoyaltyCards Business</strong>. That's the key difference from Secure Mode's redemption in Phase 2, which does need a live scan exchange &mdash; see below.</li>
   </ol>
+  <p>Do this once per day, Days 1 through 7.</p>
 
-  <h3>On a Secure day</h3>
-  <p>Secure Mode is a genuine live exchange for <strong>every single stamp</strong> &mdash; this is the functionality actually being tested, so don't skip repeats. With Stamps Required set to 3, filling and overflowing takes 4 rounds.</p>
-  <p>Repeat the following <strong>4 times</strong>:</p>
+  <h2>Phase 2, Day 8: Switch to Secure Test Shop</h2>
+  <p>This is the test's <strong>one and only other uninstall</strong>.</p>
   <ol>
-    <li>In LoyaltyCards Business (<strong>Secure Test Shop</strong> restored/selected), go to <strong>Stamp Card</strong>.</li>
-    <li>Scan your Customer Wallet device's card QR for this business (the customer side shows a request code &mdash; scan that).</li>
-    <li>The Business app then shows a freshly signed stamp QR &mdash; scan <em>that</em> with your Customer Wallet device to actually receive the stamp.</li>
+    <li><strong>Uninstall</strong> LoyaltyCards Business, then <strong>reinstall</strong> it from the Play Store link.</li>
+    <li>On first launch, choose <strong>Create New Business</strong> (not &ldquo;Recover Existing Business&rdquo; &mdash; Secure Test Shop doesn't exist yet) and set it up with:</li>
+  </ol>
+  <table>
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>Business Name</td><td><code>Secure Test Shop</code></td></tr>
+    <tr><td>Operation Mode</td><td><strong>Secure</strong></td></tr>
+    <tr><td>Stamps Required</td><td><code>3</code> (the minimum allowed &mdash; keeps each day's live round-trips short)</td></tr>
+    <tr><td>Icon / Brand Color</td><td>any</td></tr>
+  </table>
+  <ol start="3">
+    <li>Home &rarr; <strong>Issue Card</strong>, scan the QR with your Customer Wallet device, so Secure Test Shop's card is in your wallet too (your Express Test Shop card stays in your wallet unchanged, even though the business itself is no longer installed).</li>
+  </ol>
+  <p>You won't need Express Test Shop again for the rest of the test, so there's no restore to do here &mdash; just set up Secure fresh and move into its daily routine.</p>
+
+  <h2>Phase 2 (Days 8&ndash;14): Secure Test Shop daily routine</h2>
+  <p>Secure Mode is a genuine live exchange, both for stamping <strong>and</strong> for redemption &mdash; this two-way, double-scan handshake is the main functional difference from Express Mode, and is exactly what this phase is testing. Don't skip repeats even though it's the same routine each day.</p>
+
+  <h3>Stamping (repeat 4 times, since Stamps Required is 3)</h3>
+  <ol>
+    <li>In LoyaltyCards Business, go to <strong>Stamp Card</strong>.</li>
+    <li>Scan your Customer Wallet device's card QR (the customer side shows a request code &mdash; scan that).</li>
+    <li>LoyaltyCards Business then shows a freshly signed stamp QR on screen &mdash; scan <em>that</em> with your Customer Wallet device to actually receive the stamp. This is the double-scan: the customer's request, then the supplier's signed response.</li>
     <li>Check the card: after the 4th round it should show as overflowed (one stamp past the 3 required), with a new card created for the extra.</li>
   </ol>
-  <p>Then redeem: on the completed (pre-overflow) card in Customer Wallet, go to redeem &mdash; this shows a QR. In LoyaltyCards Business, go to <strong>Redeem</strong> and scan it; the app validates the entire stamp chain before confirming. Unlike Express, this validation step is real and worth watching succeed each time.</p>
+
+  <h3>Redeeming &mdash; the double-scan verification</h3>
+  <p>On the completed (pre-overflow) card, once it's full, Customer Wallet automatically shows a <strong>redemption request QR</strong> in place of the usual card QR &mdash; nothing to tap, it appears as soon as the card is complete.</p>
+  <ol>
+    <li>In LoyaltyCards Business, go to <strong>Redeem Card</strong> and scan that QR. The app validates the entire stamp chain before accepting it &mdash; this validation is real and worth watching succeed each time, unlike Express Mode where there's nothing to check.</li>
+    <li>Once validated, LoyaltyCards Business shows its <strong>own</strong> signed QR on screen &mdash; a confirmation of the redemption for the customer to keep as proof.</li>
+    <li>Back on your Customer Wallet device, tap <strong>Scan Redemption</strong> on the completed card and scan that QR. This closes the loop: the card shows as redeemed, and a new card is created for next time.</li>
+  </ol>
+  <p>That's the double scan: customer &rarr; supplier (redemption request), then supplier &rarr; customer (signed confirmation). Both scans are required for the redemption to complete on the Customer Wallet side.</p>
+  <p>Do this once per day, Days 8 through 14.</p>
 
   <h2>Reporting Issues</h2>
   <p>Email <a href="mailto:ian.hamlet@dotconnected.com">ian.hamlet@dotconnected.com</a> with:</p>
@@ -139,22 +173,29 @@
   <p>We aim to respond within 48 hours.</p>
 
   <h2>Quick Daily Checklist</h2>
+
+  <h3>Phase 1 &mdash; Express Test Shop (Days 1&ndash;7)</h3>
   <table class="checkbox-table">
-    <tr><th>Day</th><th>Business</th><th>Restore (uninstall/reinstall/recover)</th><th>Fill + Overflow</th><th>Redeem</th></tr>
-    <tr><td>1</td><td>Express Test Shop</td><td><em>(done as part of Day 1 setup)</em></td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>2</td><td>Secure Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>3</td><td>Express Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>4</td><td>Secure Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>5</td><td>Express Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>6</td><td>Secure Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>7</td><td>Express Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>8</td><td>Secure Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>9</td><td>Express Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>10</td><td>Secure Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>11</td><td>Express Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>12</td><td>Secure Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>13</td><td>Express Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
-    <tr><td>14</td><td>Secure Test Shop</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><th>Day</th><th>Setup (Day 1 only)</th><th>Fill + Overflow</th><th>Redeem</th></tr>
+    <tr><td>1</td><td>&#9744; Create business, edit icon/color, add card, Clone + restore test, Recovery Backup</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>2</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>3</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>4</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>5</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>6</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>7</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+  </table>
+
+  <h3>Phase 2 &mdash; Secure Test Shop (Days 8&ndash;14)</h3>
+  <table class="checkbox-table">
+    <tr><th>Day</th><th>Setup (Day 8 only)</th><th>Stamp &times;4 (double-scan each)</th><th>Redeem (double-scan)</th></tr>
+    <tr><td>8</td><td>&#9744; Uninstall/reinstall, Create New Business, add card</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>9</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>10</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>11</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>12</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>13</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
+    <tr><td>14</td><td>&mdash;</td><td>&#9744;</td><td>&#9744;</td></tr>
   </table>
 
   <footer>LoyaltyCards Business Android Closed Testing &mdash; thank you for helping us reach general availability.</footer>

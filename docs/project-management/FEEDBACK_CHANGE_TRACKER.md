@@ -410,3 +410,39 @@ Verification
 - [ ] Customer app behavior verified in dark mode (step descriptions readable)
 - [ ] Supplier app behavior verified in dark mode (step descriptions readable)
 - [ ] Related docs reviewed by maintainer
+
+### FB-011: Replace personal contact email with a LoyaltyCards alias
+- Date Logged: 2026-09-22
+- Source: Direct user feedback
+- App Scope: Shared
+- Priority: P2
+- Linked Defect: N/A
+- Summary: `ian.hamlet@dotconnected.com` (the developer's personal address) is published in several places that are visible to the public or to Apple/Google reviewers. Swap it for a dedicated LoyaltyCards alias to stop exposing the personal address.
+- Blocked on: developer needs to look up/confirm the exact alias address created for this — not yet supplied.
+- Reproduction/Context: Known locations referencing the personal address today:
+  - `site/index.html` footer, `site/support/index.html`, and other `site/legal/*.html` / `site/user/*.html` pages
+  - `docs/legal/PRIVACY_POLICY.md` / `docs/legal/ACCESSIBILITY_STATEMENT.md` source
+  - Every `docs/deployment/APP_STORE_METADATA_PACKET_*.md` and `PLAY_STORE_METADATA_PACKET_*.md` ("Support Contact Email" field) — these feed the live **App Store Connect** and **Play Console** "Support email" listing fields, which are public-facing
+  - Possibly the live App Store Connect / Play Console listings themselves, once the docs above are updated (a manual step in each console, not just a repo change)
+  - Note: the Apple ID / Google account used to *sign in* to App Store Connect / Play Console is a separate, private field from the public support email above — swapping the public-facing field doesn't require touching that account login.
+- Proposed Code Change: none yet — pending the alias address. Once supplied: update the site pages, docs, and future metadata packets, then re-enter the "Support Contact Email" / "App support email" field in App Store Connect and Play Console by hand (repo changes don't push to the live consoles).
+- Status: Backlog
+
+Documentation Impact Checklist
+- [ ] User docs reviewed
+  - [ ] docs/legal/PRIVACY_POLICY.md
+  - [ ] docs/legal/ACCESSIBILITY_STATEMENT.md
+  - [ ] docs/user/USER_GUIDE.md / SUPPLIER_SETUP_GUIDE.md / ABOUT_LOYALTYCARDS.md if they reference the address
+- [ ] Maintenance docs reviewed
+  - [ ] Next `APP_STORE_METADATA_PACKET_*.md` / `PLAY_STORE_METADATA_PACKET_*.md` uses the new alias going forward
+  - [ ] docs/deployment/SUPPORT_PROCEDURES.md contact details
+- [ ] Site reviewed
+  - [ ] `site/index.html`, `site/support/index.html`, `site/legal/*.html` footer/contact mentions
+- [ ] Store listings reviewed (manual, outside the repo)
+  - [ ] App Store Connect "Support Contact Email" field, both apps
+  - [ ] Play Console "App support email" field, both apps
+
+Verification
+- [ ] Alias address confirmed by developer
+- [ ] No remaining `ian.hamlet@dotconnected.com` references in `site/`, `docs/legal/`, or the latest metadata packets (`git grep`)
+- [ ] Live App Store Connect and Play Console listings updated to match

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing Materials — LoyaltyCards</title>
+<meta name="description" content="Printable flyers, handouts, and QR cards for introducing LoyaltyCards to customers and businesses.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5b6472; --accent: #2f6fed;
+    --card: #f4f6f9; --border: #e2e6ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --fg: #eef1f5; --muted: #9aa4b2; --accent: #6ea1ff;
+      --card: #1c2027; --border: #2a2f38; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+  h1 { font-size: 1.6rem; margin: 18px 0 4px; }
+  h2.section { font-size: 1.15rem; margin-top: 2.4em; border-top: 1px solid var(--border); padding-top: 1em; }
+  p.lede { color: var(--muted); margin-top: 0; }
+  .grid { display: grid; gap: 14px; margin-top: 16px; }
+  ol.pathway { list-style: none; margin: 16px 0 8px; padding: 0; counter-reset: step; }
+  ol.pathway li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--border); }
+  ol.pathway li:first-child { border-top: none; }
+  ol.pathway .num {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  ol.pathway span.txt { font-size: 0.92rem; color: var(--fg); }
+  ol.pathway span.txt strong { display: block; margin-bottom: 1px; }
+  ol.pathway span.sub { color: var(--muted); font-size: 0.85rem; }
+  a.card {
+    display: block; padding: 18px 20px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--fg); text-decoration: none;
+  }
+  a.card:hover { border-color: var(--accent); }
+  a.card strong { display: block; font-size: 1.05rem; margin-bottom: 2px; }
+  a.card span { color: var(--muted); font-size: 0.92rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../index.html">&larr; LoyaltyCards</a></nav>
+  <h1>Marketing Materials</h1>
+  <p class="lede">Printable flyers and handouts &mdash; open in a browser, then print or save as PDF. Not sure where to start? Here's the order most people go through:</p>
+
+  <ol class="pathway">
+    <li>
+      <span class="num">1</span>
+      <span class="txt"><strong>Get the app</strong><span class="sub">A quick QR code &mdash; in person or online.</span></span>
+    </li>
+    <li>
+      <span class="num">2</span>
+      <span class="txt"><strong>Weigh it up</strong><span class="sub">A business owner compares options; a customer previews what they'll get before installing.</span></span>
+    </li>
+    <li>
+      <span class="num">3</span>
+      <span class="txt"><strong>See how it works day to day</strong><span class="sub">The short version, before the full setup guide.</span></span>
+    </li>
+    <li>
+      <span class="num">4</span>
+      <span class="txt"><strong>Set it up properly</strong><span class="sub">The full setup guide for businesses, or just use the app for customers.</span></span>
+    </li>
+  </ol>
+
+  <h2 class="section">For Customers</h2>
+  <div class="grid">
+    <a class="card" href="get-the-app-customer-flyer.html">
+      <strong>Get the App &mdash; Customer</strong>
+      <span>A ready-to-print QR code card for businesses to display at checkout.</span>
+    </a>
+    <a class="card" href="see-what-you-get.html">
+      <strong>See What You Get &mdash; Customer</strong>
+      <span>A quick online preview of the app before installing: scan, collect, redeem.</span>
+    </a>
+    <a class="card" href="get-the-app-customer-how-it-works.html">
+      <strong>How It Works &mdash; Customer</strong>
+      <span>Counter card explaining the four steps, for customers moving off a paper stamp card.</span>
+    </a>
+  </div>
+
+  <h2 class="section">For Businesses</h2>
+  <div class="grid">
+    <a class="card" href="get-the-app-business-flyer.html">
+      <strong>Get the App &mdash; Business</strong>
+      <span>Printable flyer introducing LoyaltyCards Business to a shop owner.</span>
+    </a>
+    <a class="card" href="is-it-right-for-your-shop.html">
+      <strong>Is It Right for Your Shop?</strong>
+      <span>One-page comparison: paper cards vs. paid loyalty apps vs. LoyaltyCards.</span>
+    </a>
+    <a class="card" href="how-it-works-business.html">
+      <strong>How It Works &mdash; Business</strong>
+      <span>Short day-to-day overview &mdash; choose a mode, stamp, redeem &mdash; before the full setup guide.</span>
+    </a>
+    <a class="card" href="get-the-app-business-handout-a5.html">
+      <strong>Business Handout (A5, four-up)</strong>
+      <span>Cut-apart A5 cards, four per A4 sheet, for handing out in person.</span>
+    </a>
+    <a class="card" href="get-the-app-business-personal-note-a5.html">
+      <strong>Personal Note (A5, printable)</strong>
+      <span>A one-page printable note for a specific business, plus the App Store QR.</span>
+    </a>
+    <a class="card" href="get-the-app-business-personal-note-email.html">
+      <strong>Personal Note (email)</strong>
+      <span>The same note, formatted to paste straight into an email.</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>

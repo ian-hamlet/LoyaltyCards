@@ -425,6 +425,7 @@ Verification
   - Every `docs/deployment/APP_STORE_METADATA_PACKET_*.md` and `PLAY_STORE_METADATA_PACKET_*.md` ("Support Contact Email" field) — these feed the live **App Store Connect** and **Play Console** "Support email" listing fields, which are public-facing
   - Possibly the live App Store Connect / Play Console listings themselves, once the docs above are updated (a manual step in each console, not just a repo change)
   - Note: the Apple ID / Google account used to *sign in* to App Store Connect / Play Console is a separate, private field from the public support email above — swapping the public-facing field doesn't require touching that account login.
+  - **Google Play closed-testing tester notes** (found reviewing the unmerged `feature/android-play-testing-assets` branch, not yet in `develop`): `testing/android_play_assets/CUSTOMER_CLOSED_TESTING_INSTRUCTIONS.md` and `SUPPLIER_CLOSED_TESTING_INSTRUCTIONS.md`, plus their generated `output/*.html` and `output/*.pdf`, tell testers to email the personal address if something breaks. These go straight to the 12+ external closed-testing testers, so this is a direct distribution channel, not just something published on a page — worth fixing before that branch merges or those docs are actually handed to testers.
 - Proposed Code Change: none yet — pending the alias address. Once supplied: update the site pages, docs, and future metadata packets, then re-enter the "Support Contact Email" / "App support email" field in App Store Connect and Play Console by hand (repo changes don't push to the live consoles).
 - Status: Backlog
 
@@ -441,8 +442,34 @@ Documentation Impact Checklist
 - [ ] Store listings reviewed (manual, outside the repo)
   - [ ] App Store Connect "Support Contact Email" field, both apps
   - [ ] Play Console "App support email" field, both apps
+- [ ] `feature/android-play-testing-assets` branch reviewed before merge
+  - [ ] `testing/android_play_assets/CUSTOMER_CLOSED_TESTING_INSTRUCTIONS.md`
+  - [ ] `testing/android_play_assets/SUPPLIER_CLOSED_TESTING_INSTRUCTIONS.md`
+  - [ ] Both docs' generated `output/*.html` and `output/*.pdf` regenerated after the source `.md` fix
 
 Verification
 - [ ] Alias address confirmed by developer
-- [ ] No remaining `ian.hamlet@dotconnected.com` references in `site/`, `docs/legal/`, or the latest metadata packets (`git grep`)
+- [ ] No remaining `ian.hamlet@dotconnected.com` references in `site/`, `docs/legal/`, the latest metadata packets, or `testing/android_play_assets/` (`git grep`)
 - [ ] Live App Store Connect and Play Console listings updated to match
+
+### FB-012: Consider publishing Android closed-testing docs/QR packs on the public site
+- Date Logged: 2026-09-22
+- Source: Direct user feedback
+- App Scope: Shared
+- Priority: P3
+- Linked Defect: N/A
+- Summary: There may be a good reason to host the Google Play closed-testing tester instructions and QR test packs (currently `testing/android_play_assets/` on the unmerged `feature/android-play-testing-assets` branch) on the public Cloudflare site — e.g. a stable link to hand a tester instead of an email attachment — but this is explicitly deferred, not decided.
+- Blocked on:
+  - Whether closed testing on Google Play is even pursued — developer is still deciding.
+  - How `testing/android_play_assets/` assets should be stored, generated, and tested going forward. A branch review (2026-09-22, see this file's git history / session notes) flagged open questions on that branch that need resolving first regardless of the site question: real ECDSA private keys for the fictional test businesses committed in plaintext (`seed_businesses.json`), ~4MB of generated PDFs/HTML re-committed across multiple revisions instead of being treated as reproducible build output, and a new `source/shared` test (`verify_android_play_test_assets_test.dart`) that hard-fails if the generated JSON isn't present. Publishing these assets publicly shouldn't be decided in isolation from those storage/generation questions.
+- Reproduction/Context: See FB-011 above — the same tester-facing docs also currently leak the personal email address, so that needs resolving regardless of whether these ever get published to the site.
+- Proposed Code Change: none yet — revisit once (a) the Google Play closed-testing decision is made, and (b) the asset storage/generation approach for `testing/android_play_assets/` is settled.
+- Status: Backlog
+
+Documentation Impact Checklist
+- [ ] Decide Google Play closed-testing go/no-go
+- [ ] Decide `testing/android_play_assets/` storage/generation approach (private keys, generated binaries, test coupling — see FB-011/branch review)
+- [ ] If proceeding: decide where on `site/` these would live and whether they need indexing/robots handling (tester-only content, not meant for general visitors)
+
+Verification
+- [ ] Decision recorded here (published to site / kept internal only / dropped) before any site change is made
